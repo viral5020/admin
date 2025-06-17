@@ -27,10 +27,10 @@ import { ContentDivider } from '../Divider';
 
 /// validation functions
 const validationSchema = yup.object({
-  email: yup
-    .string('Enter your email')
-    .email('Enter a valid email')
-    .required('Email is required'),
+  // email: yup
+  //   .string('Enter your email')
+  //   .email('Enter a valid email')
+  //   .required('Email is required'),
   password: yup
     .string('Enter your password')
     .required('Password is required'),
@@ -41,19 +41,38 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 });
 
 function LoginForm() {
-  const sleep = (ms) => new Promise((r) => { setTimeout(r, ms); });
   const deco = useSelector((state) => state.ui.decoration);
 
   const formik = useFormik({
     initialValues: {
-      email: 'john.doe@mail.com',
-      password: '12345678',
+      username: '',
+      password: '',
     },
     validationSchema,
-    onSubmit: async (values) => {
-      await sleep(500);
-      console.log('You submitted:' + JSON.stringify(values, null, 2));
-      window.location.href = '/app';
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const response = await fetch('https://goldmineexch.org/ajaxfiles/logincheck', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values), // { email, password }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Redirect on success
+          window.location.href = '/app';
+        } else {
+          alert('Login failed: ' + (data.message || 'Invalid credentials'));
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Something went wrong. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
@@ -108,8 +127,8 @@ function LoginForm() {
           <div>
             <FormControl variant="standard" className={classes.formControl}>
               <TextField
-                id="email"
-                name="email"
+                id="username"
+                name="username"
                 label="Your Email"
                 variant="standard"
                 value={formik.values.email}
