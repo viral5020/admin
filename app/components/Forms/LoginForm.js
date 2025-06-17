@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import { NavLink } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -17,13 +17,15 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import Icon from '@mui/material/Icon';
+// import useMediaQuery from '@mui/material/useMediaQuery';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import brand from 'dan-api/dummy/brand';
 import logo from 'dan-images/logo.svg';
 import useStyles from './user-jss';
+import { ContentDivider } from '../Divider';
 
-// validation functions
+/// validation functions
 const validationSchema = yup.object({
   email: yup
     .string('Enter your email')
@@ -38,7 +40,7 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
   return <NavLink to={props.to} {...props} />; // eslint-disable-line
 });
 
-function LoginFormV3() {
+function LoginForm() {
   const sleep = (ms) => new Promise((r) => { setTimeout(r, ms); });
   const deco = useSelector((state) => state.ui.decoration);
 
@@ -67,13 +69,13 @@ function LoginFormV3() {
 
   const { classes, cx } = useStyles();
   return (
-    <Paper className={cx(classes.fullWrap, deco && classes.petal)}>
+    <Paper className={cx(classes.sideWrap, deco && classes.petal)}>
       <div className={classes.topBar}>
         <NavLink to="/" className={classes.brand}>
           <img src={logo} alt={brand.name} />
           {brand.name}
         </NavLink>
-        <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/register-v3">
+        <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/register-v2">
           <Icon className={classes.icon}>arrow_forward</Icon>
           Create new account
         </Button>
@@ -84,7 +86,7 @@ function LoginFormV3() {
       <Typography variant="caption" className={classes.subtitle} gutterBottom align="center">
         Lorem ipsum dolor sit amet
       </Typography>
-      <section className={classes.pageFormWrap}>
+      <section className={classes.socmedSideLogin}>
         <div className={classes.btnArea}>
           <Button variant="outlined" size="small" className={classes.redBtn} type="button">
             <AllInclusive className={cx(classes.leftIcon, classes.iconSmall)} />
@@ -99,11 +101,9 @@ function LoginFormV3() {
             Socmed 3
           </Button>
         </div>
+        <ContentDivider content="Or sign in with email" />
       </section>
-      <Typography variant="caption" className={classes.subtitle} gutterBottom align="center">
-        Or login with email
-      </Typography>
-      <section className={classes.pageFormWrap}>
+      <section className={classes.pageFormSideWrap}>
         <form onSubmit={formik.handleSubmit}>
           <div>
             <FormControl variant="standard" className={classes.formControl}>
@@ -165,4 +165,4 @@ function LoginFormV3() {
   );
 }
 
-export default LoginFormV3;
+export default LoginForm;
