@@ -10,7 +10,10 @@ import Tab from '@mui/material/Tab';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import SupervisorAccount from '@mui/icons-material/SupervisorAccount';
+import SettingsIcon from '@mui/icons-material/Settings';
 import Favorite from '@mui/icons-material/Favorite';
+import PasswordIcon from '@mui/icons-material/Password';
+import LockIcon from '@mui/icons-material/Lock';
 import PhotoLibrary from '@mui/icons-material/PhotoLibrary';
 import {
   Cover,
@@ -85,8 +88,8 @@ function UserProfile() {
             centered
           >
             <Tab icon={<AccountCircle />} />
-            <Tab icon={<SupervisorAccount />} />
-            <Tab icon={<Favorite />} />
+            <Tab icon={<SettingsIcon />} />
+            <Tab icon={<SettingsIcon />} />
             <Tab icon={<PhotoLibrary />} />
           </Tabs>
         )}
@@ -100,15 +103,15 @@ function UserProfile() {
             centered
           >
             <Tab icon={<AccountCircle />} label="BASIC" />
-            <Tab icon={<SupervisorAccount />} label="SETTINGS" />
-            <Tab icon={<Favorite />} label="CHANGE PASSWORD" />
-            <Tab icon={<PhotoLibrary />} label="INVESTOR PASSWORD" />
+            <Tab icon={<SettingsIcon />} label="SETTINGS" />
+            <Tab icon={<PasswordIcon />} label="CHANGE PASSWORD" />
+            <Tab icon={<LockIcon />} label="INVESTOR PASSWORD" />
           </Tabs>
         )}
       </AppBar>
       {value === 0 && <TabContainer><About data={dataProps} /></TabContainer>}
       {value === 1 && <TabContainer><Connection /></TabContainer>}
-      {value === 2 && <TabContainer><Favorites /></TabContainer>}
+      {value === 2 && <TabContainer><PasswordIcon /></TabContainer>}
       {value === 3 && <TabContainer><Albums /></TabContainer>}
     </div>
   );

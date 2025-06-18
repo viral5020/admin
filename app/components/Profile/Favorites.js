@@ -74,10 +74,18 @@ function Favorites() {
       spacing={3}
     >
     <Grid item md={12}>
-      <Typography variant="h6" component="h2">
+      <Typography variant="h6" component="h2" sx={{ ml: 37 }}>
             Change Password
           </Typography>
-          <form onSubmit={handleSubmit} className={classes.form}>
+          <form onSubmit={handleSubmit} className={classes.form}
+          style={{
+            backgroundColor: '#fff',
+            padding: '24px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            maxWidth: 500,
+            margin: '40px auto', // margin top/bottom + center horizontally
+          }}>
             <Grid container direction="column" spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -142,7 +150,7 @@ function Favorites() {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   className={classes.button}
                 >
                   Update Password
@@ -151,7 +159,7 @@ function Favorites() {
             </Grid>
           </form>
     </Grid>
-      <Grid item md={6}>
+      {/* <Grid item md={6}>
         <PostCard
           liked={1}
           shared={20}
@@ -207,8 +215,8 @@ function Favorites() {
           name="Jane Doe"
         />
         <Divider className={classes.divider} />
-      </Grid>
-      <Grid item md={6}>
+      </Grid> */}
+      {/* <Grid item md={6}>
         <PostCard
           liked={90}
           shared={10}
@@ -243,7 +251,7 @@ function Favorites() {
           avatar={avatarApi[1]}
           name="Jane Doe"
         />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }

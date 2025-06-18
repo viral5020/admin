@@ -135,48 +135,61 @@ function Connection() {
       {/* Security */}
       <TabPanel value={tabIndex} index={1}>
   <Stack spacing={4} p={2}>
+
     {/* Security Switches */}
     <Stack spacing={2}>
-      <FormControlLabel
-        control={
+      {[
+        { key: 'twoFA', label: 'Two-Factor Authentication' },
+        { key: 'privacyMode', label: 'Privacy Mode' }
+      ].map(({ key, label }) => (
+        <Box
+          key={key}
+          sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: 360, // optional max width for neatness
+        }}
+        >
+          <Typography variant="body1">{label}</Typography>
           <Switch
-            checked={settings.securitySettings.twoFA}
-            onChange={handleToggle('securitySettings', 'twoFA')}
+            checked={settings.securitySettings[key]}
+            onChange={handleToggle('securitySettings', key)}
+            edge="end"
           />
-        }
-        label="Two-Factor Authentication"
-      />
-      <FormControlLabel
-        control={
-          <Switch
-            checked={settings.securitySettings.privacyMode}
-            onChange={handleToggle('securitySettings', 'privacyMode')}
-          />
-        }
-        label="Privacy Mode"
-      />
+        </Box>
+      ))}
     </Stack>
 
     {/* Your Devices Section */}
     <Box>
       <Typography variant="h6" gutterBottom>Your Devices</Typography>
-      <Stack spacing={2}>
+      <Stack spacing={1}>
         {deviceList.map(device => (
           <Box
             key={device.id}
             sx={{
-              border: '1px solid #ccc',
+              border: '1px solid #ddd',
               borderRadius: 2,
-              p: 2,
+              p: 1.5,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: '#fafafa'
+              backgroundColor: '#fff',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              cursor: 'default',
+              '&:hover': {
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              },
+              fontSize: '0.9rem',
             }}
           >
             <Box>
-              <Typography variant="subtitle1">{device.name}</Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="subtitle2" fontWeight={600}>
+                {device.name}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
                 {device.location} — Last active: {device.lastActive}
               </Typography>
             </Box>
@@ -184,7 +197,7 @@ function Connection() {
               <Typography
                 variant="button"
                 color="primary"
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
                 onClick={() => alert(`Signed out of ${device.name}`)}
               >
                 Sign out
@@ -194,50 +207,41 @@ function Connection() {
         ))}
       </Stack>
     </Box>
+
   </Stack>
 </TabPanel>
 
+
       {/* Sound */}
       <TabPanel value={tabIndex} index={2}>
-        <Stack spacing={2} p={2}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.soundSettings.autoSquareOff}
-                onChange={handleToggle('soundSettings', 'autoSquareOff')}
-              />
-            }
-            label="Auto Square Off Sound"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.soundSettings.limitClear}
-                onChange={handleToggle('soundSettings', 'limitClear')}
-              />
-            }
-            label="Limit Clear Sound"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.soundSettings.notifications}
-                onChange={handleToggle('soundSettings', 'notifications')}
-              />
-            }
-            label="Notification Sound"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.soundSettings.alerts}
-                onChange={handleToggle('soundSettings', 'alerts')}
-              />
-            }
-            label="Alert Sound"
-          />
-        </Stack>
-      </TabPanel>
+  <Stack spacing={2} p={2}>
+    {[
+      { key: 'autoSquareOff', label: 'Auto Square Off Sound' },
+      { key: 'limitClear', label: 'Limit Clear Sound' },
+      { key: 'notifications', label: 'Notification Sound' },
+      { key: 'alerts', label: 'Alert Sound' },
+    ].map(({ key, label }) => (
+      <Box
+        key={key}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: 360, // optional max width for neatness
+        }}
+      >
+        <Typography variant="body1">{label}</Typography>
+        <Switch
+          checked={settings.soundSettings[key]}
+          onChange={handleToggle('soundSettings', key)}
+          edge="end"
+        />
+      </Box>
+    ))}
+  </Stack>
+</TabPanel>
+
 
     </Box>
   );

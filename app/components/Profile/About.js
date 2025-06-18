@@ -32,7 +32,7 @@ import Email from '@mui/icons-material/Email';
 import Home from '@mui/icons-material/Home';
 import imgData from 'dan-api/images/imgData';
 import Type from 'dan-styles/Typography.scss';
-import Timeline from '../SocialMedia/Timeline';
+// import Timeline from '../SocialMedia/Timeline';
 import PapperBlock from '../PapperBlock/PapperBlock';
 import useStyles from './profile-jss';
 
@@ -94,7 +94,7 @@ function About(props) {
                 <Button
                   variant="contained"
                   component="label"
-                  color="primary"
+                  color="secondary"
                   className={classes.button}
                   style={{ marginTop: 8 }}
                 >
@@ -127,8 +127,8 @@ function About(props) {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  name="phone2FA"
-                  label="Phone (2FA)"
+                  name="phone"
+                  label="Phone"
                   value={formData.phone2FA}
                   onChange={handleInputChange}
                   InputProps={{
@@ -144,8 +144,8 @@ function About(props) {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  name="email2FA"
-                  label="Email (2FA)"
+                  name="email"
+                  label="Email"
                   value={formData.email2FA}
                   onChange={handleInputChange}
                   InputProps={{
@@ -198,7 +198,7 @@ function About(props) {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   className={classes.button}
                 >
                   Save Changes
@@ -207,12 +207,12 @@ function About(props) {
             </Grid>
           </form>
         </PapperBlock>
-          <Timeline dataTimeline={data} />
+          {/* <Timeline dataTimeline={data} /> */}
         </div>
       </Grid>
       <Grid item md={5} xs={12}>
         {/* Profile Progress */}
-        <div className={classes.progressRoot}>
+        {/* <div className={classes.progressRoot}>
           <Paper className={classes.styledPaper} elevation={4}>
             <Typography className={classes.title} variant="h5" component="h3">
               <span className={Type.light}>Profile Strength: </span>
@@ -232,9 +232,9 @@ function About(props) {
             </Grid>
             <LinearProgress variant="determinate" className={classes.progress} value={60} />
           </Paper>
-        </div>
+        </div> */}
         {/* About Me */}
-        <PapperBlock title="About Me" icon="ion-ios-contact-outline" whiteBg noMargin desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed urna in justo euismod condimentum.">
+        {/* <PapperBlock title="About Me" icon="ion-ios-contact-outline" whiteBg noMargin desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed urna in justo euismod condimentum.">
           <Divider className={classes.divider} />
           <List dense className={classes.profileList}>
             <ListItem>
@@ -262,10 +262,10 @@ function About(props) {
               <ListItemText primary="Address" secondary="Chicendo Street no.105 Block A/5A - Barcelona, Spain" />
             </ListItem>
           </List>
-        </PapperBlock>
+        </PapperBlock> */}
         <Divider className={classes.divider} />
         {/* My Albums */}
-        <PapperBlock title="My Albums (6)" icon="ion-ios-images-outline" whiteBg desc="">
+        {/* <PapperBlock title="My Albums (6)" icon="ion-ios-images-outline" whiteBg desc="">
           <div className={classes.albumRoot}>
             <ImageList rowHeight={180} className={classes.gridList}>
               {
@@ -301,9 +301,9 @@ function About(props) {
               See All
             </Button>
           </Grid>
-        </PapperBlock>
+        </PapperBlock> */}
         {/* My Connection */}
-        <PapperBlock title="My Connection" icon="ion-ios-contacts-outline" whiteBg desc="">
+        {/* <PapperBlock title="My Connection" icon="ion-ios-contacts-outline" whiteBg desc="">
           <List dense className={classes.profileList}>
             <ListItem button>
               <Avatar className={cx(classes.avatar, classes.orangeAvatar)}>H</Avatar>
@@ -328,9 +328,9 @@ function About(props) {
               See All
             </Button>
           </Grid>
-        </PapperBlock>
+        </PapperBlock> */}
         {/* My Interests */}
-        <PapperBlock title="My Interests" icon="ion-ios-aperture-outline" whiteBg desc="">
+        {/* <PapperBlock title="My Interests" icon="ion-ios-aperture-outline" whiteBg desc="">
           <Grid container className={classes.colList}>
             <Grid item md={6}>
               <ListItem>
@@ -373,7 +373,7 @@ function About(props) {
               </ListItem>
             </Grid>
           </Grid>
-        </PapperBlock>
+        </PapperBlock> */}
         {/* Update Profile Form */}
         
       </Grid>
