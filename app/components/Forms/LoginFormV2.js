@@ -65,6 +65,9 @@ function LoginFormV2() {
         const isLoginSuccessful = data.success || data.message?.toLowerCase().includes('success');
 
         if (isLoginSuccessful) {
+          sessionStorage.setItem('auth_key',data.auth_key);
+          sessionStorage.setItem('login_id',data.login_id);
+          sessionStorage.setItem('user_id',data.user_id);
           window.location.href = 'http://localhost:3000/app';
         } else {
           alert('Login failed: ' + (data.message || 'Invalid credentials'));
