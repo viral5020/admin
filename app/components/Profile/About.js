@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PropTypes from 'prop-types';
 import Paper from '@mui/material/Paper';
@@ -25,6 +25,11 @@ import AcUnit from '@mui/icons-material/AcUnit';
 import Adb from '@mui/icons-material/Adb';
 import AllInclusive from '@mui/icons-material/AllInclusive';
 import AssistantPhoto from '@mui/icons-material/AssistantPhoto';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import Person from '@mui/icons-material/Person';
+import Email from '@mui/icons-material/Email';
+import Home from '@mui/icons-material/Home';
 import imgData from 'dan-api/images/imgData';
 import Type from 'dan-styles/Typography.scss';
 import Timeline from '../SocialMedia/Timeline';
@@ -34,6 +39,36 @@ import useStyles from './profile-jss';
 function About(props) {
   const { data } = props;
   const { classes, cx } = useStyles();
+
+  // State for form fields
+  const [formData, setFormData] = useState({
+    name: '',
+    phone2FA: '',
+    email2FA: '',
+    birthDate: '',
+    city: '',
+  });
+  const [profilePicture, setProfilePicture] = useState(null);
+
+  // Handle text field changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle profile picture upload
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePicture(URL.createObjectURL(file));
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form Data:', { ...formData, profilePicture });
+  };
 
   return (
     <Grid
@@ -45,6 +80,133 @@ function About(props) {
     >
       <Grid item md={7} xs={12}>
         <div>
+        <PapperBlock title="Update Profile" icon="ion-ios-create-outline" whiteBg desc="Update your profile information below.">
+          <form onSubmit={handleSubmit} className={classes.profileList}>
+            <Grid container spacing={2} direction="column">
+              <Grid item xs={12} style={{ textAlign: 'center' }}>
+                <Avatar
+                  src={profilePicture || undefined}
+                  className={classes.avatar}
+                  style={{ width: 80, height: 80, margin: 'auto' }}
+                >
+                  {!profilePicture && <Person />}
+                </Avatar>
+                <Button
+                  variant="contained"
+                  component="label"
+                  color="primary"
+                  className={classes.button}
+                  style={{ marginTop: 8 }}
+                >
+                  Upload Profile Picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleProfilePictureChange}
+                  />
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="name"
+                  label="Name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="phone2FA"
+                  label="Phone (2FA)"
+                  value={formData.phone2FA}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocalPhone />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="email2FA"
+                  label="Email (2FA)"
+                  value={formData.email2FA}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="birthDate"
+                  label="Birth Date"
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <DateRange />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="city"
+                  label="City"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Home />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} style={{ textAlign: 'center' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  className={classes.button}
+                >
+                  Save Changes
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </PapperBlock>
           <Timeline dataTimeline={data} />
         </div>
       </Grid>
@@ -71,7 +233,6 @@ function About(props) {
             <LinearProgress variant="determinate" className={classes.progress} value={60} />
           </Paper>
         </div>
-        {/* ----------------------------------------------------------------------*/}
         {/* About Me */}
         <PapperBlock title="About Me" icon="ion-ios-contact-outline" whiteBg noMargin desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed urna in justo euismod condimentum.">
           <Divider className={classes.divider} />
@@ -103,7 +264,6 @@ function About(props) {
           </List>
         </PapperBlock>
         <Divider className={classes.divider} />
-        {/* ----------------------------------------------------------------------*/}
         {/* My Albums */}
         <PapperBlock title="My Albums (6)" icon="ion-ios-images-outline" whiteBg desc="">
           <div className={classes.albumRoot}>
@@ -120,8 +280,7 @@ function About(props) {
                         title={tile.title}
                         subtitle={(
                           <span>
-                            by:&nbsp;
-                            {tile.author}
+                            by: {tile.author}
                           </span>
                         )}
                         actionIcon={(
@@ -143,8 +302,7 @@ function About(props) {
             </Button>
           </Grid>
         </PapperBlock>
-        {/* ----------------------------------------------------------------------*/}
-        {/* My Connection Me */}
+        {/* My Connection */}
         <PapperBlock title="My Connection" icon="ion-ios-contacts-outline" whiteBg desc="">
           <List dense className={classes.profileList}>
             <ListItem button>
@@ -171,7 +329,6 @@ function About(props) {
             </Button>
           </Grid>
         </PapperBlock>
-        {/* ----------------------------------------------------------------------*/}
         {/* My Interests */}
         <PapperBlock title="My Interests" icon="ion-ios-aperture-outline" whiteBg desc="">
           <Grid container className={classes.colList}>
@@ -217,7 +374,8 @@ function About(props) {
             </Grid>
           </Grid>
         </PapperBlock>
-        {/* ----------------------------------------------------------------------*/}
+        {/* Update Profile Form */}
+        
       </Grid>
     </Grid>
   );
