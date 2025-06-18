@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "dan-components/*": ["app/components/*"],
+      "dan-actions/*": ["app/actions/*"],
+      "dan-redux/*": ["app/redux/*"],
+      "dan-styles/*": ["app/styles/components/*"],
+      "dan-api/*": ["app/api/*"],
+      "dan-images/*": ["public/images/*"],
+      "dan-vendor/*": ["node_modules/*"]
+    }
+  },
+  "include": ["app/**/*", "public/**/*"]
+}

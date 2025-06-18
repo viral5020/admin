@@ -12,6 +12,7 @@ import avatarApi from 'dan-api/images/avatars';
 import GeneralCard from '../CardPaper/GeneralCard';
 import PostCard from '../CardPaper/PostCard';
 import Quote from '../Quote/Quote';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles()((theme) => ({
   divider: {
@@ -29,6 +30,7 @@ const useStyles = makeStyles()((theme) => ({
 function Favorites() {
   const { classes } = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
+  const navigate = useNavigate();
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -58,14 +60,16 @@ function Favorites() {
       const data = await response.json();
       console.log('API Response:', data); // <-- Debug this
 
-      const isLoginSuccessful = data.success || data.message?.toLowerCase().includes('success');
+      const isLoginSuccessful = data.status === 'ok';
       console.log('isLoginSuccessful', isLoginSuccessful);
 
       if (isLoginSuccessful) {
-       
-        // window.location.href = 'http://localhost:3000/app';
+        // alert('Password changed successfully!');
+        navigate('/app');
       } else {
         alert('Login failed: ' + (data.message || 'Invalid credentials'));
+        // window.location.href = 'http://localhost:3000/login-v2';
+        navigate('/login-v2');
       }
     } catch (error) {
       console.error('Login error:', error);
