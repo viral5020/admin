@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import InputAdornment from '@mui/material/InputAdornment';
+import Lock from '@mui/icons-material/Lock';
 import imgApi from 'dan-api/images/photos';
 import avatarApi from 'dan-api/images/avatars';
 import GeneralCard from '../CardPaper/GeneralCard';
@@ -14,13 +18,54 @@ const useStyles = makeStyles()((theme) => ({
     margin: `${theme.spacing(2)} 0`,
     background: 'none'
   },
+  form: {
+    marginTop: theme.spacing(2),
+  },
+  button: {
+    marginTop: theme.spacing(2),
+  },
 }));
 
 function Favorites() {
-  const {
-    classes
-  } = useStyles();
+  const { classes } = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
+
+  // State for form fields
+  const [formData, setFormData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+
+  // Handle text field changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(''); // Clear error on input change
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { currentPassword, newPassword, confirmPassword } = formData;
+
+    // Basic validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError('All fields are required.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirm password do not match.');
+      return;
+    }
+
+    // Log form data (placeholder for backend integration)
+    console.log('Password Change Form Data:', { currentPassword, newPassword });
+    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Reset form
+    setError(''); // Clear error
+  };
+
   return (
     <Grid
       container
@@ -28,6 +73,84 @@ function Favorites() {
       direction="row"
       spacing={3}
     >
+    <Grid item md={12}>
+      <Typography variant="h6" component="h2">
+            Change Password
+          </Typography>
+          <form onSubmit={handleSubmit} className={classes.form}>
+            <Grid container direction="column" spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="currentPassword"
+                  label="Current Password"
+                  type="password"
+                  value={formData.currentPassword}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="newPassword"
+                  label="New Password"
+                  type="password"
+                  value={formData.newPassword}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+              </Grid>
+              {error && (
+                <Grid item xs={12}>
+                  <Typography color="error">{error}</Typography>
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  className={classes.button}
+                >
+                  Update Password
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+    </Grid>
       <Grid item md={6}>
         <PostCard
           liked={1}
@@ -59,7 +182,7 @@ function Favorites() {
           <Typography component="p">
             well meaning and kindly.
             <br />
-            &apos;&apos;a benevolent smile&apos;&apos;
+            ''a benevolent smile''
           </Typography>
         </GeneralCard>
         <Divider className={classes.divider} />
@@ -83,6 +206,7 @@ function Favorites() {
           avatar={avatarApi[5]}
           name="Jane Doe"
         />
+        <Divider className={classes.divider} />
       </Grid>
       <Grid item md={6}>
         <PostCard
