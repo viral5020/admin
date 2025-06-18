@@ -99,10 +99,10 @@ function UserProfile() {
             textColor="primary"
             centered
           >
-            <Tab icon={<AccountCircle />} label="ABOUT" />
-            <Tab icon={<SupervisorAccount />} label="20 CONNECTIONS" />
-            <Tab icon={<Favorite />} label="18 FAVORITES" />
-            <Tab icon={<PhotoLibrary />} label="4 ALBUMS" />
+            <Tab icon={<AccountCircle />} label="BASIC" />
+            <Tab icon={<SupervisorAccount />} label="SETTINGS" />
+            <Tab icon={<Favorite />} label="CHANGE PASSWORD" />
+            <Tab icon={<PhotoLibrary />} label="INVESTOR PASSWORD" />
           </Tabs>
         )}
       </AppBar>
