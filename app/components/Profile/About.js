@@ -42,6 +42,7 @@ function About(props) {
   const [errors, setErrors] = useState({});
   const [otpSent, setOtpSent] = useState(false);
   const [otpSentEmail, setOtpSentEmail] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(null);
 
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -121,7 +122,7 @@ function About(props) {
     console.log('Verifying email:', emailId);
     if (isValidEmail(emailId)) {
       try {
-        const response = await fetch('http://localhost:6001/send-verification-email', {
+        const response = await fetch('http://localhost:9000/send-verification-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -135,6 +136,24 @@ function About(props) {
     } else {
       setErrors(prev => ({ ...prev, email2FA: 'Enter a valid email address.' }));
       console.error('Invalid email format');
+    }
+  }
+
+  async function handleVerifyEmail() {
+    try {
+      const reposense = await fetch('http://localhost:9000/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ emailId: formData.email2FA, otp: otp.join('') }),
+      });
+      const data = await reposense.json();
+      console.log('data', data);
+      data.success ? setIsEmailVerified(true) : setIsEmailVerified(false);
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      setErrors(prev => ({ ...prev, email2FA: 'Failed to verify email. Please try again.' }));
     }
   }
 
@@ -367,13 +386,7 @@ function About(props) {
                     style={{ marginTop: 8 }}
                     variant="contained"
                     color="secondary"
-                    onClick={() => {
-                      if (otp.join('') === '123456') {
-                        alert('OTP verified!');
-                      } else {
-                        alert('Invalid OTP');
-                      }
-                    }}
+                    onClick={handleVerifyEmail}
                   >
                     Submit OTP
                   </Button>
