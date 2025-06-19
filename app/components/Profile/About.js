@@ -41,6 +41,7 @@ function About(props) {
   const { classes, cx } = useStyles();
   const [errors, setErrors] = useState({});
   const [otpSent, setOtpSent] = useState(false);
+  const [otpSentEmail, setOtpSentEmail] = useState(false);
 
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -111,10 +112,31 @@ function About(props) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const handleVerifyClick = () => {
-    console.log('Verifying email:', formData.email2FA);
-    // Add real verification logic here
-  };
+
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  async function handleSendEmail() {
+    const emailId = formData.email2FA;
+
+    console.log('Verifying email:', emailId);
+    if (isValidEmail(emailId)) {
+      try {
+        const response = await fetch('http://localhost:6001/send-verification-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ emailId: emailId }),
+        });
+        setOtpSentEmail(true);
+      } catch (error) {
+        console.log("error", error);
+      }
+    } else {
+      setErrors(prev => ({ ...prev, email2FA: 'Enter a valid email address.' }));
+      console.error('Invalid email format');
+    }
+  }
 
   const handlePhoneVerifyClick = async () => {
     const phoneRegex = /^[0-9]{10}$/;
@@ -312,7 +334,7 @@ function About(props) {
                   <Grid item xs={4}>
                     <Button
                       fullWidth
-                      onClick={handleVerifyClick}
+                      onClick={handleSendEmail}
                       variant="contained"
                       color="secondary"
                     >
@@ -321,6 +343,42 @@ function About(props) {
                   </Grid>
                 </Grid>
               </Grid>
+              {otpSentEmail && (
+                <Grid item xs={12}>
+                  <Grid container spacing={1}>
+                    {[...Array(6)].map((_, index) => (
+                      <Grid item key={index}>
+                        <TextField
+                          inputRef={(el) => (otpRefs.current[index] = el)}
+                          value={otp[index] || ''}
+                          onChange={(e) => handleOtpChange(e, index)}
+                          onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                          inputProps={{
+                            maxLength: 1,
+                            style: { textAlign: 'center', width: '40px' },
+                          }}
+                          variant="outlined"
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+
+                  <Button
+                    style={{ marginTop: 8 }}
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => {
+                      if (otp.join('') === '123456') {
+                        alert('OTP verified!');
+                      } else {
+                        alert('Invalid OTP');
+                      }
+                    }}
+                  >
+                    Submit OTP
+                  </Button>
+                </Grid>
+              )}
 
               {/* Birth Date */}
               <Grid item xs={12}>

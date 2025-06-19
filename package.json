@@ -161,6 +161,7 @@
     "minimist": "^1.2.5",
     "moment": "^2.29.4",
     "mui-datatables": "^4.3.0",
+    "nodemailer": "^7.0.3",
     "organism-react-scroll-nav": "^0.15.0",
     "prop-types": "15.7.2",
     "raw-loader": "^4.0.2",
