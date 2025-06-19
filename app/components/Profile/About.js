@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PropTypes from 'prop-types';
 import Paper from '@mui/material/Paper';
@@ -39,6 +39,62 @@ import useStyles from './profile-jss';
 function About(props) {
   const { data } = props;
   const { classes, cx } = useStyles();
+  const [errors, setErrors] = useState({});
+  const [otpSent, setOtpSent] = useState(false);
+
+
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const otpRefs = useRef([]);
+
+  const handleOtpChange = (e, index) => {
+    const value = e.target.value;
+    if (!/^\d?$/.test(value)) return; // only allow digits
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name || formData.name.trim().length < 2) {
+      newErrors.name = 'Name is required and should be at least 2 characters.';
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!formData.phone2FA || !phoneRegex.test(formData.phone2FA)) {
+      newErrors.phone2FA = 'Phone number must be 10 digits.';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email2FA || !emailRegex.test(formData.email2FA)) {
+      newErrors.email2FA = 'Enter a valid email address.';
+    }
+
+    if (!formData.birthDate) {
+      newErrors.birthDate = 'Birth date is required.';
+    }
+
+    if (!formData.city || formData.city.trim().length < 2) {
+      newErrors.city = 'City is required and should be at least 2 characters.';
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -55,6 +111,23 @@ function About(props) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  const handleVerifyClick = () => {
+    console.log('Verifying email:', formData.email2FA);
+    // Add real verification logic here
+  };
+
+  const handlePhoneVerifyClick = async () => {
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phone2FA)) {
+      setErrors(prev => ({ ...prev, phone2FA: 'Enter a valid 10-digit phone number.' }));
+      return;
+    }
+
+    // Simulate sending OTP (you could call an actual backend API here)
+    setOtpSent(true);
+    alert(`OTP sent to ${formData.phone2FA}`);
+  };
+
 
   // Handle profile picture upload
   const handleProfilePictureChange = (e) => {
@@ -67,8 +140,14 @@ function About(props) {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form Data:', { ...formData, profilePicture });
+    if (validateForm()) {
+      console.log("Form is valid, submitting:", formData);
+      // Proceed to submit the form
+    } else {
+      console.warn("Validation failed.");
+    }
   };
+
 
   return (
     <Grid
@@ -79,10 +158,15 @@ function About(props) {
       spacing={3}
     >
       <Grid item md={7} xs={12}>
-        <div>
-        <PapperBlock title="Update Profile" icon="ion-ios-create-outline" whiteBg desc="Update your profile information below.">
+        <PapperBlock
+          title="Update Profile"
+          icon="ion-ios-create-outline"
+          whiteBg
+          desc="Update your profile information below."
+        >
           <form onSubmit={handleSubmit} className={classes.profileList}>
-            <Grid container spacing={2} direction="column">
+            <Grid container spacing={2}>
+              {/* Profile Picture Upload */}
               <Grid item xs={12} style={{ textAlign: 'center' }}>
                 <Avatar
                   src={profilePicture || undefined}
@@ -107,6 +191,8 @@ function About(props) {
                   />
                 </Button>
               </Grid>
+
+              {/* Name Field */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -114,6 +200,8 @@ function About(props) {
                   label="Name"
                   value={formData.name}
                   onChange={handleInputChange}
+                  error={!!errors.name}
+                  helperText={errors.name}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -124,40 +212,117 @@ function About(props) {
                   variant="outlined"
                 />
               </Grid>
+
+              {/* Phone Field + Verify */}
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="phone"
-                  label="Phone"
-                  value={formData.phone2FA}
-                  onChange={handleInputChange}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocalPhone />
-                      </InputAdornment>
-                    ),
-                  }}
-                  variant="outlined"
-                />
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={8}>
+                    <TextField
+                      fullWidth
+                      name="phone2FA"
+                      label="Phone"
+                      value={formData.phone2FA}
+                      onChange={handleInputChange}
+                      error={!!errors.phone2FA}
+                      helperText={errors.phone2FA}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocalPhone />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Button
+                      fullWidth
+                      onClick={handlePhoneVerifyClick}
+                      variant="contained"
+                      color="secondary"
+                    >
+                      Verify
+                    </Button>
+                  </Grid>
+                </Grid>
               </Grid>
+
+              {/* Show OTP Input Conditionally */}
+              {otpSent && (
+                <Grid item xs={12}>
+                  <Grid container spacing={1}>
+                    {[...Array(6)].map((_, index) => (
+                      <Grid item key={index}>
+                        <TextField
+                          inputRef={(el) => (otpRefs.current[index] = el)}
+                          value={otp[index] || ''}
+                          onChange={(e) => handleOtpChange(e, index)}
+                          onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                          inputProps={{
+                            maxLength: 1,
+                            style: { textAlign: 'center', width: '40px' },
+                          }}
+                          variant="outlined"
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+
+                  <Button
+                    style={{ marginTop: 8 }}
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => {
+                      if (otp.join('') === '123456') {
+                        alert('OTP verified!');
+                      } else {
+                        alert('Invalid OTP');
+                      }
+                    }}
+                  >
+                    Submit OTP
+                  </Button>
+                </Grid>
+              )}
+
+
+              {/* Email Field + Verify */}
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="email"
-                  label="Email"
-                  value={formData.email2FA}
-                  onChange={handleInputChange}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Email />
-                      </InputAdornment>
-                    ),
-                  }}
-                  variant="outlined"
-                />
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={8}>
+                    <TextField
+                      fullWidth
+                      name="email2FA"
+                      label="Email"
+                      value={formData.email2FA}
+                      onChange={handleInputChange}
+                      error={!!errors.email2FA}
+                      helperText={errors.email2FA}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Email />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Button
+                      fullWidth
+                      onClick={handleVerifyClick}
+                      variant="contained"
+                      color="secondary"
+                    >
+                      Verify
+                    </Button>
+                  </Grid>
+                </Grid>
               </Grid>
+
+              {/* Birth Date */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -166,6 +331,8 @@ function About(props) {
                   type="date"
                   value={formData.birthDate}
                   onChange={handleInputChange}
+                  error={!!errors.birthDate}
+                  helperText={errors.birthDate}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -177,6 +344,8 @@ function About(props) {
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
+
+              {/* City */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -184,6 +353,8 @@ function About(props) {
                   label="City"
                   value={formData.city}
                   onChange={handleInputChange}
+                  error={!!errors.city}
+                  helperText={errors.city}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -194,6 +365,8 @@ function About(props) {
                   variant="outlined"
                 />
               </Grid>
+
+              {/* Save Button */}
               <Grid item xs={12} style={{ textAlign: 'center' }}>
                 <Button
                   type="submit"
@@ -201,15 +374,14 @@ function About(props) {
                   color="secondary"
                   className={classes.button}
                 >
-                  Save Changes
+                  Update Changes
                 </Button>
               </Grid>
             </Grid>
           </form>
         </PapperBlock>
-          {/* <Timeline dataTimeline={data} /> */}
-        </div>
       </Grid>
+
       <Grid item md={5} xs={12}>
         {/* Profile Progress */}
         {/* <div className={classes.progressRoot}>
@@ -375,7 +547,7 @@ function About(props) {
           </Grid>
         </PapperBlock> */}
         {/* Update Profile Form */}
-        
+
       </Grid>
     </Grid>
   );
