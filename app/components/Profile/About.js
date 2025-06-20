@@ -116,6 +116,8 @@ function About(props) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setEmailMessage("Email is not verified.");
+    setIsEmailVerified(false);
   };
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -143,7 +145,7 @@ function About(props) {
 
       const data = await response.json();
 
-      if (data.alreadyVerified) {
+      if (data.isAlreadyExist) {
         setIsEmailVerified(true);
         setEmailMessage('Email is already verified.');
         setOtpSentEmail(false);
@@ -160,36 +162,36 @@ function About(props) {
   }
 
   async function handleVerifyEmail() {
-  try {
-    const response = await fetch('http://localhost:9000/verify-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ emailId: formData.email2FA, otp: otp.join('') }),
-    });
+    try {
+      const response = await fetch('http://localhost:9000/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ emailId: formData.email2FA, otp: otp.join('') }),
+      });
 
-    const data = await response.json();
-    console.log('data', data);
+      const data = await response.json();
+      console.log('data', data);
 
-    if (data.success) {
-      setIsEmailVerified(true);
-      setEmailMessage('Email verified successfully!');
-      setOtp(Array(6).fill(''));       
-      setOtpSentEmail(false);          
-    } else {
-      setIsEmailVerified(false);
-      setEmailMessage('Invalid OTP. Please try again.');
+      if (data.success) {
+        setIsEmailVerified(true);
+        setEmailMessage('Email verified successfully!');
+        setOtp(Array(6).fill(''));
+        setOtpSentEmail(false);
+      } else {
+        setIsEmailVerified(false);
+        setEmailMessage('Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      setErrors(prev => ({
+        ...prev,
+        email2FA: 'Failed to verify email. Please try again.',
+      }));
+      setEmailMessage('Error verifying email. Please try again.');
     }
-  } catch (error) {
-    console.error('Error verifying email:', error);
-    setErrors(prev => ({
-      ...prev,
-      email2FA: 'Failed to verify email. Please try again.',
-    }));
-    setEmailMessage('Error verifying email. Please try again.');
   }
-}
 
 
   const handlePhoneVerifyClick = async () => {
@@ -428,12 +430,12 @@ function About(props) {
                   >
                     Submit OTP
                   </Button>
-                  {emailMessage && (
-                    <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'}>
-                      {emailMessage}
-                    </Typography>
-                  )}
                 </Grid>
+              )}
+              {emailMessage && (
+                <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'} sx={{ marginLeft:2.5 }}>
+                  {emailMessage} 
+                </Typography>
               )}
 
               {/* Birth Date */}
