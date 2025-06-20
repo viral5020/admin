@@ -160,22 +160,37 @@ function About(props) {
   }
 
   async function handleVerifyEmail() {
-    try {
-      const reposense = await fetch('http://localhost:9000/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ emailId: formData.email2FA, otp: otp.join('') }),
-      });
-      const data = await reposense.json();
-      console.log('data', data);
-      data.success ? setIsEmailVerified(true) : setIsEmailVerified(false);
-    } catch (error) {
-      console.error('Error verifying email:', error);
-      setErrors(prev => ({ ...prev, email2FA: 'Failed to verify email. Please try again.' }));
+  try {
+    const response = await fetch('http://localhost:9000/verify-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ emailId: formData.email2FA, otp: otp.join('') }),
+    });
+
+    const data = await response.json();
+    console.log('data', data);
+
+    if (data.success) {
+      setIsEmailVerified(true);
+      setEmailMessage('Email verified successfully!');
+      setOtp(Array(6).fill(''));       
+      setOtpSentEmail(false);          
+    } else {
+      setIsEmailVerified(false);
+      setEmailMessage('Invalid OTP. Please try again.');
     }
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    setErrors(prev => ({
+      ...prev,
+      email2FA: 'Failed to verify email. Please try again.',
+    }));
+    setEmailMessage('Error verifying email. Please try again.');
   }
+}
+
 
   const handlePhoneVerifyClick = async () => {
     const phoneRegex = /^[0-9]{10}$/;
@@ -413,6 +428,11 @@ function About(props) {
                   >
                     Submit OTP
                   </Button>
+                  {emailMessage && (
+                    <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'}>
+                      {emailMessage}
+                    </Typography>
+                  )}
                 </Grid>
               )}
 
