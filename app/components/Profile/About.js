@@ -35,6 +35,8 @@ import Type from 'dan-styles/Typography.scss';
 // import Timeline from '../SocialMedia/Timeline';
 import PapperBlock from '../PapperBlock/PapperBlock';
 import useStyles from './profile-jss';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 function About(props) {
   const { data } = props;
@@ -43,6 +45,8 @@ function About(props) {
   const [otpSent, setOtpSent] = useState(false);
   const [otpSentEmail, setOtpSentEmail] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
 
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -119,23 +123,39 @@ function About(props) {
   async function handleSendEmail() {
     const emailId = formData.email2FA;
 
-    console.log('Verifying email:', emailId);
-    if (isValidEmail(emailId)) {
-      try {
-        const response = await fetch('http://localhost:9000/send-verification-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ emailId: emailId }),
-        });
-        setOtpSentEmail(true);
-      } catch (error) {
-        console.log("error", error);
-      }
-    } else {
+    if (!isValidEmail(emailId)) {
       setErrors(prev => ({ ...prev, email2FA: 'Enter a valid email address.' }));
-      console.error('Invalid email format');
+      return;
+    }
+
+    setIsVerifying(true);
+    setEmailMessage('');
+    setErrors(prev => ({ ...prev, email2FA: '' }));
+
+    try {
+      const response = await fetch('http://localhost:9000/send-verification-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ emailId }),
+      });
+
+      const data = await response.json();
+
+      if (data.alreadyVerified) {
+        setIsEmailVerified(true);
+        setEmailMessage('Email is already verified.');
+        setOtpSentEmail(false);
+      } else {
+        setOtpSentEmail(true);
+        setEmailMessage('Verification code sent to your email.');
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setEmailMessage('Failed to send verification email. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   }
 
@@ -356,9 +376,12 @@ function About(props) {
                       onClick={handleSendEmail}
                       variant="contained"
                       color="secondary"
+                      disabled={isVerifying || isEmailVerified}
+                      startIcon={isVerifying ? <CircularProgress size={20} /> : null}
                     >
-                      Verify
+                      {isEmailVerified ? 'Verified' : 'Verify'}
                     </Button>
+
                   </Grid>
                 </Grid>
               </Grid>
