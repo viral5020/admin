@@ -134,7 +134,7 @@ function LoginFormV2() {
               <TextField
                 id="username"
                 name="username"
-                label="Your Email"
+                label="User Name"
                 variant="standard"
                 value={formik.values.email}
                 onChange={formik.handleChange}

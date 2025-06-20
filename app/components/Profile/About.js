@@ -47,6 +47,7 @@ function About(props) {
   const [isEmailVerified, setIsEmailVerified] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
+  const [submitError, setSubmitError] = useState('');
 
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -116,8 +117,10 @@ function About(props) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setEmailMessage("Email is not verified.");
-    setIsEmailVerified(false);
+    if (name === 'email2FA' && isValidEmail(value)) {
+      setEmailMessage("Email is not verified.");
+      setIsEmailVerified(false);
+    }
   };
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -215,11 +218,55 @@ function About(props) {
     }
   };
 
+  async function editUserProfileApi() {
+    const formDetails = {
+      is_app: '1',
+      login_user_id: sessionStorage.getItem('user_id') || '',
+      auth_key: sessionStorage.getItem('auth_key') || '',
+      user_full_name: formData.name,
+      mobile: formData.phone2FA,
+      email: formData.email2FA,
+      dob: formData.birthDate,
+      city: formData.city,
+    }
+
+    const resetFormObj = {
+      name: '',
+      phone2FA: '',
+      email2FA: '',
+      birthDate: '',
+      city: '',
+    }
+
+    try {
+      const response = await fetch('https://goldmineexch.org/ajaxfiles/edit_profile', {
+        method: 'POST',
+        body: JSON.stringify(formDetails),
+      });
+      const result = await response.json();
+
+      if (result.status !== 'ok') {
+        setSubmitError(result.message || 'Some error occured. Try again later');
+      } else {
+        console.log('Profile update response:', result);
+        setFormData(resetFormObj);
+        setSubmitError("");
+        setIsEmailVerified(false);
+        setEmailMessage("");
+        return result;
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (validateForm() && isEmailVerified) {
       console.log("Form is valid, submitting:", formData);
+      editUserProfileApi();
       // Proceed to submit the form
     } else {
       console.warn("Validation failed.");
@@ -433,8 +480,8 @@ function About(props) {
                 </Grid>
               )}
               {emailMessage && (
-                <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'} sx={{ marginLeft:2.5 }}>
-                  {emailMessage} 
+                <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'} sx={{ marginLeft: 2.5 }}>
+                  {emailMessage}
                 </Typography>
               )}
 
@@ -481,6 +528,12 @@ function About(props) {
                   variant="outlined"
                 />
               </Grid>
+
+              {submitError.length > 0 && (
+                <Typography variant="body2" color='error.main' sx={{ marginLeft: 2.5 }}>
+                  {submitError}
+                </Typography>
+              )}
 
               {/* Save Button */}
               <Grid item xs={12} style={{ textAlign: 'center' }}>
