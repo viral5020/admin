@@ -99,18 +99,19 @@ function LoginFormV2() {
           <img src={logo} alt={brand.name} />
           {brand.name}
         </NavLink>
-        <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/register-v2">
+        {/* <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/register-v2">
           <Icon className={classes.icon}>arrow_forward</Icon>
           Create new account
-        </Button>
+        </Button> */}
       </div>
-      <Typography variant="h4" className={classes.title} gutterBottom>
+      <Typography variant="h4" sx={{ mt: 17 }} gutterBottom>
         Sign In
       </Typography>
-      <Typography variant="caption" className={classes.subtitle} gutterBottom align="center">
+
+      {/* <Typography variant="caption" className={classes.subtitle} gutterBottom align="center">
         Lorem ipsum dolor sit amet
-      </Typography>
-      <section className={classes.socmedSideLogin}>
+      </Typography> */}
+      {/* <section className={classes.socmedSideLogin}>
         <div className={classes.btnArea}>
           <Button variant="outlined" size="small" className={classes.redBtn} type="button">
             <AllInclusive className={cx(classes.leftIcon, classes.iconSmall)} />
@@ -126,7 +127,7 @@ function LoginFormV2() {
           </Button>
         </div>
         <ContentDivider content="Or sign in with email" />
-      </section>
+      </section> */}
       <section className={classes.pageFormSideWrap}>
         <form onSubmit={formik.handleSubmit}>
           <div>
@@ -175,7 +176,7 @@ function LoginFormV2() {
           </div>
           <div className={classes.optArea}>
             <FormControlLabel className={classes.label} control={<Checkbox name="checkbox" />} label="Remember" />
-            <Button size="small" component={LinkBtn} to="/reset-password" className={classes.buttonLink}>Forgot Password</Button>
+            {/* <Button size="small" component={LinkBtn} to="/reset-password" className={classes.buttonLink}>Forgot Password</Button> */}
           </div>
           <div className={classes.btnArea}>
             <Button variant="contained" color="primary" size="large" type="submit" disabled={formik.isSubmitting}>

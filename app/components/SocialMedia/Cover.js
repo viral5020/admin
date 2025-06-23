@@ -40,7 +40,7 @@ function Cover(props) {
   };
 
   return (
-    <div className={classes.cover} style={{ backgroundImage: `url(${coverImg})` }}>
+    <div className={classes.cover} style={{ backgroundImage: `url(${coverImg})`, height: '380px', }}>
       <div className={classes.opt}>
         <IconButton className={classes.button} aria-label="Delete" size="large">
           <Info />
@@ -74,14 +74,14 @@ function Cover(props) {
         </Menu>
       </div>
       <div className={classes.content}>
-        <Avatar alt={name} src={avatar} className={classes.avatar} />
-        <Typography variant="h4" className={classes.name} gutterBottom>
+        <Avatar alt={name} src={avatar} className={classes.avatar} style={{ width: 90, height: 90 }}/>
+        <Typography variant="h6" className={classes.name} gutterBottom>
           {name}
           <VerifiedUser className={classes.verified} />
         </Typography>
-        <Typography className={classes.subheading} gutterBottom>
+        {/* <Typography className={classes.subheading} gutterBottom>
           {desc}
-        </Typography>
+        </Typography> */}
         <Button className={classes.button} size="large" variant="contained" color="secondary">
           Add to Connection
         </Button>

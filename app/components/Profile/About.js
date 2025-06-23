@@ -275,47 +275,52 @@ function About(props) {
 
 
   return (
-    <Grid
-      container
-      alignItems="flex-start"
-      justifyContent="flex-start"
-      direction="row"
-      spacing={3}
-    >
-      <Grid item md={7} xs={12}>
-        <PapperBlock
-          title="Update Profile"
-          icon="ion-ios-create-outline"
-          whiteBg
-          desc="Update your profile information below."
-        >
-          <form onSubmit={handleSubmit} className={classes.profileList}>
-            <Grid container spacing={2}>
-              {/* Profile Picture Upload */}
-              <Grid item xs={12} style={{ textAlign: 'center' }}>
-                <Avatar
-                  src={profilePicture || undefined}
-                  className={classes.avatar}
-                  style={{ width: 80, height: 80, margin: 'auto' }}
-                >
-                  {!profilePicture && <Person />}
-                </Avatar>
-                <Button
-                  variant="contained"
-                  component="label"
-                  color="secondary"
-                  className={classes.button}
-                  style={{ marginTop: 8 }}
-                >
-                  Upload Profile Picture
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={handleProfilePictureChange}
-                  />
-                </Button>
-              </Grid>
+    <Grid container justifyContent="center" direction="row" spacing={3}>
+  <Grid item md={12}>
+    <Typography variant="h6" component="h2" sx={{ ml: 34 }}>
+      Update Profile
+    </Typography>
+
+    <form
+      onSubmit={handleSubmit}
+      className={classes.profileList}
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',       // very light white
+            backdropFilter: 'blur(15px)',
+            WebkitBackdropFilter: 'blur(15px)',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            maxWidth: 700,
+            margin: '40px auto',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+      <Grid container spacing={2}>
+        {/* Profile Picture Upload */}
+        <Grid item xs={12} style={{ textAlign: 'center' }}>
+          <Avatar
+            src={profilePicture || undefined}
+            className={classes.avatar}
+            style={{ width: 80, height: 80, margin: 'auto' }}
+          >
+            {!profilePicture && <Person />}
+          </Avatar>
+          <Button
+            variant="contained"
+            component="label"
+            color="secondary"
+            className={classes.button}
+            style={{ marginTop: 8 }}
+          >
+            Upload Profile Picture
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleProfilePictureChange}
+            />
+          </Button>
+        </Grid>
 
               {/* Name Field */}
               <Grid item xs={12}>
@@ -548,7 +553,6 @@ function About(props) {
               </Grid>
             </Grid>
           </form>
-        </PapperBlock>
       </Grid>
 
       <Grid item md={5} xs={12}>

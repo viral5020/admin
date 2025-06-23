@@ -122,17 +122,20 @@ function Favorites() {
       spacing={3}
     >
       <Grid item md={12}>
-        <Typography variant="h6" component="h2" sx={{ ml: 37 }}>
+        <Typography variant="h6" component="h2" sx={{ ml: 34 }}>
           Change Password
         </Typography>
         <form onSubmit={handleSubmit} className={classes.form}
           style={{
-            backgroundColor: '#fff',
+            background: 'rgba(255, 255, 255, 0.1)',       // very light white
+            backdropFilter: 'blur(15px)',
+            WebkitBackdropFilter: 'blur(15px)',
+            borderRadius: '12px',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            maxWidth: 500,
-            margin: '40px auto', // margin top/bottom + center horizontally
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            maxWidth: 700,
+            margin: '40px auto',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
           }}>
           <Grid container direction="column" spacing={2}>
             <Grid item xs={12}>
