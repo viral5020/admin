@@ -15,6 +15,7 @@ import useStyles from './sidebar-jss';
 function SidebarContent(props) {
   const { classes, cx } = useStyles();
   const [transform, setTransform] = useState(0);
+  const [profileData, setProfileData] = useState({});
 
   const handleScroll = (event) => {
     const scroll = event.target.scrollTop;
@@ -22,6 +23,7 @@ function SidebarContent(props) {
   };
 
   useEffect(() => {
+    viewUserProfile();
     const mainContent = document.getElementById('sidebar');
     mainContent.addEventListener('scroll', handleScroll);
     return () => {
@@ -57,6 +59,35 @@ function SidebarContent(props) {
     }
   };
 
+  async function viewUserProfile() {
+    const formData = {
+      is_app: 1,
+      login_user_id: sessionStorage.getItem("user_id"),
+      auth_key: sessionStorage.getItem("auth_key")
+    };
+
+    try {
+      const response = await fetch('https://goldmineexch.org/ajaxfiles/view_user_profile', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.status !== 'ok') {
+        throw new Error(result.message || 'Failed to fetch profile');
+      }
+
+      setProfileData(result.data);
+      console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ from sidebarContent.js\nError fetching profile:', error);
+      throw error;
+    }
+  }
+
   return (
     <div className={cx(classes.drawerInner, !drawerPaper ? classes.drawerPaperClose : '')}>
       <div className={classes.drawerHeader}>
@@ -75,7 +106,7 @@ function SidebarContent(props) {
               className={cx(classes.avatar, classes.bigAvatar)}
             />
             <div>
-              <h4>{dummy.user.name}</h4>
+              <h4>{profileData.user_name}</h4>
               <Button size="small" onClick={openMenuStatus}>
                 <i className={cx(classes.dotStatus, setStatus(status))} />
                 {status}
@@ -141,8 +172,8 @@ SidebarContent.propTypes = {
 
 SidebarContent.defaultProps = {
   turnDarker: false,
-  toggleDrawerOpen: () => {},
-  loadTransition: () => {},
+  toggleDrawerOpen: () => { },
+  loadTransition: () => { },
   anchorEl: null,
   isLogin: true,
 };

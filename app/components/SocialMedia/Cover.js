@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
@@ -23,6 +23,7 @@ const ITEM_HEIGHT = 48;
 
 function Cover(props) {
   const [anchorElOpt, setAnchorElOpt] = useState(null);
+  const [profileData, setProfileData] = useState({});
   const { classes } = useStyles();
   const {
     avatar,
@@ -38,6 +39,40 @@ function Cover(props) {
   const handleCloseOpt = () => {
     setAnchorElOpt(null);
   };
+
+  async function viewUserProfile() {
+    const formData = {
+      is_app: 1,
+      login_user_id: sessionStorage.getItem("user_id"),
+      auth_key: sessionStorage.getItem("auth_key")
+    };
+
+    try {
+      const response = await fetch('https://goldmineexch.org/ajaxfiles/view_user_profile', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.status !== 'ok') {
+        throw new Error(result.message || 'Failed to fetch profile');
+      }
+
+      console.log('✅ User Profile:', result.data);
+      setProfileData(result.data);
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ Error fetching profile:', error);
+      throw error;
+    }
+  }
+
+
+  useEffect(() => {
+    viewUserProfile();
+  }, []);
 
   return (
     <div className={classes.cover} style={{ backgroundImage: `url(${coverImg})`, height: '380px', }}>
@@ -74,9 +109,9 @@ function Cover(props) {
         </Menu>
       </div>
       <div className={classes.content}>
-        <Avatar alt={name} src={avatar} className={classes.avatar} style={{ width: 90, height: 90 }}/>
+        <Avatar alt={name} src={avatar} className={classes.avatar} style={{ width: 90, height: 90 }} />
         <Typography variant="h6" className={classes.name} gutterBottom>
-          {name}
+          {profileData.user_name}
           <VerifiedUser className={classes.verified} />
         </Typography>
         {/* <Typography className={classes.subheading} gutterBottom>

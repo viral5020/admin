@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { Link } from 'react-router-dom';
@@ -44,6 +44,40 @@ function UserMenu(props) {
 
   const { dark } = props;
   const { anchorEl, openMenu } = menuState;
+
+  async function viewUserProfile() {
+    const formData = {
+      is_app: 1,
+      login_user_id: sessionStorage.getItem("user_id"),
+      auth_key: sessionStorage.getItem("auth_key")
+    };
+
+    try {
+      const response = await fetch('https://goldmineexch.org/ajaxfiles/view_user_profile', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.status !== 'ok') {
+        throw new Error(result.message || 'Failed to fetch profile');
+      }
+
+      console.log('✅ from UserMenu.js\nUser Profile:', result.data); // refferenced in Header.js
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ Error fetching profile:', error);
+      throw error;
+    }
+  }
+
+
+  useEffect(() => {
+    viewUserProfile();
+  }, []);
+
   return (
     <div>
       <IconButton
