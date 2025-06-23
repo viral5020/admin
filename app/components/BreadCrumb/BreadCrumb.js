@@ -17,7 +17,7 @@ const Breadcrumbs = (props) => {
 
   return (
     <section className={cx(theme === 'dark' ? classes.dark : classes.light, classes.breadcrumbs)}>
-      <p>
+      {/* <p>
         You are here:
         <span>
           {
@@ -34,7 +34,7 @@ const Breadcrumbs = (props) => {
           &nbsp;
           {place}
         </span>
-      </p>
+      </p> */}
     </section>
   );
 };

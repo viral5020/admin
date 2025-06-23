@@ -6,7 +6,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { LoginFormV2 } from 'dan-components';
 import useStyles from 'dan-components/Forms/user-jss';
 
-function LoginV2() {
+function Login() {
   const title = brand.name + ' - Login Version 2';
   const description = brand.desc;
   const { classes } = useStyles();
@@ -40,4 +40,4 @@ function LoginV2() {
   );
 }
 
-export default LoginV2;
+export default Login;

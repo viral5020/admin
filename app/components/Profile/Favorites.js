@@ -69,7 +69,7 @@ function Favorites() {
       } else {
         alert('Login failed: ' + (data.message || 'Invalid credentials'));
         // window.location.href = 'http://localhost:3000/login-v2';
-        navigate('/login-v2');
+        navigate('/login');
       }
     } catch (error) {
       console.error('Login error:', error);

@@ -79,7 +79,7 @@ function RegisterFormV2() {
           <img src={logo} alt={brand.name} />
           {brand.name}
         </NavLink>
-        <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/login-v2">
+        <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/login">
           <Icon className={classes.icon}>arrow_forward</Icon>
           Already have account ?
         </Button>
