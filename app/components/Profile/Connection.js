@@ -110,14 +110,14 @@ function Connection() {
       <TabPanel value={tabIndex} index={0}>
         <Stack spacing={2} p={2}>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Theme</FormLabel>
-            <RadioGroup
+            {/* <FormLabel component="legend">Theme</FormLabel> */}
+            {/* <RadioGroup
               value={settings.basicSettings.theme}
               onChange={handleRadioChange('basicSettings', 'theme')}
             >
               <FormControlLabel value="light" control={<Radio />} label="Light" />
               <FormControlLabel value="dark" control={<Radio />} label="Dark" />
-            </RadioGroup>
+            </RadioGroup> */}
           </FormControl>
           <FormControlLabel
             control={
@@ -164,49 +164,53 @@ function Connection() {
 
     {/* Your Devices Section */}
     <Box>
-      <Typography variant="h6" gutterBottom>Your Devices</Typography>
-      <Stack spacing={1}>
-        {deviceList.map(device => (
-          <Box
-            key={device.id}
-            sx={{
-              border: '1px solid #ddd',
-              borderRadius: 2,
-              p: 1.5,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#fff',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              cursor: 'default',
-              '&:hover': {
-                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-              },
-              fontSize: '0.9rem',
-            }}
+  <Typography variant="h6" gutterBottom>Your Devices</Typography>
+  <Stack spacing={1}>
+    {deviceList.map(device => (
+      <Box
+        key={device.id}
+        sx={{
+          border: theme => `1px solid ${theme.palette.divider}`,
+          borderRadius: 2,
+          p: 1.5,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: theme => theme.palette.background.paper,
+          boxShadow: theme => theme.shadows[1],
+          cursor: 'default',
+          '&:hover': {
+            boxShadow: theme => theme.shadows[3],
+          },
+          fontSize: '0.9rem',
+        }}
+      >
+        <Box>
+          <Typography variant="subtitle2" fontWeight={600}>
+            {device.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: '0.8rem' }}
           >
-            <Box>
-              <Typography variant="subtitle2" fontWeight={600}>
-                {device.name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
-                {device.location} — Last active: {device.lastActive}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography
-                variant="button"
-                color="primary"
-                sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
-                onClick={() => alert(`Signed out of ${device.name}`)}
-              >
-                Sign out
-              </Typography>
-            </Box>
-          </Box>
-        ))}
-      </Stack>
-    </Box>
+            {device.location} — Last active: {device.lastActive}
+          </Typography>
+        </Box>
+        <Box>
+          <Typography
+            variant="button"
+            color="primary"
+            sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
+            onClick={() => alert(`Signed out of ${device.name}`)}
+          >
+            Sign out
+          </Typography>
+        </Box>
+      </Box>
+    ))}
+  </Stack>
+</Box>
 
   </Stack>
 </TabPanel>
