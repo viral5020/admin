@@ -89,7 +89,7 @@ function UserProfile() {
           >
             <Tab icon={<AccountCircle />} />
             <Tab icon={<SettingsIcon />} />
-            <Tab icon={<SettingsIcon />} />
+            <Tab icon={<PasswordIcon />} />
             <Tab icon={<PhotoLibrary />} />
           </Tabs>
         )}

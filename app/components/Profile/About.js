@@ -51,6 +51,9 @@ function About(props) {
   const [submitError, setSubmitError] = useState('');
   const [resendOtp, setResendOtp] = useState(false);
   const [isResendOtpDisabled, setIsResendOtpDisabled] = useState(true);
+  const [profilePic, setProfilePic] = useState()
+  const [imageBase64, setImageBase64] = useState('');
+
 
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -227,12 +230,31 @@ function About(props) {
 
 
   // Handle profile picture upload
+  // const handleProfilePictureChange = (e) => {
+  //   const file = e.target.files[0];
+  //   console.log('e.target.files[0]', file);
+  //   setProfilePic(file);
+  //   if (file) {
+  //     setProfilePicture(URL.createObjectURL(file));
+  //   }
+  // };
+
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+    // setProfilePic(file);
     if (file) {
       setProfilePicture(URL.createObjectURL(file));
     }
+
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageBase64(reader.result); // this will include the data:image/... prefix
+    };
+    reader.readAsDataURL(file); // converts file to base64 string
   };
+
 
   async function editUserProfileApi() {
     const formDetails = {
@@ -244,6 +266,7 @@ function About(props) {
       email: formData.email2FA,
       dob: formData.birthDate,
       city: formData.city,
+      image_base64: imageBase64 || ''
     }
 
     const resetFormObj = {
@@ -257,6 +280,9 @@ function About(props) {
     try {
       const response = await fetch('https://goldmineexch.org/ajaxfiles/edit_profile', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formDetails),
       });
       const result = await response.json();
@@ -279,6 +305,7 @@ function About(props) {
 
   // Handle form submission
   const handleSubmit = (e) => {
+    console.log("handlesubmit inside")
     e.preventDefault();
     if (validateForm() && isEmailVerified) {
       console.log("Form is valid, submitting:", formData);
