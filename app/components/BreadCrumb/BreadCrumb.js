@@ -11,7 +11,7 @@ const Breadcrumbs = (props) => {
     location
   } = props;
 
-  let parts = location.pathname.split('/');
+  let parts = location.pathname.split('/login');
   const place = parts[parts.length - 1];
   parts = parts.slice(1, parts.length - 1);
 

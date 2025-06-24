@@ -210,6 +210,12 @@ module.exports = [
   //       link: '/login',
   //       icon: 'ion-ios-person-outline'
   //     },
+  {
+        key: 'Dashboard',
+        name: 'Dashboard',
+        link: '/app',
+        icon: 'ion-ios-contact-outline'
+      },
       {
         key: 'login2',
         name: 'Login',

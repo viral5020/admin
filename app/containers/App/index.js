@@ -1,6 +1,6 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Corporate from '../Templates/Corporate';
 import Outer from '../Templates/Outer';
 import Creative from '../Templates/Creative';
@@ -24,9 +24,9 @@ function App(props) {
     <ThemeWrapper>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Corporate />}>
-            <Route index element={<HomePage />} />
-          </Route>
+          <Route path="/" element={<Navigate to="/login" replace />}/>
+            
+          
           <Route path="app/*" element={<Application history={history} />} />
           <Route element={<Outer />}>
             {/* <Route path="login" element={<Login />} /> */}

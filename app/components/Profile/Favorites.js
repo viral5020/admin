@@ -122,7 +122,7 @@ function Favorites() {
       spacing={3}
     >
       <Grid item md={12}>
-        <Typography variant="h6" component="h2" sx={{ ml: 34 }}>
+        <Typography variant="h6" component="h2" sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
           Change Password
         </Typography>
         <form onSubmit={handleSubmit} className={classes.form}

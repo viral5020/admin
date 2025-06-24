@@ -45,7 +45,7 @@ function Banner(props) {
             color="secondary"
             className={classes.button}
             component={Link}
-            to={link.dashboard}
+            to={link.login}
           >
             See Demo
           </Button>
