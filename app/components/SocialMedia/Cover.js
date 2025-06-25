@@ -24,7 +24,6 @@ const ITEM_HEIGHT = 48;
 function Cover(props) {
   const [anchorElOpt, setAnchorElOpt] = useState(null);
   const [profileData, setProfileData] = useState({});
-  const [profilePic, setProfilePic] = useState();
   const { classes } = useStyles();
   const {
     avatar,
@@ -75,35 +74,6 @@ function Cover(props) {
     viewUserProfile();
   }, []);
 
-  const fetchImageAsBase64 = async () => {
-    try {
-      const response = await fetch('https://goldmineexch.org/assets/profile/111111.jpg');
-      // if (!response.ok) throw new Error('Network response was not ok');
-
-      console.log("after image api...")
-      const blob = await response.blob();
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      // let fixed = base64.replace(/^dataimage\/(.*)base64/, 'data:image/$1;base64');
-      // console.log('fixed', fixed);
-      console.log('fixed', base64);
-      setProfilePic(base64);
-      console.log('Base64 image:', base64); // contains data:image/jpeg;base64,...
-    } catch (error) {
-      console.error('Error fetching image:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (profileData?.profile_image) {
-      fetchImageAsBase64();
-    }
-  }, [profileData])
-
   return (
     <div className={classes.cover} style={{ backgroundImage: `url(${coverImg})`, height: '380px', }}>
       <div className={classes.opt}>
@@ -139,7 +109,7 @@ function Cover(props) {
         </Menu>
       </div>
       <div className={classes.content}>
-        <Avatar alt={name} src={profilePic || avatar} className={classes.avatar} style={{ width: 90, height: 90 }} />
+        <Avatar alt={name} src={`${profileData?.profile_image}?${Date.now()}` || avatar} className={classes.avatar} style={{ width: 90, height: 90 }} />
         <Typography variant="h6" className={classes.name} gutterBottom>
           {profileData.user_name}
           <VerifiedUser className={classes.verified} />

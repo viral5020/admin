@@ -16,7 +16,6 @@ function SidebarContent(props) {
   const { classes, cx } = useStyles();
   const [transform, setTransform] = useState(0);
   const [profileData, setProfileData] = useState({});
-  const [profilePic, setProfilePic] = useState();
 
   const handleScroll = (event) => {
     const scroll = event.target.scrollTop;
@@ -89,35 +88,6 @@ function SidebarContent(props) {
     }
   }
 
-  const fetchImageAsBase64 = async () => {
-    try {
-      const response = await fetch('https://goldmineexch.org/assets/profile/111111.jpg');
-      // if (!response.ok) throw new Error('Network response was not ok');
-
-      console.log("after image api...")
-      const blob = await response.blob();
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      // let fixed = base64.replace(/^dataimage\/(.*)base64/, 'data:image/$1;base64');
-      // console.log('fixed', fixed);
-      console.log('fixed', base64);
-      setProfilePic(base64);
-      console.log('Base64 image:', base64); // contains data:image/jpeg;base64,...
-    } catch (error) {
-      console.error('Error fetching image:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (profileData?.profile_image) {
-      fetchImageAsBase64();
-    }
-  }, [profileData])
-
   return (
     <div className={cx(classes.drawerInner, !drawerPaper ? classes.drawerPaperClose : '')}>
       <div className={classes.drawerHeader}>
@@ -132,7 +102,7 @@ function SidebarContent(props) {
           >
             <Avatar
               alt={dummy.user.name}
-              src={profilePic || dummy.user.avatar}
+              src={`${profileData?.profile_image}?${Date.now()}` || dummy.user.avatar}
               className={cx(classes.avatar, classes.bigAvatar)}
             />
             <div>

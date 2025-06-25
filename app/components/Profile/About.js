@@ -204,6 +204,7 @@ function About(props) {
       } else {
         setIsEmailVerified(false);
         setEmailMessage('Invalid OTP. Please try again.');
+        setOtp(['', '', '', '', '', '']);
       }
     } catch (error) {
       console.error('Error verifying email:', error);
@@ -304,12 +305,13 @@ function About(props) {
   }
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     console.log("handlesubmit inside")
     e.preventDefault();
     if (validateForm() && isEmailVerified) {
       console.log("Form is valid, submitting:", formData);
-      editUserProfileApi();
+      await editUserProfileApi();
+      window.location.reload();
       // Proceed to submit the form
     } else {
       console.warn("Validation failed.");
