@@ -25,7 +25,6 @@ import brand from 'dan-api/dummy/brand';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-
 const rawSectorData = {
   labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
   datasets: [{
@@ -35,8 +34,6 @@ const rawSectorData = {
     borderWidth: 2,
   }],
 };
-
-const boxHeight = 300;
 
 const rawAssetData = {
   labels: ['Equity', 'Commodities', 'Currency', 'Derivatives'],
@@ -48,11 +45,28 @@ const rawAssetData = {
   }],
 };
 
+const boxHeight = 300;
+
 function PersonalDashboard() {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
 
   const [openModal, setOpenModal] = useState({ nse: false, ncx: false });
+  const [expanded, setExpanded] = useState({ nse: false, ncx: false });
+
+  const sectorData = useMemo(() => rawSectorData, []);
+  const assetData = useMemo(() => rawAssetData, []);
+
+  const glassStyles = {
+    p: 3,
+    borderRadius: 4,
+    backdropFilter: 'blur(10px)',
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(30, 30, 30, 0.4)'
+      : 'rgba(255, 255, 255, 0.5)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: theme.shadows[6],
+  };
 
   const handleMoreClick = (type) => {
     setOpenModal((prev) => ({ ...prev, [type]: true }));
@@ -62,77 +76,37 @@ function PersonalDashboard() {
     setOpenModal((prev) => ({ ...prev, [type]: false }));
   };
 
-
-  const [expanded, setExpanded] = useState({ nse: false, ncx: false });
-
   const toggleExpand = (type) => {
     setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-
-  const sectorData = useMemo(() => rawSectorData, []);
-  const assetData = useMemo(() => rawAssetData, []);
-
   const InfoCard = ({ title, icon, content }) => (
-    <Paper
-      elevation={5}
-      sx={{
-        p: 3,
-        minHeight: 170,
-        borderRadius: 4,
-        background: theme.palette.mode === 'dark'
-          ? 'linear-gradient(135deg, #2d2d2d, #1c1c1c)'
-          : 'linear-gradient(135deg, #ffffff, #f5f5f5)',
-        color: theme.palette.text.primary,
-        boxShadow: theme.shadows[4],
+    <Paper elevation={0} sx={{ ...glassStyles, minHeight: 170, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: '50%',
+        p: 1.5,
+        mr: 3,
         display: 'flex',
         alignItems: 'center',
-        transition: 'transform 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-6px)',
-          boxShadow: theme.shadows[8],
-        },
-      }}
-    >
-      <Box
-        sx={{
-          backgroundColor: theme.palette.mode === 'dark' ? '#444' : '#e3f2fd',
-          borderRadius: '50%',
-          p: 1.5,
-          mr: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 64,
-          minHeight: 64,
-        }}
-      >
+        justifyContent: 'center',
+        minWidth: 64,
+        minHeight: 64,
+      }}>
         {icon}
       </Box>
       <Box>
-        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-          {title}
-        </Typography>
+        <Typography variant="subtitle1" fontWeight={700} gutterBottom>{title}</Typography>
         <Divider sx={{ width: '40%', mb: 1 }} />
         {content.map((line, i) => (
-          <Typography key={i} variant="body2" color="text.secondary">
-            {line}
-          </Typography>
+          <Typography key={i} variant="body2" color="text.secondary">{line}</Typography>
         ))}
       </Box>
     </Paper>
   );
 
   const ChartCard = ({ title, chartData }) => (
-    <Paper
-      elevation={5}
-      sx={{
-        p: 3,
-        borderRadius: 4,
-        background: theme.palette.background.paper,
-        boxShadow: theme.shadows[6],
-      }}
-    >
+    <Paper elevation={0} sx={glassStyles}>
       <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
         {title}
       </Typography>
@@ -165,8 +139,7 @@ function PersonalDashboard() {
         <title>{brand.name} - Personal Dashboard</title>
       </Helmet>
 
-      <Grid container spacing={4}>
-        {/* Info Cards */}
+      <Grid container spacing={1}>
         <Grid item xs={12} sm={6} md={3}>
           <InfoCard
             title="Margin"
@@ -208,7 +181,6 @@ function PersonalDashboard() {
               </>,
             ]}
           />
-
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <InfoCard
@@ -232,24 +204,12 @@ function PersonalDashboard() {
           />
         </Grid>
 
-        {/* Sector Chart + Login History */}
         <Grid item xs={12} md={8}>
           <ChartCard title="Sector-wise Distribution" chartData={sectorData} />
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper
-            elevation={5}
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              height: '100%',
-              background: theme.palette.background.paper,
-              boxShadow: theme.shadows[5],
-            }}
-          >
-            <Typography variant="h6" fontWeight={700} mb={2}>
-              Recent Login
-            </Typography>
+          <Paper elevation={0} sx={{ ...glassStyles, height: '100%' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>Recent Login</Typography>
             <Divider sx={{ mb: 2 }} />
             <Box display="flex" flexDirection="column" gap={2}>
               {[
@@ -269,246 +229,105 @@ function PersonalDashboard() {
           </Paper>
         </Grid>
 
-        {/* Asset Distribution Chart */}
         <Grid item xs={12}>
           <ChartCard title="Asset-wise Distribution" chartData={assetData} />
         </Grid>
 
-        {/* Scripts, Gainers, Losers */}
+        {/* Trending, Gainers, Losers */}
         <Grid item xs={12}>
-          <Grid container spacing={3}>
-            {/* Scripts in Trend */}
-            <Grid item xs={12} md={4}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: 4,
-                  background: theme.palette.background.paper,
-                  boxShadow: 3,
-                  height: boxHeight,
-                  overflowY: 'auto',
-                  scrollbarWidth: 'none', // For Firefox
-                  '&::-webkit-scrollbar': {
-                    display: 'none', // For Chrome, Safari, Edge
-                  },
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  mb={2}
-                  sx={{
-                    position: 'sticky',
-                    top: 0,
-                    background: theme.palette.background.paper,
-                    zIndex: 1,
-                    pb: 1,
-                    pt: 0.5,
-                    borderBottom: `2px solid ${theme.palette.divider}`,
-                    fontSize: '1.1rem',
-                    letterSpacing: '0.5px',
-                    color: theme.palette.primary.main,
-                  }}
-                >
-                  Scripts in Trend
-                </Typography>
+  <Grid container spacing={1}>
+    {['Scripts in Trend', 'Top Gainers', 'Top Losers'].map((title, index) => {
+      const headerColor = index === 1 ? 'green' : index === 2 ? 'red' : theme.palette.primary.main;
+      const gradientBg =
+        index === 1
+          ? 'linear-gradient(to right, #e6f4ea, #d0f0d2)'
+          : index === 2
+          ? 'linear-gradient(to right, #fdecea, #f8d7da)'
+          : 'linear-gradient(to right, #e3f2fd, #bbdefb)';
 
-
-                {[
-                  { name: 'RELIANCE', ltp: '₹2,485.50', change: '+1.2%' },
-                  { name: 'TCS', ltp: '₹3,265.75', change: '-0.5%' },
-                  { name: 'INFY', ltp: '₹1,542.30', change: '+0.8%' },
-                  { name: 'HDFC', ltp: '₹1,923.90', change: '-1.1%' },
-                ].map((script, idx) => (
-                  <Box
-                    key={idx}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    mb={1.5}
-                  >
-                    {/* Left side: Icon + name */}
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {/* Dummy Icon */}
+      return (
+        <Grid key={index} item xs={12} md={4}>
+          <Paper
+            elevation={3}
+            sx={{
+              ...glassStyles,
+              height: boxHeight,
+              overflowY: 'auto',
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+              borderRadius: 3,
+              boxShadow: theme.shadows[6],
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              mb={2}
+              sx={{
+                position: 'sticky',
+                top: 0,
+                background: gradientBg,
+                backdropFilter: 'blur(8px)',
+                zIndex: 1,
+                pb: 1.2,
+                pt: 1,
+                px: 2,
+                borderTopLeftRadius: 12,
+                borderTopRightRadius: 12,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                color: headerColor,
+                fontSize: '1.15rem',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {title}
+            </Typography>
+                  {(index === 0 ? [
+                    { name: 'RELIANCE', ltp: '₹2,485.50', change: '+1.2%' },
+                    { name: 'TCS', ltp: '₹3,265.75', change: '-0.5%' },
+                    { name: 'INFY', ltp: '₹1,542.30', change: '+0.8%' },
+                    { name: 'HDFC', ltp: '₹1,923.90', change: '-1.1%' },
+                  ] : index === 1 ? [
+                    { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%' },
+                    { name: 'TATAMOTORS', ltp: '₹892.75', change: '+3.9%' },
+                    { name: 'BHARTIARTL', ltp: '₹1024.10', change: '+3.5%' },
+                  ] : [
+                    { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50' },
+                    { name: 'TECHM', ltp: '₹492.75', change: '-₹9.80' },
+                    { name: 'SBIN', ltp: '₹581.25', change: '-₹8.25' },
+                  ]).map((stock, idx) => (
+                    <Box key={idx} display="flex" alignItems="center" mb={1.5}>
                       <Box
                         sx={{
-                          width: 20,
-                          height: 20,
-                          backgroundColor: '#ccc',
+                          width: 24,
+                          height: 24,
                           borderRadius: '50%',
+                          mr: 1.5,
+                          backgroundColor:
+                            index === 1
+                              ? theme.palette.success.main
+                              : index === 2
+                                ? theme.palette.error.main
+                                : '#ccc',
                         }}
                       />
-                      <Typography variant="body2" fontWeight={600}>
-                        {script.name}
-                      </Typography>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>{stock.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          LTP: {stock.ltp} | <span style={{ color: index === 2 ? 'red' : 'green' }}>{stock.change}</span>
+                        </Typography>
+                      </Box>
                     </Box>
-
-                    {/* Right side: LTP and change */}
-                    <Box textAlign="right">
-                      <Typography variant="body2" color="text.secondary">
-                        {script.ltp}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        color={script.change.startsWith('+') ? 'success.main' : 'error.main'}
-                      >
-                        {script.change}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Paper>
-            </Grid>
-
-            {/* Top Gainers */}
-            <Grid item xs={12} md={4}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: 4,
-                  background: theme.palette.background.paper,
-                  boxShadow: 3,
-                  height: boxHeight,
-                  overflowY: 'auto',
-                  scrollbarWidth: 'none',
-                  '&::-webkit-scrollbar': {
-                    display: 'none',
-                  },
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  mb={2}
-                  sx={{
-                    position: 'sticky',
-                    top: 0,
-                    background: theme.palette.background.paper,
-                    zIndex: 1,
-                    pb: 1,
-                    pt: 0.5,
-                    borderBottom: `2px solid ${theme.palette.divider}`,
-                    fontSize: '1.1rem',
-                    letterSpacing: '0.5px',
-                    color: 'green',
-                  }}
-                >
-                  Top Gainers
-                </Typography>
-                
-                {[
-                  { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%' },
-                  { name: 'TATAMOTORS', ltp: '₹892.75', change: '+3.9%' },
-                  { name: 'BHARTIARTL', ltp: '₹1024.10', change: '+3.5%' },
-                ].map((stock, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      mb: 1.5,
-                    }}
-                  >
-                    {/* Dummy Icon */}
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        backgroundColor: theme.palette.success.main,
-                        borderRadius: '50%',
-                        mr: 1.5,
-                      }}
-                    />
-
-                    {/* Text Details */}
-                    <Box>
-                      <Typography variant="body2" fontWeight={600}>
-                        {stock.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        LTP: {stock.ltp} | <span style={{ color: theme.palette.success.main }}>{stock.change}</span>
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: 4,
-                  background: theme.palette.background.paper,
-                  boxShadow: 3,
-                  height: boxHeight,
-                  overflowY: 'auto',
-                  scrollbarWidth: 'none', // Firefox
-                  '&::-webkit-scrollbar': {
-                    display: 'none', // Chrome, Safari, Edge
-                  },
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  mb={2}
-                  sx={{
-                    position: 'sticky',
-                    top: 0,
-                    background: theme.palette.background.paper,
-                    zIndex: 1,
-                    pb: 1,
-                    pt: 0.5,
-                    borderBottom: `2px solid ${theme.palette.divider}`,
-                    fontSize: '1.1rem',
-                    letterSpacing: '0.5px',
-                    color: 'red', 
-                  }}
-                >
-                  Top Losers
-                </Typography>
-                
-                {[
-                  { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50' },
-                  { name: 'TECHM', ltp: '₹492.75', change: '-₹9.80' },
-                  { name: 'SBIN', ltp: '₹581.25', change: '-₹8.25' },
-                ].map((stock, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      mb: 1.5,
-                    }}
-                  >
-                    {/* Dummy Icon */}
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        backgroundColor: theme.palette.error.main,
-                        borderRadius: '50%',
-                        mr: 1.5,
-                      }}
-                    />
-
-                    {/* Text Details */}
-                    <Box>
-                      <Typography variant="body2" fontWeight={600}>
-                        {stock.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        LTP: {stock.ltp} | <span style={{ color: theme.palette.error.main }}>{stock.change}</span>
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Paper>
-            </Grid>
+                  ))}
+                </Paper>
+              </Grid>
+              );
+})}
           </Grid>
         </Grid>
       </Grid>
+
+      {/* NSE Modal */}
       <Dialog open={openModal.nse} onClose={() => handleClose('nse')}>
         <DialogTitle>NSE Margin Details</DialogTitle>
         <DialogContent>
@@ -524,6 +343,7 @@ function PersonalDashboard() {
         </DialogActions>
       </Dialog>
 
+      {/* NCX Modal */}
       <Dialog open={openModal.ncx} onClose={() => handleClose('ncx')}>
         <DialogTitle>NCX Margin Details</DialogTitle>
         <DialogContent>
@@ -538,7 +358,6 @@ function PersonalDashboard() {
           <Button onClick={() => handleClose('ncx')}>Close</Button>
         </DialogActions>
       </Dialog>
-
     </Box>
   );
 }
