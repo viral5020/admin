@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -20,7 +20,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -41,9 +41,9 @@ const detailedSectorData = [
     value: 400,
     color: '#42a5f5',
     companies: [
-      { name: 'HDFC Bank', qty: 120, pl: 4500 },
-      { name: 'ICICI Bank', qty: 80, pl: -1200 },
-      { name: 'SBI', qty: 100, pl: 2300 },
+      { name: 'HDFC Bank', qty: 120, price: 5000, pl: 4500 },
+      { name: 'ICICI Bank', qty: 80, price: 4500, pl: -1200 },
+      { name: 'SBI', qty: 100, price: 4800, pl: 2300 },
     ],
   },
   {
@@ -51,9 +51,9 @@ const detailedSectorData = [
     value: 300,
     color: '#66bb6a',
     companies: [
-      { name: 'Infosys', qty: 90, pl: 3600 },
-      { name: 'TCS', qty: 60, pl: 2100 },
-      { name: 'Wipro', qty: 50, pl: -400 },
+      { name: 'Infosys', qty: 90, price: 6000, pl: 3600 },
+      { name: 'TCS', qty: 60, price: 8000, pl: 2100 },
+      { name: 'Wipro', qty: 50, price: 4000, pl: -400 },
     ],
   },
   {
@@ -61,8 +61,8 @@ const detailedSectorData = [
     value: 200,
     color: '#ffca28',
     companies: [
-      { name: 'Sun Pharma', qty: 70, pl: 1800 },
-      { name: 'Dr. Reddy', qty: 30, pl: 950 },
+      { name: 'Sun Pharma', qty: 70, price: 6500, pl: 1800 },
+      { name: 'Dr. Reddy', qty: 30, price: 8000, pl: 950 },
     ],
   },
   {
@@ -70,15 +70,39 @@ const detailedSectorData = [
     value: 100,
     color: '#ef5350',
     companies: [
-      { name: 'Reliance', qty: 60, pl: 2500 },
-      { name: 'ONGC', qty: 40, pl: -600 },
+      { name: 'Reliance', qty: 60, price: 9000, pl: 2500 },
+      { name: 'ONGC', qty: 40, price: 3000, pl: -600 },
     ],
   },
 ];
 
+// Now add calculated totalInvestment per sector:
+detailedSectorData.forEach(sector => {
+  sector.totalInvestment = sector.companies.reduce(
+    (sum, company) => sum + company.qty * company.price,
+    0
+  );
+});
+
+
+const asserts = {
+  "HDFC Bank": { price: 500, pl: 4500, qty: 120 },
+  "ICICI Bank": { price: 450, pl: -1200, qty: 80 },
+  "SBI": { price: 480, pl: 2300, qty: 100 },
+  "Infosys": { price: 600, pl: 3600, qty: 90 },
+  "TCS": { price: 800, pl: 2100, qty: 60 },
+  "Wipro": { price: 400, pl: -400, qty: 50 },
+  "Sun Pharma": { price: 650, pl: 1800, qty: 70 },
+  "Dr. Reddy": { price: 800, pl: 950, qty: 30 },
+  "Reliance": { price: 900, pl: 2500, qty: 60 },
+  "ONGC": { price: 300, pl: -600, qty: 40 },
+};
+
+const assertNames = Object.keys(asserts);
 
 const rawAssetData = {
   labels: ['Equity', 'Commodities', 'Currency', 'Derivatives'],
+  totalInvestment: 78600,
   datasets: [{
     data: [500, 200, 150, 100],
     backgroundColor: ['#26a69a', '#ef5350', '#ffa726', '#5c6bc0'],
@@ -101,6 +125,14 @@ function PersonalDashboard() {
 
   const sectorData = useMemo(() => rawSectorData, []);
   const assetData = useMemo(() => rawAssetData, []);
+  const [highlightedStock, setHighlightedStock] = useState(null);
+
+  // Chart ref
+  const chartRef = useRef(null);
+
+  // Refs for each list item
+  const companyRefs = useRef({});
+  const listRef = useRef(null);
 
   const glassStyles = {
     p: 3,
@@ -111,6 +143,38 @@ function PersonalDashboard() {
       : 'rgba(255, 255, 255, 0.5)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     boxShadow: theme.shadows[6],
+  };
+
+  const showChartTooltip = (index) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    const segment = chart.getDatasetMeta(0).data[index];
+    if (!segment) return;
+
+    chart.setActiveElements([
+      { datasetIndex: 0, index }
+    ]);
+    chart.tooltip.setActiveElements([{ datasetIndex: 0, index }], { x: 0, y: 0 });
+    chart.update();
+  };
+
+  const scrollToCompany = (companyName) => {
+    const ref = companyRefs.current[companyName];
+    const listContainer = listRef.current;
+
+    if (ref && listContainer) {
+      const scrollOffset = ref.offsetTop - listContainer.offsetTop;
+
+      listContainer.scrollTo({
+        top: scrollOffset,
+        behavior: 'smooth',
+      });
+
+      // setHighlightedStock(companyName);
+      setTimeout(() => setHighlightedStock(companyName), 400);
+      setTimeout(() => setHighlightedStock(null), 1000);
+    }
   };
 
   const handleMoreClick = (type) => {
@@ -126,46 +190,46 @@ function PersonalDashboard() {
   };
 
   const InfoCard = ({ title, icon, content, bgcolor = 'rgba(255, 255, 255, 0.15)' }) => (
-  <Paper
-    elevation={0}
-    sx={{
-      ...glassStyles,
-      minHeight: 170,
-      display: 'flex',
-      alignItems: 'center',
-      backgroundColor: bgcolor,
-      borderRadius: 2,
-      p: 2,
-    }}
-  > 
-    <Box
+    <Paper
+      elevation={0}
       sx={{
-        backgroundColor: 'rgba(255,255,255,0.25)',
-        borderRadius: '50%',
-        p: 1.5,
-        mr: 3,
+        ...glassStyles,
+        minHeight: 170,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 64,
-        minHeight: 64,
+        // backgroundColor: bgcolor,
+        borderRadius: 2,
+        p: 2,
       }}
     >
-      {icon}
-    </Box>
-    <Box>
-      <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-        {title}
-      </Typography>
-      <Divider sx={{ width: '40%', mb: 1 }} />
-      {content.map((line, i) => (
-        <Typography key={i} variant="body2" color="text.secondary">
-          {line}
+      <Box
+        sx={{
+          backgroundColor: 'rgba(255,255,255,0.25)',
+          borderRadius: '50%',
+          p: 1.5,
+          mr: 3,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 64,
+          minHeight: 64,
+        }}
+      >
+        {icon}
+      </Box>
+      <Box>
+        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+          {title}
         </Typography>
-      ))}
-    </Box>
-  </Paper>
-);
+        <Divider sx={{ width: '40%', mb: 1 }} />
+        {content.map((line, i) => (
+          <Typography key={i} variant="body2" color="text.secondary">
+            {line}
+          </Typography>
+        ))}
+      </Box>
+    </Paper>
+  );
 
   const handleSectorClick = (event, elements) => {
     console.log('elements[0].index', elements[0].index);
@@ -196,7 +260,7 @@ function PersonalDashboard() {
             },
             plugins: {
               legend: {
-                position: 'bottom',
+                position: 'left',
                 labels: {
                   color: theme.palette.text.primary,
                   usePointStyle: true,
@@ -230,6 +294,7 @@ function PersonalDashboard() {
                   onClick={() => toggleExpand('nse')}
                 >
                   NSE: ₹25,000
+                  <ArrowDropDownIcon fontSize="small" />
                 </Typography>
                 {expanded.nse && (
                   <Box pl={2} pt={1}>
@@ -247,6 +312,7 @@ function PersonalDashboard() {
                   onClick={() => toggleExpand('ncx')}
                 >
                   NCX: ₹15,000
+                  <ArrowDropDownIcon fontSize="small" />
                 </Typography>
                 {expanded.ncx && (
                   <Box pl={2} pt={1}>
@@ -258,15 +324,15 @@ function PersonalDashboard() {
                 )}
               </>,
             ]}
-             bgcolor="rgba(25, 118, 210, 0.1)"
+            bgcolor="rgba(25, 118, 210, 0.1)"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <InfoCard
             title="Trades"
             icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
-            content={['Total: 120', 'Today: 5']}
-            bgcolor="rgba(156, 39, 176, 0.1)" 
+            content={['Today: 5', 'Total: 120']}
+            bgcolor="rgba(156, 39, 176, 0.1)"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -274,7 +340,7 @@ function PersonalDashboard() {
             title="Positions"
             icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
             content={['Active: 10', 'Closed: 50']}
-             bgcolor="rgba(76, 175, 80, 0.1)" 
+            bgcolor="rgba(76, 175, 80, 0.1)"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -312,7 +378,138 @@ function PersonalDashboard() {
         </Grid>
 
         <Grid item xs={12}>
-          <ChartCard title="Asset-wise Distribution" chartData={assetData} />
+          <Paper elevation={0} sx={glassStyles}>
+            <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
+              Stock-Wise Distribution
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <DialogContent sx={{ overflow: 'hidden', px: { xs: 2, sm: 3 } }}>
+              {asserts && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 4,
+                    alignItems: 'stretch',
+                  }}
+                >
+                  {/* 📋 Company list on LHS (scrollable) */}
+                  <Box
+                    ref={listRef}
+                    sx={{
+                      flex: 1,
+                      maxHeight: { xs: 250, sm: 300 },
+                      overflowY: 'auto',
+                      pr: 1,
+                      width: '100%',
+                      '&::-webkit-scrollbar': { display: 'none' },
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                    }}
+                  >
+                    {Object.entries(asserts).map(([name, details], i) => (
+                      <Box
+                        key={i}
+                        ref={el => companyRefs.current[name] = el}
+                        onClick={() => showChartTooltip(i)}
+                        sx={{
+                          mb: 2,
+                          p: 2,
+                          borderRadius: 2,
+                          boxShadow: 1,
+                          cursor: 'pointer',
+                          backgroundColor:
+                            highlightedStock === name ? 'primary.light' : 'background.paper',
+                          transition: 'background-color 0.6s ease, transform 0.5s ease',
+                          transform: highlightedStock === name ? 'scale(1.04)' : 'scale(1)',
+                        }}
+                      >
+                        {/* Top Row: Company Name & P/L */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                          }}
+                        >
+                          <Typography fontWeight={600} variant="subtitle1">
+                            {name}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: details.pl >= 0 ? 'success.main' : 'error.main',
+                              fontWeight: 600,
+                            }}
+                          >
+                            P/L: ₹{details.pl}
+                          </Typography>
+                        </Box>
+
+                        {/* Bottom Row: Qty & Price */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            mt: 1,
+                          }}
+                        >
+                          <Typography variant="body2">Qty: {details.qty}</Typography>
+                          <Typography variant="body2">Price: ₹{details.price}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+
+                  </Box>
+
+                  {/* 📊 Chart on RHS */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      width: '100%',
+                      maxWidth: { xs: '100%', md: 400 },
+                      height: { xs: 250, sm: 300 },
+                      mx: 'auto',
+                    }}
+                  >
+                    <Pie
+                      ref={chartRef}
+                      data={{
+                        labels: assertNames,
+                        datasets: [{
+                          data: assertNames.map(name => asserts[name].qty),
+                          backgroundColor: assertNames.map((_, i) =>
+                            ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
+                          ),
+                        }],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true },
+                          },
+                        },
+                        onClick: (_, elements) => {
+                          if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const stockName = assertNames[index];
+                            scrollToCompany(stockName); // 👈 Scroll to stock in list
+                          }
+                        },
+                      }}
+                    />
+
+                  </Box>
+                </Box>
+              )}
+            </DialogContent>
+          </Paper>
+          {/* <ChartCard title="Asset-wise Distribution" chartData={assetData} /> */}
         </Grid>
 
         {/* Trending, Gainers, Losers */}
@@ -410,7 +607,7 @@ function PersonalDashboard() {
       </Grid>
 
       {/* NSE Modal */}
-      <Dialog open={openModal.nse} onClose={() => handleClose('nse')}>
+      {/* <Dialog open={openModal.nse} onClose={() => handleClose('nse')}>
         {console.log('openModal.nse', openModal.nse)}
         <DialogTitle>NSE Margin Details</DialogTitle>
         <DialogContent>
@@ -424,10 +621,10 @@ function PersonalDashboard() {
         <DialogActions>
           <Button onClick={() => handleClose('nse')}>Close</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       {/* NCX Modal */}
-      <Dialog open={openModal.ncx} onClose={() => handleClose('ncx')}>
+      {/* <Dialog open={openModal.ncx} onClose={() => handleClose('ncx')}>
         <DialogTitle>NCX Margin Details</DialogTitle>
         <DialogContent>
           <Typography variant="body2" gutterBottom>
@@ -440,76 +637,120 @@ function PersonalDashboard() {
         <DialogActions>
           <Button onClick={() => handleClose('ncx')}>Close</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
+
+
+
 
       {/* sector popup */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md" >
-        <Paper elevation={0} sx={glassStyles}>
-          <DialogTitle sx={{ fontWeight: 600 }}>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
+        {/* 🧾 Title + Total Investment: Stacked on small screens */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            px: 3,
+            pt: 2,
+            pb: 1,
+            gap: 1,
+          }}
+        >
+          <DialogTitle
+            sx={{ m: 0, p: 0, fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.3rem' } }}
+          >
             {selectedSector?.sector} Sector Details
           </DialogTitle>
 
-          <DialogContent>
-            {selectedSector && (
+          <Typography
+            variant="subtitle1"
+            fontWeight={600}
+            sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, color: 'text.secondary' }}
+          >
+            Total Investment: ₹{selectedSector?.totalInvestment.toLocaleString()}
+          </Typography>
+        </Box>
+
+        <DialogContent sx={{ overflow: 'hidden', px: { xs: 2, sm: 3 } }}>
+          {selectedSector && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: 4,
+                alignItems: 'stretch',
+              }}
+            >
+              {/* 📊 Chart on LHS */}
               <Box
                 sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', md: 'row' },
-                  gap: 4,
-                  alignItems: { xs: 'center', md: 'flex-start' },
-                }}
-              >
-                {/* 📊 Chart on LHS (top on mobile) */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    width: '100%',
-                    maxWidth: 400,
-                    height: { xs: 250, sm: 300 },
-                  }}
-                >
-                  <Pie
-                    data={{
-                      labels: selectedSector.companies.map(c => c.name),
-                      datasets: [{
-                        data: selectedSector.companies.map(c => c.qty),
-                        backgroundColor: selectedSector.companies.map((_, i) =>
-                          ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
-                        ),
-                      }],
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'bottom',
-                          labels: { usePointStyle: true },
-                        },
-                      },
-                    }}
-                  />
-                </Box>
-
-                {/* 📋 Text data on RHS (bottom on mobile) */}
-                <Box sx={{
                   flex: 1,
                   width: '100%',
-                  maxWidth: 500,
-                }}>
-                  {selectedSector.companies.map((company, i) => (
-                    <Box key={i} sx={{
+                  maxWidth: { xs: '100%', md: 400 },
+                  height: { xs: 250, sm: 300 },
+                  mx: 'auto',
+                }}
+              >
+                <Pie
+                  data={{
+                    labels: selectedSector.companies.map(c => c.name),
+                    datasets: [{
+                      data: selectedSector.companies.map(c => c.qty),
+                      backgroundColor: selectedSector.companies.map((_, i) =>
+                        ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
+                      ),
+                    }],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true },
+                      },
+                    },
+                  }}
+                />
+              </Box>
+
+              {/* 📋 Company list on RHS (scrollable) */}
+              <Box
+                sx={{
+                  flex: 1,
+                  maxHeight: { xs: 250, sm: 300 },
+                  overflowY: 'auto',
+                  pr: 1,
+                  width: '100%',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {selectedSector.companies.map((company, i) => (
+                  <Box
+                    key={i}
+                    sx={{
                       mb: 2,
                       p: 2,
                       borderRadius: 2,
                       backgroundColor: 'background.paper',
                       boxShadow: 1,
-                      width: '100%',
-                    }}>
-                      <Typography fontWeight={600} variant="subtitle1" gutterBottom>
+                    }}
+                  >
+                    {/* Top Row: Company Name & P/L */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <Typography fontWeight={600} variant="subtitle1">
                         {company.name}
                       </Typography>
-                      <Typography variant="body2">Qty: {company.qty}</Typography>
                       <Typography
                         variant="body2"
                         sx={{
@@ -520,19 +761,35 @@ function PersonalDashboard() {
                         P/L: ₹{company.pl}
                       </Typography>
                     </Box>
-                  ))}
-                </Box>
-              </Box>
-            )}
-          </DialogContent>
 
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setOpen(false)} variant="contained" color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Paper>
+                    {/* Bottom Row: Qty & Price */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        mt: 1,
+                      }}
+                    >
+                      <Typography variant="body2">Qty: {company.qty}</Typography>
+                      <Typography variant="body2">Price: ₹{company.price}</Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+
+
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpen(false)} variant="contained" color="secondary" >
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
+
 
 
 
