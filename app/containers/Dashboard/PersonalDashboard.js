@@ -35,6 +35,48 @@ const rawSectorData = {
   }],
 };
 
+const detailedSectorData = [
+  {
+    sector: 'Finance',
+    value: 400,
+    color: '#42a5f5',
+    companies: [
+      { name: 'HDFC Bank', qty: 120, pl: 4500 },
+      { name: 'ICICI Bank', qty: 80, pl: -1200 },
+      { name: 'SBI', qty: 100, pl: 2300 },
+    ],
+  },
+  {
+    sector: 'Technology',
+    value: 300,
+    color: '#66bb6a',
+    companies: [
+      { name: 'Infosys', qty: 90, pl: 3600 },
+      { name: 'TCS', qty: 60, pl: 2100 },
+      { name: 'Wipro', qty: 50, pl: -400 },
+    ],
+  },
+  {
+    sector: 'Healthcare',
+    value: 200,
+    color: '#ffca28',
+    companies: [
+      { name: 'Sun Pharma', qty: 70, pl: 1800 },
+      { name: 'Dr. Reddy', qty: 30, pl: 950 },
+    ],
+  },
+  {
+    sector: 'Energy',
+    value: 100,
+    color: '#ef5350',
+    companies: [
+      { name: 'Reliance', qty: 60, pl: 2500 },
+      { name: 'ONGC', qty: 40, pl: -600 },
+    ],
+  },
+];
+
+
 const rawAssetData = {
   labels: ['Equity', 'Commodities', 'Currency', 'Derivatives'],
   datasets: [{
@@ -50,6 +92,9 @@ const boxHeight = 300;
 function PersonalDashboard() {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
+
+  const [open, setOpen] = useState(false);
+  const [selectedSector, setSelectedSector] = useState(null);
 
   const [openModal, setOpenModal] = useState({ nse: false, ncx: false });
   const [expanded, setExpanded] = useState({ nse: false, ncx: false });
@@ -105,6 +150,16 @@ function PersonalDashboard() {
     </Paper>
   );
 
+  const handleSectorClick = (event, elements) => {
+    console.log('elements[0].index', elements[0].index);
+    if (elements.length > 0) {
+      const index = elements[0].index;
+      const sector = detailedSectorData[index];
+      setSelectedSector(sector);
+      setOpen(true);
+    }
+  };
+
   const ChartCard = ({ title, chartData }) => (
     <Paper elevation={0} sx={glassStyles}>
       <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
@@ -117,6 +172,11 @@ function PersonalDashboard() {
           options={{
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements, chart) => {
+              if (title.toLowerCase().includes('sector')) {
+                handleSectorClick(event, elements, chart);
+              }
+            },
             plugins: {
               legend: {
                 position: 'bottom',
@@ -129,6 +189,7 @@ function PersonalDashboard() {
             },
           }}
         />
+
       </Box>
     </Paper>
   );
@@ -235,100 +296,101 @@ function PersonalDashboard() {
 
         {/* Trending, Gainers, Losers */}
         <Grid item xs={12}>
-  <Grid container spacing={1}>
-    {['Scripts in Trend', 'Top Gainers', 'Top Losers'].map((title, index) => {
-      const headerColor = index === 1 ? 'green' : index === 2 ? 'red' : theme.palette.primary.main;
-      const gradientBg =
-        index === 1
-          ? 'linear-gradient(to right, #e6f4ea, #d0f0d2)'
-          : index === 2
-          ? 'linear-gradient(to right, #fdecea, #f8d7da)'
-          : 'linear-gradient(to right, #e3f2fd, #bbdefb)';
+          <Grid container spacing={1}>
+            {['Scripts in Trend', 'Top Gainers', 'Top Losers'].map((title, index) => {
+              const headerColor = index === 1 ? 'green' : index === 2 ? 'red' : theme.palette.primary.main;
+              const gradientBg =
+                index === 1
+                  ? 'linear-gradient(to right, #e6f4ea, #d0f0d2)'
+                  : index === 2
+                    ? 'linear-gradient(to right, #fdecea, #f8d7da)'
+                    : 'linear-gradient(to right, #e3f2fd, #bbdefb)';
 
-      return (
-        <Grid key={index} item xs={12} md={4}>
-          <Paper
-            elevation={3}
-            sx={{
-              ...glassStyles,
-              height: boxHeight,
-              overflowY: 'auto',
-              scrollbarWidth: 'none',
-              '&::-webkit-scrollbar': { display: 'none' },
-              borderRadius: 3,
-              boxShadow: theme.shadows[6],
-            }}
-          >
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              mb={2}
-              sx={{
-                position: 'sticky',
-                top: 0,
-                background: gradientBg,
-                backdropFilter: 'blur(8px)',
-                zIndex: 1,
-                pb: 1.2,
-                pt: 1,
-                px: 2,
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                color: headerColor,
-                fontSize: '1.15rem',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {title}
-            </Typography>
-                  {(index === 0 ? [
-                    { name: 'RELIANCE', ltp: '₹2,485.50', change: '+1.2%' },
-                    { name: 'TCS', ltp: '₹3,265.75', change: '-0.5%' },
-                    { name: 'INFY', ltp: '₹1,542.30', change: '+0.8%' },
-                    { name: 'HDFC', ltp: '₹1,923.90', change: '-1.1%' },
-                  ] : index === 1 ? [
-                    { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%' },
-                    { name: 'TATAMOTORS', ltp: '₹892.75', change: '+3.9%' },
-                    { name: 'BHARTIARTL', ltp: '₹1024.10', change: '+3.5%' },
-                  ] : [
-                    { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50' },
-                    { name: 'TECHM', ltp: '₹492.75', change: '-₹9.80' },
-                    { name: 'SBIN', ltp: '₹581.25', change: '-₹8.25' },
-                  ]).map((stock, idx) => (
-                    <Box key={idx} display="flex" alignItems="center" mb={1.5}>
-                      <Box
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          mr: 1.5,
-                          backgroundColor:
-                            index === 1
-                              ? theme.palette.success.main
-                              : index === 2
-                                ? theme.palette.error.main
-                                : '#ccc',
-                        }}
-                      />
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>{stock.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          LTP: {stock.ltp} | <span style={{ color: index === 2 ? 'red' : 'green' }}>{stock.change}</span>
-                        </Typography>
+              return (
+                <Grid key={index} item xs={12} md={4}>
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      ...glassStyles,
+                      height: boxHeight,
+                      overflowY: 'auto',
+                      scrollbarWidth: 'none',
+                      '&::-webkit-scrollbar': { display: 'none' },
+                      borderRadius: 3,
+                      boxShadow: theme.shadows[6],
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      mb={2}
+                      sx={{
+                        position: 'sticky',
+                        top: 0,
+                        background: gradientBg,
+                        backdropFilter: 'blur(8px)',
+                        zIndex: 1,
+                        pb: 1.2,
+                        pt: 1,
+                        px: 2,
+                        borderTopLeftRadius: 12,
+                        borderTopRightRadius: 12,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        color: headerColor,
+                        fontSize: '1.15rem',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      {title}
+                    </Typography>
+                    {(index === 0 ? [
+                      { name: 'RELIANCE', ltp: '₹2,485.50', change: '+1.2%' },
+                      { name: 'TCS', ltp: '₹3,265.75', change: '-0.5%' },
+                      { name: 'INFY', ltp: '₹1,542.30', change: '+0.8%' },
+                      { name: 'HDFC', ltp: '₹1,923.90', change: '-1.1%' },
+                    ] : index === 1 ? [
+                      { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%' },
+                      { name: 'TATAMOTORS', ltp: '₹892.75', change: '+3.9%' },
+                      { name: 'BHARTIARTL', ltp: '₹1024.10', change: '+3.5%' },
+                    ] : [
+                      { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50' },
+                      { name: 'TECHM', ltp: '₹492.75', change: '-₹9.80' },
+                      { name: 'SBIN', ltp: '₹581.25', change: '-₹8.25' },
+                    ]).map((stock, idx) => (
+                      <Box key={idx} display="flex" alignItems="center" mb={1.5}>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            mr: 1.5,
+                            backgroundColor:
+                              index === 1
+                                ? theme.palette.success.main
+                                : index === 2
+                                  ? theme.palette.error.main
+                                  : '#ccc',
+                          }}
+                        />
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>{stock.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            LTP: {stock.ltp} | <span style={{ color: index === 2 ? 'red' : 'green' }}>{stock.change}</span>
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
-                </Paper>
-              </Grid>
+                    ))}
+                  </Paper>
+                </Grid>
               );
-})}
+            })}
           </Grid>
         </Grid>
       </Grid>
 
       {/* NSE Modal */}
       <Dialog open={openModal.nse} onClose={() => handleClose('nse')}>
+        {console.log('openModal.nse', openModal.nse)}
         <DialogTitle>NSE Margin Details</DialogTitle>
         <DialogContent>
           <Typography variant="body2" gutterBottom>
@@ -358,6 +420,102 @@ function PersonalDashboard() {
           <Button onClick={() => handleClose('ncx')}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      {/* sector popup */}
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md" >
+        <Paper elevation={0} sx={glassStyles}>
+          <DialogTitle sx={{ fontWeight: 600 }}>
+            {selectedSector?.sector} Sector Details
+          </DialogTitle>
+
+          <DialogContent>
+            {selectedSector && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 4,
+                  alignItems: { xs: 'center', md: 'flex-start' },
+                }}
+              >
+                {/* 📊 Chart on LHS (top on mobile) */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    width: '100%',
+                    maxWidth: 400,
+                    height: { xs: 250, sm: 300 },
+                  }}
+                >
+                  <Pie
+                    data={{
+                      labels: selectedSector.companies.map(c => c.name),
+                      datasets: [{
+                        data: selectedSector.companies.map(c => c.qty),
+                        backgroundColor: selectedSector.companies.map((_, i) =>
+                          ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
+                        ),
+                      }],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                          labels: { usePointStyle: true },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+
+                {/* 📋 Text data on RHS (bottom on mobile) */}
+                <Box sx={{
+                  flex: 1,
+                  width: '100%',
+                  maxWidth: 500,
+                }}>
+                  {selectedSector.companies.map((company, i) => (
+                    <Box key={i} sx={{
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: 'background.paper',
+                      boxShadow: 1,
+                      width: '100%',
+                    }}>
+                      <Typography fontWeight={600} variant="subtitle1" gutterBottom>
+                        {company.name}
+                      </Typography>
+                      <Typography variant="body2">Qty: {company.qty}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: company.pl >= 0 ? 'success.main' : 'error.main',
+                          fontWeight: 600,
+                        }}
+                      >
+                        P/L: ₹{company.pl}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setOpen(false)} variant="contained" color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Paper>
+      </Dialog>
+
+
+
+
     </Box>
   );
 }
