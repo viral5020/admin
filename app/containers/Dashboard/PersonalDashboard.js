@@ -125,10 +125,22 @@ function PersonalDashboard() {
     setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const InfoCard = ({ title, icon, content }) => (
-    <Paper elevation={0} sx={{ ...glassStyles, minHeight: 170, display: 'flex', alignItems: 'center' }}>
-      <Box sx={{
-        backgroundColor: 'rgba(255,255,255,0.2)',
+  const InfoCard = ({ title, icon, content, bgcolor = 'rgba(255, 255, 255, 0.15)' }) => (
+  <Paper
+    elevation={0}
+    sx={{
+      ...glassStyles,
+      minHeight: 170,
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: bgcolor,
+      borderRadius: 2,
+      p: 2,
+    }}
+  >
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255,255,255,0.25)',
         borderRadius: '50%',
         p: 1.5,
         mr: 3,
@@ -137,18 +149,23 @@ function PersonalDashboard() {
         justifyContent: 'center',
         minWidth: 64,
         minHeight: 64,
-      }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography variant="subtitle1" fontWeight={700} gutterBottom>{title}</Typography>
-        <Divider sx={{ width: '40%', mb: 1 }} />
-        {content.map((line, i) => (
-          <Typography key={i} variant="body2" color="text.secondary">{line}</Typography>
-        ))}
-      </Box>
-    </Paper>
-  );
+      }}
+    >
+      {icon}
+    </Box>
+    <Box>
+      <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+        {title}
+      </Typography>
+      <Divider sx={{ width: '40%', mb: 1 }} />
+      {content.map((line, i) => (
+        <Typography key={i} variant="body2" color="text.secondary">
+          {line}
+        </Typography>
+      ))}
+    </Box>
+  </Paper>
+);
 
   const handleSectorClick = (event, elements) => {
     console.log('elements[0].index', elements[0].index);
@@ -241,6 +258,7 @@ function PersonalDashboard() {
                 )}
               </>,
             ]}
+             bgcolor="rgba(25, 118, 210, 0.1)"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -248,6 +266,7 @@ function PersonalDashboard() {
             title="Trades"
             icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
             content={['Total: 120', 'Today: 5']}
+            bgcolor="rgba(156, 39, 176, 0.1)" 
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -255,6 +274,7 @@ function PersonalDashboard() {
             title="Positions"
             icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
             content={['Active: 10', 'Closed: 50']}
+             bgcolor="rgba(76, 175, 80, 0.1)" 
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -262,6 +282,7 @@ function PersonalDashboard() {
             title="Pending Trades"
             icon={<AccessTimeIcon sx={{ color: '#ff9800', fontSize: 30 }} />}
             content={['7']}
+            bgcolor="rgba(255, 152, 0, 0.1)"
           />
         </Grid>
 
