@@ -137,7 +137,7 @@ function PersonalDashboard() {
       borderRadius: 2,
       p: 2,
     }}
-  >
+  > 
     <Box
       sx={{
         backgroundColor: 'rgba(255,255,255,0.25)',
