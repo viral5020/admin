@@ -263,15 +263,20 @@ function PersonalDashboard() {
     </Paper>
   );
 
-  const handleSectorClick = (event, elements) => {
-    console.log('elements[0].index', elements[0].index);
-    if (elements.length > 0) {
-      const index = elements[0].index;
-      const sector = detailedSectorData[index];
-      setSelectedSector(sector);
-      setOpen(true);
-    }
-  };
+ const handleSectorClick = (event, elements) => {
+  if (!elements?.length) return;
+
+  const index = elements[0].index;
+
+  if (index >= 0 && index < detailedSectorData.length) {
+    const sector = detailedSectorData[index];
+    setSelectedSector(sector);
+    setOpen(true);
+  } else {
+    console.warn('Invalid sector index:', index);
+  }
+};
+
 
   const ChartCard = ({ title, chartData }) => (
     <Paper elevation={0} sx={glassStyles}>
@@ -314,29 +319,45 @@ function PersonalDashboard() {
       </Box>
       <Divider sx={{ mb: 2 }} />
       <Box sx={{ height: 300 }}>
-        <Pie
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            onClick: (event, elements, chart) => {
-              if (title.toLowerCase().includes('sector')) {
-                handleSectorClick(event, elements, chart);
-              }
-            },
-            plugins: {
-              legend: {
-                position: 'left',
-                labels: {
-                  color: theme.palette.text.primary,
-                  usePointStyle: true,
-                  padding: 20,
-                },
-              },
-            },
-          }}
-        />
+    <Pie
+  data={chartData}
+  options={{
+    responsive: true,
+    maintainAspectRatio: false,
+    onClick: (event, elements) => {
+      if (elements?.length > 0) {
+        const index = elements[0].index;
+        const sector = detailedSectorData[index]; // or chartData.datasets[0].data[index] if synced
+        setSelectedSector(sector); // For side panel/modal, not tooltip
+        setOpen(true);
+      }
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const label = context.label || 'Unknown';
+            const raw = context.raw || {};
+            const totalInvestment = raw.totalInvestment ?? 0;
 
+            return [
+              `${label}`,
+              `Total Investment: ₹${totalInvestment.toLocaleString()}`
+            ];
+          }
+        }
+      },
+      legend: {
+        position: 'left',
+        labels: {
+          color: theme.palette.text.primary,
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+    },
+  }}
+/>
       </Box>
     </Paper>
   );
@@ -580,7 +601,15 @@ function PersonalDashboard() {
                   >
                     <Pie
                       ref={chartRef}
-                      data={stockData}
+                      data={{
+                        labels: assertNames,
+                        datasets: [{
+                          data: assertNames.map(name => asserts[name].qty),
+                          backgroundColor: assertNames.map((_, i) =>
+                            ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
+                          ),
+                        }],
+                      }}
                       options={{
                         responsive: true,
                         maintainAspectRatio: false,
@@ -589,17 +618,26 @@ function PersonalDashboard() {
                             position: 'bottom',
                             labels: { usePointStyle: true },
                           },
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                const index = context.dataIndex;
+                                const name = assertNames[index];
+                                const asset = asserts[name];
+                                return `${name}\nQty: ${asset.qty}\nP/L: ₹${asset.pl.toLocaleString('en-IN')}`;
+                              },
+                            }
+                          }
                         },
                         onClick: (_, elements) => {
                           if (elements.length > 0) {
                             const index = elements[0].index;
                             const stockName = assertNames[index];
-                            scrollToCompany(stockName); // 👈 Scroll to stock in list
+                            scrollToCompany(stockName);
                           }
                         },
                       }}
                     />
-
                   </Box>
                 </Box>
               )}
@@ -806,9 +844,19 @@ function PersonalDashboard() {
                         position: 'bottom',
                         labels: { usePointStyle: true },
                       },
-                    },
+                      tooltip: {
+                        callbacks: {
+                          label: function (context) {
+                            const index = context.dataIndex;
+                            const company = selectedSector.companies[index];
+                            return `${company.name}\nQty: ${company.qty}\nP/L: ₹${company.pl.toLocaleString('en-IN')}`;
+                          },
+                        }
+                      }
+                    }
                   }}
                 />
+
               </Box>
 
               {/* 📋 Company list on RHS (scrollable) */}
