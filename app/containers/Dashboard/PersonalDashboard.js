@@ -403,7 +403,10 @@ function PersonalDashboard() {
                       pr: 1,
                       width: '100%',
                       '&::-webkit-scrollbar': { display: 'none' },
-                      scrollbarWidth: 'none',
+                      // scrollbarWidth: 'none',
+                      direction: 'rtl',
+                      scrollbarWidth: 'thin',           // For Firefox
+                      scrollbarColor: '#90caf9 transparent', // Thumb and track colors for Firefox
                       msOverflowStyle: 'none',
                     }}
                   >
@@ -433,9 +436,7 @@ function PersonalDashboard() {
                             flexWrap: 'wrap',
                           }}
                         >
-                          <Typography fontWeight={600} variant="subtitle1">
-                            {name}
-                          </Typography>
+                         
                           <Typography
                             variant="body2"
                             sx={{
@@ -444,6 +445,9 @@ function PersonalDashboard() {
                             }}
                           >
                             P/L: ₹{details.pl}
+                          </Typography>
+                           <Typography fontWeight={600} variant="subtitle1">
+                            {name}
                           </Typography>
                         </Box>
 
@@ -456,8 +460,8 @@ function PersonalDashboard() {
                             mt: 1,
                           }}
                         >
-                          <Typography variant="body2">Qty: {details.qty}</Typography>
                           <Typography variant="body2">Price: ₹{details.price}</Typography>
+                          <Typography variant="body2">Qty: {details.qty}</Typography>
                         </Box>
                       </Box>
                     ))}
