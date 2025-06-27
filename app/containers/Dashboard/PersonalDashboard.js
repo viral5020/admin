@@ -263,19 +263,19 @@ function PersonalDashboard() {
     </Paper>
   );
 
- const handleSectorClick = (event, elements) => {
-  if (!elements?.length) return;
+  const handleSectorClick = (event, elements) => {
+    if (!elements?.length) return;
 
-  const index = elements[0].index;
+    const index = elements[0].index;
 
-  if (index >= 0 && index < detailedSectorData.length) {
-    const sector = detailedSectorData[index];
-    setSelectedSector(sector);
-    setOpen(true);
-  } else {
-    console.warn('Invalid sector index:', index);
-  }
-};
+    if (index >= 0 && index < detailedSectorData.length) {
+      const sector = detailedSectorData[index];
+      setSelectedSector(sector);
+      setOpen(true);
+    } else {
+      console.warn('Invalid sector index:', index);
+    }
+  };
 
 
   const ChartCard = ({ title, chartData }) => (
@@ -319,45 +319,47 @@ function PersonalDashboard() {
       </Box>
       <Divider sx={{ mb: 2 }} />
       <Box sx={{ height: 300 }}>
-    <Pie
-  data={chartData}
-  options={{
-    responsive: true,
-    maintainAspectRatio: false,
-    onClick: (event, elements) => {
-      if (elements?.length > 0) {
-        const index = elements[0].index;
-        const sector = detailedSectorData[index]; // or chartData.datasets[0].data[index] if synced
-        setSelectedSector(sector); // For side panel/modal, not tooltip
-        setOpen(true);
-      }
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            const label = context.label || 'Unknown';
-            const raw = context.raw || {};
-            const totalInvestment = raw.totalInvestment ?? 0;
+        <Pie
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements?.length > 0) {
+                const index = elements[0].index;
+                const sector = detailedSectorData[index];
+                setSelectedSector(sector);
+                setOpen(true);
+              }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const index = context.dataIndex;
+                    const sector = detailedSectorData[index];
 
-            return [
-              `${label}`,
-              `Total Investment: ₹${totalInvestment.toLocaleString()}`
-            ];
-          }
-        }
-      },
-      legend: {
-        position: 'left',
-        labels: {
-          color: theme.palette.text.primary,
-          usePointStyle: true,
-          padding: 20,
-        },
-      },
-    },
-  }}
-/>
+                    if (!sector) return '';
+
+                    return [
+                      // `${sector.sector}`,
+                      `Total Investment: ₹${sector.totalInvestment.toLocaleString()}`,
+                    ];
+                  },
+                },
+              },
+              legend: {
+                position: 'left',
+                labels: {
+                  color: theme.palette.text.primary,
+                  usePointStyle: true,
+                  padding: 20,
+                },
+              },
+            },
+          }}
+        />
+
       </Box>
     </Paper>
   );
