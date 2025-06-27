@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -22,18 +22,10 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
+import DropdownMenu from './DropdownMenu'
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const rawSectorData = {
-  labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
-  datasets: [{
-    data: [400, 300, 200, 100],
-    backgroundColor: ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350'],
-    borderColor: '#fff',
-    borderWidth: 2,
-  }],
-};
 
 const detailedSectorData = [
   {
@@ -100,17 +92,6 @@ const asserts = {
 
 const assertNames = Object.keys(asserts);
 
-const rawAssetData = {
-  labels: ['Equity', 'Commodities', 'Currency', 'Derivatives'],
-  totalInvestment: 78600,
-  datasets: [{
-    data: [500, 200, 150, 100],
-    backgroundColor: ['#26a69a', '#ef5350', '#ffa726', '#5c6bc0'],
-    borderColor: '#fff',
-    borderWidth: 2,
-  }],
-};
-
 const boxHeight = 300;
 
 function PersonalDashboard() {
@@ -123,8 +104,30 @@ function PersonalDashboard() {
   const [openModal, setOpenModal] = useState({ nse: false, ncx: false });
   const [expanded, setExpanded] = useState({ nse: false, ncx: false });
 
-  const sectorData = useMemo(() => rawSectorData, []);
-  const assetData = useMemo(() => rawAssetData, []);
+  const [selected, setSelected] = useState('NCX');
+
+  const [sectorData, setSectorData] = useState({
+    labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
+    datasets: [{
+      data: [400, 300, 200, 100],
+      backgroundColor: ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350'],
+      borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+      borderWidth: 2,
+    }],
+  })
+
+  const [stockData, setStockData] = useState({
+    labels: assertNames,
+    datasets: [{
+      data: assertNames.map(name => asserts[name].qty),
+      backgroundColor: assertNames.map((_, i) =>
+        ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
+      ),
+      borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+      borderWidth: 1,
+    }],
+  })
+
   const [highlightedStock, setHighlightedStock] = useState(null);
 
   // Chart ref
@@ -133,6 +136,34 @@ function PersonalDashboard() {
   // Refs for each list item
   const companyRefs = useRef({});
   const listRef = useRef(null);
+
+
+  useEffect(() => {
+    setSectorData(prev => ({
+      ...prev,
+      datasets: [
+        {
+          ...prev.datasets[0],
+          borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+        },
+        ...prev.datasets.slice(1),
+      ],
+    }));
+
+    setStockData(prev => ({
+      ...prev,
+      datasets: [
+        {
+          ...prev.datasets[0],
+          borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+        },
+        ...prev.datasets.slice(1),
+      ],
+    }));
+  }, [theme.palette.mode])
+
+  // const sectorData = useMemo(() => sectorData, []);
+  // const assetData = useMemo(() => rawAssetData, []);
 
   const glassStyles = {
     p: 3,
@@ -144,6 +175,7 @@ function PersonalDashboard() {
     border: '1px solid rgba(255, 255, 255, 0.2)',
     boxShadow: theme.shadows[6],
   };
+
 
   const showChartTooltip = (index) => {
     const chart = chartRef.current;
@@ -177,13 +209,13 @@ function PersonalDashboard() {
     }
   };
 
-  const handleMoreClick = (type) => {
-    setOpenModal((prev) => ({ ...prev, [type]: true }));
-  };
+  // const handleMoreClick = (type) => {
+  //   setOpenModal((prev) => ({ ...prev, [type]: true }));
+  // };
 
-  const handleClose = (type) => {
-    setOpenModal((prev) => ({ ...prev, [type]: false }));
-  };
+  // const handleClose = (type) => {
+  //   setOpenModal((prev) => ({ ...prev, [type]: false }));
+  // };
 
   const toggleExpand = (type) => {
     setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -243,9 +275,43 @@ function PersonalDashboard() {
 
   const ChartCard = ({ title, chartData }) => (
     <Paper elevation={0} sx={glassStyles}>
-      <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
-        {title}
-      </Typography>
+      <Box sx={{ mb: 2 }}>
+        {/* Title centered */}
+        {!isMobile ? (
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="h6" fontWeight={700} textAlign="center">
+              {title}
+            </Typography>
+
+            <Box sx={{ position: 'absolute', right: 0 }}>
+              <DropdownMenu selected={selected} setSelected={setSelected} />
+            </Box>
+          </Box>
+        ) : (
+          // Mobile layout: stacked title and dropdown
+          <Box>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              textAlign="center"
+              mb={1}
+            >
+              {title}
+            </Typography>
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <DropdownMenu selected={selected} setSelected={setSelected} />
+            </Box>
+          </Box>
+        )}
+      </Box>
       <Divider sx={{ mb: 2 }} />
       <Box sx={{ height: 300 }}>
         <Pie
@@ -379,9 +445,43 @@ function PersonalDashboard() {
 
         <Grid item xs={12}>
           <Paper elevation={0} sx={glassStyles}>
-            <Typography variant="h6" fontWeight={700} textAlign="center" mb={2}>
-              Stock-Wise Distribution
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              {/* Title centered */}
+              {!isMobile ? (
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={700} textAlign="center">
+                    Stock-Wise Distribution
+                  </Typography>
+
+                  <Box sx={{ position: 'absolute', right: 0 }}>
+                    <DropdownMenu selected={selected} setSelected={setSelected} />
+                  </Box>
+                </Box>
+              ) : (
+                // Mobile layout: stacked title and dropdown
+                <Box>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    textAlign="center"
+                    mb={1}
+                  >
+                    Stock-Wise Distribution
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <DropdownMenu selected={selected} setSelected={setSelected} />
+                  </Box>
+                </Box>
+              )}
+            </Box>
             <Divider sx={{ mb: 2 }} />
             <DialogContent sx={{ overflow: 'hidden', px: { xs: 2, sm: 3 } }}>
               {asserts && (
@@ -436,7 +536,7 @@ function PersonalDashboard() {
                             flexWrap: 'wrap',
                           }}
                         >
-                         
+
                           <Typography
                             variant="body2"
                             sx={{
@@ -446,7 +546,7 @@ function PersonalDashboard() {
                           >
                             P/L: ₹{details.pl}
                           </Typography>
-                           <Typography fontWeight={600} variant="subtitle1">
+                          <Typography fontWeight={600} variant="subtitle1">
                             {name}
                           </Typography>
                         </Box>
@@ -480,15 +580,7 @@ function PersonalDashboard() {
                   >
                     <Pie
                       ref={chartRef}
-                      data={{
-                        labels: assertNames,
-                        datasets: [{
-                          data: assertNames.map(name => asserts[name].qty),
-                          backgroundColor: assertNames.map((_, i) =>
-                            ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
-                          ),
-                        }],
-                      }}
+                      data={stockData}
                       options={{
                         responsive: true,
                         maintainAspectRatio: false,
