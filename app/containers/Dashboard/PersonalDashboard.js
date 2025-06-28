@@ -115,13 +115,14 @@ function PersonalDashboard() {
   const [open, setOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState(null);
 
-  const [expanded, setExpanded] = useState({ nse: false, ncx: false });
+  // const [expanded, setExpanded] = useState({ nse: false, MCX: false });
+  const [showMore, setShowMore] = useState(false);
 
   const toggleExpand = (type) => {
     setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const [selected, setSelected] = useState('NCX');
+  const [selected, setSelected] = useState('MCX');
 
   const [highlightedStock, setHighlightedStock] = useState(null);
 
@@ -132,6 +133,20 @@ function PersonalDashboard() {
   // Chart ref
   const chartRef = useRef(null);
   const sectorChart = useRef(null);
+
+  // margin collapse expand
+  const handleShowMore = () => {
+    setShowMore(true);
+  };
+  const handleCollapse = () => {
+    setShowMore(false);
+  };
+  const exchanges = [
+    { key: 'nse', label: 'NSE', amount: '₹25,000' },
+    { key: 'mcx', label: 'MCX', amount: '₹15,000' },
+    { key: 'bse', label: 'BSE', amount: '₹20,000' },
+    { key: 'ncdex', label: 'NCDEX', amount: '₹18,000' },
+  ];
 
   // Refs for each list item
   const companyRefs = useRef({});
@@ -326,42 +341,48 @@ function PersonalDashboard() {
             title="Margin"
             icon={<AccountBalanceWalletIcon sx={{ color: '#1976d2', fontSize: 30 }} />}
             content={[
-              <>
+              ...exchanges.slice(0, 2).map((exchange) => (
                 <Typography
+                  key={exchange.key}
                   variant="body2"
                   sx={{ cursor: 'pointer', fontWeight: 500 }}
-                  onClick={() => toggleExpand('nse')}
+                  onClick={() => toggleExpand(exchange.key)}
                 >
-                  NSE: ₹25,000
-                  <ArrowDropDownIcon fontSize="small" />
+                  {exchange.label}: {exchange.amount}
                 </Typography>
-                {expanded.nse && (
-                  <Box pl={2} pt={1}>
-                    <Typography variant="body2">• Initial Margin: ₹15,000</Typography>
-                    <Typography variant="body2">• Exposure Margin: ₹10,000</Typography>
-                    <Typography variant="body2">• Total Margin: ₹25,000</Typography>
-                    <Typography variant="body2">• Leverage: 5x</Typography>
-                  </Box>
-                )}
-              </>,
-              <>
+              )),
+
+              showMore &&
+              exchanges.slice(2).map((exchange) => (
                 <Typography
+                  key={exchange.key}
                   variant="body2"
                   sx={{ cursor: 'pointer', fontWeight: 500 }}
-                  onClick={() => toggleExpand('ncx')}
+                  onClick={() => toggleExpand(exchange.key)}
                 >
-                  NCX: ₹15,000
-                  <ArrowDropDownIcon fontSize="small" />
+                  {exchange.label}: {exchange.amount}
                 </Typography>
-                {expanded.ncx && (
-                  <Box pl={2} pt={1}>
-                    <Typography variant="body2">• Commodity Margin: ₹10,000</Typography>
-                    <Typography variant="body2">• Currency Margin: ₹5,000</Typography>
-                    <Typography variant="body2">• Total Margin: ₹15,000</Typography>
-                    <Typography variant="body2">• Leverage: 3x</Typography>
-                  </Box>
-                )}
-              </>,
+              )),
+
+              !showMore ? (
+                <Typography
+                  key="more"
+                  variant="body2"
+                  sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
+                  onClick={handleShowMore}
+                >
+                  More
+                </Typography>
+              ) : (
+                <Typography
+                  key="collapse"
+                  variant="body2"
+                  sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
+                  onClick={handleCollapse}
+                >
+                  Collapse
+                </Typography>
+              ),
             ]}
             bgcolor="rgba(25, 118, 210, 0.1)"
           />
