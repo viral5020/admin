@@ -65,7 +65,7 @@ function UserMenu(props) {
         throw new Error(result.message || 'Failed to fetch profile');
       }
 
-      console.log('✅ from UserMenu.js\nUser Profile:', result.data); // refferenced in Header.js
+      // console.log('✅ from UserMenu.js\nUser Profile:', result.data); // refferenced in Header.js
       setProfileData(result.data);
       return result.data;
 

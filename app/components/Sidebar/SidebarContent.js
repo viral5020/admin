@@ -79,7 +79,7 @@ function SidebarContent(props) {
       }
 
       setProfileData(result.data);
-      console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
+      // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
       return result.data;
 
     } catch (error) {
