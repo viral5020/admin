@@ -24,6 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
 import DropdownMenu from './DropdownMenu'
 import ApexCharts from './Apexcharts.js';
+import axios from 'axios';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -327,6 +328,32 @@ function PersonalDashboard() {
     </Paper>
   );
 
+
+  const [loginData, setLoginData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchLoginData = async () => {
+      try {
+        const res = await axios.post('https://goldmineexch.org/datatables/get_login_data_details', {
+          is_app: 1,
+          login_user_id: '196',
+          auth_key: 'yUC4c1iZVu',
+        });
+
+        if (res.data.status === 'ok' && Array.isArray(res.data.data)) {
+          setLoginData(res.data.data.slice(0, 5));
+        }
+      } catch (error) {
+        console.error('Login data fetch failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLoginData();
+  }, []);
+
+
   return (
     <Box sx={{ px: { xs: 2, md: 5 }, py: 4 }}>
       <Helmet>
@@ -414,7 +441,7 @@ function PersonalDashboard() {
 
         {/*--------------------- Sector-wise Distribution ---------------------- */}
         <Grid item xs={12} md={8}>
-          <ChartCard
+          {/* <ChartCard
             title="Sector-wise Distribution"
             chartData={{
               labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
@@ -424,7 +451,105 @@ function PersonalDashboard() {
                 borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
                 borderWidth: 2,
               }],
-            }} />
+            }} /> */}
+          <Paper elevation={0} sx={glassStyles}>
+            <Box sx={{ mb: 2 }}>
+              {/* Title centered */}
+              {!isMobile ? (
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={700} textAlign="center">
+                    {"Sector-wise Distribution"}
+                  </Typography>
+
+                  <Box sx={{ position: 'absolute', right: 0 }}>
+                    <DropdownMenu selected={selected} setSelected={setSelected} />
+                  </Box>
+                </Box>
+              ) : (
+                // Mobile layout: stacked title and dropdown
+                <Box>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    textAlign="center"
+                    mb={1}
+                  >
+                    {"Sector-wise Distribution"}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <DropdownMenu selected={selected} setSelected={setSelected} />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            <Box sx={{ height: 300 }}>
+              <Pie
+                ref={sectorChart}
+                data={{
+                  labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
+                  datasets: [{
+                    data: [400, 300, 200, 100],
+                    backgroundColor: ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350'],
+                    borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+                    borderWidth: 2,
+                  }],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  // animation: {
+                  //   animateRotate: true,   // rotate the pie on load
+                  //   // animateScale: true,    // scale the chart in
+                  //   // duration: 4000,        // 1 second animation
+                  //   easing: 'easeInOutCirc', // or try 'easeInOutQuart', 'linear', etc.
+                  // },
+                  onClick: (event, elements) => {
+                    if (elements?.length > 0) {
+                      const index = elements[0].index;
+                      const sector = detailedSectorData[index];
+                      setSelectedSector(sector);
+                      setOpen(true);
+                    }
+                  },
+                  plugins: {
+                    tooltip: {
+                      callbacks: {
+                        label: function (context) {
+                          const index = context.dataIndex;
+                          const sector = detailedSectorData[index];
+
+                          if (!sector) return '';
+
+                          return [
+                            // `${sector.sector}`,
+                            `Total Investment: ₹${sector.totalInvestment.toLocaleString()}`,
+                          ];
+                        },
+                      },
+                    },
+                    legend: {
+                      position: 'left',
+                      labels: {
+                        color: theme.palette.text.primary,
+                        usePointStyle: true,
+                        padding: 20,
+                      },
+                    },
+                  },
+                }}
+              />
+
+            </Box>
+          </Paper>
         </Grid>
 
         {/*--------------------- sector popup ---------------------*/}
@@ -592,25 +717,57 @@ function PersonalDashboard() {
         {/* ----------- Recent Login ---------- */}
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{ ...glassStyles, height: '100%' }}>
-            <Typography variant="h6" fontWeight={700} mb={2}>Recent Login</Typography>
+            <Typography variant="h6" fontWeight={700} mb={2}>
+              Recent Login
+            </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Box display="flex" flexDirection="column" gap={2}>
-              {[
-                { color: '#1976d2', date: '24 June 2025, 10:45 AM', device: 'Chrome Browser' },
-                { color: '#9c27b0', date: '23 June 2025, 6:22 PM', device: 'Firefox Browser' },
-                { color: '#4caf50', date: '22 June 2025, 9:10 AM', device: 'Mobile App' },
-              ].map((login, idx) => (
-                <Box key={idx} display="flex" alignItems="center" gap={2}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: login.color }} />
-                  <Box>
-                    <Typography variant="body2" fontWeight={500}>{login.date}</Typography>
-                    <Typography variant="caption" color="text.secondary">{login.device}</Typography>
+
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={2}
+              sx={{
+                maxHeight: 250,
+                overflowY: 'auto',
+                pr: 1,
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': { display: 'none' },
+              }}
+            >
+              {loading ? (
+                <Typography variant="body2" color="text.secondary">
+                  Loading...
+                </Typography>
+              ) : loginData.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No login records found.
+                </Typography>
+              ) : (
+                loginData.map((login, idx) => (
+                  <Box key={idx} display="flex" alignItems="center" gap={2}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
+                      }}
+                    />
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        {login.loginTime}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        IP: {login.ip}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                ))
+              )}
             </Box>
           </Paper>
         </Grid>
+
 
         {/* ------------------ Stock-Wise Distribution ------------------ */}
         <Grid item xs={12}>
@@ -674,7 +831,8 @@ function PersonalDashboard() {
                       flex: 1,
                       maxHeight: { xs: 250, sm: 300 },
                       overflowY: 'auto',
-                      pr: 1,
+                      overflowX: 'hidden',
+                      px: 1,
                       width: '100%',
                       '&::-webkit-scrollbar': { display: 'none' },
                       // scrollbarWidth: 'none',
