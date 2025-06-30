@@ -148,6 +148,7 @@
     "file-loader": "^6.2.0",
     "fontfaceobserver": "2.1.0",
     "formik": "^2.4.5",
+    "framer-motion": "^12.19.2",
     "history": "4.9.0",
     "hoist-non-react-statics": "3.3.0",
     "html-webpack-plugin": "^5.6.3",

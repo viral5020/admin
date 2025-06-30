@@ -25,6 +25,14 @@ import brand from 'dan-api/dummy/brand';
 import DropdownMenu from './DropdownMenu'
 import ApexCharts from './Apexcharts.js';
 import axios from 'axios';
+import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const animationVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.95 },
+};
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -116,12 +124,7 @@ function PersonalDashboard() {
   const [open, setOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState(null);
 
-  // const [expanded, setExpanded] = useState({ nse: false, MCX: false });
   const [showMore, setShowMore] = useState(false);
-
-  const toggleExpand = (type) => {
-    setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
-  };
 
   const [selected, setSelected] = useState('MCX');
 
@@ -129,6 +132,8 @@ function PersonalDashboard() {
 
   const [candleOpen, setCandleOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
+
+  const [margindata, setMargindata] = useState()
 
 
   // Chart ref
@@ -142,12 +147,6 @@ function PersonalDashboard() {
   const handleCollapse = () => {
     setShowMore(false);
   };
-  const exchanges = [
-    { key: 'nse', label: 'NSE', amount: '₹25,000' },
-    { key: 'mcx', label: 'MCX', amount: '₹15,000' },
-    { key: 'bse', label: 'BSE', amount: '₹20,000' },
-    { key: 'ncdex', label: 'NCDEX', amount: '₹18,000' },
-  ];
 
   // Refs for each list item
   const companyRefs = useRef({});
@@ -204,7 +203,7 @@ function PersonalDashboard() {
       elevation={0}
       sx={{
         ...glassStyles,
-        minHeight: 170,
+        minHeight: 180,
         display: 'flex',
         alignItems: 'center',
         // backgroundColor: bgcolor,
@@ -241,92 +240,50 @@ function PersonalDashboard() {
     </Paper>
   );
 
-  const ChartCard = ({ title, chartData }) => (
-    <Paper elevation={0} sx={glassStyles}>
-      <Box sx={{ mb: 2 }}>
-        {/* Title centered */}
-        {!isMobile ? (
-          <Box
-            sx={{
-              position: 'relative',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Typography variant="h6" fontWeight={700} textAlign="center">
-              {title}
-            </Typography>
-
-            <Box sx={{ position: 'absolute', right: 0 }}>
-              <DropdownMenu selected={selected} setSelected={setSelected} />
-            </Box>
-          </Box>
-        ) : (
-          // Mobile layout: stacked title and dropdown
-          <Box>
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              textAlign="center"
-              mb={1}
-            >
-              {title}
-            </Typography>
-
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <DropdownMenu selected={selected} setSelected={setSelected} />
-            </Box>
-          </Box>
-        )}
-      </Box>
-      <Divider sx={{ mb: 2 }} />
-      <Box sx={{ height: 300 }}>
-        <Pie
-          ref={sectorChart}
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            onClick: (event, elements) => {
-              if (elements?.length > 0) {
-                const index = elements[0].index;
-                const sector = detailedSectorData[index];
-                setSelectedSector(sector);
-                setOpen(true);
-              }
-            },
-            plugins: {
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    const index = context.dataIndex;
-                    const sector = detailedSectorData[index];
-
-                    if (!sector) return '';
-
-                    return [
-                      // `${sector.sector}`,
-                      `Total Investment: ₹${sector.totalInvestment.toLocaleString()}`,
-                    ];
-                  },
-                },
-              },
-              legend: {
-                position: 'left',
-                labels: {
-                  color: theme.palette.text.primary,
-                  usePointStyle: true,
-                  padding: 20,
-                },
-              },
-            },
+  const InfoCardHorizontal = ({ title, icon, content, bgcolor }) => (
+    <Paper
+      elevation={0}
+      sx={{
+        ...glassStyles,
+        minHeight: 170,
+        borderRadius: 2,
+        p: 2,
+        // backgroundColor: bgcolor,
+      }}
+    >
+      {/* Row: Icon + Title (Horizontally Aligned) */}
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
           }}
-        />
+        >
+          {icon}
+        </Box>
+        <Typography variant="subtitle1" fontWeight={700}>
+          {title}
+        </Typography>
+      </Box>
 
+      {/* Divider below the title row */}
+      <Divider sx={{ width: '30%', mb: 1 }} />
+
+      {/* Content (listed below icon-title row) */}
+      <Box display="flex" flexDirection="column" gap={0.5}>
+        {content.map((line, i) => (
+          <Typography key={i} variant="body2" color="text.secondary" component="div">
+            {line}
+          </Typography>
+        ))}
       </Box>
     </Paper>
   );
+
+
 
 
   const [loginData, setLoginData] = useState([]);
@@ -350,6 +307,32 @@ function PersonalDashboard() {
       }
     };
 
+    const data = sessionStorage.getItem("data");
+    const dataObj = JSON.parse(data);
+
+    const tempObj = {
+      cricket_margin: dataObj.cricket_margin,
+      nseopt_margin: dataObj.nseopt_margin,
+      comex_margin: dataObj.comex_margin,
+      forex_margin: dataObj.forex_margin,
+      global_margin: dataObj.global_margin,
+      nseeqt_margin: dataObj.nseeqt_margin,
+      mcx_margin: dataObj.mcx_margin,
+      nse_margin: dataObj.nse_margin
+    }
+
+    let obj = [];
+
+    for (let i in tempObj) {
+      obj.push({
+        label: i,
+        value: dataObj[i],
+      })
+    }
+
+    // console.log('obj', obj);
+    setMargindata(obj);
+
     fetchLoginData();
   }, []);
 
@@ -364,56 +347,84 @@ function PersonalDashboard() {
 
         {/* --------- InfoCards ------------ */}
         <Grid item xs={12} sm={6} md={3}>
-          <InfoCard
-            title="Margin"
-            icon={<AccountBalanceWalletIcon sx={{ color: '#1976d2', fontSize: 30 }} />}
-            content={[
-              ...exchanges.slice(0, 2).map((exchange) => (
-                <Typography
-                  key={exchange.key}
-                  variant="body2"
-                  sx={{ cursor: 'pointer', fontWeight: 500 }}
-                  onClick={() => toggleExpand(exchange.key)}
-                >
-                  {exchange.label}: {exchange.amount}
-                </Typography>
-              )),
-
-              showMore &&
-              exchanges.slice(2).map((exchange) => (
-                <Typography
-                  key={exchange.key}
-                  variant="body2"
-                  sx={{ cursor: 'pointer', fontWeight: 500 }}
-                  onClick={() => toggleExpand(exchange.key)}
-                >
-                  {exchange.label}: {exchange.amount}
-                </Typography>
-              )),
-
-              !showMore ? (
-                <Typography
-                  key="more"
-                  variant="body2"
-                  sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
-                  onClick={handleShowMore}
-                >
-                  More
-                </Typography>
-              ) : (
-                <Typography
-                  key="collapse"
-                  variant="body2"
-                  sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
-                  onClick={handleCollapse}
-                >
-                  Collapse
-                </Typography>
-              ),
-            ]}
-            bgcolor="rgba(25, 118, 210, 0.1)"
-          />
+          <AnimatePresence mode="wait">
+            {!showMore ? (
+              <motion.div
+                key="compact"
+                variants={animationVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              // transition={{ type: 'spring', stiffness: 200 }}
+              // transition={{ duration: 0 }}
+              >
+                <InfoCard
+                  title="Margin"
+                  icon={<AccountBalanceWalletIcon sx={{ color: '#1976d2', fontSize: 30 }} />}
+                  content={[
+                    ...(Array.isArray(margindata)
+                      ? margindata.slice(0, 2).map((exchange) => (
+                        <Typography
+                          key={exchange.key}
+                          variant="body2"
+                          sx={{ fontWeight: 500 }}
+                        >
+                          {exchange.label.replace(/_/g, ' ').toUpperCase()}: {exchange.value}
+                        </Typography>
+                      ))
+                      : []),
+                    <Typography
+                      key="more"
+                      variant="body2"
+                      sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
+                      onClick={handleShowMore}
+                    >
+                      More
+                    </Typography>,
+                  ]}
+                  bgcolor="rgba(25, 118, 210, 0.1)"
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="expanded"
+                variants={animationVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+              >
+                <InfoCardHorizontal
+                  title="Margin"
+                  icon={<AccountBalanceWalletIcon sx={{ color: '#1976d2', fontSize: 30 }} />}
+                  content={[
+                    ...(Array.isArray(margindata)
+                      ? margindata.map((exchange) => (
+                        <Typography
+                          key={exchange.key}
+                          variant="body2"
+                          sx={{ fontWeight: 500 }}
+                        >
+                          {exchange.label.replace(/_/g, ' ').toUpperCase()}: {exchange.value}
+                        </Typography>
+                      ))
+                      : []),
+                    <Typography
+                      key="collapse"
+                      variant="body2"
+                      sx={{ cursor: 'pointer', fontWeight: 500, color: '#1976d2' }}
+                      onClick={handleCollapse}
+                    >
+                      Collapse
+                    </Typography>,
+                  ]}
+                  bgcolor="rgba(25, 118, 210, 0.1)"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
           <InfoCard
             title="Trades"
@@ -441,17 +452,6 @@ function PersonalDashboard() {
 
         {/*--------------------- Sector-wise Distribution ---------------------- */}
         <Grid item xs={12} md={8}>
-          {/* <ChartCard
-            title="Sector-wise Distribution"
-            chartData={{
-              labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
-              datasets: [{
-                data: [400, 300, 200, 100],
-                backgroundColor: ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350'],
-                borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
-                borderWidth: 2,
-              }],
-            }} /> */}
           <Paper elevation={0} sx={glassStyles}>
             <Box sx={{ mb: 2 }}>
               {/* Title centered */}
