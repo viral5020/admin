@@ -8,7 +8,9 @@ import {
   Grid, Paper, Typography, Box, Divider, useMediaQuery as useMUIQuery,
 } from '@mui/material';
 
-import { Pie } from 'react-chartjs-2';
+import { Tabs, Tab } from '@mui/material';
+
+import { Pie, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,6 +21,8 @@ import {
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import WarningIcon from '@mui/icons-material/Warning';
+import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
@@ -113,7 +117,54 @@ const asserts = {
   "ONGC": { price: 300, pl: -600, qty: 40 },
 };
 
+
 const assertNames = Object.keys(asserts);
+const smallCapNames = ["Wipro", "ONGC", "Dr. Reddy"];
+const midCapNames = ["Sun Pharma", "SBI", "ICICI Bank"];
+const largeCapNames = ["HDFC Bank", "Infosys", "TCS", "Reliance"];
+
+const smallCapColors = ["#4a148c", "#6a1b9a", "#7b1fa2"];
+const midCapColors = ["#1a237e", "#283593", "#303f9f"];
+const largeCapColors = ["#0d47a1", "#1565c0", "#1976d2", "#1e88e5"];
+
+const smallCapData = smallCapNames.map(name => asserts[name].qty);
+const midCapData = midCapNames.map(name => asserts[name].qty);
+const largeCapData = largeCapNames.map(name => asserts[name].qty);
+
+// const companyRefs = useRef({});
+
+// const scrollToCompany = (name) => {
+//   const el = companyRefs.current[name];
+//   if (el) {
+//     el.scrollIntoView({ behavior: "smooth", block: "center" });
+//   }
+// };
+
+
+const exampleStock = {
+  name: "Reliance Industries",
+  ltp: 2850,
+  priceChange: "+30",
+  pricePercentChange: "+1.06",
+  open: 2820,
+  high: 2865,
+  low: 2800,
+  close: 2820,
+  bidRate: 2848,
+  askRate: 2852,
+  volumeOi: 1200000,
+  minOrder: 1,
+  maxOrder: 1000,
+  positions: "200 shares held at average ₹2700",
+  shortDescription: "India's largest private sector company with businesses in energy, petrochemicals, textiles, natural resources, retail, and telecommunications.",
+  longDescription: "Reliance Industries Limited is a Fortune 500 company and the largest private sector corporation in India. It operates in multiple segments including oil and gas exploration, refining and marketing, petrochemicals, retail, digital services, and financial services. The company has consistently delivered strong revenue and profit growth, supported by its diversified business model and robust execution capabilities.",
+};
+
+const handleOpenDialog = () => {
+  setSelectedStock(exampleStock);
+  setTabValue(0);        // open Basic tab by default
+  setCandleOpen(true);   // show the dialog
+};
 
 const boxHeight = 300;
 
@@ -131,9 +182,17 @@ function PersonalDashboard() {
   const [highlightedStock, setHighlightedStock] = useState(null);
 
   const [candleOpen, setCandleOpen] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
   const [selectedStock, setSelectedStock] = useState(null);
 
   const [margindata, setMargindata] = useState()
+
+const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
+
+
+  const handleTabChange = (_, newValue) => {
+  setTabValue(newValue);
+};
 
 
   // Chart ref
@@ -203,7 +262,7 @@ function PersonalDashboard() {
       elevation={0}
       sx={{
         ...glassStyles,
-        minHeight: 170,
+        minHeight: 130,
         borderRadius: 2,
         p: 2,
         // backgroundColor: bgcolor,
@@ -303,14 +362,33 @@ function PersonalDashboard() {
 
       <Grid container spacing={1}>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <InfoCardHorizontal
-            title="Orders"
-            icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
-            content={['Today: 5', 'Total: 120']}
-            bgcolor="rgba(156, 39, 176, 0.1)"
-          />
-        </Grid>
+       <Grid item xs={12} sm={6} md={3}>
+  <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+    <InfoCardHorizontal
+      title="Orders"
+      icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
+      content={['Today: 5', 'This Week: 120']}
+      bgcolor="rgba(156, 39, 176, 0.1)"
+    />
+  </Box>
+</Grid>
+
+<Dialog open={ordersDialogOpen} onClose={() => setOrdersDialogOpen(false)} fullWidth maxWidth="sm">
+  <Box sx={{ p: 3 }}>
+    <Typography variant="h6" fontWeight={600} mb={2}>
+      Order Details
+    </Typography>
+    <Typography>
+      Here you can show detailed order data, table, or anything you like!
+    </Typography>
+  </Box>
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button onClick={() => setOrdersDialogOpen(false)} variant="contained" color="primary">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
+
         <Grid item xs={12} sm={6} md={3}>
           <InfoCardHorizontal
             title="Positions"
@@ -327,9 +405,38 @@ function PersonalDashboard() {
             bgcolor="rgba(255, 152, 0, 0.1)"
           />
         </Grid>
-
-         {/* --------- InfoCards ------------ */}
         <Grid item xs={12} sm={6} md={3}>
+          <InfoCardHorizontal
+            title="Rejection Logs"
+            icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
+            content={['Today: 50', 'This Week: 10']}
+            bgcolor="rgba(76, 175, 80, 0.1)"
+          />
+        </Grid>
+
+
+        <Box
+          sx={{
+            mt: 1,
+            mx: 2,
+            paddingLeft: '10px',
+            width: '100%',
+            border: '2px solid #f44336',      // Red border
+            backgroundColor: '#ffebee',        // Light red background
+            p: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,                            // Space between icon and text
+          }}
+        >
+          <WarningIcon sx={{ color: '#f44336', fontSize: 30 }} />
+          <Typography variant="h9" sx={{ color: '#d32f2f' }}>
+            Important Notice: Some rejections require immediate attention! Please review the logs.
+          </Typography>
+        </Box>
+        {/* --------- InfoCards ------------ */}
+        {/* <Grid item xs={12} sm={6} md={3}>
           <AnimatePresence mode="wait">
             {!showMore ? (
               <motion.div
@@ -406,7 +513,7 @@ function PersonalDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-        </Grid>
+        </Grid> */}
 
         {/*--------------------- Sector-wise Distribution ---------------------- */}
         <Grid item xs={12} md={8}>
@@ -418,11 +525,11 @@ function PersonalDashboard() {
                   sx={{
                     position: 'relative',
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    // justifyContent: 'center',
+                    // alignItems: 'center',
                   }}
                 >
-                  <Typography variant="h6" fontWeight={700} textAlign="center">
+                  <Typography variant="subtitle1" fontWeight={700} textAlign="left">
                     {"Sector-wise Distribution"}
                   </Typography>
 
@@ -450,26 +557,20 @@ function PersonalDashboard() {
             </Box>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ height: 300 }}>
-              <Pie
+              <Doughnut
                 ref={sectorChart}
                 data={{
                   labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
                   datasets: [{
                     data: [400, 300, 200, 100],
-                    backgroundColor: ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350'],
-                    borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+                    backgroundColor: ['#1976d2', '#388e3c', '#7b1fa2', '#d32f2f'], // 🌑 Darker colors
+                    borderColor: theme.palette.mode === 'dark' ? '#222' : '#fff',
                     borderWidth: 2,
                   }],
                 }}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
-                  // animation: {
-                  //   animateRotate: true,   // rotate the pie on load
-                  //   // animateScale: true,    // scale the chart in
-                  //   // duration: 4000,        // 1 second animation
-                  //   easing: 'easeInOutCirc', // or try 'easeInOutQuart', 'linear', etc.
-                  // },
                   onClick: (event, elements) => {
                     if (elements?.length > 0) {
                       const index = elements[0].index;
@@ -484,11 +585,8 @@ function PersonalDashboard() {
                         label: function (context) {
                           const index = context.dataIndex;
                           const sector = detailedSectorData[index];
-
                           if (!sector) return '';
-
                           return [
-                            // `${sector.sector}`,
                             `Total Investment: ₹${sector.totalInvestment.toLocaleString()}`,
                           ];
                         },
@@ -505,8 +603,8 @@ function PersonalDashboard() {
                   },
                 }}
               />
-
             </Box>
+
           </Paper>
         </Grid>
 
@@ -675,7 +773,7 @@ function PersonalDashboard() {
         {/* ----------- Recent Login ---------- */}
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{ ...glassStyles, height: '100%' }}>
-            <Typography variant="h6" fontWeight={700} mb={2}>
+            <Typography variant="subtitle1" fontWeight={700} mb={2}>
               Recent Login
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -742,7 +840,7 @@ function PersonalDashboard() {
                     alignItems: 'center',
                   }}
                 >
-                  <Typography variant="h6" fontWeight={700} textAlign="center">
+                  <Typography variant="subtitle1" fontWeight={700} textAlign="center">
                     Stock-Wise Distribution
                   </Typography>
 
@@ -795,15 +893,15 @@ function PersonalDashboard() {
                       '&::-webkit-scrollbar': { display: 'none' },
                       // scrollbarWidth: 'none',
                       direction: 'rtl',
-                      scrollbarWidth: 'thin',           // For Firefox
-                      scrollbarColor: '#90caf9 transparent', // Thumb and track colors for Firefox
+                      scrollbarWidth: 'thin',           
+                      scrollbarColor: '#90caf9 transparent', 
                       msOverflowStyle: 'none',
                     }}
                   >
                     {Object.entries(asserts).map(([name, details], i) => (
                       <Box
                         key={i}
-                        ref={el => companyRefs.current[name] = el}
+                        ref={(el) => (companyRefs.current[name] = el)}
                         onClick={() => showChartTooltip(i)}
                         sx={{
                           mb: 2,
@@ -868,50 +966,91 @@ function PersonalDashboard() {
                       mx: 'auto',
                     }}
                   >
-                    <Pie
-                      ref={chartRef}
+                    <Doughnut
                       data={{
-                        labels: assertNames,
-                        datasets: [{
-                          data: assertNames.map(name => asserts[name].qty),
-                          backgroundColor: assertNames.map((_, i) =>
-                            ['#42a5f5', '#66bb6a', '#ffca28', '#ef5350', '#ab47bc', '#26c6da'][i % 6]
-                          ),
-                          borderColor: theme.palette.mode === 'dark' ? '#444' : '#fff',
-                          borderWidth: 1,
-                        }],
+                        labels: [], // Skip individual stock labels in legend
+                        datasets: [
+                          {
+                            label: "Small Cap",
+                            data: smallCapData,
+                            backgroundColor: smallCapColors,
+                            borderColor: "#222",
+                            borderWidth: 1,
+                          },
+                          {
+                            label: "Mid Cap",
+                            data: midCapData,
+                            backgroundColor: midCapColors,
+                            borderColor: "#222",
+                            borderWidth: 1,
+                          },
+                          {
+                            label: "Large Cap",
+                            data: largeCapData,
+                            backgroundColor: largeCapColors,
+                            borderColor: "#222",
+                            borderWidth: 1,
+                          },
+                        ],
                       }}
                       options={{
                         responsive: true,
                         maintainAspectRatio: false,
+                        cutout: "50%",
                         plugins: {
                           legend: {
-                            position: 'bottom',
+                            position: "bottom",
                             labels: {
                               usePointStyle: true,
+                              pointStyle: 'circle',
                               color: theme.palette.text.primary,
+                              padding: 20,
+                              generateLabels: (chart) => {
+                                return chart.data.datasets.map((dataset, i) => ({
+                                  text: dataset.label,
+                                  fillStyle: dataset.backgroundColor[0],
+                                  strokeStyle: dataset.borderColor,
+                                  lineWidth: 1,
+                                  hidden: false,
+                                  index: i,
+                                }));
+                              },
                             },
                           },
                           tooltip: {
                             callbacks: {
                               label: function (context) {
-                                const index = context.dataIndex;
-                                const name = assertNames[index];
+                                const datasetLabel = context.dataset.label;
+                                const dataIndex = context.dataIndex;
+                                let name = "";
+
+                                if (datasetLabel === "Small Cap") name = smallCapNames[dataIndex];
+                                else if (datasetLabel === "Mid Cap") name = midCapNames[dataIndex];
+                                else if (datasetLabel === "Large Cap") name = largeCapNames[dataIndex];
+
                                 const asset = asserts[name];
-                                return `${name}\nQty: ${asset.qty}\nP/L: ₹${asset.pl.toLocaleString('en-IN')}`;
+                                return `${name}: Qty ${asset.qty}, P/L ₹${asset.pl.toLocaleString("en-IN")}`;
                               },
-                            }
-                          }
+                            },
+                          },
                         },
                         onClick: (_, elements) => {
                           if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const stockName = assertNames[index];
+                            const datasetIndex = elements[0].datasetIndex;
+                            const dataIndex = elements[0].index;
+                            let stockName = "";
+
+                            if (datasetIndex === 0) stockName = smallCapNames[dataIndex];
+                            else if (datasetIndex === 1) stockName = midCapNames[dataIndex];
+                            else if (datasetIndex === 2) stockName = largeCapNames[dataIndex];
+
                             scrollToCompany(stockName);
                           }
                         },
                       }}
                     />
+
+
                   </Box>
                 </Box>
               )}
@@ -1025,23 +1164,121 @@ function PersonalDashboard() {
           </Grid>
         </Grid>
 
-        <Dialog open={candleOpen} onClose={() => setCandleOpen(false)} fullWidth maxWidth="md">
-          <Box sx={{ px: 3, py: 2 }}>
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              {selectedStock?.name} - Candlestick View
-            </Typography>
+       <Dialog open={candleOpen}  onClose={() => setCandleOpen(false)} fullWidth maxWidth="md">
+  <Box sx={{ px: 3, py: 2 }}>
+    <Tabs
+      value={tabValue}
+      onChange={handleTabChange}
+      textColor="primary"
+      indicatorColor="primary"
+      variant="scrollable"
+      scrollButtons="auto"
+    >
+      <Tab label="Basic" />
+      <Tab label="Trades" />
+      <Tab label="Positions" />
+      <Tab label="Charts" />
+    </Tabs>
 
-            {selectedStock && (
-              <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
-            )}
-          </Box>
+    <Box sx={{ mt: 2 }}>
+      {tabValue === 0 && selectedStock && (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Grid container spacing={2}>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">LTP</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.ltp}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Price Change</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.priceChange}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">% Change</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.pricePercentChange}%</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Open</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.open}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">High</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.high}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Low</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.low}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Close</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.close}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Bid Rate</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.bidRate}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Ask Rate</Typography>
+        <Typography variant="body1" fontWeight={600}>₹{exampleStock.askRate}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Volume OI</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Min Order</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.minOrder}</Typography>
+      </Grid>
+      <Grid item xs={6} sm={4}>
+        <Typography variant="subtitle2" color="text.secondary">Max Order</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.maxOrder}</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="subtitle2" color="text.secondary">Positions</Typography>
+        <Typography variant="body1" fontWeight={600}>{exampleStock.positions}</Typography>
+      </Grid>
+    </Grid>
 
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setCandleOpen(false)} variant="contained" color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary">Short Description</Typography>
+      <Typography variant="body2">{exampleStock.shortDescription}</Typography>
+    </Box>
+
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary">Long Description</Typography>
+      <Typography variant="body2">{exampleStock.longDescription}</Typography>
+    </Box>
+  </Box>
+)}
+
+      {/* ----- Trades tab ----- */}
+      {tabValue === 1 && (
+        <Typography variant="body1">
+          {/* Put trade details here */}
+          Trades data for {selectedStock?.name}.
+        </Typography>
+      )}
+
+      {/* ----- Positions tab ----- */}
+      {tabValue === 2 && (
+        <Typography variant="body1">
+          {/* Put positions data here */}
+          Positions data for {selectedStock?.name}.
+        </Typography>
+      )}
+
+      {/* ----- Charts tab ----- */}
+      {tabValue === 3 && selectedStock && (
+        <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
+      )}
+    </Box>
+  </Box>
+
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button onClick={() => setCandleOpen(false)} variant="contained" color="primary">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
 
       </Grid>
 

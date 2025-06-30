@@ -35,6 +35,7 @@ const StyledDropdown = ({ selected, setSelected }) => {
                     borderRadius: 3,
                     px: 2.5,
                     py: 1,
+                    marginBottom: 0,
                     fontWeight: 600,
                     backdropFilter: 'blur(10px)',
                     backgroundColor:
