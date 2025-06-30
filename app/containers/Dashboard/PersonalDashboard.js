@@ -198,48 +198,6 @@ function PersonalDashboard() {
     }
   };
 
-  const InfoCard = ({ title, icon, content, bgcolor = 'rgba(255, 255, 255, 0.15)' }) => (
-    <Paper
-      elevation={0}
-      sx={{
-        ...glassStyles,
-        minHeight: 180,
-        display: 'flex',
-        alignItems: 'center',
-        // backgroundColor: bgcolor,
-        borderRadius: 2,
-        p: 2,
-      }}
-    >
-      <Box
-        sx={{
-          backgroundColor: 'rgba(255,255,255,0.25)',
-          borderRadius: '50%',
-          p: 1.5,
-          mr: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 64,
-          minHeight: 64,
-        }}
-      >
-        {icon}
-      </Box>
-      <Box>
-        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-          {title}
-        </Typography>
-        <Divider sx={{ width: '40%', mb: 1 }} />
-        {content.map((line, i) => (
-          <Typography key={i} variant="body2" color="text.secondary" component="div">
-            {line}
-          </Typography>
-        ))}
-      </Box>
-    </Paper>
-  );
-
   const InfoCardHorizontal = ({ title, icon, content, bgcolor }) => (
     <Paper
       elevation={0}
@@ -311,14 +269,14 @@ function PersonalDashboard() {
     const dataObj = JSON.parse(data);
 
     const tempObj = {
+      nse_margin: dataObj.nse_margin,
+      mcx_margin: dataObj.mcx_margin,
       cricket_margin: dataObj.cricket_margin,
       nseopt_margin: dataObj.nseopt_margin,
       comex_margin: dataObj.comex_margin,
       forex_margin: dataObj.forex_margin,
       global_margin: dataObj.global_margin,
       nseeqt_margin: dataObj.nseeqt_margin,
-      mcx_margin: dataObj.mcx_margin,
-      nse_margin: dataObj.nse_margin
     }
 
     let obj = [];
@@ -345,7 +303,32 @@ function PersonalDashboard() {
 
       <Grid container spacing={1}>
 
-        {/* --------- InfoCards ------------ */}
+        <Grid item xs={12} sm={6} md={3}>
+          <InfoCardHorizontal
+            title="Orders"
+            icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
+            content={['Today: 5', 'Total: 120']}
+            bgcolor="rgba(156, 39, 176, 0.1)"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <InfoCardHorizontal
+            title="Positions"
+            icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
+            content={['Active: 10', 'Closed: 50']}
+            bgcolor="rgba(76, 175, 80, 0.1)"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <InfoCardHorizontal
+            title="Pending Orders"
+            icon={<AccessTimeIcon sx={{ color: '#ff9800', fontSize: 30 }} />}
+            content={['7']}
+            bgcolor="rgba(255, 152, 0, 0.1)"
+          />
+        </Grid>
+
+         {/* --------- InfoCards ------------ */}
         <Grid item xs={12} sm={6} md={3}>
           <AnimatePresence mode="wait">
             {!showMore ? (
@@ -358,7 +341,7 @@ function PersonalDashboard() {
               // transition={{ type: 'spring', stiffness: 200 }}
               // transition={{ duration: 0 }}
               >
-                <InfoCard
+                <InfoCardHorizontal
                   title="Margin"
                   icon={<AccountBalanceWalletIcon sx={{ color: '#1976d2', fontSize: 30 }} />}
                   content={[
@@ -423,31 +406,6 @@ function PersonalDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <InfoCard
-            title="Trades"
-            icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
-            content={['Today: 5', 'Total: 120']}
-            bgcolor="rgba(156, 39, 176, 0.1)"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <InfoCard
-            title="Positions"
-            icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
-            content={['Active: 10', 'Closed: 50']}
-            bgcolor="rgba(76, 175, 80, 0.1)"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <InfoCard
-            title="Pending Trades"
-            icon={<AccessTimeIcon sx={{ color: '#ff9800', fontSize: 30 }} />}
-            content={['7']}
-            bgcolor="rgba(255, 152, 0, 0.1)"
-          />
         </Grid>
 
         {/*--------------------- Sector-wise Distribution ---------------------- */}
