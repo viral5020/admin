@@ -60,10 +60,11 @@ function SidebarContent(props) {
   };
 
   async function viewUserProfile() {
+    const data = JSON.parse(sessionStorage.getItem('data'));
     const formData = {
       is_app: 1,
-      login_user_id: sessionStorage.getItem("user_id"),
-      auth_key: sessionStorage.getItem("auth_key")
+      login_user_id: data.user_id ,
+      auth_key: data.auth_key 
     };
 
     try {
