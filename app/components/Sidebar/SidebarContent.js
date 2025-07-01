@@ -68,7 +68,7 @@ function SidebarContent(props) {
     };
 
     try {
-      const response = await fetch('https://goldmineexch.org/ajaxfiles/view_user_profile', {
+      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
         method: 'POST',
         body: JSON.stringify(formData),
       });

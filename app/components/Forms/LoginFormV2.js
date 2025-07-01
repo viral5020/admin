@@ -51,7 +51,7 @@ function LoginFormV2() {
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await fetch('https://goldmineexch.org/ajaxfiles/logincheck', {
+        const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/logincheck', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

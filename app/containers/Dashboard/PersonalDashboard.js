@@ -309,7 +309,7 @@ function PersonalDashboard() {
   useEffect(() => {
     const fetchLoginData = async () => {
       try {
-        const res = await axios.post('https://goldmineexch.org/datatables/get_login_data_details', {
+        const res = await axios.post('http://128.199.126.171/~goldorg/datatables/get_login_data_details', {
           is_app: 1,
           login_user_id: '196',
           auth_key: 'yUC4c1iZVu',

@@ -279,7 +279,7 @@ function About(props) {
     }
 
     try {
-      const response = await fetch('https://goldmineexch.org/ajaxfiles/edit_profile', {
+      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/edit_profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

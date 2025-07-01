@@ -49,7 +49,7 @@ function Favorites() {
 
   async function handleChnagePassword(values) {
     try {
-      const response = await fetch('https://goldmineexch.org/ajaxfiles/change_password', {
+      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/change_password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
