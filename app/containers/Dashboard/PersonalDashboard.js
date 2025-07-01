@@ -187,12 +187,13 @@ function PersonalDashboard() {
 
   const [margindata, setMargindata] = useState()
 
-const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
+  const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
+   const [positionDialogOpen, setpositionDialogOpen] = useState(false);
 
 
   const handleTabChange = (_, newValue) => {
-  setTabValue(newValue);
-};
+    setTabValue(newValue);
+  };
 
 
   // Chart ref
@@ -362,41 +363,60 @@ const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
 
       <Grid container spacing={1}>
 
-       <Grid item xs={12} sm={6} md={3}>
-  <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-    <InfoCardHorizontal
-      title="Orders"
-      icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
-      content={['Today: 5', 'This Week: 120']}
-      bgcolor="rgba(156, 39, 176, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Orders"
+              icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
+              content={['Today: 5', 'This Week: 120']}
+              bgcolor="rgba(156, 39, 176, 0.1)"
+            />
+          </Box>
+        </Grid>
 
-<Dialog open={ordersDialogOpen} onClose={() => setOrdersDialogOpen(false)} fullWidth maxWidth="sm">
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h6" fontWeight={600} mb={2}>
-      Order Details
-    </Typography>
-    <Typography>
-      Here you can show detailed order data, table, or anything you like!
-    </Typography>
-  </Box>
-  <DialogActions sx={{ px: 3, pb: 2 }}>
-    <Button onClick={() => setOrdersDialogOpen(false)} variant="contained" color="primary">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
+        <Dialog open={ordersDialogOpen} onClose={() => setOrdersDialogOpen(false)} fullWidth maxWidth="sm">
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" fontWeight={600} mb={2}>
+              Order Details
+            </Typography>
+            <Typography>
+              Here you can show detailed order data, table, or anything you like!
+            </Typography>
+          </Box>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setOrdersDialogOpen(false)} variant="contained" color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Grid item xs={12} sm={6} md={3}>
+           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
           <InfoCardHorizontal
             title="Positions"
             icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
             content={['Active: 10', 'Closed: 50']}
             bgcolor="rgba(76, 175, 80, 0.1)"
           />
+          </Box>
         </Grid>
+
+        <Dialog open={positionDialogOpen} onClose={() => setpositionDialogOpen(false)} fullWidth maxWidth="sm">
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" fontWeight={600} mb={2}>
+              Positions Details
+            </Typography>
+            <Typography>
+              Here you can show detailed positions data, table, or anything you like!
+            </Typography>
+          </Box>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setpositionDialogOpen(false)} variant="contained" color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <Grid item xs={12} sm={6} md={3}>
           <InfoCardHorizontal
             title="Pending Orders"
@@ -893,8 +913,8 @@ const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
                       '&::-webkit-scrollbar': { display: 'none' },
                       // scrollbarWidth: 'none',
                       direction: 'rtl',
-                      scrollbarWidth: 'thin',           
-                      scrollbarColor: '#90caf9 transparent', 
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#90caf9 transparent',
                       msOverflowStyle: 'none',
                     }}
                   >
@@ -1164,121 +1184,121 @@ const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
           </Grid>
         </Grid>
 
-       <Dialog open={candleOpen}  onClose={() => setCandleOpen(false)} fullWidth maxWidth="md">
-  <Box sx={{ px: 3, py: 2 }}>
-    <Tabs
-      value={tabValue}
-      onChange={handleTabChange}
-      textColor="primary"
-      indicatorColor="primary"
-      variant="scrollable"
-      scrollButtons="auto"
-    >
-      <Tab label="Basic" />
-      <Tab label="Trades" />
-      <Tab label="Positions" />
-      <Tab label="Charts" />
-    </Tabs>
+        <Dialog open={candleOpen} onClose={() => setCandleOpen(false)} fullWidth maxWidth="md">
+          <Box sx={{ px: 3, py: 2 }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              textColor="primary"
+              indicatorColor="primary"
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              <Tab label="Basic" />
+              <Tab label="Trades" />
+              <Tab label="Positions" />
+              <Tab label="Charts" />
+            </Tabs>
 
-    <Box sx={{ mt: 2 }}>
-      {tabValue === 0 && selectedStock && (
-  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-    <Grid container spacing={2}>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">LTP</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.ltp}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Price Change</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.priceChange}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">% Change</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.pricePercentChange}%</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Open</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.open}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">High</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.high}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Low</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.low}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Close</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.close}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Bid Rate</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.bidRate}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Ask Rate</Typography>
-        <Typography variant="body1" fontWeight={600}>₹{exampleStock.askRate}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Volume OI</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Min Order</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.minOrder}</Typography>
-      </Grid>
-      <Grid item xs={6} sm={4}>
-        <Typography variant="subtitle2" color="text.secondary">Max Order</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.maxOrder}</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="subtitle2" color="text.secondary">Positions</Typography>
-        <Typography variant="body1" fontWeight={600}>{exampleStock.positions}</Typography>
-      </Grid>
-    </Grid>
+            <Box sx={{ mt: 2 }}>
+              {tabValue === 0 && selectedStock && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">LTP</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.ltp}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Price Change</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.priceChange}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">% Change</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.pricePercentChange}%</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Open</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.open}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">High</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.high}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Low</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.low}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Close</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.close}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Bid Rate</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.bidRate}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Ask Rate</Typography>
+                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.askRate}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Volume OI</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Min Order</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.minOrder}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Max Order</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.maxOrder}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" color="text.secondary">Positions</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.positions}</Typography>
+                    </Grid>
+                  </Grid>
 
-    <Box>
-      <Typography variant="subtitle2" color="text.secondary">Short Description</Typography>
-      <Typography variant="body2">{exampleStock.shortDescription}</Typography>
-    </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Short Description</Typography>
+                    <Typography variant="body2">{exampleStock.shortDescription}</Typography>
+                  </Box>
 
-    <Box>
-      <Typography variant="subtitle2" color="text.secondary">Long Description</Typography>
-      <Typography variant="body2">{exampleStock.longDescription}</Typography>
-    </Box>
-  </Box>
-)}
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Long Description</Typography>
+                    <Typography variant="body2">{exampleStock.longDescription}</Typography>
+                  </Box>
+                </Box>
+              )}
 
-      {/* ----- Trades tab ----- */}
-      {tabValue === 1 && (
-        <Typography variant="body1">
-          {/* Put trade details here */}
-          Trades data for {selectedStock?.name}.
-        </Typography>
-      )}
+              {/* ----- Trades tab ----- */}
+              {tabValue === 1 && (
+                <Typography variant="body1">
+                  {/* Put trade details here */}
+                  Trades data for {selectedStock?.name}.
+                </Typography>
+              )}
 
-      {/* ----- Positions tab ----- */}
-      {tabValue === 2 && (
-        <Typography variant="body1">
-          {/* Put positions data here */}
-          Positions data for {selectedStock?.name}.
-        </Typography>
-      )}
+              {/* ----- Positions tab ----- */}
+              {tabValue === 2 && (
+                <Typography variant="body1">
+                  {/* Put positions data here */}
+                  Positions data for {selectedStock?.name}.
+                </Typography>
+              )}
 
-      {/* ----- Charts tab ----- */}
-      {tabValue === 3 && selectedStock && (
-        <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
-      )}
-    </Box>
-  </Box>
+              {/* ----- Charts tab ----- */}
+              {tabValue === 3 && selectedStock && (
+                <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
+              )}
+            </Box>
+          </Box>
 
-  <DialogActions sx={{ px: 3, pb: 2 }}>
-    <Button onClick={() => setCandleOpen(false)} variant="contained" color="primary">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setCandleOpen(false)} variant="contained" color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </Grid>
 
