@@ -1241,7 +1241,11 @@ function PersonalDashboard() {
                       <Typography variant="body1" fontWeight={600}>₹{exampleStock.askRate}</Typography>
                     </Grid>
                     <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Volume OI</Typography>
+                      <Typography variant="subtitle2" color="text.secondary">Volume</Typography>
+                      <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">OI</Typography>
                       <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
                     </Grid>
                     <Grid item xs={6} sm={4}>
