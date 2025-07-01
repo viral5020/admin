@@ -13,6 +13,11 @@ const useStyles = makeStyles()((theme) => ({
     marginTop: theme.spacing(3),
     overflowX: 'auto',
   },
+  root_Table: {
+    width: '100%',
+    // marginTop: theme.spacing(3),
+    overflowX: 'auto',
+  },
   highlight:
     theme.palette.mode === 'light' ? {
       color: theme.palette.secondary.main,

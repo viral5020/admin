@@ -40,12 +40,19 @@ function TableToolbar(props) {
       className={cx(classes.toolbar, {
         [classes.highlight]: numSelected > 0,
       })}
+      sx={{
+        position: 'sticky',
+        top: 0,
+        backgroundColor: 'white',
+        zIndex: 1,
+        whiteSpace: 'nowrap',
+      }}
     >
       <div className={classes.title}>
         {numSelected > 0 ? (
           <Typography color="inherit" variant="subtitle1">
             {numSelected}
-              &nbsp;selected
+            &nbsp;selected
           </Typography>
         ) : (
           <Typography variant="h6">{title}</Typography>
