@@ -8,7 +8,7 @@ const initialState = {
   type: 'light', // light or dark
   gradient: true, // true or false
   decoration: true, // true or false
-  bgPosition: 'half', // half, header, full
+  bgPosition: 'header', // half, header, full
   layout: 'left-sidebar', // big-sidebar, left-sidebar, top-navigation, mega-menu
   /* End settings */
   palette: [

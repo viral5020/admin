@@ -24,6 +24,9 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningIcon from '@mui/icons-material/Warning';
 import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ComputerIcon from '@mui/icons-material/Computer';
+import LaptopMacIcon from '@mui/icons-material/LaptopMac';
+
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
 import DropdownMenu from './DropdownMenu'
@@ -451,7 +454,7 @@ function PersonalDashboard() {
           }}
         >
           <WarningIcon sx={{ color: '#f44336', fontSize: 30 }} />
-          <Typography variant="h9" sx={{ color: '#d32f2f' }}>
+          <Typography variant="subtitle1" sx={{ color: 'black' }}>
             Important Notice: Some rejections require immediate attention! Please review the logs.
           </Typography>
         </Box>
@@ -820,24 +823,73 @@ function PersonalDashboard() {
                 </Typography>
               ) : (
                 loginData.map((login, idx) => (
-                  <Box key={idx} display="flex" alignItems="center" gap={2}>
-                    <Box
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
-                      }}
-                    />
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
-                        {login.loginTime}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        IP: {login.ip}
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <Box
+  key={idx}
+  display="flex"
+  alignItems="center"
+  justifyContent="space-between"
+  gap={2}
+>
+  {/* Left part */}
+  <Box display="flex" alignItems="center" gap={2}>
+    <Box
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+        backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
+      }}
+    />
+    <Box>
+      <Typography variant="body2" fontWeight={500}>
+        {login.loginTime}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        IP: {login.ip}
+      </Typography>
+      {/* <Typography variant="caption" color="text.secondary">
+        {login.source}
+      </Typography> */}
+    </Box>
+  </Box>
+
+  {/* Right part: computer icon */}
+  {login.source?.toLowerCase() === 'web' && (
+  <Box
+    sx={{
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      backgroundColor: '#e3f2fd', // light blue background
+      border: '2px solid #1976d2', // dark blue border
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <LaptopMacIcon sx={{ color: '#1976d2' }} /> {/* dark icon */}
+  </Box>
+)}
+
+{login.source?.toLowerCase() === 'phone' && (
+  <Box
+    sx={{
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      backgroundColor: '#e8f5e9', // light green background
+      border: '2px solid #4caf50', // dark green border
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <SmartphoneIcon sx={{ color: '#4caf50' }} /> {/* dark icon */}
+  </Box>
+)}
+
+</Box>
+
                 ))
               )}
             </Box>

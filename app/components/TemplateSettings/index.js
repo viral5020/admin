@@ -51,7 +51,7 @@ function TemplateSettings(props) {
   const [show, setShow] = useState(false);
   const [showAllThemes, setShowAllThemes] = useState(false);
   const [dark, setDark] = useState(false); // eslint-disable-line
-  const [bgPositionState, setBgPosition] = useState('half'); // eslint-disable-line
+  const [bgPositionState, setBgPosition] = useState('header'); // eslint-disable-line
   const [decorated, setDecoration] = useState(true); // eslint-disable-line
   const [rtl, setRtl] = useState(false); // eslint-disable-line
   const [gradientState, setGradient] = useState(true); // eslint-disable-line
