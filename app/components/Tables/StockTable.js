@@ -463,7 +463,7 @@ function StockTable({ searchText }) {
                 height: '100%',
                 width: '26px',
                 pointerEvents: 'none',
-                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.02), transparent)',
+                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.09), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.015), transparent)',
                 zIndex: 10,
               }}
             />
@@ -523,7 +523,8 @@ function StockTable({ searchText }) {
                     height: '100%',
                     width: '26px',
                     pointerEvents: 'none',
-                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.04), transparent)',
+                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.09), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.015), transparent)',
+                    borderRadius: '10px 0px 0px 0px',
                     zIndex: 10,
                   }}
                 />
