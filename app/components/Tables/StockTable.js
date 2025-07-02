@@ -368,8 +368,9 @@ const dummyWatchlistData = [
 function StockTable({ searchText }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedAction, setSelectedAction] = useState('');
+  // const [openDialog, setOpenDialog] = useState(false);
+  // const [selectedAction, setSelectedAction] = useState('');
+  const [isStockOpen, setIsStockOpen] = useState();
   const [selectedScript, setSelectedScript] = useState('');
   const [hoveredRow, setHoveredRow] = useState('');
 
@@ -397,12 +398,23 @@ function StockTable({ searchText }) {
     left: 0,                    // ✅ sticks to the left edge
     background: 'white',        // ✅ avoids overlap transparency
     zIndex: 3,                  // ✅ make sure it renders above
-    // boxShadow: '4px 0 6px -2px rgba(0,0,0)', // ✅ right shadow
     whiteSpace: 'nowrap',
     minWidth: isMobile ? '120px' : '160px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     overflow: 'visible',
+  }
+  const firstColumnHeaderStyle2 = {
+    position: 'sticky',         // ✅ fixes the column
+    left: 0,                    // ✅ sticks to the left edge
+    background: '#1976d2',        // ✅ avoids overlap transparency
+    zIndex: 3,                  // ✅ make sure it renders above
+    whiteSpace: 'nowrap',
+    minWidth: isMobile ? '120px' : '160px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    overflow: 'visible',
+    color: "white",
   }
 
   const tableCellStyle = {
@@ -412,157 +424,98 @@ function StockTable({ searchText }) {
     textOverflow: 'ellipsis'  //  adds "..." if still overflows
   }
 
-
   const { classes, cx } = useStyles();
 
-  const getCellBackgroundColor = (val) => {
-
+  const getCellBgColor = (val) => {
     if (val > 0) return 'rgba(144, 199, 147, 0.15)'; // light green
-
     if (val < 0) return 'rgba(226, 162, 157, 0.15)'; // light red
-
-    return 'rgba(158, 158, 158, 0.15)';            // neutral gray
-
+    return 'rgba(158, 158, 158, 0.15)';             // neutral gray
+  };
+  
+  const getCellBgColorFisrtCol = (val) => {
+    if (val > 0) return 'rgba(144, 199, 147)'; // light green
+    if (val < 0) return 'rgba(226, 162, 157)'; // light red
+    return 'rgba(158, 158, 158)';             // neutral gray
   };
 
-   const getCondition = (val, showIcon) => {
-
+  const getCondition = (val, showIcon) => {
     const theme = useTheme();
 
-
-
     if (val > 0) {
-
       return (
-
         <Box
-
           component="span"
-
           sx={{
-
             color: theme.palette.success.main,
-
             backgroundColor: 'rgba(76, 175, 80, 0.1)',
-
             borderRadius: 1,
-
             px: 1,
-
             py: 0.5,
-
             display: 'inline-flex',
-
             alignItems: 'center',
-
             fontWeight: 600,
-
           }}
-
         >
-
           {showIcon && <TrendingUp fontSize="small" />}
-
           &nbsp;
-
           {val}%
-
         </Box>
-
       );
-
     }
 
     if (val < 0) {
-
       return (
-
         <Box
-
           component="span"
-
           sx={{
-
             color: theme.palette.error.main,
-
             backgroundColor: 'rgba(244, 67, 54, 0.1)',
-
             borderRadius: 1,
-
             px: 1,
-
             py: 0.5,
-
             display: 'inline-flex',
-
             alignItems: 'center',
-
             fontWeight: 600,
-
           }}
-
         >
-
           {showIcon && <TrendingDown fontSize="small" />}
-
           &nbsp;
-
           {val}%
-
         </Box>
-
       );
-
     }
 
     return (
-
       <Box
-
         component="span"
-
         sx={{
-
           color: theme.palette.text.secondary,
-
           backgroundColor: 'rgba(158, 158, 158, 0.1)',
-
           borderRadius: 1,
-
           px: 1,
-
           py: 0.5,
-
           display: 'inline-flex',
-
           alignItems: 'center',
-
           fontWeight: 600,
-
         }}
-
       >
-
         {showIcon && <TrendingFlat fontSize="small" />}
-
         &nbsp;0%
-
       </Box>
-
     );
-
   };
 
- const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
+  const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
     const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
-    const rowBackground = getCellBackgroundColor(rowVal);
+    const rowBgColor = getCellBgColor(rowVal);
+    const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
 
     if (itemCell.id === 'scriptName') {
       return (
         <>
           <TableCell
             key={index.toString()}
-            sx={firstColumnHeaderStyle}
+            sx={{ ...firstColumnHeaderStyle, backgroundColor: rowBgColorFirstCol }}
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
@@ -592,7 +545,7 @@ function StockTable({ searchText }) {
           key={index.toString()}
           sx={{
             ...tableCellStyle,
-            backgroundColor: rowBackground,
+            backgroundColor: rowBgColor,
           }}>
           {getCondition(dataArray[itemCell.id], itemCell.id === 'priceChangePercent')}
         </TableCell>
@@ -606,7 +559,7 @@ function StockTable({ searchText }) {
         key={index.toString()}
         sx={{
           ...tableCellStyle,
-          backgroundColor: rowBackground, // ✅ Apply to all other cells too
+          backgroundColor: rowBgColor, // ✅ Apply to all other cells too
         }}>
         {dataArray[itemCell.id]}
       </TableCell>
@@ -619,13 +572,13 @@ function StockTable({ searchText }) {
         <TableRow
           tabIndex={-1}
           key={'column'}
-          sx={{ position: 'relative',background: "linear-gradient(90deg, #1976d2, #2196f3)",color: "white !important" }}
+          sx={{ position: 'relative', background: "linear-gradient(90deg, #1976d2, #2196f3)" }}
         >
           {columnData.map((column) => (
             <TableCell
               key={column.id}
               align={column.numeric ? 'right' : 'left'}
-              sx={column.id === 'scriptName' ? firstColumnHeaderStyle : null}
+              sx={column.id === 'scriptName' ? firstColumnHeaderStyle2 : { color: "white" }}
             >
               {column.label.toUpperCase()}
 
@@ -656,7 +609,7 @@ function StockTable({ searchText }) {
   return (
     <Paper sx={{ margimTop: '0px' }}>
       <div className={classes.root_Table} style={{ margimTop: '0px' }}>
-        <div className={classes.tableWrapper}  ref={tableWrapperRef} style={{ overflowX: 'auto', position: 'relative' }}>
+        <div className={classes.tableWrapper} ref={tableWrapperRef} style={{ overflowX: 'auto', position: 'relative' }}>
           <Table className={cx(classes.table, classes.stripped, classes.hover)}>
             <TableHeader columnData={columnData} />
             <TableBody>
@@ -668,6 +621,8 @@ function StockTable({ searchText }) {
                   <TableRow
                     tabIndex={-1}
                     key={data.id}
+                    sx={{cursor: 'pointer'}}
+                    onClick={() => setIsStockOpen(data)}
                   >
                     {renderCell(data, columnData)}
                   </TableRow>
@@ -679,15 +634,15 @@ function StockTable({ searchText }) {
         </div>
       </div>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>{selectedAction} Order</DialogTitle>
+      <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)}>
+        <DialogTitle>{isStockOpen?.scriptName} Order</DialogTitle>
         <DialogContent>
-          <Typography>You selected to <strong>{selectedAction}</strong> <em>{selectedScript}</em>.</Typography>
+          <Typography>You selected to <strong>{isStockOpen?.scriptName}</strong> <em>{isStockOpen?.scriptName}</em>.</Typography>
           {/* Add your form here */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Close</Button>
-          <Button variant="contained" onClick={() => setOpenDialog(false)}>
+          <Button onClick={() => setIsStockOpen(null)}>Close</Button>
+          <Button variant="contained" onClick={() => setIsStockOpen(null)}>
             Confirm
           </Button>
         </DialogActions>
