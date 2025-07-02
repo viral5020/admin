@@ -46,7 +46,7 @@ function Application(props) {
         { /* Home */ }
         <Route path="/" element={<PersonalDashboard/>} />
         <Route path="dashboard/sales-marketing" element={<CrmDashboard/>} />
-        <Route path="dashboard/cryptocurrency" element={<CryptoDashboard/>} />
+        <Route path="dashboard/watchlist" element={<CryptoDashboard/>} />
         { /* Widgets */ }
         <Route path="widgets/infographics" element={<Infographics/>} />
         <Route path="widgets/status" element={<Status/>} />

@@ -225,7 +225,7 @@ module.exports = [
       {
         key: 'crypto',
         name: 'Watchlist',
-        link: '/app/dashboard/cryptocurrency',
+        link: '/app/dashboard/watchlist',
         icon: 'ion-ios-medal-outline'
       },
       {

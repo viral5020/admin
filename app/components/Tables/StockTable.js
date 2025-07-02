@@ -16,7 +16,7 @@ import PapperBlock from '../PapperBlock/PapperBlock';
 import EnhancedTableToolbar from './tableParts/TableToolbar';
 import EnhancedTableHead from './tableParts/TableHeader';
 import useStyles from './tableStyle-jss';
-import { Paper } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 
@@ -368,6 +368,11 @@ const dummyWatchlistData = [
 function StockTable({ searchText }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedAction, setSelectedAction] = useState('');
+  const [selectedScript, setSelectedScript] = useState('');
+  const [hoveredRow, setHoveredRow] = useState('');
+
 
   const firstColumnHeaderStyle = {
     position: 'sticky',         // ✅ fixes the column
@@ -423,16 +428,72 @@ function StockTable({ searchText }) {
   const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
     if (itemCell.id === 'scriptName') {
       return (
-        <TableCell
-          padding="normal"
-          align={itemCell.numeric ? 'right' : 'left'}
-          key={index.toString()}
-          sx={firstColumnHeaderStyle}
-        >
-          <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
-        </TableCell>
+        <>
+          <TableCell
+            key={index.toString()}
+            sx={{
+              ...firstColumnHeaderStyle,
+              overflow: 'visible', // allow dropdown to escape
+              zIndex: 3,           // ensure it's above scroll
+            }}
+          >
+            <Box sx={{ position: 'relative' }}>
+              <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
+            </Box>
+          </TableCell>
+
+          {hoveredRow === dataArray.scriptName && (
+            <TableCell
+              colSpan={columnData.length - 1} // the rest of the columns
+              sx={{
+                position: 'relative',
+                padding: 0,
+                height: 0,
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: isMobile ? 10 : 10,  // place beside sticky column
+                  top: -10,
+                  bgcolor: 'white',
+                  boxShadow: 3,
+                  borderRadius: 1,
+                  zIndex: 20,
+                  p: 1,
+                  display: 'flex',
+                  gap: 1,
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="small"
+                  onClick={() => {
+                    setSelectedAction('Buy');
+                    setOpenDialog(true);
+                  }}
+                >
+                  Buy
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={() => {
+                    setSelectedAction('Sell');
+                    setOpenDialog(true);
+                  }}
+                >
+                  Sell
+                </Button>
+              </Box>
+            </TableCell>
+          )}
+        </>
       );
     }
+
     if (itemCell.id === 'priceChangePercent') {
       return (
         <TableCell padding="normal" align={itemCell.numeric ? 'right' : 'left'} key={index.toString()} sx={tableCellStyle}>
@@ -464,10 +525,10 @@ function StockTable({ searchText }) {
       <TableHead>
         <TableRow>
           {columnData.map((column) => (
-            < TableCell
+            <TableCell
               key={column.id}
               align={column.numeric ? 'right' : 'left'}
-              sx={column.id === 'scriptName' && firstColumnHeaderStyle}
+              sx={column.id === 'scriptName' ? firstColumnHeaderStyle : null}
             >
               {column.label.toUpperCase()}
             </TableCell>
@@ -481,13 +542,6 @@ function StockTable({ searchText }) {
   return (
     <Paper sx={{ margimTop: '0px' }}>
       <div className={classes.root_Table} style={{ margimTop: '0px' }}>
-        {/* <EnhancedTableToolbar
-          numSelected={0}
-          filterText={filterText}
-          onUserInput={txt => setFilterText(txt)}
-          title="USD Market"
-          placeholder="Search Coin"
-        /> */}
         <div className={classes.tableWrapper} style={{ overflowX: 'auto', position: 'relative' }}>
           <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ margimTop: '0px' }}>
             <TableHeader columnData={columnData} />
@@ -497,9 +551,15 @@ function StockTable({ searchText }) {
                   return false;
                 }
                 return (
-                  <TableRow 
+                  <TableRow
                     tabIndex={-1}
                     key={data.id}
+                    onMouseEnter={() => {
+                      setHoveredRow(data.scriptName);
+                      setSelectedScript(data.scriptName); // ✅ SET IT HERE
+                    }}
+                    // onMouseEnter={() => setHoveredRow(data.scriptName)}
+                    onMouseLeave={() => setHoveredRow('')}
                   >
                     {renderCell(data, columnData)}
                   </TableRow>
@@ -509,6 +569,20 @@ function StockTable({ searchText }) {
           </Table>
         </div>
       </div>
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>{selectedAction} Order</DialogTitle>
+        <DialogContent>
+          <Typography>You selected to <strong>{selectedAction}</strong> <em>{selectedScript}</em>.</Typography>
+          {/* Add your form here */}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Close</Button>
+          <Button variant="contained" onClick={() => setOpenDialog(false)}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

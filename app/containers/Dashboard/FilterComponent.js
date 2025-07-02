@@ -81,7 +81,7 @@ const dummyOptions = {
 };
 
 
-const FilterComponent = ({ onFilterChange, searchText, setSearchText }) => {
+const FilterComponent = ({ searchText, setSearchText }) => {
     const [segment, setSegment] = useState('');
     const [script, setScript] = useState('');
     const [expiry, setExpiry] = useState('');
@@ -128,10 +128,11 @@ const FilterComponent = ({ onFilterChange, searchText, setSearchText }) => {
                 }].map(({ label, value, onChange, options }) => (
                     <Grid item xs={12} sm={6} md={2.4} key={label}>
                         <Autocomplete
-                            value={value}
+                            value={value} // initialValues are ''
                             onChange={(_, newValue) => onChange(newValue)}
                             options={options}
                             getOptionLabel={(opt) => String(opt)}
+                            isOptionEqualToValue={(option, val) => option.value === val.value}
                             renderInput={(params) => <TextField {...params} label={label} size="small" />}
                             fullWidth
                         />
