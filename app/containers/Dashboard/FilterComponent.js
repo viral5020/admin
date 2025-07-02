@@ -3,6 +3,7 @@ import {
     Box, Grid, Autocomplete, TextField, Button, InputAdornment, IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { useTheme } from '@mui/material/styles';
 
 const dummyOptions = {
     Equity: {
@@ -82,6 +83,7 @@ const dummyOptions = {
 
 
 const FilterComponent = ({ searchText, setSearchText }) => {
+    const theme = useTheme();
     const [segment, setSegment] = useState('');
     const [script, setScript] = useState('');
     const [expiry, setExpiry] = useState('');
@@ -156,7 +158,8 @@ const FilterComponent = ({ searchText, setSearchText }) => {
                             size="small"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
-                            sx={{ width: '100%', maxWidth: 300,backgroundColor: '#fff' }}
+                            sx={{ width: '100%', maxWidth: 300}}
+                            // sx={{ width: '100%', maxWidth: 300,backgroundColor: theme.palette.mode === 'dark' ? '#222' : '#fff' }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">

@@ -431,10 +431,10 @@ function StockTable({ searchText }) {
     if (val < 0) return 'rgba(226, 162, 157, 0.15)'; // light red
     return 'rgba(158, 158, 158, 0.15)';             // neutral gray
   };
-  
+
   const getCellBgColorFisrtCol = (val) => {
-    if (val > 0) return 'rgba(144, 199, 147)'; // light green
-    if (val < 0) return 'rgba(226, 162, 157)'; // light red
+    if (val > 0) return theme.palette.mode === 'dark' ? '#3a433b' : '#eaf3eb'; // light green
+    if (val < 0) return theme.palette.mode === 'dark' ? '#4e4443' : '#fbf1f0'; // light red
     return 'rgba(158, 158, 158)';             // neutral gray
   };
 
@@ -526,9 +526,9 @@ function StockTable({ searchText }) {
                 top: 0,
                 left: isMobile ? '120px' : '160px',
                 height: '100%',
-                width: '26px',
+                width: '36px',
                 pointerEvents: 'none',
-                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.09), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.015), transparent)',
+                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
                 zIndex: 10,
               }}
             />
@@ -589,9 +589,9 @@ function StockTable({ searchText }) {
                     top: 0,
                     left: isMobile ? '120px' : '160px',
                     height: '100%',
-                    width: '26px',
+                    width: '36px',
                     pointerEvents: 'none',
-                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.09), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.015), transparent)',
+                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
                     borderRadius: '10px 0px 0px 0px',
                     zIndex: 10,
                   }}
@@ -621,7 +621,7 @@ function StockTable({ searchText }) {
                   <TableRow
                     tabIndex={-1}
                     key={data.id}
-                    sx={{cursor: 'pointer'}}
+                    sx={{ cursor: 'pointer' }}
                     onClick={() => setIsStockOpen(data)}
                   >
                     {renderCell(data, columnData)}
