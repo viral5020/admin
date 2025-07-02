@@ -16,9 +16,24 @@ import PapperBlock from '../PapperBlock/PapperBlock';
 import EnhancedTableToolbar from './tableParts/TableToolbar';
 import EnhancedTableHead from './tableParts/TableHeader';
 import useStyles from './tableStyle-jss';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
+
+const generateCandleData = (name) => {
+  const base = 1000 + Math.random() * 100;
+  const data = Array.from({ length: 10 }, (_, i) => {
+    const open = base + Math.random() * 10;
+    const close = open + (Math.random() - 0.5) * 20;
+    const high = Math.max(open, close) + Math.random() * 5;
+    const low = Math.min(open, close) - Math.random() * 5;
+    return {
+      x: new Date(2025, 5, 20 + i),
+      y: [open.toFixed(2), high.toFixed(2), low.toFixed(2), close.toFixed(2)],
+    };
+  });
+  return data;
+};
 
 const columnData = [
   {
@@ -365,12 +380,12 @@ const dummyWatchlistData = [
   }
 ];
 
-function StockTable({ searchText }) {
+function StockTable({ searchText, setIsStockOpen }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   // const [openDialog, setOpenDialog] = useState(false);
   // const [selectedAction, setSelectedAction] = useState('');
-  const [isStockOpen, setIsStockOpen] = useState();
+
   const [selectedScript, setSelectedScript] = useState('');
   const [hoveredRow, setHoveredRow] = useState('');
 
@@ -393,10 +408,9 @@ function StockTable({ searchText }) {
   }, []);
 
 
-  const firstColumnHeaderStyle = {
+  const firstColumnStyle = {
     position: 'sticky',         // ✅ fixes the column
     left: 0,                    // ✅ sticks to the left edge
-    background: 'white',        // ✅ avoids overlap transparency
     zIndex: 3,                  // ✅ make sure it renders above
     whiteSpace: 'nowrap',
     minWidth: isMobile ? '120px' : '160px',
@@ -404,17 +418,16 @@ function StockTable({ searchText }) {
     textOverflow: 'ellipsis',
     overflow: 'visible',
   }
-  const firstColumnHeaderStyle2 = {
-    position: 'sticky',         // ✅ fixes the column
-    left: 0,                    // ✅ sticks to the left edge
-    background: '#1976d2',        // ✅ avoids overlap transparency
-    zIndex: 3,                  // ✅ make sure it renders above
-    whiteSpace: 'nowrap',
-    minWidth: isMobile ? '120px' : '160px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    overflow: 'visible',
+  const firstColumnHeaderStyle = {
+    ...firstColumnStyle,
     color: "white",
+    background: '#1976d2',
+  }
+  
+  const firstColumnBackground = {
+    ...firstColumnStyle,
+    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+    background: theme.palette.mode === 'dark' ? '#000' : '#fff',
   }
 
   const tableCellStyle = {
@@ -515,7 +528,7 @@ function StockTable({ searchText }) {
         <>
           <TableCell
             key={index.toString()}
-            sx={{ ...firstColumnHeaderStyle, backgroundColor: rowBgColorFirstCol }}
+            sx={{ ...firstColumnStyle, backgroundColor: rowBgColorFirstCol }}
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
@@ -578,29 +591,32 @@ function StockTable({ searchText }) {
             <TableCell
               key={column.id}
               align={column.numeric ? 'right' : 'left'}
-              sx={column.id === 'scriptName' ? firstColumnHeaderStyle2 : { color: "white" }}
+              sx={column.id === 'scriptName' ?
+                firstColumnHeaderStyle : { color: "white" }}
             >
               {column.label.toUpperCase()}
 
               {column.id === 'scriptName' && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: isMobile ? '120px' : '160px',
-                    height: '100%',
-                    width: '36px',
-                    pointerEvents: 'none',
-                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
-                    borderRadius: '10px 0px 0px 0px',
-                    zIndex: 10,
-                  }}
-                />
+                <>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: isMobile ? '120px' : '160px',
+                      height: '100%',
+                      width: '36px',
+                      pointerEvents: 'none',
+                      background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
+                      borderRadius: '10px 0px 0px 0px',
+                      zIndex: 10,
+                    }}
+                  />
+                  
+                </>
               )}
             </TableCell>
           ))}
         </TableRow>
-
       </TableHead >
     );
   };
@@ -609,7 +625,27 @@ function StockTable({ searchText }) {
   return (
     <Paper sx={{ margimTop: '0px' }}>
       <div className={classes.root_Table} style={{ margimTop: '0px' }}>
-        <div className={classes.tableWrapper} ref={tableWrapperRef} style={{ overflowX: 'auto', position: 'relative' }}>
+        <Box
+          className={classes.tableWrapper}
+          ref={tableWrapperRef}
+          sx={{
+            overflowX: 'auto',
+            position: 'relative',
+            '&::-webkit-scrollbar': {
+              height: 8,
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: theme.palette.mode === 'dark' ? '#2c2c2c' : '#f1f1f1',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#aaa',
+              borderRadius: 4,
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: theme.palette.mode === 'dark' ? '#777' : '#888',
+            },
+          }}
+        >
           <Table className={cx(classes.table, classes.stripped, classes.hover)}>
             <TableHeader columnData={columnData} />
             <TableBody>
@@ -630,23 +666,8 @@ function StockTable({ searchText }) {
               })}
             </TableBody>
           </Table>
-
-        </div>
+        </Box>
       </div>
-
-      <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)}>
-        <DialogTitle>{isStockOpen?.scriptName} Order</DialogTitle>
-        <DialogContent>
-          <Typography>You selected to <strong>{isStockOpen?.scriptName}</strong> <em>{isStockOpen?.scriptName}</em>.</Typography>
-          {/* Add your form here */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsStockOpen(null)}>Close</Button>
-          <Button variant="contained" onClick={() => setIsStockOpen(null)}>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Paper>
   );
 }
