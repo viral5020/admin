@@ -32,6 +32,7 @@ import brand from 'dan-api/dummy/brand';
 import DropdownMenu from './DropdownMenu'
 import ApexCharts from './Apexcharts.js';
 import axios from 'axios';
+
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -124,7 +125,7 @@ const asserts = {
 const assertNames = Object.keys(asserts);
 const smallCapNames = ["Wipro", "ONGC", "Dr. Reddy"];
 const midCapNames = ["Sun Pharma", "SBI", "ICICI Bank"];
-const largeCapNames = ["HDFC Bank", "Infosys", "TCS", "Reliance"];
+const largeCapNames = ["HDFC Bank", "Infosys", "TCS"];
 
 const smallCapColors = ["#4a148c", "#6a1b9a", "#7b1fa2"];
 const midCapColors = ["#1a237e", "#283593", "#303f9f"];
@@ -1236,125 +1237,158 @@ function PersonalDashboard() {
           </Grid>
         </Grid>
 
-        <Dialog open={candleOpen} onClose={() => setCandleOpen(false)} fullWidth maxWidth="md">
-          <Box sx={{ px: 3, py: 2 }}>
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              textColor="primary"
-              indicatorColor="primary"
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              <Tab label="Basic" />
-              <Tab label="Trades" />
-              <Tab label="Positions" />
-              <Tab label="Charts" />
-            </Tabs>
+       <Dialog
+      open={candleOpen}
+      onClose={() => setCandleOpen(false)}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: 24,
+        },
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 3,
+          py: 2,
+          background: "linear-gradient(90deg, #1976d2, #2196f3)",
+          color: "white",
+        }}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          {selectedStock?.name || "Stock Details"}
+        </Typography>
+        <CloseIcon
+          sx={{ cursor: "pointer" }}
+          onClick={() => setCandleOpen(false)}
+        />
+      </Box>
 
-            <Box sx={{ mt: 2 }}>
-              {tabValue === 0 && selectedStock && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">LTP</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.ltp}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Price Change</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.priceChange}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">% Change</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.pricePercentChange}%</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Open</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.open}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">High</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.high}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Low</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.low}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Close</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.close}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Bid Rate</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.bidRate}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Ask Rate</Typography>
-                      <Typography variant="body1" fontWeight={600}>₹{exampleStock.askRate}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Volume</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">OI</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.volumeOi}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Min Order</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.minOrder}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="subtitle2" color="text.secondary">Max Order</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.maxOrder}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle2" color="text.secondary">Positions</Typography>
-                      <Typography variant="body1" fontWeight={600}>{exampleStock.positions}</Typography>
-                    </Grid>
-                  </Grid>
+      {/* Tabs */}
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        textColor="inherit"
+        indicatorColor="secondary"
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{
+          px: 3,
+          bgcolor: "background.paper",
+          ".MuiTab-root": { fontWeight: 600, textTransform: "none" },
+        }}
+      >
+        <Tab label="Basic" />
+        <Tab label="Trades" />
+        <Tab label="Positions" />
+        <Tab label="Charts" />
+      </Tabs>
 
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Short Description</Typography>
-                    <Typography variant="body2">{exampleStock.shortDescription}</Typography>
-                  </Box>
+      {/* Scrollable content */}
+      <DialogContent dividers sx={{ p: 3, maxHeight: "65vh" }}>
+        {tabValue === 0 && selectedStock && (
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+            <Grid container spacing={2}>
+              {[
+                { label: "LTP", value: `₹${exampleStock.ltp}` },
+                { label: "Price Change", value: exampleStock.priceChange },
+                { label: "% Change", value: `${exampleStock.pricePercentChange}%` },
+                { label: "Open", value: `₹${exampleStock.open}` },
+                { label: "High", value: `₹${exampleStock.high}` },
+                { label: "Low", value: `₹${exampleStock.low}` },
+                { label: "Close", value: `₹${exampleStock.close}` },
+                { label: "Bid Rate", value: `₹${exampleStock.bidRate}` },
+                { label: "Ask Rate", value: `₹${exampleStock.askRate}` },
+                { label: "Volume", value: exampleStock.volumeOi },
+                { label: "OI", value: exampleStock.volumeOi },
+                { label: "Min Order", value: exampleStock.minOrder },
+                { label: "Max Order", value: exampleStock.maxOrder },
+              ].map((item, index) => (
+                <Grid item xs={6} sm={4} key={index}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    {item.label}
+                  </Typography>
+                  <Typography variant="body1" fontWeight={600}>
+                    {item.value}
+                  </Typography>
+                </Grid>
+              ))}
 
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Long Description</Typography>
-                    <Typography variant="body2">{exampleStock.longDescription}</Typography>
-                  </Box>
-                </Box>
-              )}
-
-              {/* ----- Trades tab ----- */}
-              {tabValue === 1 && (
-                <Typography variant="body1">
-                  {/* Put trade details here */}
-                  Trades data for {selectedStock?.name}.
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" color="text.secondary">
+                  Positions
                 </Typography>
-              )}
-
-              {/* ----- Positions tab ----- */}
-              {tabValue === 2 && (
-                <Typography variant="body1">
-                  {/* Put positions data here */}
-                  Positions data for {selectedStock?.name}.
+                <Typography variant="body1" fontWeight={600}>
+                  {exampleStock.positions}
                 </Typography>
-              )}
+              </Grid>
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" color="text.secondary">
+                  Short Description
+                </Typography>
+                <Typography variant="body2">
+                  {exampleStock.shortDescription}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mt: 2 }}
+                >
+                  Long Description
+                </Typography>
+                <Typography variant="body2">
+                  {exampleStock.longDescription}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        )}
 
-              {/* ----- Charts tab ----- */}
-              {tabValue === 3 && selectedStock && (
+        {tabValue === 1 && (
+          <Typography variant="body1">
+            Trades data for {selectedStock?.name}.
+          </Typography>
+        )}
+
+        {tabValue === 2 && (
+          <Typography variant="body1">
+            Positions data for {selectedStock?.name}.
+          </Typography>
+        )}
+
+        {tabValue === 3 && selectedStock && (
+          <Box>
+            {/* Replace with your actual chart component */}
+           {tabValue === 3 && selectedStock && (
                 <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
               )}
-            </Box>
+            {/* <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} /> */}
           </Box>
+        )}
+      </DialogContent>
 
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setCandleOpen(false)} variant="contained" color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+      {/* <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button
+          onClick={() => setCandleOpen(false)}
+          variant="contained"
+          size="large"
+          sx={{ borderRadius: 2 }}
+        >
+          Close
+        </Button>
+      </DialogActions> */}
+    </Dialog>
 
       </Grid>
 

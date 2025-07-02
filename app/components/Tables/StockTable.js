@@ -55,7 +55,7 @@ const columnData = [
     id: 'priceChange',
     numeric: true,
     disablePadding: false,
-    label: 'Price Change'
+    label: 'Price Ch.'
   },
   {
     id: 'open',
@@ -91,7 +91,7 @@ const columnData = [
     id: 'maxOrder',
     numeric: true,
     disablePadding: false,
-    label: 'Max Order'
+    label: 'Max Or.'
   },
   {
     id: 'position',
@@ -415,36 +415,148 @@ function StockTable({ searchText }) {
 
   const { classes, cx } = useStyles();
 
-  const getCondition = (val, showIcon) => {
-    if (val > 0) {
-      return (
-        <span className={classes.up}>
-          {showIcon && <TrendingUp />}
-          &nbsp;
-          {val}
-          %
-        </span>
-      );
-    }
-    if (val < 0) {
-      return (
-        <span className={classes.down}>
-          {showIcon && <TrendingDown />}
-          &nbsp;
-          {val}
-          %
-        </span>
-      );
-    }
-    return (
-      <span className={classes.flat}>
-        {showIcon && <TrendingFlat />}
-        &nbsp;0%
-      </span>
-    );
+  const getCellBackgroundColor = (val) => {
+
+    if (val > 0) return 'rgba(144, 199, 147, 0.15)'; // light green
+
+    if (val < 0) return 'rgba(226, 162, 157, 0.15)'; // light red
+
+    return 'rgba(158, 158, 158, 0.15)';            // neutral gray
+
   };
 
-  const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
+   const getCondition = (val, showIcon) => {
+
+    const theme = useTheme();
+
+
+
+    if (val > 0) {
+
+      return (
+
+        <Box
+
+          component="span"
+
+          sx={{
+
+            color: theme.palette.success.main,
+
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+
+            borderRadius: 1,
+
+            px: 1,
+
+            py: 0.5,
+
+            display: 'inline-flex',
+
+            alignItems: 'center',
+
+            fontWeight: 600,
+
+          }}
+
+        >
+
+          {showIcon && <TrendingUp fontSize="small" />}
+
+          &nbsp;
+
+          {val}%
+
+        </Box>
+
+      );
+
+    }
+
+    if (val < 0) {
+
+      return (
+
+        <Box
+
+          component="span"
+
+          sx={{
+
+            color: theme.palette.error.main,
+
+            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+
+            borderRadius: 1,
+
+            px: 1,
+
+            py: 0.5,
+
+            display: 'inline-flex',
+
+            alignItems: 'center',
+
+            fontWeight: 600,
+
+          }}
+
+        >
+
+          {showIcon && <TrendingDown fontSize="small" />}
+
+          &nbsp;
+
+          {val}%
+
+        </Box>
+
+      );
+
+    }
+
+    return (
+
+      <Box
+
+        component="span"
+
+        sx={{
+
+          color: theme.palette.text.secondary,
+
+          backgroundColor: 'rgba(158, 158, 158, 0.1)',
+
+          borderRadius: 1,
+
+          px: 1,
+
+          py: 0.5,
+
+          display: 'inline-flex',
+
+          alignItems: 'center',
+
+          fontWeight: 600,
+
+        }}
+
+      >
+
+        {showIcon && <TrendingFlat fontSize="small" />}
+
+        &nbsp;0%
+
+      </Box>
+
+    );
+
+  };
+
+ const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
+    const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
+    const rowBackground = getCellBackgroundColor(rowVal);
+
     if (itemCell.id === 'scriptName') {
       return (
         <>
@@ -472,17 +584,17 @@ function StockTable({ searchText }) {
       );
     }
 
-    if (itemCell.id === 'priceChangePercent') {
+    if (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') {
       return (
-        <TableCell padding="normal" align={itemCell.numeric ? 'right' : 'left'} key={index.toString()} sx={tableCellStyle}>
-          {getCondition(dataArray[itemCell.id], true)}
-        </TableCell>
-      );
-    }
-    if (itemCell.id === 'priceChange') {
-      return (
-        <TableCell padding="normal" align={itemCell.numeric ? 'right' : 'left'} key={index.toString()} sx={tableCellStyle}>
-          {getCondition(dataArray[itemCell.id], false)}
+        <TableCell
+          padding="normal"
+          align={itemCell.numeric ? 'right' : 'left'}
+          key={index.toString()}
+          sx={{
+            ...tableCellStyle,
+            backgroundColor: rowBackground,
+          }}>
+          {getCondition(dataArray[itemCell.id], itemCell.id === 'priceChangePercent')}
         </TableCell>
       );
     }
@@ -492,7 +604,10 @@ function StockTable({ searchText }) {
         padding="normal"
         align={itemCell.numeric ? 'right' : 'left'}
         key={index.toString()}
-        sx={tableCellStyle}>
+        sx={{
+          ...tableCellStyle,
+          backgroundColor: rowBackground, // ✅ Apply to all other cells too
+        }}>
         {dataArray[itemCell.id]}
       </TableCell>
     );
@@ -504,7 +619,7 @@ function StockTable({ searchText }) {
         <TableRow
           tabIndex={-1}
           key={'column'}
-          sx={{ position: 'relative' }}
+          sx={{ position: 'relative',background: "linear-gradient(90deg, #1976d2, #2196f3)",color: "white !important" }}
         >
           {columnData.map((column) => (
             <TableCell
