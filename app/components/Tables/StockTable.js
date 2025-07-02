@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback, useState } from 'react';
+import React, { useReducer, useEffect, useCallback, useState, useRef } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Table from '@mui/material/Table';
 import Typography from '@mui/material/Typography';
@@ -373,17 +373,36 @@ function StockTable({ searchText }) {
   const [selectedScript, setSelectedScript] = useState('');
   const [hoveredRow, setHoveredRow] = useState('');
 
+  const [showShadow, setShowShadow] = useState(false);
+  const tableWrapperRef = useRef(null);
+
+  const handleScroll = () => {
+    if (tableWrapperRef.current) {
+      const scrollLeft = tableWrapperRef.current.scrollLeft;
+      setShowShadow(scrollLeft > 0);
+    }
+  };
+
+  useEffect(() => {
+    const wrapper = tableWrapperRef.current;
+    if (wrapper) {
+      wrapper.addEventListener('scroll', handleScroll);
+      return () => wrapper.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
 
   const firstColumnHeaderStyle = {
     position: 'sticky',         // ✅ fixes the column
     left: 0,                    // ✅ sticks to the left edge
     background: 'white',        // ✅ avoids overlap transparency
-    zIndex: 2,                  // ✅ make sure it renders above
-    boxShadow: '4px 0 6px -2px rgba(0,0,0)', // ✅ right shadow
+    zIndex: 3,                  // ✅ make sure it renders above
+    // boxShadow: '4px 0 6px -2px rgba(0,0,0)', // ✅ right shadow
     whiteSpace: 'nowrap',
-    minWidth: isMobile ? 110 : 160,
+    minWidth: isMobile ? '120px' : '160px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    overflow: 'visible',
   }
 
   const tableCellStyle = {
@@ -431,65 +450,24 @@ function StockTable({ searchText }) {
         <>
           <TableCell
             key={index.toString()}
-            sx={{
-              ...firstColumnHeaderStyle,
-              overflow: 'visible', // allow dropdown to escape
-              zIndex: 3,           // ensure it's above scroll
-            }}
+            sx={firstColumnHeaderStyle}
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
             </Box>
-          </TableCell>
-
-          {hoveredRow === dataArray.scriptName && (
-            <TableCell
-              colSpan={columnData.length - 1} // the rest of the columns
+            <Box
               sx={{
-                position: 'relative',
-                padding: 0,
-                height: 0,
+                position: 'absolute',
+                top: 0,
+                left: isMobile ? '120px' : '160px',
+                height: '100%',
+                width: '26px',
+                pointerEvents: 'none',
+                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.02), transparent)',
+                zIndex: 10,
               }}
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: isMobile ? 10 : 10,  // place beside sticky column
-                  top: -10,
-                  bgcolor: 'white',
-                  boxShadow: 3,
-                  borderRadius: 1,
-                  zIndex: 20,
-                  p: 1,
-                  display: 'flex',
-                  gap: 1,
-                }}
-              >
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="small"
-                  onClick={() => {
-                    setSelectedAction('Buy');
-                    setOpenDialog(true);
-                  }}
-                >
-                  Buy
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  onClick={() => {
-                    setSelectedAction('Sell');
-                    setOpenDialog(true);
-                  }}
-                >
-                  Sell
-                </Button>
-              </Box>
-            </TableCell>
-          )}
+            />
+          </TableCell>
         </>
       );
     }
@@ -523,7 +501,11 @@ function StockTable({ searchText }) {
   const TableHeader = ({ columnData }) => {
     return (
       <TableHead>
-        <TableRow>
+        <TableRow
+          tabIndex={-1}
+          key={'column'}
+          sx={{ position: 'relative' }}
+        >
           {columnData.map((column) => (
             <TableCell
               key={column.id}
@@ -531,9 +513,25 @@ function StockTable({ searchText }) {
               sx={column.id === 'scriptName' ? firstColumnHeaderStyle : null}
             >
               {column.label.toUpperCase()}
+
+              {column.id === 'scriptName' && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: isMobile ? '120px' : '160px',
+                    height: '100%',
+                    width: '26px',
+                    pointerEvents: 'none',
+                    background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.04), transparent)',
+                    zIndex: 10,
+                  }}
+                />
+              )}
             </TableCell>
           ))}
         </TableRow>
+
       </TableHead >
     );
   };
@@ -542,8 +540,8 @@ function StockTable({ searchText }) {
   return (
     <Paper sx={{ margimTop: '0px' }}>
       <div className={classes.root_Table} style={{ margimTop: '0px' }}>
-        <div className={classes.tableWrapper} style={{ overflowX: 'auto', position: 'relative' }}>
-          <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ margimTop: '0px' }}>
+        <div className={classes.tableWrapper}  ref={tableWrapperRef} style={{ overflowX: 'auto', position: 'relative' }}>
+          <Table className={cx(classes.table, classes.stripped, classes.hover)}>
             <TableHeader columnData={columnData} />
             <TableBody>
               {dummyWatchlistData.map(data => {
@@ -554,12 +552,6 @@ function StockTable({ searchText }) {
                   <TableRow
                     tabIndex={-1}
                     key={data.id}
-                    onMouseEnter={() => {
-                      setHoveredRow(data.scriptName);
-                      setSelectedScript(data.scriptName); // ✅ SET IT HERE
-                    }}
-                    // onMouseEnter={() => setHoveredRow(data.scriptName)}
-                    onMouseLeave={() => setHoveredRow('')}
                   >
                     {renderCell(data, columnData)}
                   </TableRow>
@@ -567,6 +559,7 @@ function StockTable({ searchText }) {
               })}
             </TableBody>
           </Table>
+
         </div>
       </div>
 
