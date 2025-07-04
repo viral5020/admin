@@ -19,6 +19,8 @@ import useStyles from './tableStyle-jss';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
+import { lighten, darken, alpha } from '@mui/material/styles';
+import { maxWidth } from '@mui/system';
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
@@ -70,7 +72,7 @@ const columnData = [
     id: 'priceChange',
     numeric: true,
     disablePadding: false,
-    label: 'Price Ch.'
+    label: 'Change'
   },
   {
     id: 'open',
@@ -254,7 +256,7 @@ const dummyWatchlistData = [
     ltp: 477.65,
     priceChange: +2.65,
     priceChangePercent: +0.56,
-    qty: 160,
+    qty: 130,
     maxOrder: 1200,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:49:30'
@@ -407,34 +409,33 @@ function StockTable({ searchText, setIsStockOpen }) {
     }
   }, []);
 
+  const tableCellStyle = {
+    // minWidth: 100,             // ensures enough space
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',     // prevents breaking into multiple lines
+    // textOverflow: 'ellipsis',  //  adds "..." if still overflows
+    px: 1,
+    py: 0.5,
+    maxWidth: 'fit-content',
+    lineHeight: 1.2,
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
+    // fontSize: '0.75rem',
+  }
 
   const firstColumnStyle = {
+    ...tableCellStyle,
     position: 'sticky',         // ✅ fixes the column
     left: 0,                    // ✅ sticks to the left edge
     zIndex: 3,                  // ✅ make sure it renders above
-    whiteSpace: 'nowrap',
-    minWidth: isMobile ? '120px' : '160px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    minWidth: isMobile ? '90px' : '100px',
     overflow: 'visible',
+    px: 1,
   }
+
   const firstColumnHeaderStyle = {
     ...firstColumnStyle,
     color: "white",
     background: '#1976d2',
-  }
-  
-  const firstColumnBackground = {
-    ...firstColumnStyle,
-    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-    background: theme.palette.mode === 'dark' ? '#000' : '#fff',
-  }
-
-  const tableCellStyle = {
-    whiteSpace: 'nowrap',     // prevents breaking into multiple lines
-    minWidth: 100,             // ensures enough space
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'  //  adds "..." if still overflows
   }
 
   const { classes, cx } = useStyles();
@@ -453,69 +454,34 @@ function StockTable({ searchText, setIsStockOpen }) {
 
   const getCondition = (val, showIcon) => {
     const theme = useTheme();
-
-    if (val > 0) {
-      return (
-        <Box
-          component="span"
-          sx={{
-            color: theme.palette.success.main,
-            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-            borderRadius: 1,
-            px: 1,
-            py: 0.5,
-            display: 'inline-flex',
-            alignItems: 'center',
-            fontWeight: 600,
-          }}
-        >
-          {showIcon && <TrendingUp fontSize="small" />}
-          &nbsp;
-          {val}%
-        </Box>
-      );
-    }
-
-    if (val < 0) {
-      return (
-        <Box
-          component="span"
-          sx={{
-            color: theme.palette.error.main,
-            backgroundColor: 'rgba(244, 67, 54, 0.1)',
-            borderRadius: 1,
-            px: 1,
-            py: 0.5,
-            display: 'inline-flex',
-            alignItems: 'center',
-            fontWeight: 600,
-          }}
-        >
-          {showIcon && <TrendingDown fontSize="small" />}
-          &nbsp;
-          {val}%
-        </Box>
-      );
-    }
-
     return (
       <Box
         component="span"
         sx={{
-          color: theme.palette.text.secondary,
-          backgroundColor: 'rgba(158, 158, 158, 0.1)',
+          color: val > 0 ? theme.palette.success.main : val < 0 ? theme.palette.error.main : theme.palette.text.secondary,
+          backgroundColor: val > 0 ? 'rgba(76, 175, 80, 0.08)' : val < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
+          borderRadius: 0.5,
           borderRadius: 1,
-          px: 1,
-          py: 0.5,
+          px: 0.6,
+          py: 0.3,
           display: 'inline-flex',
           alignItems: 'center',
           fontWeight: 600,
+          // fontSize: '0.75rem',
+          // lineHeight: 1.1,
         }}
       >
-        {showIcon && <TrendingFlat fontSize="small" />}
-        &nbsp;0%
+        {showIcon &&
+          (val > 0 ? (
+            <TrendingUp fontSize="inherit" sx={{ mr: 0.5 }} />
+          ) : val < 0 ? (
+            <TrendingDown fontSize="inherit" sx={{ mr: 0.5 }} />
+          ) : (
+            <TrendingFlat fontSize="inherit" sx={{ mr: 0.5 }} />
+          ))}
+        {val}%
       </Box>
-    );
+    )
   };
 
   const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
@@ -528,17 +494,22 @@ function StockTable({ searchText, setIsStockOpen }) {
         <>
           <TableCell
             key={index.toString()}
-            sx={{ ...firstColumnStyle, backgroundColor: rowBgColorFirstCol }}
+            sx={{
+              ...firstColumnStyle,
+              backgroundColor: rowBgColorFirstCol,
+            }}
           >
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1">{dataArray.scriptName}</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
+                {dataArray.scriptName}
+              </Typography>
             </Box>
             <Box
               sx={{
                 position: 'absolute',
                 top: 0,
-                left: isMobile ? '120px' : '160px',
                 height: '100%',
+                right: '-36px',
                 width: '36px',
                 pointerEvents: 'none',
                 background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
@@ -585,14 +556,21 @@ function StockTable({ searchText, setIsStockOpen }) {
         <TableRow
           tabIndex={-1}
           key={'column'}
-          sx={{ position: 'relative', background: "linear-gradient(90deg, #1976d2, #2196f3)" }}
+          sx={{
+            height: 36,
+            '& th': {
+              color: '#fff',
+              background: theme.palette.mode === 'dark' ? 'linear-gradient(90deg, #134591, #154b97)' : 'linear-gradient(90deg, #3060aa, #3269b5)',
+              // background: 'linear-gradient(90deg, #0d47a1d9, #0f4fa8d9)',
+            },
+          }}
         >
           {columnData.map((column) => (
             <TableCell
               key={column.id}
               align={column.numeric ? 'right' : 'left'}
               sx={column.id === 'scriptName' ?
-                firstColumnHeaderStyle : { color: "white" }}
+                firstColumnHeaderStyle : { ...tableCellStyle, color: "white" }}
             >
               {column.label.toUpperCase()}
 
@@ -602,8 +580,8 @@ function StockTable({ searchText, setIsStockOpen }) {
                     sx={{
                       position: 'absolute',
                       top: 0,
-                      left: isMobile ? '120px' : '160px',
                       height: '100%',
+                      right: '-36px',
                       width: '36px',
                       pointerEvents: 'none',
                       background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
@@ -611,7 +589,7 @@ function StockTable({ searchText, setIsStockOpen }) {
                       zIndex: 10,
                     }}
                   />
-                  
+
                 </>
               )}
             </TableCell>
@@ -646,7 +624,7 @@ function StockTable({ searchText, setIsStockOpen }) {
             },
           }}
         >
-          <Table className={cx(classes.table, classes.stripped, classes.hover)}>
+          <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my:0 }}>
             <TableHeader columnData={columnData} />
             <TableBody>
               {dummyWatchlistData.map(data => {

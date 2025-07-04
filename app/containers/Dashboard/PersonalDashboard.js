@@ -192,7 +192,7 @@ function PersonalDashboard() {
   const [margindata, setMargindata] = useState()
 
   const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
-   const [positionDialogOpen, setpositionDialogOpen] = useState(false);
+  const [positionDialogOpen, setpositionDialogOpen] = useState(false);
 
 
   const handleTabChange = (_, newValue) => {
@@ -306,31 +306,28 @@ function PersonalDashboard() {
   );
 
 
+  const fetchLoginData = async () => {
+    try {
+      const res = await axios.post('http://128.199.126.171/~goldorg/datatables/get_login_data_details', {
+        is_app: 1,
+        login_user_id: '196',
+        auth_key: 'yUC4c1iZVu',
+      });
 
-
-  const [loginData, setLoginData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchLoginData = async () => {
-      try {
-        const res = await axios.post('http://128.199.126.171/~goldorg/datatables/get_login_data_details', {
-          is_app: 1,
-          login_user_id: '196',
-          auth_key: 'yUC4c1iZVu',
-        });
-
-        if (res.data.status === 'ok' && Array.isArray(res.data.data)) {
-          setLoginData(res.data.data.slice(0, 5));
-        }
-      } catch (error) {
-        console.error('Login data fetch failed:', error);
-      } finally {
-        setLoading(false);
+      if (res.data.status === 'ok' && Array.isArray(res.data.data)) {
+        setLoginData(res.data.data.slice(0, 5));
       }
-    };
+    } catch (error) {
+      console.error('Login data fetch failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  function getMarginDataFromSessionStorage() {
     const data = sessionStorage.getItem("data");
     const dataObj = JSON.parse(data);
+    console.log('!!dataObj', !!dataObj);
 
     const tempObj = {
       nse_margin: dataObj.nse_margin,
@@ -351,10 +348,15 @@ function PersonalDashboard() {
         value: dataObj[i],
       })
     }
-
     // console.log('obj', obj);
     setMargindata(obj);
+  }
 
+  const [loginData, setLoginData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    getMarginDataFromSessionStorage();
     fetchLoginData();
   }, []);
 
@@ -395,13 +397,13 @@ function PersonalDashboard() {
         </Dialog>
 
         <Grid item xs={12} sm={6} md={3}>
-           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-          <InfoCardHorizontal
-            title="Positions"
-            icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
-            content={['Active: 10', 'Closed: 50']}
-            bgcolor="rgba(76, 175, 80, 0.1)"
-          />
+          <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Positions"
+              icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
+              content={['Active: 10', 'Closed: 50']}
+              bgcolor="rgba(76, 175, 80, 0.1)"
+            />
           </Box>
         </Grid>
 
@@ -825,71 +827,71 @@ function PersonalDashboard() {
               ) : (
                 loginData.map((login, idx) => (
                   <Box
-  key={idx}
-  display="flex"
-  alignItems="center"
-  justifyContent="space-between"
-  gap={2}
->
-  {/* Left part */}
-  <Box display="flex" alignItems="center" gap={2}>
-    <Box
-      sx={{
-        width: 10,
-        height: 10,
-        borderRadius: '50%',
-        backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
-      }}
-    />
-    <Box>
-      <Typography variant="body2" fontWeight={500}>
-        {login.loginTime}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        IP: {login.ip}
-      </Typography>
-      {/* <Typography variant="caption" color="text.secondary">
+                    key={idx}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={2}
+                  >
+                    {/* Left part */}
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
+                        }}
+                      />
+                      <Box>
+                        <Typography variant="body2" fontWeight={500}>
+                          {login.loginTime}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          IP: {login.ip}
+                        </Typography>
+                        {/* <Typography variant="caption" color="text.secondary">
         {login.source}
       </Typography> */}
-    </Box>
-  </Box>
+                      </Box>
+                    </Box>
 
-  {/* Right part: computer icon */}
-  {login.source?.toLowerCase() === 'web' && (
-  <Box
-    sx={{
-      width: 32,
-      height: 32,
-      borderRadius: '50%',
-      backgroundColor: '#e3f2fd', // light blue background
-      border: '2px solid #1976d2', // dark blue border
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
-  >
-    <LaptopMacIcon sx={{ color: '#1976d2' }} /> {/* dark icon */}
-  </Box>
-)}
+                    {/* Right part: computer icon */}
+                    {login.source?.toLowerCase() === 'web' && (
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          backgroundColor: '#e3f2fd', // light blue background
+                          border: '2px solid #1976d2', // dark blue border
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <LaptopMacIcon sx={{ color: '#1976d2' }} /> {/* dark icon */}
+                      </Box>
+                    )}
 
-{login.source?.toLowerCase() === 'phone' && (
-  <Box
-    sx={{
-      width: 32,
-      height: 32,
-      borderRadius: '50%',
-      backgroundColor: '#e8f5e9', // light green background
-      border: '2px solid #4caf50', // dark green border
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
-  >
-    <SmartphoneIcon sx={{ color: '#4caf50' }} /> {/* dark icon */}
-  </Box>
-)}
+                    {login.source?.toLowerCase() === 'phone' && (
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          backgroundColor: '#e8f5e9', // light green background
+                          border: '2px solid #4caf50', // dark green border
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <SmartphoneIcon sx={{ color: '#4caf50' }} /> {/* dark icon */}
+                      </Box>
+                    )}
 
-</Box>
+                  </Box>
 
                 ))
               )}
@@ -1237,148 +1239,148 @@ function PersonalDashboard() {
           </Grid>
         </Grid>
 
-       <Dialog
-      open={candleOpen}
-      onClose={() => setCandleOpen(false)}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          overflow: "hidden",
-          boxShadow: 24,
-        },
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          px: 3,
-          py: 2,
-          background: "linear-gradient(90deg, #1976d2, #2196f3)",
-          color: "white",
-        }}
-      >
-        <Typography variant="h6" fontWeight={600}>
-          {selectedStock?.name || "Stock Details"}
-        </Typography>
-        <CloseIcon
-          sx={{ cursor: "pointer" }}
-          onClick={() => setCandleOpen(false)}
-        />
-      </Box>
-
-      {/* Tabs */}
-      <Tabs
-        value={tabValue}
-        onChange={handleTabChange}
-        textColor="inherit"
-        indicatorColor="secondary"
-        variant="scrollable"
-        scrollButtons="auto"
-        sx={{
-          px: 3,
-          bgcolor: "background.paper",
-          ".MuiTab-root": { fontWeight: 600, textTransform: "none" },
-        }}
-      >
-        <Tab label="Basic" />
-        <Tab label="Trades" />
-        <Tab label="Positions" />
-        <Tab label="Charts" />
-      </Tabs>
-
-      {/* Scrollable content */}
-      <DialogContent dividers sx={{ p: 3, maxHeight: "65vh" }}>
-        {tabValue === 0 && selectedStock && (
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-            <Grid container spacing={2}>
-              {[
-                { label: "LTP", value: `₹${exampleStock.ltp}` },
-                { label: "Price Change", value: exampleStock.priceChange },
-                { label: "% Change", value: `${exampleStock.pricePercentChange}%` },
-                { label: "Open", value: `₹${exampleStock.open}` },
-                { label: "High", value: `₹${exampleStock.high}` },
-                { label: "Low", value: `₹${exampleStock.low}` },
-                { label: "Close", value: `₹${exampleStock.close}` },
-                { label: "Bid Rate", value: `₹${exampleStock.bidRate}` },
-                { label: "Ask Rate", value: `₹${exampleStock.askRate}` },
-                { label: "Volume", value: exampleStock.volumeOi },
-                { label: "OI", value: exampleStock.volumeOi },
-                { label: "Min Order", value: exampleStock.minOrder },
-                { label: "Max Order", value: exampleStock.maxOrder },
-              ].map((item, index) => (
-                <Grid item xs={6} sm={4} key={index}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {item.label}
-                  </Typography>
-                  <Typography variant="body1" fontWeight={600}>
-                    {item.value}
-                  </Typography>
-                </Grid>
-              ))}
-
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle2" color="text.secondary">
-                  Positions
-                </Typography>
-                <Typography variant="body1" fontWeight={600}>
-                  {exampleStock.positions}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle2" color="text.secondary">
-                  Short Description
-                </Typography>
-                <Typography variant="body2">
-                  {exampleStock.shortDescription}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ mt: 2 }}
-                >
-                  Long Description
-                </Typography>
-                <Typography variant="body2">
-                  {exampleStock.longDescription}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Paper>
-        )}
-
-        {tabValue === 1 && (
-          <Typography variant="body1">
-            Trades data for {selectedStock?.name}.
-          </Typography>
-        )}
-
-        {tabValue === 2 && (
-          <Typography variant="body1">
-            Positions data for {selectedStock?.name}.
-          </Typography>
-        )}
-
-        {tabValue === 3 && selectedStock && (
-          <Box>
-            {/* Replace with your actual chart component */}
-           {tabValue === 3 && selectedStock && (
-                <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
-              )}
-            {/* <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} /> */}
+        <Dialog
+          open={candleOpen}
+          onClose={() => setCandleOpen(false)}
+          fullWidth
+          maxWidth="md"
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: 24,
+            },
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 3,
+              py: 2,
+              background: "linear-gradient(90deg, #1976d2, #2196f3)",
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" fontWeight={600}>
+              {selectedStock?.name || "Stock Details"}
+            </Typography>
+            <CloseIcon
+              sx={{ cursor: "pointer" }}
+              onClick={() => setCandleOpen(false)}
+            />
           </Box>
-        )}
-      </DialogContent>
 
-      {/* <DialogActions sx={{ px: 3, pb: 3 }}>
+          {/* Tabs */}
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            textColor="inherit"
+            indicatorColor="secondary"
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              px: 3,
+              bgcolor: "background.paper",
+              ".MuiTab-root": { fontWeight: 600, textTransform: "none" },
+            }}
+          >
+            <Tab label="Basic" />
+            <Tab label="Trades" />
+            <Tab label="Positions" />
+            <Tab label="Charts" />
+          </Tabs>
+
+          {/* Scrollable content */}
+          <DialogContent dividers sx={{ p: 3, maxHeight: "65vh" }}>
+            {tabValue === 0 && selectedStock && (
+              <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                <Grid container spacing={2}>
+                  {[
+                    { label: "LTP", value: `₹${exampleStock.ltp}` },
+                    { label: "Price Change", value: exampleStock.priceChange },
+                    { label: "% Change", value: `${exampleStock.pricePercentChange}%` },
+                    { label: "Open", value: `₹${exampleStock.open}` },
+                    { label: "High", value: `₹${exampleStock.high}` },
+                    { label: "Low", value: `₹${exampleStock.low}` },
+                    { label: "Close", value: `₹${exampleStock.close}` },
+                    { label: "Bid Rate", value: `₹${exampleStock.bidRate}` },
+                    { label: "Ask Rate", value: `₹${exampleStock.askRate}` },
+                    { label: "Volume", value: exampleStock.volumeOi },
+                    { label: "OI", value: exampleStock.volumeOi },
+                    { label: "Min Order", value: exampleStock.minOrder },
+                    { label: "Max Order", value: exampleStock.maxOrder },
+                  ].map((item, index) => (
+                    <Grid item xs={6} sm={4} key={index}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        {item.label}
+                      </Typography>
+                      <Typography variant="body1" fontWeight={600}>
+                        {item.value}
+                      </Typography>
+                    </Grid>
+                  ))}
+
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Positions
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {exampleStock.positions}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Short Description
+                    </Typography>
+                    <Typography variant="body2">
+                      {exampleStock.shortDescription}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      sx={{ mt: 2 }}
+                    >
+                      Long Description
+                    </Typography>
+                    <Typography variant="body2">
+                      {exampleStock.longDescription}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            )}
+
+            {tabValue === 1 && (
+              <Typography variant="body1">
+                Trades data for {selectedStock?.name}.
+              </Typography>
+            )}
+
+            {tabValue === 2 && (
+              <Typography variant="body1">
+                Positions data for {selectedStock?.name}.
+              </Typography>
+            )}
+
+            {tabValue === 3 && selectedStock && (
+              <Box>
+                {/* Replace with your actual chart component */}
+                {tabValue === 3 && selectedStock && (
+                  <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} />
+                )}
+                {/* <ApexCharts name={selectedStock.name} data={selectedStock.data} theme={theme} /> */}
+              </Box>
+            )}
+          </DialogContent>
+
+          {/* <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button
           onClick={() => setCandleOpen(false)}
           variant="contained"
@@ -1388,7 +1390,7 @@ function PersonalDashboard() {
           Close
         </Button>
       </DialogActions> */}
-    </Dialog>
+        </Dialog>
 
       </Grid>
 

@@ -51,6 +51,7 @@ function Dashboard(props) {
   };
 
   const { changeMode, children } = props;
+  // const titleException = ['/app','/app/dashboard/watchlist'];
   const titleException = ['/app'];
   const parts = location.pathname.split('/');
   const place = parts[parts.length - 1].replace('-', ' ');

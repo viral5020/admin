@@ -143,23 +143,22 @@ const FilterComponent = ({ searchText, setSearchText }) => {
             </Grid>
 
             {/* Second row: buttons and search field */}
-            <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
+            <Grid container spacing={2} alignItems="center" sx={{ mt: 2, flexWrap: 'wrap' }}>
                 {/* Left side: Add + Reset */}
-                <Grid item xs={12} md={6} display="flex" gap={2}>
-                    <Button variant="contained" onClick={handleAdd}>Add</Button>
-                    <Button variant="outlined" onClick={handleReset}>Reset</Button>
+                <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+                    <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
+                    <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
                 </Grid>
 
-                {/* Right side: Search bar aligned right */}
-                <Grid item xs={12} md={6}>
+                {/* Right side: Search bar */}
+                <Grid item xs={12} sm={6} md={4} lg={3}>
                     <Box display="flex" justifyContent="flex-end">
                         <TextField
                             label="Search"
                             size="small"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
-                            sx={{ width: '100%', maxWidth: 300}}
-                            // sx={{ width: '100%', maxWidth: 300,backgroundColor: theme.palette.mode === 'dark' ? '#222' : '#fff' }}
+                            sx={{ width: '100%', maxWidth: 300 }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
