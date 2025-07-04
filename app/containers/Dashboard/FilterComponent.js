@@ -1,9 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Box, Grid, Autocomplete, TextField, Button, InputAdornment, IconButton
+    Box, Grid, Autocomplete, TextField, Button, InputAdornment, IconButton,
+    DialogActions
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTheme } from '@mui/material/styles';
+import { Dialog, DialogTitle, DialogContent, useMediaQuery } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+
 
 const dummyOptions = {
     Equity: {
@@ -84,6 +88,8 @@ const dummyOptions = {
 
 const FilterComponent = ({ searchText, setSearchText }) => {
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [filterOpen, setFilterOpen] = useState(false);
     const [segment, setSegment] = useState('');
     const [script, setScript] = useState('');
     const [expiry, setExpiry] = useState('');
@@ -113,44 +119,86 @@ const FilterComponent = ({ searchText, setSearchText }) => {
         });
     };
 
-    return (
-        <Box sx={{ p: 2 }}>
-            {/* First row: 5 dropdowns */}
-            <Grid container spacing={2}>
-                {[{
-                    label: 'Segment', value: segment, onChange: setSegment, options: segmentOptions
-                }, {
-                    label: 'Script', value: script, onChange: setScript, options: scriptOptions
-                }, {
-                    label: 'Expiry', value: expiry, onChange: setExpiry, options: expiryOptions
-                }, {
-                    label: 'CE/PE', value: type, onChange: setType, options: typeOptions
-                }, {
-                    label: 'Strike', value: strike, onChange: setStrike, options: strikeOptions
-                }].map(({ label, value, onChange, options }) => (
-                    <Grid item xs={12} sm={6} md={2.4} key={label}>
-                        <Autocomplete
-                            value={value} // initialValues are ''
-                            onChange={(_, newValue) => onChange(newValue)}
-                            options={options}
-                            getOptionLabel={(opt) => String(opt)}
-                            isOptionEqualToValue={(option, val) => option.value === val.value}
-                            renderInput={(params) => <TextField {...params} label={label} size="small" />}
-                            fullWidth
-                        />
-                    </Grid>
-                ))}
-            </Grid>
+    const renderFilterFields = () => (
+        <Grid container spacing={2}>
+            {[{
+                label: 'Segment', value: segment, onChange: setSegment, options: segmentOptions
+            }, {
+                label: 'Script', value: script, onChange: setScript, options: scriptOptions
+            }, {
+                label: 'Expiry', value: expiry, onChange: setExpiry, options: expiryOptions
+            }, {
+                label: 'CE/PE', value: type, onChange: setType, options: typeOptions
+            }, {
+                label: 'Strike', value: strike, onChange: setStrike, options: strikeOptions
+            }].map(({ label, value, onChange, options }) => (
+                <Grid item xs={12} sm={6} md={2.4} key={label} >
+                    <Autocomplete
+                        value={value}
+                        onChange={(_, newValue) => onChange(newValue)}
+                        options={options}
+                        getOptionLabel={(opt) => String(opt)}
+                        isOptionEqualToValue={(option, val) => option.value === val.value}
+                        renderInput={(params) => (
+                            <TextField {...params} label={label} size="small" />
+                        )}
+                        fullWidth
+                        slotProps={{
+                            paper: {
+                                sx: {
+                                    backgroundColor: (theme) =>
+                                        theme.palette.mode === 'dark' ? '#1e1e1e' : '#e0f7fa',
+                                    '& .MuiAutocomplete-option': {
+                                        backgroundColor: 'transparent',
+                                        '&[aria-selected="true"]': {
+                                            backgroundColor: (theme) =>
+                                                theme.palette.mode === 'dark' ? '#333' : '#e0f7fa',
+                                        },
+                                        '&:hover': {
+                                            backgroundColor: (theme) =>
+                                                theme.palette.mode === 'dark' ? '#2c2c2c' : '#e3f2fd',
+                                        },
+                                    },
+                                },
+                            },
+                        }}
+                    />
+                </Grid>
+            ))}
+        </Grid>
+    );
 
-            {/* Second row: buttons and search field */}
-            <Grid container spacing={2} alignItems="center" sx={{ mt: 2, flexWrap: 'wrap' }}>
-                {/* Left side: Add + Reset */}
-                <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
-                    <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
-                    <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
+    return (
+        <Box sx={{ p: 1.5, py: isMobile ? 1 : 1.5 }}>
+            {!isMobile && renderFilterFields()}
+
+            <Grid container alignItems="center" sx={{ mt: isMobile ? 0 : 1.4, flexWrap: 'wrap', gap: { xs: 2, sm: 0 } }}>
+                <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex',gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+                    <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
+                        <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
+                        <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
+                    </Box>
+
+                    {isMobile && (
+                        <Box sx={{ ml: 'auto' }}>
+                            <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<FilterListIcon />}
+                                onClick={() => setFilterOpen(true)}
+                                sx={{
+                                    backgroundColor: '#607d8b',
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: '#546e7a' }
+                                }}
+                            >
+                                Filter
+                            </Button>
+                        </Box>
+                    )}
                 </Grid>
 
-                {/* Right side: Search bar */}
+
                 <Grid item xs={12} sm={6} md={4} lg={3}>
                     <Box display="flex" justifyContent="flex-end">
                         <TextField
@@ -173,7 +221,30 @@ const FilterComponent = ({ searchText, setSearchText }) => {
                 </Grid>
             </Grid>
 
+            {/* Filter dialog for mobile */}
+            <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth>
+                <DialogTitle sx={{ mb: 1, pt: 2, pb: 1 }}>Filter</DialogTitle>
+
+                <DialogContent dividers>
+                    {renderFilterFields()}
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            // your apply logic
+                            setFilterOpen(false);
+                        }}
+                    >
+                        Apply
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
         </Box>
+
     );
 };
 

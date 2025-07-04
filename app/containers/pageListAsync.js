@@ -35,6 +35,10 @@ export const CryptoDashboard = loadable(() =>
   import ('./Dashboard/CryptoDashboard'), {
     fallback: <Loading />,
   });
+export const Watchlist = loadable(() =>
+  import ('./Dashboard/Watchlist'), {
+    fallback: <Loading />,
+  });
 
 // Widgets
 export const Infographics = loadable(() =>

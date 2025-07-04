@@ -8,8 +8,6 @@ const ProtectedRoute = ({ children }) => {
   if (!isLoggedIn) {
     alert('Please, login first.');
     return <Navigate to="/login" replace />;
-  }else{
-    console.log('children', children);  // output: undefined
   }
 
   return <Outlet />;

@@ -204,6 +204,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
   pageTitle: {
     paddingLeft: theme.spacing(2),
     // paddingBottom: theme.spacing(3),
+    marginBottom: theme.spacing(0),
     [theme.breakpoints.up('lg')]: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -213,7 +214,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
       fontWeight: 700,
       textTransform: 'capitalize',
       [theme.breakpoints.down('lg')]: {
-        marginBottom: theme.spacing(1)
+        // marginBottom: theme.spacing(1)
       }
     },
   },

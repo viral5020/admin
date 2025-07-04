@@ -34,7 +34,8 @@ import {
   Photos, Pricing, CheckoutPage,
   Error, Settings, HelpSupport,
   MapMarker, MapDirection, SearchMap,
-  TrafficIndicator, StreetViewMap, NotFound
+  TrafficIndicator, StreetViewMap, NotFound,
+  Watchlist
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -47,9 +48,10 @@ function Application(props) {
         { /* Home */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
-          <Route path="dashboard/watchlist" element={<CryptoDashboard />} />
+          <Route path="dashboard/watchlist" element={<Watchlist />} />
         </Route>
 
+        <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />
         <Route path="dashboard/sales-marketing" element={<CrmDashboard />} />
         { /* Widgets */}
         <Route path="widgets/infographics" element={<Infographics />} />

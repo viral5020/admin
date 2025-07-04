@@ -41,7 +41,7 @@ const generateCandleData = (name) => {
 };
 
 
-function CryptoDahboard() {
+function Watchlist() {
   const theme = useTheme();
   const title = brand.name + ' - Cryptocurrency Dashboard';
   const description = brand.desc;
@@ -146,4 +146,4 @@ function CryptoDahboard() {
   );
 }
 
-export default CryptoDahboard;
+export default Watchlist;

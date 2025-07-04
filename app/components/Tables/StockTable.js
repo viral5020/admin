@@ -16,7 +16,7 @@ import PapperBlock from '../PapperBlock/PapperBlock';
 import EnhancedTableToolbar from './tableParts/TableToolbar';
 import EnhancedTableHead from './tableParts/TableHeader';
 import useStyles from './tableStyle-jss';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 import { lighten, darken, alpha } from '@mui/material/styles';
@@ -498,6 +498,7 @@ function StockTable({ searchText, setIsStockOpen }) {
               ...firstColumnStyle,
               backgroundColor: rowBgColorFirstCol,
             }}
+          // sortDirection={'desc'}
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
@@ -571,27 +572,29 @@ function StockTable({ searchText, setIsStockOpen }) {
               align={column.numeric ? 'right' : 'left'}
               sx={column.id === 'scriptName' ?
                 firstColumnHeaderStyle : { ...tableCellStyle, color: "white" }}
+              // sortDirection={column.id === 'scriptName' ? 'desc' : null}
             >
-              {column.label.toUpperCase()}
+              {/* <TableSortLabel active direction={"desc"}> */}
+                {column.label.toUpperCase()}
 
-              {column.id === 'scriptName' && (
-                <>
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      height: '100%',
-                      right: '-36px',
-                      width: '36px',
-                      pointerEvents: 'none',
-                      background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
-                      borderRadius: '10px 0px 0px 0px',
-                      zIndex: 10,
-                    }}
-                  />
-
-                </>
-              )}
+                {column.id === 'scriptName' && (
+                  <>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        height: '100%',
+                        right: '-36px',
+                        width: '36px',
+                        pointerEvents: 'none',
+                        background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
+                        borderRadius: '10px 0px 0px 0px',
+                        zIndex: 10,
+                      }}
+                    />
+                  </>
+                )}
+              {/* </TableSortLabel> */}
             </TableCell>
           ))}
         </TableRow>
@@ -624,7 +627,7 @@ function StockTable({ searchText, setIsStockOpen }) {
             },
           }}
         >
-          <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my:0 }}>
+          <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my: 0 }}>
             <TableHeader columnData={columnData} />
             <TableBody>
               {dummyWatchlistData.map(data => {
