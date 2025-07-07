@@ -471,6 +471,16 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
       opacity: 0.87
     }
   },
+  header_Title: {
+    fontSize: theme.spacing(3),
+    fontWeight: 700,
+    color: theme.palette.common.white,
+    textTransform: 'capitalize',
+    position: 'relative',
+    opacity: 1,
+    top: 0,
+    left: 0
+  },
   swipeDrawerPaper: {
     width: drawerWidth,
   },

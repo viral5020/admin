@@ -129,9 +129,10 @@ function Header(props) {
         >
           <MenuIcon />
         </Fab>
-        {!mdDown && (
+        
+        {/* {!mdDown && ( */}
           <div className={classes.headerProperties}>
-            <div className={cx(classes.headerAction, showTitle && classes.fadeOut)}>
+            {/* <div className={cx(classes.headerAction, showTitle && classes.fadeOut)}>
               {fullScreen ? (
                 <Tooltip title="Exit Full Screen" placement="bottom">
                   <IconButton className={classes.button} onClick={closeFullScreen} size="large">
@@ -155,20 +156,20 @@ function Header(props) {
                   <i className="ion-ios-help-circle-outline" />
                 </IconButton>
               </Tooltip>
-            </div>
-            <Typography component="h2" className={cx(classes.headerTitle, showTitle && classes.show)}>
+            </div> */}
+            <Typography component="h2" className={classes.header_Title}>
               {title}
             </Typography>
           </div>
-        )}
-        <div className={classes.searchWrapper}>
+        {/* )} */}
+        {/* <div className={classes.searchWrapper}> */}
           <div className={cx(classes.wrapper, classes.light)}>
             <div className={classes.search}>
               <SearchIcon />
             </div>
             <SearchUi history={history} />
           </div>
-        </div>
+        {/* </div> */}
         {!smDown && (
           <span className={classes.separatorV} />
         )}

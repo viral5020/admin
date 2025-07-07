@@ -86,9 +86,7 @@ const dummyOptions = {
 };
 
 
-const FilterComponent = ({ searchText, setSearchText }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [segment, setSegment] = useState('');
     const [script, setScript] = useState('');
@@ -169,57 +167,88 @@ const FilterComponent = ({ searchText, setSearchText }) => {
     );
 
     return (
-        <Box sx={{ p: 1.5, py: isMobile ? 1 : 1.5 }}>
+        <Box sx={{ p: 1.5, py: !isMobile ? 2 : null, pb: isMobile ? 2 : null }}>
             {!isMobile && renderFilterFields()}
 
             <Grid container alignItems="center" sx={{ mt: isMobile ? 0 : 1.4, flexWrap: 'wrap', gap: { xs: 2, sm: 0 } }}>
-                <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex',gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
-                    <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-                        <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
-                        <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
-                    </Box>
+                {!isMobile && (
+                    <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+                        <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
+                            <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
+                            <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
+                        </Box>
+                    </Grid>
+                )}
 
-                    {isMobile && (
-                        <Box sx={{ ml: 'auto' }}>
+                <Grid item xs={12} sm={6} md={isMobile ? 12 : 4} lg={isMobile ? 12 : 3}>
+                    <Box sx={{ display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: 1 }}>
+                        {isMobile && (
                             <Button
-                                variant="contained"
+                                variant="outlined"
                                 size="small"
                                 startIcon={<FilterListIcon />}
                                 onClick={() => setFilterOpen(true)}
                                 sx={{
-                                    backgroundColor: '#607d8b',
-                                    color: '#fff',
-                                    '&:hover': { backgroundColor: '#546e7a' }
+                                    backgroundColor: isDarkMode ? '#263238' : '#fff', // dark: blue-grey, light: white
+                                    borderColor: isDarkMode ? '#90a4ae' : '#607d8b',
+                                    color: isDarkMode ? '#cfd8dc' : '#607d8b',
+                                    '&:hover': {
+                                        borderColor: isDarkMode ? '#b0bec5' : '#546e7a',
+                                        backgroundColor: isDarkMode ? '#37474f' : '#f0f4f7',
+                                        color: isDarkMode ? '#eceff1' : '#546e7a',
+                                    },
                                 }}
                             >
                                 Filter
                             </Button>
-                        </Box>
-                    )}
-                </Grid>
 
+                        )}
 
-                <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Box display="flex" justifyContent="flex-end">
                         <TextField
                             label="Search"
                             size="small"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
-                            sx={{ width: '100%', maxWidth: 300 }}
+                            sx={{
+                                flexGrow: 1,
+                                maxWidth: 300,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '50px', // Fully rounded
+                                    paddingLeft: 2,
+                                    paddingRight: 1,
+                                    backgroundColor: isDarkMode ? '#37474f' : '#fff',
+                                    color: isDarkMode ? '#eceff1' : '#263238',
+                                    '& fieldset': {
+                                        borderColor: isDarkMode ? '#607d8b' : '#b0bec5',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: isDarkMode ? '#90a4ae' : '#78909c',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: isDarkMode ? '#b0bec5' : '#455a64',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: isDarkMode ? '#cfd8dc' : '#546e7a',
+                                },
+                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton>
-                                            <SearchIcon />
+                                        <IconButton edge="end">
+                                            <SearchIcon sx={{ color: isDarkMode ? '#cfd8dc' : '#455a64' }} />
                                         </IconButton>
                                     </InputAdornment>
-                                )
+                                ),
                             }}
                         />
+
+
+
                     </Box>
                 </Grid>
             </Grid>
+
 
             {/* Filter dialog for mobile */}
             <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth>

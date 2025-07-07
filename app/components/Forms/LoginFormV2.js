@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { Navigate, NavLink, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -41,7 +41,8 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 });
 
 function LoginFormV2() {
-    const deco = useSelector((state) => state.ui.decoration);
+  const deco = useSelector((state) => state.ui.decoration);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -65,8 +66,8 @@ function LoginFormV2() {
         const isLoginSuccessful = data.success || data.message?.toLowerCase().includes('success');
 
         if (isLoginSuccessful) {
-          sessionStorage.setItem('data',JSON.stringify(data));
-          window.location.href = 'http://localhost:3000/app';
+          sessionStorage.setItem('data', JSON.stringify(data));
+          setTimeout(() => navigate('/app'), 400)
         } else {
           alert('Login failed: ' + (data.message || 'Invalid credentials'));
         }
@@ -184,8 +185,8 @@ function LoginFormV2() {
           </div>
         </form>
       </section>
-    </Paper>
-  );
+    </Paper>
+  );
 
 }
 
