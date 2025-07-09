@@ -55,7 +55,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
   },
   content: {
     width: '100%',
-    padding: theme.spacing(2),
+    padding: theme.spacing(0.7),
     minHeight: '100%',
     overflow: 'hidden',
     [theme.breakpoints.down('lg')]: {

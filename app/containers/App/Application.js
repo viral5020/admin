@@ -35,9 +35,12 @@ import {
   Error, Settings, HelpSupport,
   MapMarker, MapDirection, SearchMap,
   TrafficIndicator, StreetViewMap, NotFound,
-  Watchlist
+  Watchlist,
+  StockDetailMobile
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
+// import Watchlist from '../Dashboard/Watchlist';
+// import StockDetailMobile from '../Dashboard/StockDetailMobile';
 
 function Application(props) {
   const { history } = props;
@@ -49,6 +52,7 @@ function Application(props) {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
           <Route path="dashboard/watchlist" element={<Watchlist />} />
+          <Route path="dashboard/stock-details" element={<StockDetailMobile />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

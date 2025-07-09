@@ -28,7 +28,10 @@ import ApexCharts from './Apexcharts';
 import { useTheme } from '@mui/material/styles';
 import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from 'dan-components/Tables/MobileStockTable';
-import CloseIcon from '@mui/icons-material/Close';
+import { Navigate } from 'react-router-dom';
+import BackToTop from './BackToTop';
+// import { Navigate } from 'react-big-calendar';
+//"react-router-dom": "^6.23.1",
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
@@ -365,7 +368,7 @@ function Watchlist() {
         <meta property="twitter:description" content={description} />
       </Helmet>
       {/* <MarketPlaceWIdget /> */}
-      <FilterComponent searchText={searchText} setSearchText={setSearchText} isDarkMode={isDarkMode} isMobile={isMobile}/>
+      <FilterComponent searchText={searchText} setSearchText={setSearchText} isDarkMode={isDarkMode} isMobile={isMobile} />
       {/* <StockTable /> */}
       <Box>
         {sections.map((section, index) => (
@@ -385,7 +388,7 @@ function Watchlist() {
               </AccordionSummary>
               <AccordionDetails>
                 {isMobile ?
-                  <MobileStockTable searchText={searchText} setIsStockOpen={setIsStockOpenInMobile} watchList={dummyWatchlistData}  isDarkMode={isDarkMode}/>
+                  <MobileStockTable searchText={searchText} setIsStockOpen={setIsStockOpenInMobile} isStockOpen={isStockOpenInMobile} watchList={dummyWatchlistData} isDarkMode={isDarkMode} />
                   : <StockTable searchText={searchText} setIsStockOpen={setIsStockOpen} watchList={dummyWatchlistData} />}
               </AccordionDetails>
             </Accordion>
@@ -393,94 +396,47 @@ function Watchlist() {
         ))}
       </Box>
 
-      {isMobile ?
-        <Dialog
-          // fullScreen={isMobile}
-          fullWidth
-          open={isStockOpenInMobile}
-          onClose={() => setIsStockOpenInMobile(null)}
-          TransitionComponent={Transition}
-          PaperProps={{
-            sx: {
-              position: 'fixed',
-              bottom: 0,
-              m: 0,
-              width: '100%',
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
-            },
-          }}
-        >
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-            <Typography variant="h6">{isStockOpenInMobile?.scriptName}</Typography>
-            <IconButton onClick={() => setIsStockOpenInMobile(null)}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
+      <BackToTop />
 
-          <DialogContent dividers sx={{ p: 2 }}>
-            <Grid container spacing={1}>
-              {[
-                ['Open', isStockOpenInMobile?.open],
-                ['Close', isStockOpenInMobile?.close],
-                ['High', isStockOpenInMobile?.high],
-                ['Low', isStockOpenInMobile?.low],
-                ['Bid Rate', isStockOpenInMobile?.bidRate],
-                ['Ask Rate', isStockOpenInMobile?.askRate],
-                ['LTP', isStockOpenInMobile?.ltp],
-                ['Change', `${isStockOpenInMobile?.priceChange} (${isStockOpenInMobile?.priceChangePercent}%)`],
-                ['Qty', isStockOpenInMobile?.qty],
-                ['Max Order', isStockOpenInMobile?.maxOrder],
-                ['Position', isStockOpenInMobile?.position],
-                ['Last Changed', isStockOpenInMobile?.lastChangedAt],
-              ].map(([label, value]) => (
-                <Grid item xs={6} key={label}>
-                  <Typography variant="body2" color="text.secondary">
-                    {label}
-                  </Typography>
-                  <Typography variant="subtitle2" fontWeight="500">
-                    {value}
-                  </Typography>
-                </Grid>
-              ))}
-            </Grid>
-          </DialogContent>
-        </Dialog>
+      {isMobile ? isStockOpenInMobile && (
+        <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} />
+      )
         :
-        <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
-          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
-              <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" color="green" fontWeight="bold">
-                ₹164.85 ▲ +4.80 (+3.00%)
-              </Typography>
-            </Box>
-          </DialogTitle>
+      <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
+            <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" color="green" fontWeight="bold">
+              ₹164.85 ▲ +4.80 (+3.00%)
+            </Typography>
+          </Box>
+        </DialogTitle>
 
-          <DialogContent sx={{ px: 2 }}>
-            <Box display="flex" alignItems="center" gap={2} mb={2}>
-              <Button variant="contained" color="success">BUY</Button>
-              <Button variant="contained" color="error">SELL</Button>
-            </Box>
+        <DialogContent sx={{ px: 2 }}>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Button variant="contained" color="success">BUY</Button>
+            <Button variant="contained" color="error">SELL</Button>
+          </Box>
 
-            {/* Placeholder empty space */}
-            <Box
-              sx={{
-                height: 350,
-                border: '1px dashed #ccc',
-                borderRadius: 2,
-                backgroundColor: '#f9f9f9'
-              }}
-            ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
-          </DialogContent>
+          {/* Placeholder empty space */}
+          <Box
+            sx={{
+              height: 350,
+              border: '1px dashed #ccc',
+              borderRadius: 2,
+              backgroundColor: '#f9f9f9'
+            }}
+          ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
+        </DialogContent>
 
-          <DialogActions>
-            <Button onClick={() => setIsStockOpen(null)}>Close</Button>
-          </DialogActions>
-        </Dialog>}
+        <DialogActions>
+          <Button onClick={() => setIsStockOpen(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      }
     </>
   );
 }

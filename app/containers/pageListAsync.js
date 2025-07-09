@@ -39,6 +39,10 @@ export const Watchlist = loadable(() =>
   import ('./Dashboard/Watchlist'), {
     fallback: <Loading />,
   });
+export const StockDetailMobile = loadable(() =>
+  import ('./Dashboard/StockDetailMobile'), {
+    fallback: <Loading />,
+  });
 
 // Widgets
 export const Infographics = loadable(() =>

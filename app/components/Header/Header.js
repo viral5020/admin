@@ -131,7 +131,7 @@ function Header(props) {
         </Fab>
         
         {/* {!mdDown && ( */}
-          <div className={classes.headerProperties}>
+          <div className={classes.headerProperties} style={{paddingLeft: '0.7rem'}}>
             {/* <div className={cx(classes.headerAction, showTitle && classes.fadeOut)}>
               {fullScreen ? (
                 <Tooltip title="Exit Full Screen" placement="bottom">

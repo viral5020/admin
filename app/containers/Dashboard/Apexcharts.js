@@ -34,11 +34,12 @@ const ApexCharts = ({ theme }) => {
             mode: theme.palette.mode, // auto switches between 'light' or 'dark'
         },
         title: {
-            text: `${name} Candlestick Chart`,
-            align: 'left',
-            style: {
-                color: theme.palette.text.primary,
-            },
+            text: '',
+            show: false,
+            // align: 'left',
+            // style: {
+            //     color: theme.palette.text.primary,
+            // },
         },
         xaxis: {
             type: 'datetime',

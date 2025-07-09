@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Stack, Divider } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Navigate, useNavigate } from 'react-router-dom';
 
+const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, isDarkMode }) => {
 
-const MobileStockTable = ({ searchText, setIsStockOpen, watchList, isDarkMode }) => {
     return (
         <Box>
             {watchList.map((stock, idx) => {
@@ -12,7 +13,7 @@ const MobileStockTable = ({ searchText, setIsStockOpen, watchList, isDarkMode })
                 // const color = isUp ? '#00b894' : '#e17055'; // updated softer green/red
                 const color = isDarkMode
                     ? isUp ? '#26a69a' : '#ef6d61'
-                    : isUp ? '#BB3536' : '#388055';
+                    : isUp ? '#388055' : '#BB3536';
 
                 const textColor = isDarkMode ? '#e0e0e0' : '#1f1f1f';  // light gray vs dark gray
                 // const textColor = isDarkMode ? '#e0e0e0' : '#444';

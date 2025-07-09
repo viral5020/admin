@@ -229,6 +229,13 @@ module.exports = [
         icon: 'ion-ios-medal-outline'
       },
       {
+        key: 'crypto',
+        name: 'StockDetailMobile',
+        link: '/app/dashboard/stock-details',
+        icon: 'ion-ios-medal-outline',
+        hideInSidebar: true, 
+      },
+      {
         key: 'login2',
         name: 'Login',
         link: '/login',

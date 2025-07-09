@@ -35,6 +35,9 @@ function MainMenu(props) {
   const { dataMenu } = props;
 
   const getMenus = (menuArray, paddingLevel) => menuArray.map((item, index) => {
+    if(item.hideInSidebar){
+      return;
+    }
     if (item.child || item.linkParent) {
       return (
         <div key={index.toString()}>
