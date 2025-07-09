@@ -12,6 +12,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import UserMenu from './UserMenu';
 import SearchUi from '../Search/SearchUi';
 import useStyles from './header-jss';
+import { useSelector } from 'react-redux';
+import { useTheme } from '@mui/material';
 
 const elem = document.documentElement;
 
@@ -21,6 +23,9 @@ function Header(props) {
   const [fullScreen, setFullScreen] = useState(false);
   const [turnDarker, setTurnDarker] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
+  const isLgUp = useMediaQuery(useTheme().breakpoints.up('lg'));
+  const sidebarOpen = useSelector((state) => state.ui.sidebarOpen);
+
 
   // Initial header style
   let flagDarker = false;
@@ -129,10 +134,10 @@ function Header(props) {
         >
           <MenuIcon />
         </Fab>
-        
+
         {/* {!mdDown && ( */}
-          <div className={classes.headerProperties} style={{paddingLeft: '0.7rem'}}>
-            {/* <div className={cx(classes.headerAction, showTitle && classes.fadeOut)}>
+        <div className={classes.headerProperties} style={{ paddingLeft: '0.7rem' }}>
+          {/* <div className={cx(classes.headerAction, showTitle && classes.fadeOut)}>
               {fullScreen ? (
                 <Tooltip title="Exit Full Screen" placement="bottom">
                   <IconButton className={classes.button} onClick={closeFullScreen} size="large">
@@ -157,18 +162,18 @@ function Header(props) {
                 </IconButton>
               </Tooltip>
             </div> */}
-            <Typography component="h2" className={classes.header_Title}>
-              {title}
-            </Typography>
-          </div>
+          <Typography component="h2" className={classes.header_Title} sx={{pl: isLgUp && !sidebarOpen ? 2 : 0}}>
+            {title}
+          </Typography>
+        </div>
         {/* )} */}
         {/* <div className={classes.searchWrapper}> */}
-          <div className={cx(classes.wrapper, classes.light)}>
-            <div className={classes.search}>
-              <SearchIcon />
-            </div>
-            <SearchUi history={history} />
+        <div className={cx(classes.wrapper, classes.light)}>
+          <div className={classes.search}>
+            <SearchIcon />
           </div>
+          <SearchUi history={history} />
+        </div>
         {/* </div> */}
         {!smDown && (
           <span className={classes.separatorV} />

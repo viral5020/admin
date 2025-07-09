@@ -9,6 +9,7 @@ import {
     IconButton,
     Slide,
     AppBar,
+    Button,
     Toolbar,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ApexCharts from './Apexcharts'; // Adjust path to your actual component
 
-const MobileStockDetails = () => {
+const StockDetailMobile = () => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const MobileStockDetails = () => {
 
     const { scriptName, exchange, open, close, high, low, bidRate, askRate, ltp, priceChange, priceChangePercent, qty, maxOrder, position, lastChangedAt } = isStockOpen;
 
-    console.log('priceChange > 0',priceChange > 0)
+    console.log('priceChange > 0', priceChange > 0)
     const isUp = priceChange > 0;
     // const priceColor = isUp ? '#00b894' : '#e17055';
     const icon = isUp ? <ArrowDropUpIcon fontSize="small" /> : <ArrowDropDownIcon fontSize="small" />;
@@ -40,7 +41,7 @@ const MobileStockDetails = () => {
 
     return (
         <Slide direction="up" in mountOnEnter unmountOnExit>
-            <Box sx={{  overflowY: 'auto', bgcolor: theme.palette.background.default, scrollbarWidth: 'none' }}>
+            <Box sx={{ overflowY: 'auto', bgcolor: theme.palette.background.default, scrollbarWidth: 'none' }}>
                 <AppBar
                     position="fixed"
                     color="default"
@@ -137,12 +138,66 @@ const MobileStockDetails = () => {
                         </Grid>
                     ))}
                 </Grid>
+
+                {/* Buy Sell Btn */}
+                <Box
+                    sx={{
+                        position: 'fixed',          // <— fixed to viewport
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        backgroundColor: theme.palette.background.paper,
+                        boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        px: 2,
+                        py: 1.3,
+                        zIndex: 1400,              // ensure it's above everything
+                    }}
+                >
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        sx={{
+                            backgroundColor: '#00b894', // Buy color
+                            color: '#fff',
+                            py: 1,
+                            mr: 1,
+                            '&:hover': {
+                                backgroundColor: '#00a36c',
+                            },
+                        }}
+                    >
+                        Buy
+                    </Button>
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        sx={{
+                            backgroundColor: '#d63031', // Sell color
+                            color: '#fff',
+                            py: 1,
+                            ml: 1,
+                            '&:hover': {
+                                backgroundColor: '#c0392b',
+                            },
+                        }}
+                    >
+                        Sell
+                    </Button>
+                </Box>
+
+                {/* Buy Sell Btn  */}
+                <Box sx={{ visibility: 'hidden', width: '100%', px: 2, py: 1.5, }}>
+                    <Button>xxx</Button>
+                    <Button>xxx</Button>
+                </Box>
             </Box>
         </Slide>
     );
 };
 
-export default MobileStockDetails;
+export default StockDetailMobile;
 
 function generateCandleData() {
     return [
