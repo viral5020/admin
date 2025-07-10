@@ -55,7 +55,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const dummyWatchlistData = [
   {
     id: '1',
-    scriptName: 'RELIANCE',
+    scriptName: 'RELIANCE 31 JUL 2025',
     exchange: 'NSE',
     open: 2845.50,
     close: 2829.10,
@@ -69,11 +69,12 @@ const dummyWatchlistData = [
     qty: 150,
     maxOrder: 1000,
     position: 'Buy',
+    isFavorite: true,
     lastChangedAt: '2025-07-01 09:42:11'
   },
   {
     id: '2',
-    scriptName: 'HDFCBANK',
+    scriptName: 'HDFCBANK 31 JUL 2025',
     exchange: 'BSE',
     open: 1675.20,
     close: 1682.40,
@@ -86,12 +87,13 @@ const dummyWatchlistData = [
     priceChangePercent: +0.43,
     qty: 80,
     maxOrder: 800,
+    isFavorite: true,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:43:08'
   },
   {
     id: '3',
-    scriptName: 'INFY',
+    scriptName: 'INFY  31 JUL 2025',
     exchange: 'NSE',
     open: 1530.00,
     close: 1525.10,
@@ -109,7 +111,7 @@ const dummyWatchlistData = [
   },
   {
     id: '4',
-    scriptName: 'ITC',
+    scriptName: 'ITC 31 JUL 2025',
     exchange: 'MCX',
     open: 435.60,
     close: 438.00,
@@ -122,12 +124,13 @@ const dummyWatchlistData = [
     priceChangePercent: +0.55,
     qty: 250,
     maxOrder: 2000,
+    isFavorite: true,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:45:01'
   },
   {
     id: '5',
-    scriptName: 'TCS',
+    scriptName: 'TCS 31 JUL 2025',
     exchange: 'NSE',
     open: 3830.00,
     close: 3825.75,
@@ -140,12 +143,13 @@ const dummyWatchlistData = [
     priceChangePercent: -0.11,
     qty: 70,
     maxOrder: 600,
+    isFavorite: true,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:46:17'
   },
   {
     id: '6',
-    scriptName: 'COALINDIA',
+    scriptName: 'COALINDIA 31 JUL 2025',
     exchange: 'BSE',
     open: 392.00,
     close: 390.10,
@@ -163,7 +167,7 @@ const dummyWatchlistData = [
   },
   {
     id: '7',
-    scriptName: 'SBIN',
+    scriptName: 'SBIN 31 JUL 2025',
     exchange: 'NSE',
     open: 865.30,
     close: 868.20,
@@ -181,7 +185,7 @@ const dummyWatchlistData = [
   },
   {
     id: '8',
-    scriptName: 'WIPRO',
+    scriptName: 'WIPRO 31 JUL 2025',
     exchange: 'MCX',
     open: 475.00,
     close: 477.65,
@@ -194,12 +198,13 @@ const dummyWatchlistData = [
     priceChangePercent: +0.56,
     qty: 130,
     maxOrder: 1200,
+    isFavorite: true,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:49:30'
   },
   {
     id: '9',
-    scriptName: 'JSWSTEEL',
+    scriptName: 'JSWSTEEL 31 JUL 2025',
     exchange: 'BSE',
     open: 840.00,
     close: 838.20,
@@ -217,7 +222,7 @@ const dummyWatchlistData = [
   },
   {
     id: '10',
-    scriptName: 'HINDALCO',
+    scriptName: 'HINDALCO 31 JUL 2025',
     exchange: 'NSE',
     open: 570.00,
     close: 573.40,
@@ -235,7 +240,7 @@ const dummyWatchlistData = [
   },
   {
     id: '11',
-    scriptName: 'ONGC',
+    scriptName: 'ONGC 31 JUL 2025',
     exchange: 'MCX',
     open: 220.00,
     close: 219.20,
@@ -248,12 +253,13 @@ const dummyWatchlistData = [
     priceChangePercent: -0.36,
     qty: 600,
     maxOrder: 3000,
+    isFavorite: true,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:51:59'
   },
   {
     id: '12',
-    scriptName: 'HCLTECH',
+    scriptName: 'HCLTECH 31 JUL 2025',
     exchange: 'NSE',
     open: 1465.00,
     close: 1472.80,
@@ -266,12 +272,13 @@ const dummyWatchlistData = [
     priceChangePercent: +0.53,
     qty: 95,
     maxOrder: 850,
+    isFavorite: true,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:52:45'
   },
   {
     id: '13',
-    scriptName: 'NTPC',
+    scriptName: 'NTPC 31 JUL 2025',
     exchange: 'BSE',
     open: 320.40,
     close: 318.90,
@@ -289,7 +296,7 @@ const dummyWatchlistData = [
   },
   {
     id: '14',
-    scriptName: 'ASIANPAINT',
+    scriptName: 'ASIANPAINT 31 JUL 2025',
     exchange: 'MCX',
     open: 3100.00,
     close: 3106.50,
@@ -302,12 +309,13 @@ const dummyWatchlistData = [
     priceChangePercent: +0.21,
     qty: 55,
     maxOrder: 500,
+    isFavorite: true,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:54:12'
   },
   {
     id: '15',
-    scriptName: 'MARUTI',
+    scriptName: 'MARUTI 31 JUL 2025',
     exchange: 'NSE',
     open: 10850.00,
     close: 10825.00,
@@ -372,13 +380,22 @@ function Watchlist() {
       {/* <StockTable /> */}
       <Box>
         {sections.map((section, index) => (
-          <Box key={section.key} mb={2}>
+          <Box key={section.key} mb={2} >
             <Accordion
               expanded={expanded.has(section.key)}
               onChange={() => toggleExpand(section.key)}
+              sx={{
+                // border: '2px solid red',
+                // '& .MuiAccordionSummary-root': {
+                //   px: 1,
+                // },
+                '& .MuiAccordionDetails-root': {
+                  px: 1,
+                }
+              }}
               disableGutters
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} >
                 <Box display="flex" alignItems="center" gap={1}>
                   {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
                   <Typography variant="subtitle1" fontWeight="bold">
@@ -402,40 +419,40 @@ function Watchlist() {
         <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} />
       )
         :
-      <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
-            <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
-          </Box>
-          <Box>
-            <Typography variant="h6" color="green" fontWeight="bold">
-              ₹164.85 ▲ +4.80 (+3.00%)
-            </Typography>
-          </Box>
-        </DialogTitle>
+        <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
+              <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" color="green" fontWeight="bold">
+                ₹164.85 ▲ +4.80 (+3.00%)
+              </Typography>
+            </Box>
+          </DialogTitle>
 
-        <DialogContent sx={{ px: 2 }}>
-          <Box display="flex" alignItems="center" gap={2} mb={2}>
-            <Button variant="contained" color="success">BUY</Button>
-            <Button variant="contained" color="error">SELL</Button>
-          </Box>
+          <DialogContent sx={{ px: 2 }}>
+            <Box display="flex" alignItems="center" gap={2} mb={2}>
+              <Button variant="contained" color="success">BUY</Button>
+              <Button variant="contained" color="error">SELL</Button>
+            </Box>
 
-          {/* Placeholder empty space */}
-          <Box
-            sx={{
-              height: 350,
-              border: '1px dashed #ccc',
-              borderRadius: 2,
-              backgroundColor: '#f9f9f9'
-            }}
-          ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
-        </DialogContent>
+            {/* Placeholder empty space */}
+            <Box
+              sx={{
+                height: 350,
+                border: '1px dashed #ccc',
+                borderRadius: 2,
+                backgroundColor: '#f9f9f9'
+              }}
+            ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
+          </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setIsStockOpen(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+          <DialogActions>
+            <Button onClick={() => setIsStockOpen(null)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       }
     </>
   );
