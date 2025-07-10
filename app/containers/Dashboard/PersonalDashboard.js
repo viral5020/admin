@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import {
-  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress,
   Grid, Paper, Typography, Box, Divider, useMediaQuery as useMUIQuery,
 } from '@mui/material';
 
@@ -192,6 +192,7 @@ function PersonalDashboard() {
   const [margindata, setMargindata] = useState()
 
   const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
+  const [orders, setOrders] = useState([]);
   const [positionDialogOpen, setpositionDialogOpen] = useState(false);
 
 
@@ -267,10 +268,10 @@ function PersonalDashboard() {
       elevation={0}
       sx={{
         ...glassStyles,
-        minHeight: 130,
+        minHeight: 110,
         borderRadius: 2,
-        p: 2,
-        // backgroundColor: bgcolor,
+        p: 1,
+        backgroundColor: bgcolor,
       }}
     >
       {/* Row: Icon + Title (Horizontally Aligned) */}
@@ -324,6 +325,51 @@ function PersonalDashboard() {
     }
   };
 
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem('data'));
+    const formData = {
+      is_app: 1,
+      login_user_id: dataStored.user_id,
+      auth_key: dataStored.auth_key,
+      isTodayTrade: "today",
+    };
+
+    try {
+      const response = await fetch('http://128.199.126.171/~goldorg/datatables/order_book_new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log("API response:", data);
+
+      if (data.status === "error") {
+        console.error("Session expired:", data.message);
+        return;
+      }
+
+      // Check where your order array is
+      const ordersArray = data.aaData || data.data || [];
+
+      if (!ordersArray.length) {
+        console.log("No orders found");
+      }
+
+      setOrders(ordersArray);
+      setOrdersDialogOpen(true); // ✅ Open dialog after data loaded
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   function getMarginDataFromSessionStorage() {
     const data = sessionStorage.getItem("data");
     const dataObj = JSON.parse(data);
@@ -354,10 +400,11 @@ function PersonalDashboard() {
 
   const [loginData, setLoginData] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     getMarginDataFromSessionStorage();
     fetchLoginData();
+    fetchOrders();
   }, []);
 
 
@@ -380,21 +427,56 @@ function PersonalDashboard() {
           </Box>
         </Grid>
 
-        <Dialog open={ordersDialogOpen} onClose={() => setOrdersDialogOpen(false)} fullWidth maxWidth="sm">
+        <Dialog
+          open={ordersDialogOpen}
+          onClose={() => setOrdersDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={600} mb={2}>
               Order Details
             </Typography>
-            <Typography>
-              Here you can show detailed order data, table, or anything you like!
-            </Typography>
+
+            {loading ? (
+              <CircularProgress />
+            ) : orders.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Symbol</TableCell>
+                    <TableCell>Quantity</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>{order.id}</TableCell>
+                      <TableCell>{order.symbol}</TableCell>
+                      <TableCell>{order.quantity}</TableCell>
+                      <TableCell>{order.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography>No today's orders found.</Typography>
+            )}
           </Box>
+
           <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setOrdersDialogOpen(false)} variant="contained" color="primary">
+            <Button
+              onClick={() => setOrdersDialogOpen(false)}
+              variant="contained"
+              color="primary"
+            >
               Close
             </Button>
           </DialogActions>
         </Dialog>
+
 
         <Grid item xs={12} sm={6} md={3}>
           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
@@ -436,7 +518,7 @@ function PersonalDashboard() {
             title="Rejection Logs"
             icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
             content={['Today: 50', 'This Week: 10']}
-            bgcolor="rgba(76, 175, 80, 0.1)"
+            bgcolor="rgba(206, 48, 48, 0.1)"
           />
         </Grid>
 
@@ -544,18 +626,23 @@ function PersonalDashboard() {
         {/*--------------------- Sector-wise Distribution ---------------------- */}
         <Grid item xs={12} md={8}>
           <Paper elevation={0} sx={glassStyles}>
-            <Box sx={{ mb: 2 }}>
-              {/* Title centered */}
+            <Box sx={{ mb: 1 }}> {/* Reduced bottom margin of outer Box */}
               {!isMobile ? (
                 <Box
                   sx={{
                     position: 'relative',
                     display: 'flex',
-                    // justifyContent: 'center',
-                    // alignItems: 'center',
+                    m: 0,
+                    p: 0,
                   }}
                 >
-                  <Typography variant="subtitle1" fontWeight={700} textAlign="left">
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={700}
+                    textAlign="left"
+                    gutterBottom={false}
+                    sx={{ m: 0, p: 0, lineHeight: 1.2 }}
+                  >
                     {"Sector-wise Distribution"}
                   </Typography>
 
@@ -564,32 +651,38 @@ function PersonalDashboard() {
                   </Box>
                 </Box>
               ) : (
-                // Mobile layout: stacked title and dropdown
-                <Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    m: 0,
+                    p: 0,
+                  }}
+                >
                   <Typography
-                    variant="h6"
+                    variant="subtitle1"
                     fontWeight={700}
-                    textAlign="center"
-                    mb={1}
+                    textAlign="left"
+                    gutterBottom={false}
+                    sx={{ m: 0, p: 0, lineHeight: 1.2 }}
                   >
                     {"Sector-wise Distribution"}
                   </Typography>
 
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <DropdownMenu selected={selected} setSelected={setSelected} />
-                  </Box>
+                  <DropdownMenu selected={selected} setSelected={setSelected} />
                 </Box>
               )}
             </Box>
-            <Divider sx={{ mb: 2 }} />
-            <Box sx={{ height: 300 }}>
+            <Divider sx={{ mb: 1 }} /> {/* Reduced vertical margin */}
+            <Box sx={{ height: 220, m: 0, p: 0 }}> {/* Reduced chart height */}
               <Doughnut
                 ref={sectorChart}
                 data={{
                   labels: ['Finance', 'Technology', 'Healthcare', 'Energy'],
                   datasets: [{
                     data: [400, 300, 200, 100],
-                    backgroundColor: ['#1976d2', '#388e3c', '#7b1fa2', '#d32f2f'], // 🌑 Darker colors
+                    backgroundColor: ['#1976d2', '#388e3c', '#7b1fa2', '#d32f2f'],
                     borderColor: theme.palette.mode === 'dark' ? '#222' : '#fff',
                     borderWidth: 2,
                   }],
@@ -612,9 +705,7 @@ function PersonalDashboard() {
                           const index = context.dataIndex;
                           const sector = detailedSectorData[index];
                           if (!sector) return '';
-                          return [
-                            `Total Investment: ₹${sector.totalInvestment.toLocaleString()}`,
-                          ];
+                          return [`Total Investment: ₹${sector.totalInvestment.toLocaleString()}`];
                         },
                       },
                     },
@@ -623,16 +714,16 @@ function PersonalDashboard() {
                       labels: {
                         color: theme.palette.text.primary,
                         usePointStyle: true,
-                        padding: 20,
+                        padding: 10, // Reduced legend padding
                       },
                     },
                   },
                 }}
               />
             </Box>
-
           </Paper>
         </Grid>
+
 
         {/*--------------------- sector popup ---------------------*/}
         <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
@@ -798,32 +889,46 @@ function PersonalDashboard() {
 
         {/* ----------- Recent Login ---------- */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ ...glassStyles, height: '100%' }}>
-            <Typography variant="subtitle1" fontWeight={700} mb={2}>
+          <Paper elevation={0} sx={{ ...glassStyles, height: '100%', p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700} mb={1}>
               Recent Login
             </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 1 }} />
 
             <Box
               display="flex"
               flexDirection="column"
-              gap={2}
+              gap={1}
               sx={{
-                maxHeight: 250,
+                height: 220, // Fixed height so content doesn't push it
                 overflowY: 'auto',
-                pr: 1,
+                pr: 0.5,
                 scrollbarWidth: 'none',
                 '&::-webkit-scrollbar': { display: 'none' },
               }}
             >
               {loading ? (
-                <Typography variant="body2" color="text.secondary">
-                  Loading...
-                </Typography>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flex={1}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    Loading...
+                  </Typography>
+                </Box>
               ) : loginData.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No login records found.
-                </Typography>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flex={1}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No login records found.
+                  </Typography>
+                </Box>
               ) : (
                 loginData.map((login, idx) => (
                   <Box
@@ -831,81 +936,82 @@ function PersonalDashboard() {
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
-                    gap={2}
+                    gap={1}
+                    sx={{ m: 0, p: 0 }}
                   >
                     {/* Left part */}
-                    <Box display="flex" alignItems="center" gap={2}>
+                    <Box display="flex" alignItems="center" gap={1}>
                       <Box
                         sx={{
-                          width: 10,
-                          height: 10,
+                          width: 8,
+                          height: 8,
                           borderRadius: '50%',
                           backgroundColor: ['#1976d2', '#9c27b0', '#4caf50'][idx % 3],
                         }}
                       />
                       <Box>
-                        <Typography variant="body2" fontWeight={500}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={500}
+                          sx={{ lineHeight: 1.2, m: 0 }}
+                        >
                           {login.loginTime}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ lineHeight: 1.2, m: 0 }}
+                        >
                           IP: {login.ip}
                         </Typography>
-                        {/* <Typography variant="caption" color="text.secondary">
-        {login.source}
-      </Typography> */}
                       </Box>
                     </Box>
 
-                    {/* Right part: computer icon */}
+                    {/* Right part: icon */}
                     {login.source?.toLowerCase() === 'web' && (
                       <Box
                         sx={{
-                          width: 32,
-                          height: 32,
+                          width: 28,
+                          height: 28,
                           borderRadius: '50%',
-                          backgroundColor: '#e3f2fd', // light blue background
-                          border: '2px solid #1976d2', // dark blue border
+                          backgroundColor: '#e3f2fd',
+                          border: '2px solid #1976d2',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        <LaptopMacIcon sx={{ color: '#1976d2' }} /> {/* dark icon */}
+                        <LaptopMacIcon sx={{ color: '#1976d2', fontSize: 16 }} />
                       </Box>
                     )}
 
                     {login.source?.toLowerCase() === 'phone' && (
                       <Box
                         sx={{
-                          width: 32,
-                          height: 32,
+                          width: 28,
+                          height: 28,
                           borderRadius: '50%',
-                          backgroundColor: '#e8f5e9', // light green background
-                          border: '2px solid #4caf50', // dark green border
+                          backgroundColor: '#e8f5e9',
+                          border: '2px solid #4caf50',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        <SmartphoneIcon sx={{ color: '#4caf50' }} /> {/* dark icon */}
+                        <SmartphoneIcon sx={{ color: '#4caf50', fontSize: 16 }} />
                       </Box>
                     )}
-
                   </Box>
-
                 ))
               )}
             </Box>
           </Paper>
         </Grid>
-
-
         {/* ------------------ Stock-Wise Distribution ------------------ */}
         <Grid item xs={12}>
-          <Paper elevation={0} sx={glassStyles}>
-
+          <Paper elevation={0} sx={{ ...glassStyles, p: 2 }}>
             {/*--------- Title --------- */}
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1 }}>
               {!isMobile ? (
                 <Box
                   sx={{
@@ -913,64 +1019,62 @@ function PersonalDashboard() {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    mb: 0,
                   }}
                 >
-                  <Typography variant="subtitle1" fontWeight={700} textAlign="center">
+                  <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ m: 0 }}>
                     Stock-Wise Distribution
                   </Typography>
-
                   <Box sx={{ position: 'absolute', right: 0 }}>
                     <DropdownMenu selected={selected} setSelected={setSelected} />
                   </Box>
                 </Box>
               ) : (
-                // Mobile layout: stacked title and dropdown
-                <Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 0,
+                  }}
+                >
                   <Typography
-                    variant="h6"
+                    variant="subtitle1"
                     fontWeight={700}
-                    textAlign="center"
-                    mb={1}
+                    textAlign="left"
+                    sx={{ m: 0 }}
                   >
                     Stock-Wise Distribution
                   </Typography>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <DropdownMenu selected={selected} setSelected={setSelected} />
-                  </Box>
+                  <DropdownMenu selected={selected} setSelected={setSelected} />
                 </Box>
               )}
             </Box>
 
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 1 }} />
 
-            <DialogContent sx={{ overflow: 'hidden', px: { xs: 2, sm: 3 } }}>
+            <DialogContent sx={{ overflow: 'hidden', px: { xs: 1, sm: 2 }, pt: 0, pb: 0 }}>
               {asserts && (
                 <Box
                   sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
-                    gap: 4,
+                    gap: 2,
                     alignItems: 'stretch',
                   }}
                 >
-
-                  {/*-------------- 📋 Company list on LHS (scrollable) --------------*/}
+                  {/* Company list */}
                   <Box
                     ref={listRef}
                     sx={{
                       flex: 1,
-                      maxHeight: { xs: 250, sm: 300 },
+                      maxHeight: { xs: 220, sm: 280 },
                       overflowY: 'auto',
                       overflowX: 'hidden',
-                      px: 1,
-                      width: '100%',
+                      px: 0.5,
                       '&::-webkit-scrollbar': { display: 'none' },
-                      // scrollbarWidth: 'none',
-                      direction: 'rtl',
                       scrollbarWidth: 'thin',
                       scrollbarColor: '#90caf9 transparent',
-                      msOverflowStyle: 'none',
                     }}
                   >
                     {Object.entries(asserts).map(([name, details], i) => (
@@ -979,18 +1083,16 @@ function PersonalDashboard() {
                         ref={(el) => (companyRefs.current[name] = el)}
                         onClick={() => showChartTooltip(i)}
                         sx={{
-                          mb: 2,
-                          p: 2,
-                          borderRadius: 2,
+                          mb: 1.5,
+                          p: 1.5,
+                          borderRadius: 1,
                           boxShadow: 1,
                           cursor: 'pointer',
-                          backgroundColor:
-                            highlightedStock === name ? 'primary.light' : 'background.paper',
-                          transition: 'background-color 0.6s ease, transform 0.5s ease',
-                          transform: highlightedStock === name ? 'scale(1.04)' : 'scale(1)',
+                          backgroundColor: highlightedStock === name ? 'primary.light' : 'background.paper',
+                          transition: 'background-color 0.4s ease, transform 0.3s ease',
+                          transform: highlightedStock === name ? 'scale(1.02)' : 'scale(1)',
                         }}
                       >
-                        {/* Top Row: Company Name & P/L */}
                         <Box
                           sx={{
                             display: 'flex',
@@ -999,39 +1101,41 @@ function PersonalDashboard() {
                             flexWrap: 'wrap',
                           }}
                         >
-
                           <Typography
                             variant="body2"
                             sx={{
                               color: details.pl >= 0 ? 'success.main' : 'error.main',
                               fontWeight: 600,
+                              lineHeight: 1.2,
+                              m: 0,
                             }}
                           >
                             P/L: ₹{details.pl}
                           </Typography>
-                          <Typography fontWeight={600} variant="subtitle1">
+                          <Typography fontWeight={600} variant="subtitle2" sx={{ lineHeight: 1.2, m: 0 }}>
                             {name}
                           </Typography>
                         </Box>
-
-                        {/* Bottom Row: Qty & Price */}
                         <Box
                           sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             flexWrap: 'wrap',
-                            mt: 1,
+                            mt: 0.5,
                           }}
                         >
-                          <Typography variant="body2">Price: ₹{details.price}</Typography>
-                          <Typography variant="body2">Qty: {details.qty}</Typography>
+                          <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
+                            Price: ₹{details.price}
+                          </Typography>
+                          <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
+                            Qty: {details.qty}
+                          </Typography>
                         </Box>
                       </Box>
                     ))}
-
                   </Box>
 
-                  {/* ---------------📊 Chart on RHS ------------------*/}
+                  {/* Chart */}
                   <Box
                     sx={{
                       flex: 1,
@@ -1039,11 +1143,12 @@ function PersonalDashboard() {
                       maxWidth: { xs: '100%', md: 400 },
                       height: { xs: 250, sm: 300 },
                       mx: 'auto',
+                      position: 'relative', // ⭐ Added
                     }}
                   >
                     <Doughnut
                       data={{
-                        labels: [], // Skip individual stock labels in legend
+                        labels: [],
                         datasets: [
                           {
                             label: "Small Cap",
@@ -1070,7 +1175,7 @@ function PersonalDashboard() {
                       }}
                       options={{
                         responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: false, // Keep or try removing to test
                         cutout: "50%",
                         plugins: {
                           legend: {
@@ -1123,9 +1228,9 @@ function PersonalDashboard() {
                           }
                         },
                       }}
+                      height={250}  // ⭐ Optional fallback
+                      width={250}
                     />
-
-
                   </Box>
                 </Box>
               )}
@@ -1162,22 +1267,22 @@ function PersonalDashboard() {
                     <Typography
                       variant="h6"
                       fontWeight={700}
-                      mb={2}
+                      mb={1}
                       sx={{
                         position: 'sticky',
                         top: 0,
                         background: gradientBg,
                         backdropFilter: 'blur(8px)',
                         zIndex: 1,
-                        pb: 1.2,
-                        pt: 1,
-                        px: 2,
+                        pb: 0.8,
+                        pt: 0.8,
+                        px: 1.5,
                         borderTopLeftRadius: 12,
                         borderTopRightRadius: 12,
                         borderBottom: `1px solid ${theme.palette.divider}`,
                         color: headerColor,
-                        fontSize: '1.15rem',
-                        letterSpacing: '0.5px',
+                        fontSize: '1.05rem',
+                        letterSpacing: '0.4px',
                       }}
                     >
                       {title}
@@ -1205,17 +1310,16 @@ function PersonalDashboard() {
                           });
                           setCandleOpen(true);
                         }}
-                        sx={{ cursor: 'pointer' }}
+                        sx={{ cursor: 'pointer', mb: 1 }}
                         display="flex"
                         alignItems="center"
-                        mb={1.5}
                       >
                         <Box
                           sx={{
-                            width: 24,
-                            height: 24,
+                            width: 20,
+                            height: 20,
                             borderRadius: '50%',
-                            mr: 1.5,
+                            mr: 1,
                             backgroundColor:
                               index === 1
                                 ? theme.palette.success.main
@@ -1225,9 +1329,12 @@ function PersonalDashboard() {
                           }}
                         />
                         <Box>
-                          <Typography variant="body2" fontWeight={600}>{stock.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            LTP: {stock.ltp} | <span style={{ color: index === 2 ? 'red' : 'green' }}>{stock.change}</span>
+                          <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                            {stock.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+                            LTP: {stock.ltp} |{' '}
+                            <span style={{ color: index === 2 ? 'red' : 'green' }}>{stock.change}</span>
                           </Typography>
                         </Box>
                       </Box>
@@ -1238,6 +1345,7 @@ function PersonalDashboard() {
             })}
           </Grid>
         </Grid>
+
 
         <Dialog
           open={candleOpen}
