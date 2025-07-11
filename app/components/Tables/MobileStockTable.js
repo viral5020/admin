@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -13,20 +13,6 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import { useNavigate } from 'react-router-dom';
-import MiniLineChart from '../../containers/Dashboard/MiniLineChart';
-
-const soloTheme = createTheme({
-    breakpoints: {
-        values: {
-            xs: 0,
-            mobile: 480,
-            // tablet: 768,
-            // laptop: 1024,
-            // desktop: 1280,
-            // xl: 1536,
-        },
-    },
-})
 
 function splitScriptAndDate(fullText) {
     const parts = fullText.trim().split(' ');
@@ -40,11 +26,46 @@ function splitScriptAndDate(fullText) {
 
 
 const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, isDarkMode, onToggleFavorite, favorites }) => {
+    const [boxStyle, setBoxStyle] = useState();
+    const [spacing, setSpacing] = useState({});
 
     function apiSetFavrioute(e) {
         e.stopPropagation();
         console.log('inside apiSetFavrioute');
     }
+
+    useEffect(() => {
+        if (window.innerWidth < 370) {
+            setSpacing({
+                gap: '1vw',
+                width: '4.6rem',
+                px: '0.15rem'
+            })
+        } else if (window.innerWidth < 405) {
+            setSpacing({
+                gap: '2vw',
+                width: '4.8rem',
+                px: '0.2rem'
+            })
+        } else {
+            setSpacing({
+                gap: '3vw',
+                width: '5.5rem',
+                px: '0.4rem'
+            })
+        }
+    }, [])
+
+    useEffect(() => {
+        setBoxStyle({
+            borderRadius: '10%',
+            px: spacing.px,
+            py: 0,
+            color: 'white',
+            width: '100%',
+            opacity: '0.9'
+        })
+    }, [spacing])
 
     return (
         <Box>
@@ -53,6 +74,8 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                 const color = isDarkMode
                     ? isUp ? '#26a69a' : '#ef6d61'
                     : isUp ? '#388055' : '#BB3536';
+
+                // setBoxStyle(prev => ({ ...prev, backgroundColor: color }))
 
                 const textColor = isDarkMode ? '#e0e0e0' : '#1f1f1f';
                 const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
@@ -75,7 +98,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                             onClick={() => setIsStockOpen(stock)}
                         >
                             {/* Logo & Star Section */}
-                            <Stack spacing={0} alignItems="center">
+                            <Stack alignItems="flex-start" direction='column'>
                                 {/* Logo */}
                                 <Box
                                     sx={{
@@ -93,42 +116,29 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                 >
                                     {stock.scriptName[0]}
                                 </Box>
-
-                                {/* Star */}
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onToggleFavorite(stock.id);
-                                    }}
-                                    sx={{ mt: 0 }}  // is it applicable
-                                >
-                                    {stock.isFavorite ? (
-                                        <StarIcon sx={{ color: '#fdd835', mt: 0 }} />
-                                    ) : (
-                                        <StarBorderIcon sx={{ color: isDarkMode ? '#aaa' : '#666', mt: 0 }} />
-                                    )}
-                                </IconButton>
                             </Stack>
-                            
+
                             <Stack direction="row" justifyContent="space-between" sx={{ mt: 0, width: '100%' }} gap={2}>
-                                {/** 2nd column */}
+                                {/** 1st column */}
                                 <Stack direction="column" justifyContent="space-between" alignItems="left" >
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color,
+                                            fontWeight: 550,
+                                            // fontSize: '0.9rem',
+                                        }}
+                                    >
+                                        {stock.priceChange.toFixed(2)}  ({stock.priceChangePercent.toFixed(2)}%){' '}
+                                    </Typography>
+
                                     <Stack direction="row" justifyContent="space-between" alignItems="" sx={{ width: '30vw', gap: 1 }} >
                                         <Typography
                                             variant="subtitle2"
                                             fontWeight={600}
-                                            sx={{ color: textColor }}
+                                            sx={{ color: textColor, lineHeight: '1rem' }}
                                         >
                                             {splitScriptAndDate(stock.scriptName).scriptName}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            fontWeight={500}
-                                            // fontSize={15}
-                                            sx={{ color: textColor }}
-                                        >
-                                            {stock.qty}
                                         </Typography>
                                     </Stack>
 
@@ -139,58 +149,109 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                         {splitScriptAndDate(stock.scriptName).date}
                                     </Typography>
 
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            color,
-                                            fontWeight: 550,
-                                            // fontSize: '0.9rem',
-                                        }}
-                                    >
-                                        {stock.priceChange.toFixed(2)}  ({stock.priceChangePercent.toFixed(2)}%){' '}
-                                        {stock.ltp.toFixed(2)}
-                                        {/* {stock.priceChange > 0 ? '+' : ''} */}
-                                    </Typography>
+                                    {/* <Stack direction='row' gap={1}>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ color: textColor }}
+                                        >
+                                            O: {stock.open}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ color: textColor }}
+                                        >
+                                            C: {stock.close}
+                                        </Typography>
+                                    </Stack> */}
                                 </Stack>
+                                {/** 2nd column */}
+                                <Stack direction="row" justifyContent="space-between" alignItems="left" gap={spacing.gap}>
+                                    <Stack direction="column" justifyContent="space-between" alignItems="left" sx={{ width: spacing.width }}>
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight={500}
+                                            sx={{ color: textColor }}
+                                        >
+                                            Q : {stock.qty}
+                                        </Typography>
 
-                                {/** 3rd column */}
-                                <Stack direction="column" justifyContent="space-between" alignItems="left" >
-                                    <Typography
-                                        variant="body1"
-                                        sx={{ color, fontWeight: 700 }}
-                                        textAlign={'right'}
-                                    >
-                                        {stock.bidRate} / {stock.askRate}
-                                    </Typography>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="left" sx={{ width: '9rem', gap: 0.7 }}>
-                                        <Stack direction="column" justifyContent="space-between" alignItems="left">
+                                        <Box sx={{ ...boxStyle, backgroundColor: color }}>
+                                            <Typography
+                                                variant="body1"
+                                                sx={{ fontWeight: 600 }}
+                                                textAlign={'center'}
+                                            >
+                                                {stock.bidRate}
+                                            </Typography>
+
+                                            <Stack direction="column" justifyContent="space-between" alignItems="left">
+                                                <Typography
+                                                    variant="body2"
+                                                >
+                                                    H: {stock.high}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                >
+                                                    O: {stock.open}
+                                                </Typography>
+                                            </Stack>
+                                        </Box>
+                                    </Stack>
+
+                                    <Stack direction="column" justifyContent="space-between" alignItems="left" sx={{ width: spacing.width }}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="left">
                                             <Typography
                                                 variant="body2"
-                                                sx={{ color: textColor }}
+                                                sx={{
+                                                    color,
+                                                    fontWeight: 550,
+                                                    // fontSize: '0.9rem',
+                                                }}
                                             >
-                                                H: {stock.high}
+                                                {stock.ltp.toFixed(2)}
                                             </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ color: textColor }}
+
+                                            {/* Star */}
+                                            <IconButton
+                                                size="small"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onToggleFavorite(stock.id);
+                                                }}
+                                                sx={{ p: 0, pb: 0.5, position: 'relative', bottom: '3px' }}
                                             >
-                                                O: {stock.open}
-                                            </Typography>
+                                                {stock.isFavorite ? (
+                                                    <StarIcon sx={{ color: '#fdd835' }} />
+                                                ) : (
+                                                    <StarBorderIcon sx={{ color: isDarkMode ? '#aaa' : '#666' }} />
+                                                )}
+                                            </IconButton>
                                         </Stack>
-                                        <Stack direction="column" justifyContent="space-between" alignItems="left">
+
+                                        <Box sx={{ ...boxStyle, backgroundColor: color }}>
                                             <Typography
-                                                variant="body2"
-                                                sx={{ color: textColor }}
+                                                variant="body1"
+                                                sx={{ fontWeight: 700 }}
+                                                textAlign={'center'}
                                             >
-                                                L: {stock.low}
+                                                {stock.bidRate}
                                             </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ color: textColor }}
-                                            >
-                                                C: {stock.close}
-                                            </Typography>
-                                        </Stack>
+                                            <Stack direction="row" justifyContent="space-between" alignItems="left" sx={{ gap: 0.7 }}>
+                                                <Stack direction="column" justifyContent="space-between" alignItems="left">
+                                                    <Typography
+                                                        variant="body2"
+                                                    >
+                                                        L: {stock.low}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                    >
+                                                        C: {stock.close}
+                                                    </Typography>
+                                                </Stack>
+                                            </Stack>
+                                        </Box>
                                     </Stack>
                                 </Stack>
                             </Stack>
