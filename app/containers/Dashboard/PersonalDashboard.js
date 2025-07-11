@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import {
-  Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress,
-  Grid, Paper, Typography, Box, Divider, useMediaQuery as useMUIQuery,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, FormControl, InputLabel, Select, MenuItem,
+  Grid, Paper, TextField, Typography, Box, Divider, useMediaQuery as useMUIQuery,
 } from '@mui/material';
 
 import { Tabs, Tab } from '@mui/material';
@@ -24,8 +26,8 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningIcon from '@mui/icons-material/Warning';
 import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ComputerIcon from '@mui/icons-material/Computer';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import brand from 'dan-api/dummy/brand';
@@ -193,8 +195,23 @@ function PersonalDashboard() {
 
   const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [filterType, setFilterType] = useState("today");
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+  const [visibleCount, setVisibleCount] = useState(10);
   const [positionDialogOpen, setpositionDialogOpen] = useState(false);
 
+  const [todayCount, setTodayCount] = useState(0);
+  const [weekCount, setWeekCount] = useState(0);
+
+  const [searchText, setSearchText] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 10);
+  };
+
+  const visibleOrders = orders.slice(0, visibleCount);
 
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
@@ -308,11 +325,12 @@ function PersonalDashboard() {
 
 
   const fetchLoginData = async () => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
       const res = await axios.post('http://128.199.126.171/~goldorg/datatables/get_login_data_details', {
         is_app: 1,
-        login_user_id: '196',
-        auth_key: 'yUC4c1iZVu',
+        login_user_id: dataStored.user_id,
+        auth_key: dataStored.auth_key,
       });
 
       if (res.data.status === 'ok' && Array.isArray(res.data.data)) {
@@ -326,42 +344,32 @@ function PersonalDashboard() {
   };
 
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (type = "today", searchValue = "") => {
     setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem('data'));
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
     const formData = {
+      sEcho: 1,
+      iDisplayStart: 0,
+      iDisplayLength: 100,
+      sSearch: searchValue,
       is_app: 1,
       login_user_id: dataStored.user_id,
       auth_key: dataStored.auth_key,
-      isTodayTrade: "today",
+      isTodayTrade: type === "today" ? "today" : "",
     };
 
     try {
-      const response = await fetch('http://128.199.126.171/~goldorg/datatables/order_book_new', {
-        method: 'POST',
+      const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      console.log("API response:", data);
-
-      if (data.status === "error") {
-        console.error("Session expired:", data.message);
-        return;
-      }
-
-      // Check where your order array is
-      const ordersArray = data.aaData || data.data || [];
-
-      if (!ordersArray.length) {
-        console.log("No orders found");
-      }
-
-      setOrders(ordersArray);
-      setOrdersDialogOpen(true); // ✅ Open dialog after data loaded
+      setOrders(data.aaData || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
@@ -369,6 +377,41 @@ function PersonalDashboard() {
     }
   };
 
+
+    const fetchCount = async (type = "today") => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
+    const formData = {
+      sEcho: 1,
+      iDisplayStart: 0,
+      iDisplayLength: 1, // Only need count
+      sSearch: "",
+      is_app: 1,
+      login_user_id: dataStored.user_id,
+      auth_key: dataStored.auth_key,
+      isTodayTrade: type === "today" ? "today" : "",
+    };
+
+    try {
+      const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      return data.iTotalRecords || 0;
+    } catch (error) {
+      console.error(`Error fetching ${type} orders count:`, error);
+      return 0;
+    }
+  };
+  const paginatedOrders = orders.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
 
   function getMarginDataFromSessionStorage() {
     const data = sessionStorage.getItem("data");
@@ -404,8 +447,45 @@ function PersonalDashboard() {
   useEffect(() => {
     getMarginDataFromSessionStorage();
     fetchLoginData();
-    fetchOrders();
+    fetchOrders(filterType);
+  }, [filterType]);
+
+  useEffect(() => {
+    const getCounts = async () => {
+      const today = await fetchCount("today");
+      setTodayCount(today);
+
+      const week = await fetchCount("all");
+      setWeekCount(week);
+    };
+
+    getCounts();
   }, []);
+
+
+  const handleFilterChange = (event) => {
+    const newFilter = event.target.value;
+    setFilterType(newFilter);
+    setCurrentPage(0);
+    fetchOrders(newFilter); // pass filter type to fetch updated data
+    setOrdersDialogOpen(true)
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchText(value);
+
+    // Clear previous timeout if exists
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Delay search to avoid firing on every keystroke
+    const timeout = setTimeout(() => {
+      fetchOrders(filterType, value);
+    }, 500);
+
+    setSearchTimeout(timeout);
+  };
 
 
   return (
@@ -416,67 +496,228 @@ function PersonalDashboard() {
 
       <Grid container spacing={1}>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-            <InfoCardHorizontal
-              title="Orders"
-              icon={<SwapHorizIcon sx={{ color: '#9c27b0', fontSize: 30 }} />}
-              content={['Today: 5', 'This Week: 120']}
-              bgcolor="rgba(156, 39, 176, 0.1)"
-            />
-          </Box>
-        </Grid>
+         <Grid item xs={12} sm={6} md={3}>
+      <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+        <InfoCardHorizontal
+          title="Orders"
+          icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
+          content={[`Today: ${todayCount}`, `This Week: ${weekCount}`]}
+          bgcolor="rgba(156, 39, 176, 0.1)"
+        />
+      </Box>
+    </Grid>
 
-        <Dialog
-          open={ordersDialogOpen}
-          onClose={() => setOrdersDialogOpen(false)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              Order Details
-            </Typography>
+      <Dialog
+  open={ordersDialogOpen}
+  onClose={(event, reason) => {
+    if (reason !== "backdropClick") {
+      setOrdersDialogOpen(false);
+    }
+  }}
+  fullWidth
+  maxWidth="xl"
+  disableEscapeKeyDown
+>
+  <Box sx={{ p: 0 }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        mb: 0,
+        px: 1,
+        py: 1,
+      }}
+    >
+      <Typography variant="h6" fontWeight={600}>
+        Order Details
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>Filter</InputLabel>
+          <Select value={filterType} label="Filter" onChange={handleFilterChange}>
+            <MenuItem value="today">Today</MenuItem>
+            <MenuItem value="all">This Week</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          size="small"
+          placeholder="Search orders"
+          value={searchText}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          sx={{ ml: 1 }}
+        />
+      </Box>
+    </Box>
 
-            {loading ? (
-              <CircularProgress />
-            ) : orders.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Symbol</TableCell>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.id}</TableCell>
-                      <TableCell>{order.symbol}</TableCell>
-                      <TableCell>{order.quantity}</TableCell>
-                      <TableCell>{order.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography>No today's orders found.</Typography>
+    {loading ? (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+        <CircularProgress size={24} />
+      </Box>
+    ) : orders.length > 0 ? (
+      <>
+        {isMobile ? (
+          <>
+            {visibleOrders.map((item, index) => (
+              <Box
+                key={item.trd_id || index}
+                sx={{
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  p: 1,
+                  mb: 0.5,
+                  backgroundColor:
+                    item.trd_type === "Buy" ? "#e0f7fa" : 
+                    item.trd_type === "Sell" ? "#fce4ec" : 
+                    "#f5f5f5",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight={600} sx={{ color: "#000" }}>
+  <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Time: {item.trd_matchedtime}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Market: {item.mrkt_name}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Script: {item.scrp_name}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Type: {item.trd_type} ({item.trd_type2})</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Lot: {item.trd_lot}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Qty: {item.actual_lot_qty}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Rate: {item.trd_rate}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Status: {item.trd_status}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Order Time: {item.trd_time}</Typography>
+<Typography variant="body2" sx={{ color: "#000" }}>Comm: {item.trd_comm_amnt}</Typography>
+
+              </Box>
+            ))}
+
+            {visibleCount < orders.length && (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 0.5 }}>
+                <Button variant="outlined" onClick={handleLoadMore} size="small">
+                  Load More
+                </Button>
+              </Box>
             )}
-          </Box>
 
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button
-              onClick={() => setOrdersDialogOpen(false)}
-              variant="contained"
-              color="primary"
+            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", px: 1, py: 1 }}>
+              <Button
+                onClick={() => setOrdersDialogOpen(false)}
+                variant="contained"
+                color="secondary"
+                size="small"
+              >
+                Close
+              </Button>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box
+              sx={{
+                overflowX: "auto",
+                border: "1px solid #ddd",
+                borderRadius: "0px",
+              }}
             >
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+              <table
+                className="table table-striped table-bordered"
+                style={{
+                  minWidth: "1350px",
+                  fontSize: "12px",
+                  margin: 0,
+                }}
+              >
+                <thead style={{ backgroundColor: "#e0e0e0" }}>
+  <tr>
+    <th style={{ color: "#000", fontWeight: 600 }}>Device</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Time</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Trade ID</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Client</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Market</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Script</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>B/S</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Order Type</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Lot</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Qty</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Order Price</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Status</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>O. Time</th>
+    <th style={{ color: "#000", fontWeight: 600 }}>Comm Amt</th>
+  </tr>
+</thead>
+                <tbody>
+  {paginatedOrders.map((item, index) => (
+    <tr
+      key={item.trd_id || index}
+      style={{
+        backgroundColor:
+          item.trd_type === "Buy"
+            ? "#e0f7fa"
+            : item.trd_type === "Sell"
+            ? "#fce4ec"
+            : "#f5f5f5",
+      }}
+    >
+      <td style={{ color: "#000" }} dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+      <td style={{ color: "#000" }}>{item.trd_matchedtime}</td>
+      <td style={{ color: "#000" }}>#{item.trd_id}</td>
+      <td style={{ color: "#000" }}>{item.client_full_name}</td>
+      <td style={{ color: "#000" }}>{item.mrkt_name}</td>
+      <td style={{ color: "#000" }}>{item.scrp_name}</td>
+      <td style={{ color: "#000" }}>{item.trd_type}</td>
+      <td style={{ color: "#000" }}>{item.trd_type2}</td>
+      <td style={{ color: "#000" }}>{item.trd_lot}</td>
+      <td style={{ color: "#000" }}>{item.actual_lot_qty}</td>
+      <td style={{ color: "#000" }}>{item.trd_rate}</td>
+      <td style={{ color: "#000" }}>{item.trd_status}</td>
+      <td style={{ color: "#000" }}>{item.trd_time}</td>
+      <td style={{ color: "#000" }}>{item.trd_comm_amnt}</td>
+    </tr>
+  ))}
+</tbody>
+              </table>
+            </Box>
 
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Button
+                  size="small"
+                  disabled={currentPage === 0}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  color="secondary"
+                  sx={{ mr: 1 }}
+                >
+                  Prev
+                </Button>
+                <Typography sx={{ fontSize: "12px" }}>
+                  Page {currentPage + 1} / {Math.ceil(orders.length / itemsPerPage)}
+                </Typography>
+                <Button
+                  size="small"
+                  disabled={(currentPage + 1) * itemsPerPage >= orders.length}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  color="secondary"
+                  sx={{ ml: 1 }}
+                >
+                  Next
+                </Button>
+              </Box>
+              <Button
+                onClick={() => setOrdersDialogOpen(false)}
+                variant="contained"
+                color="secondary"
+                size="small"
+                sx={{ ml: 1 }}
+              >
+                Close
+              </Button>
+            </Box>
+          </>
+        )}
+      </>
+    ) : (
+      <Typography sx={{ fontSize: "14px", px: 1 }}>No orders found.</Typography>
+    )}
+  </Box>
+</Dialog>
 
         <Grid item xs={12} sm={6} md={3}>
           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
@@ -985,21 +1226,22 @@ function PersonalDashboard() {
                       </Box>
                     )}
 
-                    {login.source?.toLowerCase() === 'phone' && (
+                    {login.source?.toLowerCase() === 'mobile' && (
                       <Box
-                        sx={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: '50%',
-                          backgroundColor: '#e8f5e9',
-                          border: '2px solid #4caf50',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <SmartphoneIcon sx={{ color: '#4caf50', fontSize: 16 }} />
-                      </Box>
+  sx={{
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
+    backgroundColor: '#f3e5f5', // light purple background
+    border: '2px solid #9c27b0', // purple border
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  <PhoneIphoneIcon sx={{ color: '#9c27b0', fontSize: 16 }} />
+</Box>
+
                     )}
                   </Box>
                 ))
@@ -1503,8 +1745,8 @@ function PersonalDashboard() {
       </Grid>
 
     </Box>
-  );
-}
+  ); 
+} 
 
 export default PersonalDashboard;
 
@@ -1567,3 +1809,5 @@ export default PersonalDashboard;
 //   //   </div>
 //   // );
 // }
+
+
