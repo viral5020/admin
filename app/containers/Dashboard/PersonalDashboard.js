@@ -7,7 +7,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import {
   Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, FormControl, InputLabel, Select, MenuItem,
-  Grid, Paper, TextField, Typography, Box, Divider, useMediaQuery as useMUIQuery,
+  Grid, Paper, TextField, Card, CardContent, Typography, Box, Divider, useMediaQuery as useMUIQuery,
 } from '@mui/material';
 
 import { Tabs, Tab } from '@mui/material';
@@ -378,7 +378,7 @@ function PersonalDashboard() {
   };
 
 
-    const fetchCount = async (type = "today") => {
+  const fetchCount = async (type = "today") => {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
     const formData = {
@@ -496,228 +496,318 @@ function PersonalDashboard() {
 
       <Grid container spacing={1}>
 
-         <Grid item xs={12} sm={6} md={3}>
-      <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-        <InfoCardHorizontal
-          title="Orders"
-          icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
-          content={[`Today: ${todayCount}`, `This Week: ${weekCount}`]}
-          bgcolor="rgba(156, 39, 176, 0.1)"
-        />
-      </Box>
-    </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+            <InfoCardHorizontal
+              title="Orders"
+              icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
+              content={[`Today: ${todayCount}`, `This Week: ${weekCount}`]}
+              bgcolor="rgba(156, 39, 176, 0.1)"
+            />
+          </Box>
+        </Grid>
 
-      <Dialog
-  open={ordersDialogOpen}
-  onClose={(event, reason) => {
-    if (reason !== "backdropClick") {
-      setOrdersDialogOpen(false);
-    }
-  }}
-  fullWidth
-  maxWidth="xl"
-  disableEscapeKeyDown
->
-  <Box sx={{ p: 0 }}>
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        mb: 0,
-        px: 1,
-        py: 1,
-      }}
-    >
-      <Typography variant="h6" fontWeight={600}>
-        Order Details
-      </Typography>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Filter</InputLabel>
-          <Select value={filterType} label="Filter" onChange={handleFilterChange}>
-            <MenuItem value="today">Today</MenuItem>
-            <MenuItem value="all">This Week</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField
-          size="small"
-          placeholder="Search orders"
-          value={searchText}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          sx={{ ml: 1 }}
-        />
-      </Box>
-    </Box>
-
-    {loading ? (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-        <CircularProgress size={24} />
-      </Box>
-    ) : orders.length > 0 ? (
-      <>
-        {isMobile ? (
-          <>
-            {visibleOrders.map((item, index) => (
-              <Box
-                key={item.trd_id || index}
-                sx={{
-                  border: "1px solid #ddd",
-                  borderRadius: 1,
-                  p: 1,
-                  mb: 0.5,
-                  backgroundColor:
-                    item.trd_type === "Buy" ? "#e0f7fa" : 
-                    item.trd_type === "Sell" ? "#fce4ec" : 
-                    "#f5f5f5",
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight={600} sx={{ color: "#000" }}>
-  <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Time: {item.trd_matchedtime}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Market: {item.mrkt_name}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Script: {item.scrp_name}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Type: {item.trd_type} ({item.trd_type2})</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Lot: {item.trd_lot}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Qty: {item.actual_lot_qty}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Rate: {item.trd_rate}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Status: {item.trd_status}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Order Time: {item.trd_time}</Typography>
-<Typography variant="body2" sx={{ color: "#000" }}>Comm: {item.trd_comm_amnt}</Typography>
-
-              </Box>
-            ))}
-
-            {visibleCount < orders.length && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 0.5 }}>
-                <Button variant="outlined" onClick={handleLoadMore} size="small">
-                  Load More
-                </Button>
-              </Box>
-            )}
-
-            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", px: 1, py: 1 }}>
-              <Button
-                onClick={() => setOrdersDialogOpen(false)}
-                variant="contained"
-                color="secondary"
-                size="small"
-              >
-                Close
-              </Button>
-            </Box>
-          </>
-        ) : (
-          <>
+        <Dialog
+          open={ordersDialogOpen}
+          onClose={(event, reason) => {
+            if (reason !== "backdropClick") {
+              setOrdersDialogOpen(false);
+            }
+          }}
+          fullWidth
+          maxWidth="xl"
+          disableEscapeKeyDown
+        >
+          <Box sx={{ p: 0 }}>
             <Box
               sx={{
-                overflowX: "auto",
-                border: "1px solid #ddd",
-                borderRadius: "0px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 0,
+                px: 1,
+                py: 1,
+                backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
+                borderRadius: 1,
               }}
             >
-              <table
-                className="table table-striped table-bordered"
-                style={{
-                  minWidth: "1350px",
-                  fontSize: "12px",
-                  margin: 0,
-                }}
-              >
-                <thead style={{ backgroundColor: "#e0e0e0" }}>
-  <tr>
-    <th style={{ color: "#000", fontWeight: 600 }}>Device</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Time</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Trade ID</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Client</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Market</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Script</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>B/S</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Order Type</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Lot</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Qty</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Order Price</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Status</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>O. Time</th>
-    <th style={{ color: "#000", fontWeight: 600 }}>Comm Amt</th>
-  </tr>
-</thead>
-                <tbody>
-  {paginatedOrders.map((item, index) => (
-    <tr
-      key={item.trd_id || index}
-      style={{
-        backgroundColor:
-          item.trd_type === "Buy"
-            ? "#e0f7fa"
-            : item.trd_type === "Sell"
-            ? "#fce4ec"
-            : "#f5f5f5",
-      }}
-    >
-      <td style={{ color: "#000" }} dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-      <td style={{ color: "#000" }}>{item.trd_matchedtime}</td>
-      <td style={{ color: "#000" }}>#{item.trd_id}</td>
-      <td style={{ color: "#000" }}>{item.client_full_name}</td>
-      <td style={{ color: "#000" }}>{item.mrkt_name}</td>
-      <td style={{ color: "#000" }}>{item.scrp_name}</td>
-      <td style={{ color: "#000" }}>{item.trd_type}</td>
-      <td style={{ color: "#000" }}>{item.trd_type2}</td>
-      <td style={{ color: "#000" }}>{item.trd_lot}</td>
-      <td style={{ color: "#000" }}>{item.actual_lot_qty}</td>
-      <td style={{ color: "#000" }}>{item.trd_rate}</td>
-      <td style={{ color: "#000" }}>{item.trd_status}</td>
-      <td style={{ color: "#000" }}>{item.trd_time}</td>
-      <td style={{ color: "#000" }}>{item.trd_comm_amnt}</td>
-    </tr>
-  ))}
-</tbody>
-              </table>
+              <Typography variant="h6" fontWeight={600} color={(theme) => theme.palette.mode === "dark" ? "#fff" : "#000"}>
+                Order Details
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Filter</InputLabel>
+                  <Select value={filterType} label="Filter" onChange={handleFilterChange}>
+                    <MenuItem value="today">Today</MenuItem>
+                    <MenuItem value="all">This Week</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  size="small"
+                  placeholder="Search orders"
+                  value={searchText}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  sx={{ ml: 1 }}
+                />
+              </Box>
             </Box>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Button
-                  size="small"
-                  disabled={currentPage === 0}
-                  onClick={() => setCurrentPage((prev) => prev - 1)}
-                  color="secondary"
-                  sx={{ mr: 1 }}
-                >
-                  Prev
-                </Button>
-                <Typography sx={{ fontSize: "12px" }}>
-                  Page {currentPage + 1} / {Math.ceil(orders.length / itemsPerPage)}
-                </Typography>
-                <Button
-                  size="small"
-                  disabled={(currentPage + 1) * itemsPerPage >= orders.length}
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
-                  color="secondary"
-                  sx={{ ml: 1 }}
-                >
-                  Next
-                </Button>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                <CircularProgress size={24} />
               </Box>
-              <Button
-                onClick={() => setOrdersDialogOpen(false)}
-                variant="contained"
-                color="secondary"
-                size="small"
-                sx={{ ml: 1 }}
-              >
-                Close
-              </Button>
-            </Box>
-          </>
-        )}
-      </>
-    ) : (
-      <Typography sx={{ fontSize: "14px", px: 1 }}>No orders found.</Typography>
-    )}
-  </Box>
-</Dialog>
+            ) : orders.length > 0 ? (
+              <>
+                {isMobile ? (
+                  <>
+                    {visibleOrders.map((item, index) => {
+                      const [mainName, subName] = item.scrp_name.split(" ", 2);
+                      const cleanRate = item.trd_rate?.split("(")[0].trim();
+
+                      const isBuy = item.trd_type === "Buy";
+                      const isSell = item.trd_type === "Sell";
+                      const borderGradient = isBuy
+                        ? "linear-gradient(to right, #2196f3, #21cbf3)"
+                        : isSell
+                          ? "linear-gradient(to right, #f44336, #ff7961)"
+                          : "#ccc";
+
+                      const boxShadowColor = isBuy
+                        ? "rgba(33, 150, 243, 0.3)"
+                        : isSell
+                          ? "rgba(244, 67, 54, 0.3)"
+                          : "rgba(0,0,0,0.1)";
+
+                      return (
+                        <Card
+                          key={item.trd_id || index}
+                          sx={{
+                            mb: 1,
+                            mx: 1,
+                            borderRadius: 2,
+                            // Transparent border to allow gradient
+                            border: "1px solid transparent",
+                            // Inner background color based on theme
+                            backgroundImage: (theme) =>
+                              `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"
+                              }), ${borderGradient}`,
+                            backgroundOrigin: "border-box",
+                            backgroundClip: "content-box, border-box",
+                            boxShadow: `0 4px 12px ${boxShadowColor}`,
+                            position: "relative",
+                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.02)",
+                              boxShadow: `0 8px 20px ${boxShadowColor}`,
+                            },
+                          }}
+                        >
+                          {item.is_hot && (
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                                backgroundColor: "gold",
+                                color: "#000",
+                                fontSize: "0.7em",
+                                px: 1,
+                                py: 0.3,
+                                borderBottomLeftRadius: 4,
+                                fontWeight: 700,
+                              }}
+                            >
+                              HOT
+                            </Box>
+                          )}
+
+                          <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                                {mainName}
+                                {" "}
+                                <span style={{ fontSize: "0.8em", fontWeight: 500 }}>
+                                  {subName}
+                                </span>
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                                ID: #{item.trd_id}
+                              </Typography>
+                            </Box>
+
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Typography
+                                  variant="body2"
+                                  component="span"
+                                  dangerouslySetInnerHTML={{ __html: item.device_type_html }}
+                                  sx={{ mr: 0.3 }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: isBuy ? "#2196f3" : isSell ? "#f44336" : (theme) => theme.palette.mode === "dark" ? "#fff" : "#000",
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}
+                                  {" "}
+                                  <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
+                                    {item.trd_type2}
+                                  </span>
+                                </Typography>
+                              </Box>
+
+                              <Typography variant="body2" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                                ({item.trd_lot}) {item.actual_lot_qty} @
+                                <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
+                                  {cleanRate}
+                                </span>
+                              </Typography>
+                            </Box>
+
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                                {item.trd_time}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#ccc" : "#000" }}>
+                                Commission:{" "}
+                                <span style={{ fontWeight: 700, color: "#2e7d32" }}>
+                                  {item.trd_comm_amnt}
+                                </span>
+                              </Typography>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+
+                    {visibleCount < orders.length && (
+                      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                        <Button variant="outlined" onClick={handleLoadMore} size="small">
+                          Load More
+                        </Button>
+                      </Box>
+                    )}
+
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", px: 1, py: 1 }}>
+                      <Button
+                        onClick={() => setOrdersDialogOpen(false)}
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                      >
+                        Close
+                      </Button>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        overflowX: "auto",
+                        border: "1px solid #ddd",
+                        borderRadius: "0px",
+                      }}
+                    >
+                      <table
+                        className="table table-striped table-bordered"
+                        style={{
+                          minWidth: "1350px",
+                          fontSize: "12px",
+                          margin: 0,
+                          backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                          color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000",
+                        }}
+                      >
+                        <thead style={{ backgroundColor: (theme) => theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                          <tr>
+                            {["Device", "Time", "Trade ID", "Client", "Market", "Script", "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
+                              <th key={header} style={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000", fontWeight: 600 }}>{header}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedOrders.map((item, index) => (
+                            <tr
+                              key={item.trd_id || index}
+                              style={{
+                                backgroundColor:
+                                  item.trd_type === "Buy"
+                                    ? (theme) => theme.palette.mode === "dark" ? "#264653" : "#e0f7fa"
+                                    : item.trd_type === "Sell"
+                                      ? (theme) => theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec"
+                                      : (theme) => theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
+                              }}
+                            >
+                              <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                              <td>{item.trd_matchedtime}</td>
+                              <td>#{item.trd_id}</td>
+                              <td>{item.client_full_name}</td>
+                              <td>{item.mrkt_name}</td>
+                              <td>{item.scrp_name}</td>
+                              <td>{item.trd_type}</td>
+                              <td>{item.trd_type2}</td>
+                              <td>{item.trd_lot}</td>
+                              <td>{item.actual_lot_qty}</td>
+                              <td>{item.trd_rate}</td>
+                              <td>{item.trd_status}</td>
+                              <td>{item.trd_time}</td>
+                              <td>{item.trd_comm_amnt}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </Box>
+
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Button
+                          size="small"
+                          disabled={currentPage === 0}
+                          onClick={() => setCurrentPage((prev) => prev - 1)}
+                          color="secondary"
+                          sx={{ mr: 1 }}
+                        >
+                          Prev
+                        </Button>
+                        <Typography sx={{ fontSize: "12px" }}>
+                          Page {currentPage + 1} / {Math.ceil(orders.length / itemsPerPage)}
+                        </Typography>
+                        <Button
+                          size="small"
+                          disabled={(currentPage + 1) * itemsPerPage >= orders.length}
+                          onClick={() => setCurrentPage((prev) => prev + 1)}
+                          color="secondary"
+                          sx={{ ml: 1 }}
+                        >
+                          Next
+                        </Button>
+                      </Box>
+                      <Button
+                        onClick={() => setOrdersDialogOpen(false)}
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        sx={{ ml: 1 }}
+                      >
+                        Close
+                      </Button>
+                    </Box>
+                  </>
+                )}
+              </>
+            ) : (
+              <Typography sx={{ fontSize: "14px", px: 1, color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                No orders found.
+              </Typography>
+            )}
+          </Box>
+        </Dialog>
+
 
         <Grid item xs={12} sm={6} md={3}>
           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
@@ -1228,19 +1318,19 @@ function PersonalDashboard() {
 
                     {login.source?.toLowerCase() === 'mobile' && (
                       <Box
-  sx={{
-    width: 28,
-    height: 28,
-    borderRadius: '50%',
-    backgroundColor: '#f3e5f5', // light purple background
-    border: '2px solid #9c27b0', // purple border
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }}
->
-  <PhoneIphoneIcon sx={{ color: '#9c27b0', fontSize: 16 }} />
-</Box>
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          backgroundColor: '#f3e5f5', // light purple background
+                          border: '2px solid #9c27b0', // purple border
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <PhoneIphoneIcon sx={{ color: '#9c27b0', fontSize: 16 }} />
+                      </Box>
 
                     )}
                   </Box>
@@ -1745,8 +1835,8 @@ function PersonalDashboard() {
       </Grid>
 
     </Box>
-  ); 
-} 
+  );
+}
 
 export default PersonalDashboard;
 
