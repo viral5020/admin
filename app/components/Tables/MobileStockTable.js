@@ -72,11 +72,11 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
     const [isSmallMobile, setIsSmallMobile] = useState();
     const [textColor, setTextColor] = useState('');
     const [boxStyle, setBoxStyle] = useState(boxCss);
-    // const [headerBoxStyle, setHeaderBoxStyle] = useState(headerBgCss);
+    const [headerBoxStyle, setHeaderBoxStyle] = useState(headerBgCss);
 
     useEffect(() => {
         isDarkMode ? setTextColor('#e0e0e0') : setTextColor('#1f1f1f');
-        // setHeaderBoxStyle(prev => ({ ...prev, backgroundColor: isDarkMode ? '#8383833d' : '#3551533d'}))
+        setHeaderBoxStyle(prev => ({ ...prev, backgroundColor: isDarkMode ? '#8383833d' : '#3551533d'}))
     }, [isDarkMode])
 
     useEffect(() => {
@@ -121,21 +121,24 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
         if (window.innerWidth < 417) {
             setSpacing(prev => ({
                 ...prev,
-                width: '5.5rem',
+                width: '5.6rem',
                 px: '0.17rem',
+                fontSize: '0.9rem',
             }))
         } else if (window.innerWidth < 440) {
             setSpacing(prev => ({
                 ...prev,
-                width: '5.8rem',
+                width: '5.9rem',
                 px: '0.34rem',
+                fontSize: '0.9rem',
             }))
         } else {
             setSpacing(prev => ({
                 ...prev,
-                width: '6.5rem',
+                width: '6.6rem',
                 px: '0.44rem',
                 fontWeight: 600,
+                fontSize: '1rem',
             }))
         }
 
@@ -186,7 +189,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                             }}
                             onClick={() => setIsStockOpen(stock)}
                         >
-                            <Box sx={headerBgCss}></Box>
+                            <Box sx={headerBoxStyle}></Box>
 
                             <Typography
                                 variant="body2"
@@ -197,7 +200,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     // left: '0rem'
                                 }}
                             >
-                                Q{stock.qty}
+                                {isSmallMobile ? 'Q' : 'Q : '}{stock.qty.toLocaleString('en-IN')}
                             </Typography>
 
                             {isSmallMobile && <Typography
@@ -211,7 +214,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     left: '3.3rem'
                                 }}
                             >
-                                {stock.ltp.toFixed(2)}
+                                {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
                             </Typography>}
 
                             {/* Logo */}
@@ -274,7 +277,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                             left: '-0.8rem'
                                         }}
                                     >
-                                        {stock.ltp.toFixed(2)}
+                                        {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
                                     </Typography>}
                                 </Box>
                             </Box>
@@ -297,7 +300,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     <Typography
                                         fontSize={'0.825rem'}
                                     >
-                                        O: {stock.open}
+                                        O: {stock.open.toLocaleString('en-IN')}
                                         {/* H: {stock.high} */}
                                     </Typography>
 
@@ -308,17 +311,18 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                         <Typography
                                             variant="h6"
                                             sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
-                                            pt={0.8}
+                                            pt={0.6}
                                         >
-                                            {stock.bidRate}
+                                            {stock.bidRate.toLocaleString('en-IN')}
                                         </Typography>
 
                                         <Typography
                                             variant="body2"
-                                            fontSize='0.8rem'
+                                            fontSize='0.75rem'
                                             fontWeight='600'
+                                            pt={0.5}
                                         >
-                                            H: {stock.high}
+                                            H: {stock.high.toLocaleString('en-IN')}
                                         </Typography>
                                     </Box>
                                 </Stack>
@@ -334,7 +338,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     <Typography
                                         fontSize={'0.825rem'}
                                     >
-                                        C: {stock.close}
+                                        C: {stock.close.toLocaleString('en-IN')}
                                         {/* L: {stock.low} */}
                                     </Typography>
 
@@ -345,19 +349,18 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                         <Typography
                                             variant="h6"
                                             sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
-                                            textAlign={'center'}
-                                            pt={0.8}
+                                            pt={0.6}
                                         >
-                                            {stock.askRate}
+                                            {stock.askRate.toLocaleString('en-IN')}
                                         </Typography>
 
                                         <Typography
                                             variant="body2"
-                                            fontSize='0.8rem'
+                                            fontSize='0.75rem'
                                             fontWeight='600'
-                                            textAlign={'center'}
+                                            pt={0.5}
                                         >
-                                            L: {stock.low}
+                                            L: {stock.low.toLocaleString('en-IN')}
                                         </Typography>
                                     </Box>
                                 </Stack>
