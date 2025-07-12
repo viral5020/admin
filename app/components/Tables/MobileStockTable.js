@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
     Box,
     Typography,
@@ -33,10 +33,14 @@ const boxCss = {
     borderRadius: '10%',
     py: 0,
     color: 'white',
-    width: '100%',
+    // width: '100%',   
+    // height: 'calc(100% + 1rem)',
+    height: '3.5rem',
     opacity: '0.9',
     position: 'relative',
     top: '4px',
+    // wordBreak: 'break-word',
+    // whiteSpace: 'normal',
 }
 
 const logoCss = {
@@ -64,35 +68,92 @@ const headerBgCss = {
 }
 
 const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, isDarkMode, onToggleFavorite, favorites }) => {
-    const textColor = isDarkMode ? '#e0e0e0' : '#1f1f1f';
-    const [boxStyle, setBoxStyle] = useState({ ...boxCss, border: `1.7px solid ${textColor}` });
-    const [spacing, setSpacing] = useState({});
+    const [spacing, setSpacing] = useState({ fontSize: '1rem' });
+    const [isSmallMobile, setIsSmallMobile] = useState();
+    const [textColor, setTextColor] = useState('');
+    const [boxStyle, setBoxStyle] = useState(boxCss);
+    // const [headerBoxStyle, setHeaderBoxStyle] = useState(headerBgCss);
+
+    useEffect(() => {
+        isDarkMode ? setTextColor('#e0e0e0') : setTextColor('#1f1f1f');
+        // setHeaderBoxStyle(prev => ({ ...prev, backgroundColor: isDarkMode ? '#8383833d' : '#3551533d'}))
+    }, [isDarkMode])
+
+    useEffect(() => {
+        setBoxStyle(prev => ({ ...prev, border: `1.7px solid ${textColor}` }))
+    }, [textColor]);
+    // const askBoxRef = useRef([]);
+    // const bidBoxRef = useRef([]);
+    // const [askWrapStatus, setAskWrapStatus] = useState([]);
+    // const [bidWrapStatus, setBidWrapStatus] = useState([]);
 
     function apiSetFavrioute(e) {
         e.stopPropagation();
         console.log('inside apiSetFavrioute');
     }
 
-    useEffect(() => {
-        if (window.innerWidth < 370) {
-            setSpacing({
-                gap: '1vw',
-                width: '4.6rem',
-                px: '0.15rem'
-            })
-        } else if (window.innerWidth < 405) {
-            setSpacing({
-                gap: '2vw',
-                width: '4.8rem',
-                px: '0.2rem'
-            })
-        } else {
-            setSpacing({
-                gap: '3vw',
+    // const checkWrap = (el) => {
+    //     // console.log('el.offsetHeight', el.offsetHeight)
+    //     // // return el.offsetHeight;
+    //     // console.log('el.scrollHeight', el.scrollHeight);
+    //     // console.log('el.clientHeight', el.clientHeight);
+    //     return el.scrollHeight > el.clientHeight;
+    // };
+
+    // function setWrapStatus() {
+    //     const bid = bidBoxRef.current.map((el) => el && checkWrap(el));  // line: 86
+    //     const ask = askBoxRef.current.map((el) => el && checkWrap(el));
+    //     setBidWrapStatus(bid);
+    //     setAskWrapStatus(ask);
+    //     console.log('bid', bid);
+    //     console.log('ask', ask)
+    // }
+
+    function setSpace() {
+        // if (window.innerWidth < 385) {
+        //     setSpacing(prev => ({
+        //         ...prev,
+        //         width: '5.5rem',
+        //         px: '0.17rem'
+
+        //     }))
+        // } else 
+        if (window.innerWidth < 417) {
+            setSpacing(prev => ({
+                ...prev,
                 width: '5.5rem',
-                px: '0.4rem'
-            })
+                px: '0.17rem',
+            }))
+        } else if (window.innerWidth < 440) {
+            setSpacing(prev => ({
+                ...prev,
+                width: '5.8rem',
+                px: '0.34rem',
+            }))
+        } else {
+            setSpacing(prev => ({
+                ...prev,
+                width: '6.5rem',
+                px: '0.44rem',
+                fontWeight: 600,
+            }))
         }
+
+        window.innerWidth < 405 ? setIsSmallMobile(true) : setIsSmallMobile(false);
+    }
+
+    useEffect(() => {
+        setSpace();
+        window.addEventListener('resize', setSpace); // 👂 add listener
+        // requestAnimationFrame(() => {
+        //     setTimeout(() => {
+        //         setWrapStatus();
+        //     }, [2000])
+        // })
+
+        return () => {
+            window.removeEventListener('resize', setSpace); // 🧹 cleanup
+        };
     }, [])
 
     useEffect(() => {
@@ -106,8 +167,6 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                 const color = isDarkMode
                     ? isUp ? '#26a69a' : '#ef6d61'
                     : isUp ? '#388055' : '#BB3536';
-
-                // setBoxStyle(prev => ({ ...prev, backgroundColor: color }))
 
                 const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
 
@@ -129,7 +188,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                         >
                             <Box sx={headerBgCss}></Box>
 
-                            <Typography   
+                            <Typography
                                 variant="body2"
                                 fontWeight={500}
                                 sx={{
@@ -138,8 +197,22 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     // left: '0rem'
                                 }}
                             >
-                                Q : {stock.qty}
+                                Q{stock.qty}
                             </Typography>
+
+                            {isSmallMobile && <Typography
+                                variant="body2"
+                                sx={{
+                                    color,
+                                    display: 'inline',
+                                    fontWeight: 600,
+                                    position: 'absolute',
+                                    top: '0rem',
+                                    left: '3.3rem'
+                                }}
+                            >
+                                {stock.ltp.toFixed(2)}
+                            </Typography>}
 
                             {/* Logo */}
                             <Box sx={{
@@ -161,9 +234,8 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     top: row2Top,
                                 }}>
                                 <Typography
-                                    // variant="subtitle2"
+                                    variant="subtitle2"
                                     fontWeight={600}
-                                    fontSize={'1rem'}
                                     sx={{ color: textColor, lineHeight: '1rem' }}
                                 >
                                     {splitScriptAndDate(stock.scriptName).scriptName}
@@ -171,7 +243,6 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
 
                                 <Typography
                                     variant="body2"
-                                    // fontStyle='italic'
                                     sx={{ color: textColor, fontSize: '0.75rem', transform: 'skewX(-10deg)' }}
                                 >
                                     {splitScriptAndDate(stock.scriptName).date}
@@ -180,36 +251,31 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
 
                             <Box sx={{ position: 'absolute', bottom: '0rem', left: '4px' }}>
                                 <Box sx={{ position: 'relative', left: '1.9rem' }}>
-                                    <Icon style={{ color, position: 'absolute', fontSize: '2rem', left: '-2.2rem', top: '-3px' }} />
+                                    <Icon style={{ color, position: 'absolute', fontSize: '1.8rem', left: '-2.2rem', top: '-2px' }} />
                                     <Typography
                                         variant="body2"
                                         sx={{
                                             display: 'inline',
                                             fontSize: '0.83rem',
-                                            // color,
                                             fontWeight: 500,
-                                            // position: 'absolute',
-                                            // bottom: '0rem'
                                             position: 'relative',
-                                            left: '-0.5rem'
+                                            left: '-0.8rem'
                                         }}
                                     >
                                         {stock.priceChange.toFixed(2)} ({stock.priceChangePercent.toFixed(2)}%) {' '}
                                     </Typography>
-                                    <Typography
+                                    {!isSmallMobile && <Typography
                                         variant="body2"
                                         sx={{
                                             color,
                                             display: 'inline',
-                                            fontWeight: 550,
-                                            // position: 'absolute',
-                                            // bottom: '0rem',
+                                            fontWeight: 600,
                                             position: 'relative',
-                                            left: '-0.5rem'
+                                            left: '-0.8rem'
                                         }}
                                     >
                                         {stock.ltp.toFixed(2)}
-                                    </Typography>
+                                    </Typography>}
                                 </Box>
                             </Box>
 
@@ -218,7 +284,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                 sx={{
                                     position: 'absolute',
                                     right: '4px',
-                                    top: '0px',
+                                    top: '0rem',
                                 }}>
                                 <Stack
                                     direction="column"
@@ -229,23 +295,28 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     }}
                                 >
                                     <Typography
-                                        variant="body2"
+                                        fontSize={'0.825rem'}
                                     >
                                         O: {stock.open}
+                                        {/* H: {stock.high} */}
                                     </Typography>
 
-                                    <Box sx={{ ...boxStyle, backgroundColor: color }}>
+                                    <Box
+                                        sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                    // ref={(el) => (bidBoxRef.current[idx] = el)} // assign ref dynamically
+                                    >
                                         <Typography
                                             variant="h6"
-                                            sx={{ fontWeight: 600 }}
-                                            textAlign={'center'}
+                                            sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
+                                            pt={0.8}
                                         >
                                             {stock.bidRate}
                                         </Typography>
 
                                         <Typography
                                             variant="body2"
-                                            fontWeight={600}
+                                            fontSize='0.8rem'
+                                            fontWeight='600'
                                         >
                                             H: {stock.high}
                                         </Typography>
@@ -261,27 +332,33 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
                                     }}
                                 >
                                     <Typography
-                                        variant="body2"
+                                        fontSize={'0.825rem'}
                                     >
                                         C: {stock.close}
+                                        {/* L: {stock.low} */}
                                     </Typography>
 
-                                    <Box sx={{ ...boxStyle, backgroundColor: color }}>
+                                    <Box
+                                        sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                    // ref={(el) => (askBoxRef.current[idx] = el)} // assign ref dynamically
+                                    >
                                         <Typography
                                             variant="h6"
-                                            sx={{ fontWeight: 700 }}
+                                            sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
                                             textAlign={'center'}
+                                            pt={0.8}
                                         >
                                             {stock.askRate}
                                         </Typography>
 
                                         <Typography
                                             variant="body2"
-                                            fontWeight={600}
+                                            fontSize='0.8rem'
+                                            fontWeight='600'
+                                            textAlign={'center'}
                                         >
                                             L: {stock.low}
                                         </Typography>
-
                                     </Box>
                                 </Stack>
                             </Stack>
