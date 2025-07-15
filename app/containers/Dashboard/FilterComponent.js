@@ -7,7 +7,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useTheme } from '@mui/material/styles';
 import { Dialog, DialogTitle, DialogContent, useMediaQuery } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
+import { position } from 'stylis';
+import AddSharpIcon from '@mui/icons-material/AddSharp';
 
 const dummyOptions = {
     Equity: {
@@ -186,22 +187,27 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                             <Button
                                 variant="outlined"
                                 size="small"
-                                startIcon={<FilterListIcon />}
+                                startIcon={<FilterListIcon sx={{ position: 'relative', left: '4px' }} />}
                                 onClick={() => setFilterOpen(true)}
                                 sx={{
-                                    backgroundColor: isDarkMode ? '#263238' : '#fff', // dark: blue-grey, light: white
+                                    backgroundColor: isDarkMode ? '#263238' : '#fff',
                                     borderColor: isDarkMode ? '#90a4ae' : '#607d8b',
                                     color: isDarkMode ? '#cfd8dc' : '#607d8b',
+                                    borderRadius: '9px',
+                                    px: 0,
+                                    py: 0,
+                                    minHeight: '10px',
+                                    minWidth: '45px',
+                                    '& .MuiButton-startIcon': {
+                                        marginRight: '6px', // Adjust icon spacing if needed
+                                    },
                                     '&:hover': {
                                         borderColor: isDarkMode ? '#b0bec5' : '#546e7a',
                                         backgroundColor: isDarkMode ? '#37474f' : '#f0f4f7',
                                         color: isDarkMode ? '#eceff1' : '#546e7a',
                                     },
                                 }}
-                            >
-                                Filter
-                            </Button>
-
+                            />
                         )}
 
                         <TextField
@@ -211,9 +217,9 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                             onChange={(e) => setSearchText(e.target.value)}
                             sx={{
                                 flexGrow: 1,
-                                maxWidth: 300,
+                                // maxWidth: 300,
                                 '& .MuiOutlinedInput-root': {
-                                    borderRadius: '50px', // Fully rounded
+                                    borderRadius: '9px', // Fully rounded
                                     paddingLeft: 2,
                                     paddingRight: 1,
                                     backgroundColor: isDarkMode ? '#37474f' : '#fff',
@@ -243,7 +249,34 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                             }}
                         />
 
+                        {/* {isMobile && (
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<AddSharpIcon sx={{ position: 'relative', left: '4px' }} />}
+                                // onClick={() => setFilterOpen(true)}
+                                sx={{
+                                    backgroundColor: isDarkMode ? '#1B5E2044' : '#E8F5E944',
+                                    borderColor: isDarkMode ? '#66BB6A' : '#4CAF50',
+                                    color: isDarkMode ? '#C8E6C9' : '#388E3C',
+                                    borderRadius: '20px',
+                                    px: 0,
+                                    py: 0,
+                                    minHeight: '10px',
+                                    minWidth: '39px', 
+                                    '& .MuiButton-startIcon': {
+                                        marginRight: '6px', // Adjust icon spacing if needed
+                                    },
+                                    '&:hover': {
+                                        // backgroundColor: isDarkMode ? '#2E7D32' : '#C8E6C9',
+                                        borderColor: isDarkMode ? '#81C784' : '#66BB6A',
+                                        color: isDarkMode ? '#E8F5E9' : '#2E7D32',
+                                    },
+                                }}
+                            >
+                            </Button>
 
+                        )} */}
 
                     </Box>
                 </Grid>

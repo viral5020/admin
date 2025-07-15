@@ -7,6 +7,7 @@ import {
     IconButton,
     Paper,
     createTheme,
+    Button,
 } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -14,6 +15,18 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import { useNavigate } from 'react-router-dom';
 import { position } from 'stylis';
+import { faTableCellsRowLock } from 'dan-vendor/@fortawesome/free-solid-svg-icons';
+import {
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
+    Type as ListType,
+    LeadingActions
+} from 'react-swipeable-list';
+import 'react-swipeable-list/dist/styles.css';
+import './listAnimation.css'; // Animation styles
+import toast, { Toaster } from 'react-hot-toast';
 
 function splitScriptAndDate(fullText) {
     const parts = fullText.trim().split(' ');
@@ -33,14 +46,12 @@ const boxCss = {
     borderRadius: '10%',
     py: 0,
     color: 'white',
-    // width: '100%',   
+    width: '22vw',
     // height: 'calc(100% + 1rem)',
-    height: '3.5rem',
+    minHeight: '3.5rem',
     opacity: '0.9',
-    position: 'relative',
+    // position: 'relative',
     top: '4px',
-    // wordBreak: 'break-word',
-    // whiteSpace: 'normal',
 }
 
 const logoCss = {
@@ -52,23 +63,19 @@ const logoCss = {
     justifyContent: 'center',
     fontWeight: 600,
     fontSize: '1rem',
-    position: 'absolute',
+    // position: 'absolute',
     top: row2Top,
     left: '4px'
 }
 
 const headerBgCss = {
-    width: '104.5%',
-    height: '1.2rem',
-    // backgroundColor: '#5d6d6e44',
     backgroundColor: '#3551533d',
-    position: 'relative',
-    left: '-9px',
-    borderRadius: '10px 10px 0 0'
+    borderRadius: '10px 10px 0 0',
+    px: '0.4rem'
 }
 
-const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, isDarkMode, onToggleFavorite, favorites }) => {
-    const [spacing, setSpacing] = useState({ fontSize: '1rem' });
+const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, isDarkMode, onToggleFavorite, favorites, setDummyData }) => {
+    const [spacing, setSpacing] = useState({ fontSize: '0.95rem' });
     const [isSmallMobile, setIsSmallMobile] = useState();
     const [textColor, setTextColor] = useState('');
     const [boxStyle, setBoxStyle] = useState(boxCss);
@@ -76,7 +83,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
 
     useEffect(() => {
         isDarkMode ? setTextColor('#e0e0e0') : setTextColor('#1f1f1f');
-        setHeaderBoxStyle(prev => ({ ...prev, backgroundColor: isDarkMode ? '#8383833d' : '#3551533d'}))
+        setHeaderBoxStyle(prev => ({ ...prev, backgroundColor: isDarkMode ? '#8383833d' : '#3551533d' }))
     }, [isDarkMode])
 
     useEffect(() => {
@@ -121,24 +128,21 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
         if (window.innerWidth < 417) {
             setSpacing(prev => ({
                 ...prev,
-                width: '5.6rem',
+                // width: '5.6rem',
                 px: '0.17rem',
-                fontSize: '0.9rem',
             }))
         } else if (window.innerWidth < 440) {
             setSpacing(prev => ({
                 ...prev,
-                width: '5.9rem',
+                // width: '5.9rem',
                 px: '0.34rem',
-                fontSize: '0.9rem',
             }))
         } else {
             setSpacing(prev => ({
                 ...prev,
-                width: '6.6rem',
+                // width: '6.6rem',
                 px: '0.44rem',
                 fontWeight: 600,
-                fontSize: '1rem',
             }))
         }
 
@@ -148,11 +152,6 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
     useEffect(() => {
         setSpace();
         window.addEventListener('resize', setSpace); // 👂 add listener
-        // requestAnimationFrame(() => {
-        //     setTimeout(() => {
-        //         setWrapStatus();
-        //     }, [2000])
-        // })
 
         return () => {
             window.removeEventListener('resize', setSpace); // 🧹 cleanup
@@ -160,248 +159,369 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, watchList, 
     }, [])
 
     useEffect(() => {
+        isSmallMobile ? setBoxStyle(prev => ({ ...prev, width: '27vw' })) : setBoxStyle(prev => ({ ...prev, width: '23vw' }));
+    }, [isSmallMobile])
+
+    useEffect(() => {
         setBoxStyle(prev => ({ ...prev, px: spacing.px }))
     }, [spacing])
 
+    const removeItem = (id) => {
+        console.log("remoe=veItem calledd...")
+        setTimeout(() => {
+            setDummyData((prev) => prev.filter((item) => item.id !== id));
+        }, [500])
+    };
+
+    function showRemoveToast(scriptName, onUndo) {
+        let didUndo = false;
+
+        const toastId = toast.custom((t) => (
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: isDarkMode ? '#333' : '#fff',
+                    color: isDarkMode ? '#fff' : '#000',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: '8px',
+                    boxShadow: 3,
+                    minWidth: '80vw',
+                    justifyContent: 'space-between'
+                }}
+            >
+                <Typography variant='caption' sx={{ fontSize: '0.9rem' }}>
+                    {scriptName} Removed
+                </Typography>
+                <Button
+                    size="small"
+                    sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0.5 }}
+                    onClick={() => {
+                        didUndo = true;
+                        onUndo();
+                        toast.dismiss(t.id);
+                    }}
+                >
+                    Undo
+                </Button>
+            </Box>
+        ), {
+            id: scriptName, // optional: prevent duplicate toasts
+            duration: 3000,
+            position: 'bottom-center',
+        });
+    };
+
+
+    function handleRemove(stock, idx) {
+        function onUndo() {
+            setDummyData(prev => [
+                ...prev.slice(0, idx),
+                stock,
+                ...prev.slice(idx)
+            ]);
+        }
+        removeItem(stock.id);
+        showRemoveToast(stock.scriptName, onUndo);
+    }
+
+    const renderActions = (item, idx) => ({
+        leading: (
+            <LeadingActions>
+                <SwipeAction
+                    destructive={true}
+                    onClick={() => handleRemove(item, idx)}
+                >
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            height: '100%',
+                            borderRadius: 0,
+                            minWidth: '80px',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Remove
+                    </Button>
+                </SwipeAction >
+            </LeadingActions >
+        ),
+        trailing: (
+            <TrailingActions>
+                <SwipeAction
+                    destructive={true}
+                    onClick={() => handleRemove(item, idx)}
+                >
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            height: '100%',
+                            borderRadius: 0,
+                            minWidth: '80px',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Remove
+                    </Button>
+                </SwipeAction>
+            </TrailingActions>
+        )
+    });
+
     return (
-        <Box>
-            {watchList.map((stock, idx) => {
-                const isUp = stock.priceChange > 0;
-                const color = isDarkMode
-                    ? isUp ? '#26a69a' : '#ef6d61'
-                    : isUp ? '#388055' : '#BB3536';
+        <>
+            <SwipeableList type={ListType.IOS} threshold={0.8} fullSwipe={true}>
+                {dummyData.map((stock, idx) => {
+                    const isUp = stock.priceChange > 0;
+                    const color = isDarkMode
+                        ? isUp ? '#26a69a' : '#ef6d61'
+                        : isUp ? '#388055' : '#BB3536';
 
-                const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
+                    const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
+                    const time = new Date(stock.time).toLocaleString();
 
-                if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
-                    return false;
-                }
+                    if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                        return false;
+                    }
+                    const { leading, trailing } = renderActions(stock, idx);
 
-                return (
-                    <React.Fragment key={stock.id}>
-                        <Box
-                            sx={{
-                                width: '100%',
-                                height: '5rem',
-                                // border: '1px solid red',
-                                position: 'relative',
-                                px: 1
-                            }}
-                            onClick={() => setIsStockOpen(stock)}
+                    return (
+                        <SwipeableListItem
+                            key={stock.id}
+                            leadingActions={leading}
+                            trailingActions={trailing}
+                        // fullSwipe={false}
+                        // threshold={0.5}
                         >
-                            <Box sx={headerBoxStyle}></Box>
-
-                            <Typography
-                                variant="body2"
-                                fontWeight={500}
-                                sx={{
-                                    position: 'absolute',
-                                    top: '0rem',
-                                    // left: '0rem'
-                                }}
-                            >
-                                {isSmallMobile ? 'Q' : 'Q : '}{stock.qty.toLocaleString('en-IN')}
-                            </Typography>
-
-                            {isSmallMobile && <Typography
-                                variant="body2"
-                                sx={{
-                                    color,
-                                    display: 'inline',
-                                    fontWeight: 600,
-                                    position: 'absolute',
-                                    top: '0rem',
-                                    left: '3.3rem'
-                                }}
-                            >
-                                {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
-                            </Typography>}
-
-                            {/* Logo */}
-                            <Box sx={{
-                                ...logoCss,
-                                backgroundColor: isDarkMode ? '#777' : '#ccc',
-                                color: isDarkMode ? '#fff' : '#000'
-                            }}
-                            >
-                                {stock.scriptName[0]}
-                            </Box>
-
-                            <Stack
-                                direction="column"
-                                justifyContent="space-between"
-                                alignItems="left"
-                                sx={{
-                                    position: 'absolute',
-                                    left: '2.5rem',
-                                    top: row2Top,
-                                }}>
-                                <Typography
-                                    variant="subtitle2"
-                                    fontWeight={600}
-                                    sx={{ color: textColor, lineHeight: '1rem' }}
+                            <Box sx={{ width: '100%', px: 0.2 }} onClick={() => setIsStockOpen(stock)}>
+                                {/* Header line */}
+                                <Stack
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    sx={headerBoxStyle}
                                 >
-                                    {splitScriptAndDate(stock.scriptName).scriptName}
-                                </Typography>
-
-                                <Typography
-                                    variant="body2"
-                                    sx={{ color: textColor, fontSize: '0.75rem', transform: 'skewX(-10deg)' }}
-                                >
-                                    {splitScriptAndDate(stock.scriptName).date}
-                                </Typography>
-                            </Stack>
-
-                            <Box sx={{ position: 'absolute', bottom: '0rem', left: '4px' }}>
-                                <Box sx={{ position: 'relative', left: '1.9rem' }}>
-                                    <Icon style={{ color, position: 'absolute', fontSize: '1.8rem', left: '-2.2rem', top: '-2px' }} />
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            display: 'inline',
-                                            fontSize: '0.83rem',
-                                            fontWeight: 500,
-                                            position: 'relative',
-                                            left: '-0.8rem'
-                                        }}
-                                    >
-                                        {stock.priceChange.toFixed(2)} ({stock.priceChangePercent.toFixed(2)}%) {' '}
-                                    </Typography>
-                                    {!isSmallMobile && <Typography
+                                    {isSmallMobile && <Typography
                                         variant="body2"
                                         sx={{
                                             color,
                                             display: 'inline',
                                             fontWeight: 600,
-                                            position: 'relative',
-                                            left: '-0.8rem'
+                                            top: '0rem',
+                                            width: '5rem'
                                         }}
                                     >
                                         {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
                                     </Typography>}
-                                </Box>
+
+                                    <Typography
+                                        variant="body2"
+                                        fontWeight={500}
+                                    >
+                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock.qty.toLocaleString('en-IN')}
+                                    </Typography>
+
+                                    <Typography sx={{ fontSize: '0.84rem' }}>{time}</Typography>
+                                </Stack>
+
+                                {/* Below Header */}
+                                <Stack
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    sx={{
+                                        px: '0.2rem',
+                                        mt: '0.3rem'
+                                    }}
+                                >
+                                    {/* LHS section */}
+                                    <Stack
+                                        direction="column"
+                                        justifyContent="space-between"
+                                        alignItems="flex-start"
+                                    >
+                                        {/* Logo and scriptname */}
+                                        <Stack
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                            gap={0.75}
+                                        >
+                                            {/* Logo */}
+                                            <Box sx={{
+                                                ...logoCss,
+                                                backgroundColor: isDarkMode ? '#777' : '#ccc',
+                                                color: isDarkMode ? '#fff' : '#000'
+                                            }}
+                                            >
+                                                {stock.scriptName[0]}
+                                            </Box>
+
+
+                                            {/* scriptName and Date */}
+                                            <Stack
+                                                direction="column"
+                                                justifyContent="space-between"
+                                                alignItems="flex-start"
+                                            >
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    fontWeight={600}
+                                                    sx={{
+                                                        color: textColor, lineHeight: '1rem',
+                                                        // border: '1px solid blue'
+                                                    }}
+                                                >
+                                                    {splitScriptAndDate(stock.scriptName).scriptName}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{ color: textColor, fontSize: '0.75rem', transform: 'skewX(-10deg)' }}
+                                                >
+                                                    {splitScriptAndDate(stock.scriptName).date}
+                                                </Typography>
+                                            </Stack>
+                                        </Stack>
+
+                                        {/* change % and LTP */}
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
+                                                left: '1rem',
+                                                // height: '1rem',
+                                                // border: '1px solid red',
+                                                top: '-0.19rem',
+                                                mr: '14px',
+                                                width: !isSmallMobile ? '40vw' : 'auto',
+                                            }}
+                                        >
+                                            <Icon style={{
+                                                color, fontSize: '1.8rem',
+                                                position: 'absolute',
+                                                left: '-1.3rem',
+                                                top: '-2px'
+                                            }} />
+                                            <Box>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        display: 'inline',
+                                                        fontSize: '0.83rem',
+                                                        fontWeight: 500,
+                                                        // position: 'relative',
+                                                        // left: '-0.8rem'
+                                                        // border: '1px solid green',
+                                                        // lineHeight: '0rem',
+                                                    }}
+                                                >
+                                                    {stock.priceChange.toFixed(2)} ({stock.priceChangePercent.toFixed(2)}%) {' '}
+                                                </Typography>
+                                                {!isSmallMobile && <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        color,
+                                                        display: 'inline',
+                                                        fontWeight: 600,
+                                                        // position: 'relative',
+                                                        // left: '-0.8rem'
+                                                    }}
+                                                >
+                                                    {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
+                                                </Typography>}
+                                            </Box>
+                                        </Box>
+                                    </Stack>
+
+
+                                    {/* RHS section */}
+                                    <Stack
+                                        direction="row"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                    >
+                                        {/* Bid Box */}
+                                        <Stack
+                                            direction="column"
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                        >
+                                            <Box
+                                                sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                            >
+                                                <Typography
+                                                    sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
+                                                    pt={0.6}
+                                                >
+                                                    {stock.bidRate.toLocaleString('en-IN')}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    fontSize='0.75rem'
+                                                    fontWeight='600'
+                                                    pt={0.5}
+                                                >
+                                                    H: {stock.high.toLocaleString('en-IN')}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+
+                                        {/* Ask Box */}
+                                        <Stack
+                                            direction="column"
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                        >
+                                            <Box
+                                                sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                            >
+                                                <Typography
+                                                    sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
+                                                    pt={0.6}
+                                                >
+                                                    {stock.askRate.toLocaleString('en-IN')}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    fontSize='0.75rem'
+                                                    fontWeight='600'
+                                                    pt={0.5}
+                                                >
+                                                    L: {stock.low.toLocaleString('en-IN')}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Stack>
+                                </Stack>
+
+                                {/* Divider */}
+                                {
+                                    idx !== dummyData.length - 1 && (
+                                        <Divider
+                                            sx={{
+                                                my: 0.9,
+                                                backgroundColor: (theme) =>
+                                                    theme.palette.mode === 'dark'
+                                                        ? 'rgba(255,255,255,0.08)'
+                                                        : 'rgba(0,0,0,0.08)',
+                                                mx: 1,
+                                            }}
+                                        />
+                                    )
+                                }
                             </Box>
-
-                            {/** 2nd column */}
-                            <Stack direction='row' gap={0}
-                                sx={{
-                                    position: 'absolute',
-                                    right: '4px',
-                                    top: '0rem',
-                                }}>
-                                <Stack
-                                    direction="column"
-                                    justifyContent="space-between"
-                                    alignItems="left"
-                                    sx={{
-                                        width: spacing.width,
-                                    }}
-                                >
-                                    <Typography
-                                        fontSize={'0.825rem'}
-                                    >
-                                        O: {stock.open.toLocaleString('en-IN')}
-                                        {/* H: {stock.high} */}
-                                    </Typography>
-
-                                    <Box
-                                        sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
-                                    // ref={(el) => (bidBoxRef.current[idx] = el)} // assign ref dynamically
-                                    >
-                                        <Typography
-                                            variant="h6"
-                                            sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
-                                            pt={0.6}
-                                        >
-                                            {stock.bidRate.toLocaleString('en-IN')}
-                                        </Typography>
-
-                                        <Typography
-                                            variant="body2"
-                                            fontSize='0.75rem'
-                                            fontWeight='600'
-                                            pt={0.5}
-                                        >
-                                            H: {stock.high.toLocaleString('en-IN')}
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-
-                                <Stack
-                                    direction="column"
-                                    justifyContent="space-between"
-                                    alignItems="left"
-                                    sx={{
-                                        width: spacing.width,
-                                    }}
-                                >
-                                    <Typography
-                                        fontSize={'0.825rem'}
-                                    >
-                                        C: {stock.close.toLocaleString('en-IN')}
-                                        {/* L: {stock.low} */}
-                                    </Typography>
-
-                                    <Box
-                                        sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
-                                    // ref={(el) => (askBoxRef.current[idx] = el)} // assign ref dynamically
-                                    >
-                                        <Typography
-                                            variant="h6"
-                                            sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
-                                            pt={0.6}
-                                        >
-                                            {stock.askRate.toLocaleString('en-IN')}
-                                        </Typography>
-
-                                        <Typography
-                                            variant="body2"
-                                            fontSize='0.75rem'
-                                            fontWeight='600'
-                                            pt={0.5}
-                                        >
-                                            L: {stock.low.toLocaleString('en-IN')}
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                            </Stack>
-                        </Box>
-
-                        {/* Divider */}
-                        {
-                            idx !== watchList.length - 1 && (
-                                <Divider
-                                    sx={{
-                                        my: 0.9,
-                                        backgroundColor: (theme) =>
-                                            theme.palette.mode === 'dark'
-                                                ? 'rgba(255,255,255,0.08)'
-                                                : 'rgba(0,0,0,0.08)',
-                                        mx: 1,
-                                    }}
-                                />
-                            )
-                        }
-                    </React.Fragment>
-                );
-            })}
-        </Box >
+                        </SwipeableListItem>
+                    );
+                })}
+            </SwipeableList>
+            <Toaster />
+        </>
     );
 };
 
 export default MobileStockTable;
-
-
-/*
-- scriptName
-- Qty
-- Date
-
-- LTP
-- price change / %
-
-- bid/ask
-
-- open/close
-- high/low
-*/

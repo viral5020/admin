@@ -30,6 +30,10 @@ import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from 'dan-components/Tables/MobileStockTable';
 import { Navigate } from 'react-router-dom';
 import BackToTop from './BackToTop';
+import MobileStockTableDesign2 from 'dan-components/Tables/MobileStockTableDesign2';
+import MobileStockTableFlexCss from 'dan-components/Tables/MobileStockTableFlexCss';
+import MobileStockWithReactSwipeable from 'dan-components/Tables/MobileStockWithReactSwipeable';
+import SwipeableStockList from 'dan-components/Tables/reactSwipe';
 // import { Navigate } from 'react-big-calendar';
 //"react-router-dom": "^6.23.1",
 
@@ -67,6 +71,7 @@ const dummyWatchlistData = [
     priceChange: -16.40,
     priceChangePercent: -0.58,
     qty: 150,
+    time: new Date().getTime(),
     maxOrder: 1000,
     position: 'Buy',
     isFavorite: true,
@@ -86,6 +91,7 @@ const dummyWatchlistData = [
     priceChange: +70.21,
     priceChangePercent: +10.43,
     qty: 891,
+    time: new Date().getTime(),
     maxOrder: 801,
     isFavorite: true,
     position: 'Sell',
@@ -105,6 +111,7 @@ const dummyWatchlistData = [
     priceChange: -4.90,
     priceChangePercent: -0.32,
     qty: 100,
+    time: new Date().getTime(),
     maxOrder: 900,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:44:22'
@@ -123,6 +130,7 @@ const dummyWatchlistData = [
     priceChange: +2.40,
     priceChangePercent: +0.55,
     qty: 250,
+    time: new Date().getTime(),
     maxOrder: 2000,
     isFavorite: true,
     position: 'Sell',
@@ -142,6 +150,7 @@ const dummyWatchlistData = [
     priceChange: -4.25,
     priceChangePercent: -0.11,
     qty: 70,
+    time: new Date().getTime(),
     maxOrder: 600,
     isFavorite: true,
     position: 'Buy',
@@ -161,6 +170,7 @@ const dummyWatchlistData = [
     priceChange: -1.90,
     priceChangePercent: -0.48,
     qty: 500,
+    time: new Date().getTime(),
     maxOrder: 2500,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:47:33'
@@ -179,6 +189,7 @@ const dummyWatchlistData = [
     priceChange: +2.90,
     priceChangePercent: +0.34,
     qty: 320,
+    time: new Date().getTime(),
     maxOrder: 1500,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:48:41'
@@ -197,6 +208,7 @@ const dummyWatchlistData = [
     priceChange: +2.65,
     priceChangePercent: +0.56,
     qty: 130,
+    time: new Date().getTime(),
     maxOrder: 1200,
     isFavorite: true,
     position: 'Sell',
@@ -216,6 +228,7 @@ const dummyWatchlistData = [
     priceChange: -1.80,
     priceChangePercent: -0.21,
     qty: 140,
+    time: new Date().getTime(),
     maxOrder: 1100,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:50:20'
@@ -234,6 +247,7 @@ const dummyWatchlistData = [
     priceChange: +3.40,
     priceChangePercent: +0.60,
     qty: 180,
+    time: new Date().getTime(),
     maxOrder: 1400,
     position: 'Sell',
     lastChangedAt: '2025-07-01 09:51:07'
@@ -252,6 +266,7 @@ const dummyWatchlistData = [
     priceChange: -0.80,
     priceChangePercent: -0.36,
     qty: 600,
+    time: new Date().getTime(),
     maxOrder: 3000,
     isFavorite: true,
     position: 'Buy',
@@ -271,6 +286,7 @@ const dummyWatchlistData = [
     priceChange: +7.80,
     priceChangePercent: +0.53,
     qty: 95,
+    time: new Date().getTime(),
     maxOrder: 850,
     isFavorite: true,
     position: 'Sell',
@@ -290,6 +306,7 @@ const dummyWatchlistData = [
     priceChange: -1.50,
     priceChangePercent: -0.47,
     qty: 200,
+    time: new Date().getTime(),
     maxOrder: 1700,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:53:32'
@@ -308,6 +325,7 @@ const dummyWatchlistData = [
     priceChange: +6.50,
     priceChangePercent: +0.21,
     qty: 55,
+    time: new Date().getTime(),
     maxOrder: 500,
     isFavorite: true,
     position: 'Sell',
@@ -327,6 +345,7 @@ const dummyWatchlistData = [
     priceChange: -25.00,
     priceChangePercent: -0.23,
     qty: 30,
+    time: new Date().getTime(),
     maxOrder: 400,
     position: 'Buy',
     lastChangedAt: '2025-07-01 09:54:55'
@@ -345,6 +364,7 @@ function Watchlist() {
   const [searchText, setSearchText] = useState('');
   const [isStockOpen, setIsStockOpen] = useState();
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
+  const [dummyData, setDummyData] = useState(dummyWatchlistData)
 
   const sections = [
     { title: 'Nifty 50 Stocks', key: 'nifty' },
@@ -405,8 +425,21 @@ function Watchlist() {
               </AccordionSummary>
               <AccordionDetails>
                 {isMobile ?
-                  <MobileStockTable searchText={searchText} setIsStockOpen={setIsStockOpenInMobile} isStockOpen={isStockOpenInMobile} watchList={dummyWatchlistData} isDarkMode={isDarkMode} />
-                  : <StockTable searchText={searchText} setIsStockOpen={setIsStockOpen} watchList={dummyWatchlistData} />}
+                // <WithOneAction/>
+                  // <MobileStockTableFlexCss
+                  <MobileStockTable
+                    searchText={searchText}
+                    setIsStockOpen={setIsStockOpenInMobile}
+                    isStockOpen={isStockOpenInMobile}
+                    dummyData={dummyData} 
+                    setDummyData={setDummyData}
+                    isDarkMode={isDarkMode}
+                  />
+                  : <StockTable
+                    searchText={searchText}
+                    setIsStockOpen={setIsStockOpen}
+                    watchList={dummyWatchlistData}
+                  />}
               </AccordionDetails>
             </Accordion>
           </Box>
