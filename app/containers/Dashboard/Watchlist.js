@@ -30,12 +30,7 @@ import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from 'dan-components/Tables/MobileStockTable';
 import { Navigate } from 'react-router-dom';
 import BackToTop from './BackToTop';
-import MobileStockTableDesign2 from 'dan-components/Tables/MobileStockTableDesign2';
-import MobileStockTableFlexCss from 'dan-components/Tables/MobileStockTableFlexCss';
-import MobileStockWithReactSwipeable from 'dan-components/Tables/MobileStockWithReactSwipeable';
-import SwipeableStockList from 'dan-components/Tables/reactSwipe';
-// import { Navigate } from 'react-big-calendar';
-//"react-router-dom": "^6.23.1",
+
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
