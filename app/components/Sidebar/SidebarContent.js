@@ -84,10 +84,10 @@ function SidebarContent(props) {
       return result.data;
 
     } catch (error) {
-      if (error.message === 'Unauthorised Access') {
-        alert('Session expired, please login again.');
-        return <Navigate to="/login" replace />;
-      }
+      // if (error.message === 'Unauthorised Access') {
+      //   alert('Session expired, please login again.');
+      //   return <Navigate to="/login" replace />;
+      // }
       console.error('❌ from sidebarContent.js\nError fetching profile:', error);
       throw error;
     }

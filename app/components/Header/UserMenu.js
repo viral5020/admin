@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
@@ -71,11 +71,10 @@ function UserMenu(props) {
       return result.data;
 
     } catch (error) {
-      if (error.message === 'Unauthorised Access') {
-        alert('Session expired, please login again.');
-        return <Navigate to="/login" replace />;
-      }
-
+      // if (error.message === 'Unauthorised Access') {
+      //   alert('Session expired, please login again.');
+      //   return <Navigate to="/login" replace />;
+      // }
       console.error('❌ Error fetching profile:', error);
       throw error;
     }
