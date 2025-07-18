@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import { NavLink } from 'react-router-dom';
+import { Navigate, NavLink } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -63,8 +63,8 @@ function SidebarContent(props) {
     const data = JSON.parse(sessionStorage.getItem('data'));
     const formData = {
       is_app: 1,
-      login_user_id: data.user_id ,
-      auth_key: data.auth_key 
+      login_user_id: data.user_id,
+      auth_key: data.auth_key
     };
 
     try {
@@ -84,6 +84,10 @@ function SidebarContent(props) {
       return result.data;
 
     } catch (error) {
+      if (error.message === 'Unauthorised Access') {
+        alert('Session expired, please login again.');
+        return <Navigate to="/login" replace />;
+      }
       console.error('❌ from sidebarContent.js\nError fetching profile:', error);
       throw error;
     }

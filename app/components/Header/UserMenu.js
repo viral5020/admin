@@ -71,6 +71,11 @@ function UserMenu(props) {
       return result.data;
 
     } catch (error) {
+      if (error.message === 'Unauthorised Access') {
+        alert('Session expired, please login again.');
+        return <Navigate to="/login" replace />;
+      }
+
       console.error('❌ Error fetching profile:', error);
       throw error;
     }

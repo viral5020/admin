@@ -6,8 +6,9 @@ import {
     Divider,
     IconButton,
     Paper,
-    createTheme,
     Button,
+    createTheme,
+    ThemeProvider,
 } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -27,6 +28,10 @@ import {
 import 'react-swipeable-list/dist/styles.css';
 import './listAnimation.css'; // Animation styles
 import toast, { Toaster } from 'react-hot-toast';
+import StarSharpIcon from '@mui/icons-material/StarSharp';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { useTheme } from '@emotion/react';
 
 function splitScriptAndDate(fullText) {
     const parts = fullText.trim().split(' ');
@@ -41,6 +46,17 @@ function splitScriptAndDate(fullText) {
 
 const row2Top = '1.6rem';
 const row3Top = '';
+
+const toastBoxCss = {
+    display: 'flex',
+    alignItems: 'center',
+    px: 2.5,
+    py: 0.7,
+    boxShadow: 3,
+    minWidth: '80vw',
+    justifyContent: 'space-between',
+    borderRadius: '60px',
+}
 
 const boxCss = {
     borderRadius: '10%',
@@ -74,7 +90,23 @@ const headerBgCss = {
     px: '0.4rem'
 }
 
-const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, isDarkMode, onToggleFavorite, favorites, setDummyData }) => {
+const MobileStockTable = ({
+    searchText,
+    isStockOpen,
+    setIsStockOpen,
+    dummyData,
+    isDarkMode,
+    onToggleFavorite,
+    favorites,
+    setDummyData
+}) => {
+
+    const theme = createTheme({
+        palette: {
+            star: '#fff', // Don't think, Just remain this as it is
+        },
+    });
+
     const [spacing, setSpacing] = useState({ fontSize: '0.95rem' });
     const [isSmallMobile, setIsSmallMobile] = useState();
     const [textColor, setTextColor] = useState('');
@@ -89,42 +121,13 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
     useEffect(() => {
         setBoxStyle(prev => ({ ...prev, border: `1.7px solid ${textColor}` }))
     }, [textColor]);
-    // const askBoxRef = useRef([]);
-    // const bidBoxRef = useRef([]);
-    // const [askWrapStatus, setAskWrapStatus] = useState([]);
-    // const [bidWrapStatus, setBidWrapStatus] = useState([]);
 
     function apiSetFavrioute(e) {
         e.stopPropagation();
         console.log('inside apiSetFavrioute');
     }
 
-    // const checkWrap = (el) => {
-    //     // console.log('el.offsetHeight', el.offsetHeight)
-    //     // // return el.offsetHeight;
-    //     // console.log('el.scrollHeight', el.scrollHeight);
-    //     // console.log('el.clientHeight', el.clientHeight);
-    //     return el.scrollHeight > el.clientHeight;
-    // };
-
-    // function setWrapStatus() {
-    //     const bid = bidBoxRef.current.map((el) => el && checkWrap(el));  // line: 86
-    //     const ask = askBoxRef.current.map((el) => el && checkWrap(el));
-    //     setBidWrapStatus(bid);
-    //     setAskWrapStatus(ask);
-    //     console.log('bid', bid);
-    //     console.log('ask', ask)
-    // }
-
     function setSpace() {
-        // if (window.innerWidth < 385) {
-        //     setSpacing(prev => ({
-        //         ...prev,
-        //         width: '5.5rem',
-        //         px: '0.17rem'
-
-        //     }))
-        // } else 
         if (window.innerWidth < 417) {
             setSpacing(prev => ({
                 ...prev,
@@ -173,30 +176,18 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
         }, [500])
     };
 
-    function showRemoveToast(scriptName, onUndo) {
+    function showToast(msg, onUndo) {
         let didUndo = false;
 
         const toastId = toast.custom((t) => (
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: isDarkMode ? '#333' : '#fff',
-                    color: isDarkMode ? '#fff' : '#000',
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: '8px',
-                    boxShadow: 3,
-                    minWidth: '80vw',
-                    justifyContent: 'space-between'
-                }}
-            >
-                <Typography variant='caption' sx={{ fontSize: '0.9rem' }}>
-                    {scriptName} Removed
+            <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
+                <Typography sx={{ fontSize: '0.9rem' }}>
+                    {/* {scriptName} Removed */}
+                    {msg}
                 </Typography>
-                <Button
+                {onUndo && <Button
                     size="small"
-                    sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0.5 }}
+                    sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0 }}
                     onClick={() => {
                         didUndo = true;
                         onUndo();
@@ -204,67 +195,85 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                     }}
                 >
                     Undo
-                </Button>
+                </Button>}
             </Box>
         ), {
-            id: scriptName, // optional: prevent duplicate toasts
-            duration: 3000,
+            id: msg, // optional: prevent duplicate toasts
+            duration: 60000,
             position: 'bottom-center',
         });
     };
 
-
-    function handleRemove(stock, idx) {
-        function onUndo() {
-            setDummyData(prev => [
-                ...prev.slice(0, idx),
-                stock,
-                ...prev.slice(idx)
-            ]);
+    function handleRemove(stock, idx, isQty) {
+        if (isQty) {
+            showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
+        } else {
+            function onUndo() {
+                setDummyData(prev => [
+                    ...prev.slice(0, idx),
+                    stock,
+                    ...prev.slice(idx)
+                ]);
+            }
+            removeItem(stock.id);
+            showToast(`${stock.scriptName} Removed `, onUndo);
         }
-        removeItem(stock.id);
-        showRemoveToast(stock.scriptName, onUndo);
     }
 
-    const renderActions = (item, idx) => ({
+    function handleStar(stock, isFavorite) {
+        console.log("handle star called...");
+        showToast(`${stock.scriptName} ${isFavorite ? 'removed from' : 'added in'} favorites.`);
+    }
+
+    const renderActions = (item, idx, isQty, isFavorite) => ({
         leading: (
             <LeadingActions>
                 <SwipeAction
-                    destructive={true}
-                    onClick={() => handleRemove(item, idx)}
+                    // destructive={true}
+                    onClick={() => handleStar(item, isFavorite)}
                 >
-                    <Button
-                        variant="contained"
-                        color="error"
-                        sx={{
-                            height: '100%',
-                            borderRadius: 0,
-                            minWidth: '80px',
-                            fontSize: '0.85rem'
-                        }}
-                    >
-                        Remove
-                    </Button>
+                    <ThemeProvider theme={theme}>
+                        <Button
+                            variant="contained"
+                            color="star"
+                            sx={{
+                                backgroundColor: isDarkMode ? '#eca52e' : '#ffb63c',
+                                height: '100%',
+                                borderRadius: 0,
+                                minWidth: '80px',
+                                fontSize: '0.85rem',
+                                color: '#fff',
+                            }}
+                        >
+                            {/* Star */}
+                            {isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
+                        </Button>
+                    </ThemeProvider>
                 </SwipeAction >
             </LeadingActions >
         ),
         trailing: (
             <TrailingActions>
                 <SwipeAction
-                    destructive={true}
-                    onClick={() => handleRemove(item, idx)}
+                    destructive={isQty ? false : true}
+                    onClick={() => handleRemove(item, idx, isQty)}
                 >
                     <Button
                         variant="contained"
-                        color="error"
+                        color={isQty ? "inherit" : "error"}
                         sx={{
+                            backgroundColor: isQty ?
+                                isDarkMode ? '#696969' : '#797979'
+                                : isDarkMode ? '#d73733' : '#e0362a',
                             height: '100%',
                             borderRadius: 0,
                             minWidth: '80px',
+                            color: '#fff',
                             fontSize: '0.85rem'
                         }}
                     >
-                        Remove
+                        {/* Remove */}
+                        <DeleteIcon sx={{ fontSize: '2rem' }} />
                     </Button>
                 </SwipeAction>
             </TrailingActions>
@@ -273,7 +282,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
 
     return (
         <>
-            <SwipeableList type={ListType.IOS} threshold={0.8} fullSwipe={true}>
+            <SwipeableList type={ListType.IOS}>
                 {dummyData.map((stock, idx) => {
                     const isUp = stock.priceChange > 0;
                     const color = isDarkMode
@@ -286,7 +295,10 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                     if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                         return false;
                     }
-                    const { leading, trailing } = renderActions(stock, idx);
+
+                    const isQty = stock.qty > 0 ? true : false;
+                    const isFavorite = idx % 3 == 0 ? true : false;
+                    const { leading, trailing } = renderActions(stock, idx, isQty, isFavorite);
 
                     return (
                         <SwipeableListItem
@@ -321,7 +333,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                                         variant="body2"
                                         fontWeight={500}
                                     >
-                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock.qty.toLocaleString('en-IN')}
+                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock.qty?.toLocaleString('en-IN')}
                                     </Typography>
 
                                     <Typography sx={{ fontSize: '0.84rem' }}>{time}</Typography>
@@ -460,8 +472,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                                                 </Typography>
 
                                                 <Typography
-                                                    variant="body2"
-                                                    fontSize='0.75rem'
+                                                    fontSize='0.71rem'
                                                     fontWeight='600'
                                                     pt={0.5}
                                                 >
@@ -487,8 +498,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                                                 </Typography>
 
                                                 <Typography
-                                                    variant="body2"
-                                                    fontSize='0.75rem'
+                                                    fontSize='0.71rem'
                                                     fontWeight='600'
                                                     pt={0.5}
                                                 >
@@ -519,7 +529,7 @@ const MobileStockTable = ({ searchText, isStockOpen, setIsStockOpen, dummyData, 
                     );
                 })}
             </SwipeableList>
-            <Toaster />
+            <Toaster limit={3} />
         </>
     );
 };

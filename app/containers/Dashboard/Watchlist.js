@@ -85,7 +85,7 @@ const dummyWatchlistData = [
     ltp: 164482.1,
     priceChange: +70.21,
     priceChangePercent: +10.43,
-    qty: 891,
+    qty: 0,
     time: new Date().getTime(),
     maxOrder: 801,
     isFavorite: true,
@@ -124,7 +124,7 @@ const dummyWatchlistData = [
     ltp: 438.00,
     priceChange: +2.40,
     priceChangePercent: +0.55,
-    qty: 250,
+    qty: 0,
     time: new Date().getTime(),
     maxOrder: 2000,
     isFavorite: true,
@@ -144,7 +144,7 @@ const dummyWatchlistData = [
     ltp: 3825.75,
     priceChange: -4.25,
     priceChangePercent: -0.11,
-    qty: 70,
+    qty: 0,
     time: new Date().getTime(),
     maxOrder: 600,
     isFavorite: true,
@@ -202,7 +202,7 @@ const dummyWatchlistData = [
     ltp: 477.65,
     priceChange: +2.65,
     priceChangePercent: +0.56,
-    qty: 130,
+    qty: 0,
     time: new Date().getTime(),
     maxOrder: 1200,
     isFavorite: true,
@@ -222,7 +222,7 @@ const dummyWatchlistData = [
     ltp: 838.20,
     priceChange: -1.80,
     priceChangePercent: -0.21,
-    qty: 140,
+    qty: 0,
     time: new Date().getTime(),
     maxOrder: 1100,
     position: 'Buy',
@@ -420,13 +420,13 @@ function Watchlist() {
               </AccordionSummary>
               <AccordionDetails>
                 {isMobile ?
-                // <WithOneAction/>
+                  // <WithOneAction/>
                   // <MobileStockTableFlexCss
                   <MobileStockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpenInMobile}
                     isStockOpen={isStockOpenInMobile}
-                    dummyData={dummyData} 
+                    dummyData={dummyData}
                     setDummyData={setDummyData}
                     isDarkMode={isDarkMode}
                   />

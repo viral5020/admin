@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Box, Grid, Autocomplete, TextField, Button, InputAdornment, IconButton,
     DialogActions
@@ -9,6 +9,7 @@ import { Dialog, DialogTitle, DialogContent, useMediaQuery } from '@mui/material
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { position } from 'stylis';
 import AddSharpIcon from '@mui/icons-material/AddSharp';
+import axios from 'dan-vendor/axios';
 
 const dummyOptions = {
     Equity: {
@@ -86,21 +87,79 @@ const dummyOptions = {
     }
 };
 
+function changeFormat(arr) {
+    const result = {};
+
+    arr.forEach(script => {
+        const { market_type_name, script_name, script_expiry_orginal_format } = script;
+
+        if (!result[market_type_name]) {
+            result[market_type_name] = {};
+        }
+
+        if (!result[market_type_name][script_name]) {
+            result[market_type_name][script_name] = { expiry: [] };
+        }
+
+        result[market_type_name][script_name].expiry.push(script_expiry_orginal_format);
+    });
+    console.log('result', result);
+    return result;
+}
+
 
 const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) => {
     const [filterOpen, setFilterOpen] = useState(false);
-    const [segment, setSegment] = useState('');
+    const [dataObj, setDataObj] = useState({});
     const [script, setScript] = useState('');
     const [expiry, setExpiry] = useState('');
     const [type, setType] = useState('');
     const [strike, setStrike] = useState('');
+    const [segment, setSegment] = useState(Object.keys(dataObj)?.[0] || '');
 
-    const segmentOptions = Object.keys(dummyOptions);
+    async function getFilterData() {
+        const userData = JSON.parse(sessionStorage.getItem('data'));
+        try {
+            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/market_watch_list1", {
+                is_app: 1,
+                login_user_id: userData.user_id,
+                auth_key: userData.auth_key,
+            })
+            console.log(response.data.scripts);
+            const data = changeFormat(response.data.scripts);
+            setDataObj(data);
+        } catch (error) {
+            console.log('## getFilterData error', error);
+        }
+    }
 
-    const scriptOptions = useMemo(() => segment ? Object.keys(dummyOptions[segment]) : [], [segment]);
-    const expiryOptions = useMemo(() => segment && script ? dummyOptions[segment][script]?.expiries || [] : [], [segment, script]);
-    const typeOptions = useMemo(() => segment && script ? dummyOptions[segment][script]?.types || [] : [], [segment, script]);
-    const strikeOptions = useMemo(() => segment && script ? dummyOptions[segment][script]?.strikes || [] : [], [segment, script]);
+    useEffect(() => {
+        setSegment(Object.keys(dataObj)?.[0] || '');
+    }, [dataObj])
+
+    useEffect(() => {
+        getFilterData();
+    }, [])
+
+
+    const segmentOptions = Object.keys(dataObj);
+
+    const scriptOptions = useMemo(() => {
+        if (segment) {
+            const firstScriptName = Object.keys(dataObj[segment])?.[0];
+            setScript(firstScriptName || '');
+            setExpiry(dataObj[segment][firstScriptName]?.expiry?.[0] || '');
+        }
+        return segment ? Object.keys(dataObj[segment]) : []
+    }, [segment]);
+
+    const expiryOptions = useMemo(() => {
+        setExpiry(segment && script ? dataObj[segment][script]?.expiry?.[0] || '' : '');
+        return segment && script ? dataObj[segment][script]?.expiry || [] : []
+    }, [segment, script]);
+    // const typeOptions = useMemo(() => segment && script ? dataObj[segment][script]?.types || [] : [], [segment, script]);
+    // const strikeOptions = useMemo(() => segment && script ? dataObj[segment][script]?.strikes || [] : [], [segment, script]);
+
 
     const handleReset = () => {
         setSegment('');
@@ -118,6 +177,10 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
         });
     };
 
+    function formatExpiryDate(dateStr) {
+        return dateStr.replace(/(\d{2})([A-Z]{3})(\d{4})/, '$1 $2 $3');
+    }
+
     const renderFilterFields = () => (
         <Grid container spacing={2}>
             {[{
@@ -127,9 +190,9 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
             }, {
                 label: 'Expiry', value: expiry, onChange: setExpiry, options: expiryOptions
             }, {
-                label: 'CE/PE', value: type, onChange: setType, options: typeOptions
+                label: 'CE/PE', value: type, onChange: setType, options: ['Demo Option 1', 'Demo Option 2']
             }, {
-                label: 'Strike', value: strike, onChange: setStrike, options: strikeOptions
+                label: 'Strike', value: strike, onChange: setStrike, options: ['Demo Option 1', 'Demo Option 2']
             }].map(({ label, value, onChange, options }) => (
                 <Grid item xs={12} sm={6} md={2.4} key={label} >
                     <Autocomplete
@@ -138,6 +201,22 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                         options={options}
                         getOptionLabel={(opt) => String(opt)}
                         isOptionEqualToValue={(option, val) => option.value === val.value}
+                        inputValue={value}
+                        onInputChange={(_, newInputValue) => onChange(newInputValue)}
+                        renderOption={(props, option) => {
+                            const isMatch = String(option).toLowerCase() === value.toLowerCase();
+
+                            return (
+                                <li {...props}
+                                    style={{
+                                        backgroundColor: isMatch ? isDarkMode ? '#2e4354' : '#c7eaf9' : 'inherit',
+                                        fontWeight: isMatch ? 600 : 400
+                                    }}
+                                >
+                                    {label === 'Expiry' ? formatExpiryDate(option) : option}
+                                </li>
+                            );
+                        }}
                         renderInput={(params) => (
                             <TextField {...params} label={label} size="small" />
                         )}
