@@ -215,6 +215,11 @@ function PersonalDashboard() {
 
   const [rejectionDialogOpen, setrejectionDialogOpen] = useState(false);
   const [rejectionLogs, setRejectionLogs] = useState([]);
+  const [logPageSize, setLogPageSize] = useState(10);
+  const [logCurrentPage, setLogCurrentPage] = useState(0);
+  const [logTotalPages, setLogTotalPages] = useState(0);
+  const [visibleLogCount, setVisibleLogCount] = useState(10);
+
 
   const [pendingOrdersDialogOpen, setPendingOrdersDialogOpen] = useState(false);
   const [pendingOrders, setPendingOrders] = useState([]);
@@ -232,19 +237,19 @@ function PersonalDashboard() {
   const [loadingTrades, setLoadingTrades] = useState(false);
   const [tradesError, setTradesError] = useState(null);
 
-   const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   const [searchQuery, setSearchQuery] = useState("");
 
-   const [dashboardData, setDashboardData] = useState({
+  const [dashboardData, setDashboardData] = useState({
     today_rejection: '0',
     total_rejection: '0',
-     total_position: '0',
-     today_trades: '0',
-     week_trades: '0',
-      today_pending_trades: '0',
+    total_position: '0',
+    today_trades: '0',
+    week_trades: '0',
+    today_pending_trades: '0',
   });
 
   const handlePendingSearchChange = (value) => {
@@ -272,6 +277,10 @@ function PersonalDashboard() {
 
   const handlePendingLoadMore = () => {
     setPendingVisibleCount((prev) => prev + 10);
+  };
+
+  const handleRejectionLoadMore = () => {
+    setVisibleLogCount((prev) => prev + 10);
   };
 
   const pendingVisibleOrders = pendingOrders.slice(0, pendingVisibleCount);
@@ -357,15 +366,17 @@ function PersonalDashboard() {
     }
   };
 
- const filteredLogs = rejectionLogs.filter((log) => {
-  const query = searchQuery.toLowerCase();
-  return (
-    log.full_name?.toLowerCase().includes(query) ||
-    log.script_name?.toLowerCase().includes(query) ||
-    log.trade_type?.toLowerCase().includes(query) ||
-    log.log_message?.toLowerCase().includes(query)
-  );
-});
+  const filteredLogs = rejectionLogs.filter((log) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      log.full_name?.toLowerCase().includes(query) ||
+      log.script_name?.toLowerCase().includes(query) ||
+      log.trade_type?.toLowerCase().includes(query) ||
+      log.log_message?.toLowerCase().includes(query)
+    );
+  });
+
+
 
   const InfoCardHorizontal = ({ title, icon, content, bgcolor }) => (
     <Paper
@@ -479,10 +490,10 @@ function PersonalDashboard() {
         login_user_id: dataStored.user_id,
         auth_key: dataStored.auth_key,
         sEcho: 1,
-         isTodayTrade: filterType,
+        isTodayTrade: filterType,
         iDisplayStart: 0,
-        iDisplayLength: 10,
-         sSearch: searchQuery || "",
+        iDisplayLength: 10000,
+        sSearch: searchQuery || "",
       });
       setRejectionLogs(response.data.aaData || []);
     } catch (error) {
@@ -519,7 +530,7 @@ function PersonalDashboard() {
     const formData = {
       sEcho: 1,
       iDisplayStart: 0,
-      iDisplayLength: 100,
+      iDisplayLength: 10000,
       sSearch: searchValue,
       is_app: 1,
       login_user_id: dataStored.user_id,
@@ -545,7 +556,7 @@ function PersonalDashboard() {
     }
   };
 
-   const fetchTradesData = async () => {
+  const fetchTradesData = async () => {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     if (!selectedRow) return;
 
@@ -580,7 +591,7 @@ function PersonalDashboard() {
     }
   };
 
-    const handleViewTradesClick = () => {
+  const handleViewTradesClick = () => {
     if (!expanded) fetchTradesData();
     setExpanded((prev) => !prev);
   };
@@ -589,6 +600,18 @@ function PersonalDashboard() {
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
+
+  const paginatedLogs = useMemo(() => {
+    const start = logCurrentPage * logPageSize;
+    const end = start + logPageSize;
+    return filteredLogs.slice(start, end);
+  }, [filteredLogs, logCurrentPage, logPageSize]);
+
+  const visibleMobileLogs = useMemo(
+    () => filteredLogs.slice(0, visibleLogCount),
+    [filteredLogs, visibleLogCount]
+  );
+
 
   function getMarginDataFromSessionStorage() {
     const data = sessionStorage.getItem("data");
@@ -628,14 +651,11 @@ function PersonalDashboard() {
     fetchPendingOrders(PendingFilterType)
   }, [filterType, PendingFilterType]);
 
-useEffect(() => {
-  if (rejectionDialogOpen) {
-    fetchRejectionLogs();
-  }
-}, [rejectionDialogOpen, filterType, searchQuery]);
-
- 
-
+  useEffect(() => {
+    if (rejectionDialogOpen) {
+      fetchRejectionLogs();
+    }
+  }, [rejectionDialogOpen, filterType, searchQuery]);
 
   useEffect(() => {
     const fetchTrendStocks = async () => {
@@ -716,47 +736,47 @@ useEffect(() => {
   }, [tabValue, selectedStock]);
 
   useEffect(() => {
-  const fetchPositions = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (tabValue === 2 && selectedStock) {
-      setLoading(true);
-      setPositionData([]); // optional: clear old data
-      try {
-        const response = await fetch("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            isActive: "active",
-            sEcho: 1,
-            iDisplayStart: 0,
-            iDisplayLength: 10,
-            script_id: selectedStock.script_id,
-            sSearch: "",
-          }),
-        });
+    const fetchPositions = async () => {
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      if (tabValue === 2 && selectedStock) {
+        setLoading(true);
+        setPositionData([]); // optional: clear old data
+        try {
+          const response = await fetch("http://128.199.126.171/~goldorg/datatables/position_book_list", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              is_app: "1",
+              login_user_id: dataStored.user_id,
+              auth_key: dataStored.auth_key,
+              isActive: "active",
+              sEcho: 1,
+              iDisplayStart: 0,
+              iDisplayLength: 10,
+              script_id: selectedStock.script_id,
+              sSearch: "",
+            }),
+          });
 
-        const data = await response.json();
-        if (data && data.aaData) {
-          setPositionData(data.aaData);
-        } else {
+          const data = await response.json();
+          if (data && data.aaData) {
+            setPositionData(data.aaData);
+          } else {
+            setPositionData([]);
+          }
+        } catch (error) {
+          console.error("Error fetching position data:", error);
           setPositionData([]);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching position data:", error);
-        setPositionData([]);
-      } finally {
-        setLoading(false);
       }
-    }
-  };
+    };
 
-  fetchPositions();
-}, [tabValue, selectedStock]);
+    fetchPositions();
+  }, [tabValue, selectedStock]);
 
 
   useEffect(() => {
@@ -765,6 +785,21 @@ useEffect(() => {
     }
   }, [pendingOrdersDialogOpen]);
 
+  useEffect(() => {
+    const total = Math.ceil(filteredLogs.length / logPageSize);
+    setLogTotalPages(total);
+    // Ensure current page is valid
+    if (logCurrentPage >= total) {
+      setLogCurrentPage(total > 0 ? total - 1 : 0);
+    }
+  }, [filteredLogs, logPageSize]);
+
+  useEffect(() => {
+    // Only reset if logs changed completely
+    setVisibleLogCount((prev) => Math.min(prev, filteredLogs.length));
+  }, [filteredLogs.length]);
+
+
 
   useEffect(() => {
     if (positionDialogOpen) {
@@ -772,16 +807,19 @@ useEffect(() => {
     }
   }, [positionDialogOpen]);
 
-  
+  useEffect(() => {
+  setExpanded(false); // collapse trades on new selection
+}, [selectedRow]);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
-       const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
       try {
         const response = await axios.post(
           'http://128.199.126.171/~goldorg/ajaxfiles/dashboard_count_trade',
           {
             is_app: '1',
-           login_user_id: dataStored.user_id,
+            login_user_id: dataStored.user_id,
             auth_key: dataStored.auth_key,
           }
         );
@@ -791,9 +829,9 @@ useEffect(() => {
             today_rejection: response.data.today_rejection,
             total_rejection: response.data.total_rejection,
             total_position: response.data.total_position,
-             today_trades: response.data.today_trades,
-             week_trades: response.data.week_trades,
-              today_pending_trades: response.data.today_pending_trades,
+            today_trades: response.data.today_trades,
+            week_trades: response.data.week_trades,
+            today_pending_trades: response.data.today_pending_trades,
           });
         }
       } catch (error) {
@@ -836,19 +874,19 @@ useEffect(() => {
 
       <Grid container spacing={1}>
 
-       <Grid item xs={12} sm={6} md={3}>
-  <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-    <InfoCardHorizontal
-      title="Orders"
-      icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
-      content={[
-        `Today: ${dashboardData.today_trades}`,
-        `This Week: ${dashboardData.week_trades}`,
-      ]}
-      bgcolor="rgba(156, 39, 176, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+            <InfoCardHorizontal
+              title="Orders"
+              icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
+              content={[
+                `Today: ${dashboardData.today_trades}`,
+                `This Week: ${dashboardData.week_trades}`,
+              ]}
+              bgcolor="rgba(156, 39, 176, 0.1)"
+            />
+          </Box>
+        </Grid>
 
 
         <Dialog
@@ -859,66 +897,67 @@ useEffect(() => {
               setOrdersDialogOpen(false);
             }
           }}
-           fullWidth
-  maxWidth="xl"
-  disableEscapeKeyDown
-  PaperProps={{
-    sx: {
-      overflow: "hidden", // ✅ Hide outer scrollbar
-      maxHeight: isMobile ? "100vh" : "90vh",
-    },
-  }}
->
+          fullWidth
+          maxWidth="xl"
+          disableEscapeKeyDown
+          PaperProps={{
+            sx: {
+              overflow: "hidden", // ✅ Hide outer scrollbar
+              maxHeight: isMobile ? "100vh" : "90vh",
+              overflowY: 'auto'
+            },
+          }}
+        >
           <Box sx={{ p: 0 }}>
             {/* Blue header similar to your image */}
-           <Box
-  sx={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    px: 3,
-    py: 1,
-    backdropFilter: "blur(6px)",
-    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-    color: "#fff",
-    width: "100%",
-    borderTopLeftRadius: "8px",
-    borderTopRightRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    position: "relative",
-  }}
->
-  <Typography
-    variant="h6"
-    fontWeight={800}
-    sx={{
-      textTransform: "uppercase",
-      letterSpacing: 1.5,
-      fontSize: "1rem",
-      display: "flex",
-      alignItems: "center",
-      textShadow: "0 0 6px rgba(33,203,243,0.9)",
-    }}
-  >
-    <AssignmentIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-    Orders
-  </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 3,
+                py: 1,
+                backdropFilter: "blur(6px)",
+                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                color: "#fff",
+                width: "100%",
+                borderTopLeftRadius: "8px",
+                borderTopRightRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                position: "relative",
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{
+                  textTransform: "uppercase",
+                  letterSpacing: 1.5,
+                  fontSize: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
+                }}
+              >
+                <AssignmentIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+                Orders
+              </Typography>
 
-  <IconButton
-    size="small"
-    sx={{
-      color: "#fff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      borderRadius: "50%",
-      "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-      },
-    }}
-    onClick={() => setOrdersDialogOpen(false)}
-  >
-    <CloseIcon fontSize="small" />
-  </IconButton>
-</Box>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "50%",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+                onClick={() => setOrdersDialogOpen(false)}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
 
             <Box
@@ -1137,16 +1176,16 @@ useEffect(() => {
                         border: "1px solid #ddd",
                         borderRadius: "0px",
                         mx: 1,
-                         scrollbarWidth: "none", 
-    "&::-webkit-scrollbar": {
-      display: "none", 
-      },
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": {
+                          display: "none",
+                        },
                       }}
                     >
                       <table
                         className="table table-striped table-bordered"
                         style={{
-                          minWidth: "1350px",
+                          minWidth: "1500px",
                           fontSize: "12px",
                           margin: 0,
                           backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
@@ -1282,78 +1321,79 @@ useEffect(() => {
 
 
         <Grid item xs={12} sm={6} md={3}>
-  <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-    <InfoCardHorizontal
-      title="Positions"
-      icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
-      content={[`Positions: ${dashboardData.total_position}`]}
-      bgcolor="rgba(76, 175, 80, 0.1)"
-    />
-  </Box>
-</Grid>
+          <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Positions"
+              icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
+              content={[`Positions: ${dashboardData.total_position}`]}
+              bgcolor="rgba(76, 175, 80, 0.1)"
+            />
+          </Box>
+        </Grid>
 
         <Dialog
-  open={positionDialogOpen}
-  onClose={handleDialogClose}
-  fullScreen={isMobile}
-  fullWidth
-  maxWidth="xl"
-  disableEscapeKeyDown
-  PaperProps={{
-    sx: {
-      overflow: "hidden", // ✅ Prevent outer scrolling
-      maxHeight: isMobile ? "100vh" : "90vh",
-    },
-  }}
->
+          open={positionDialogOpen}
+          onClose={handleDialogClose}
+          fullScreen={isMobile}
+          fullWidth
+          maxWidth="xl"
+          disableEscapeKeyDown
+          PaperProps={{
+            sx: {
+              overflow: "hidden", // ✅ Prevent outer scrolling
+              maxHeight: isMobile ? "100vh" : "90vh",
+              overflowY: 'auto'
+            },
+          }}
+        >
           <Box sx={{ p: 0, position: "relative" }}>
             {/* Header */}
             <Box
-  sx={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    px: 3,
-    py: 1,
-    backdropFilter: "blur(6px)",
-    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-    color: "#fff",
-    borderTopLeftRadius: "0px",
-    borderTopRightRadius: "0px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    position: "relative",
-  }}
->
-  <Typography
-    variant="h6"
-    fontWeight={800}
-    sx={{
-      textTransform: "uppercase",
-      letterSpacing: 1.5,
-      fontSize: "1rem",
-      display: "flex",
-      alignItems: "center",
-      textShadow: "0 0 6px rgba(33,203,243,0.9)",
-    }}
-  >
-    <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-    Positions
-  </Typography>
-  <IconButton
-    size="small"
-    sx={{
-      color: "#fff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      borderRadius: "50%",
-      "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-      },
-    }}
-    onClick={handleDialogClose}
-  >
-    <CloseIcon fontSize="small" />
-  </IconButton>
-</Box>
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 3,
+                py: 1,
+                backdropFilter: "blur(6px)",
+                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                color: "#fff",
+                borderTopLeftRadius: "0px",
+                borderTopRightRadius: "0px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                position: "relative",
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{
+                  textTransform: "uppercase",
+                  letterSpacing: 1.5,
+                  fontSize: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
+                }}
+              >
+                <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+                Positions
+              </Typography>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "50%",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+                onClick={handleDialogClose}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
 
             {/* Body */}
@@ -1364,174 +1404,178 @@ useEffect(() => {
             ) : positionData.length > 0 ? (
               <>
                 {isMobile ? (
-  <>
-    {positionData.map((row, index) => {
-      const scriptHtml = row?.script_name || "";
-      const parts = scriptHtml.split("<br>");
-      const mainName = parts[0] || "";
-      const datePart = parts[1] || "";
+                  <>
+                    {positionData.map((row, index) => {
+                      const scriptHtml = row?.script_name || "";
+                      const parts = scriptHtml.split("<br>");
+                      const mainName = parts[0] || "";
+                      const datePart = parts[1] || "";
 
-      const currentValue = row.total_buy * row.last_trade_price;
-      const todaysPL = -203.0;
-      const unrealizedPL = 8170;
-      const unrealizedPLPerc = 10.62;
+                      const currentValue = row.total_buy * row.last_trade_price;
+                      const todaysPL = -203.0;
+                      const unrealizedPL = 8170;
+                      const unrealizedPLPerc = 10.62;
 
-      return (
-        <Box
-          key={index}
-          onClick={() => handleCardClick(row)}
-          sx={{
-            m: 0.2, // Reduce margin
-            border: (theme) => `1px solid ${theme.palette.primary.main}`,
-            borderRadius: 1.5,
-            backgroundColor: (theme) => theme.palette.background.paper,
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 0 4px rgba(255, 255, 255, 0.08)"
-                : "0 0 4px rgba(0, 0, 0, 0.04)",
-            overflow: "hidden",
-            cursor: "pointer",
-          }}
-        >
-          {/* Top row */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              px: 0.8,
-              py: 0.5, // Reduce vertical padding
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-              <Avatar
-                alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
-                src="/path-to-your-logo.png"
-                variant="square"
-                sx={{ width: 28, height: 28, mr: 0.6, flexShrink: 0 }} // Smaller avatar, smaller margin
-              />
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  overflow: "hidden",
-                  flexWrap: "nowrap",
-                  minWidth: 0,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 700,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    mr: 0.3, // Reduce margin
-                  }}
-                  dangerouslySetInnerHTML={{ __html: mainName }}
-                />
-                <Box sx={{ display: "flex", alignItems: "center", ml: 0.4 }}>
-                  <ShoppingBagIcon fontSize="inherit" sx={{ fontSize: 10, color: "text.disabled" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: 10,
-                      fontWeight: 300,
-                      ml: 0.2,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {row.total_buy} X {row.buy_avg_rate}
-                  </Typography>
-                </Box>
-                {datePart && (
-                  <Typography
-                    variant="caption"
-                    sx={{ opacity: 0.7, ml: 0.4, whiteSpace: "nowrap" }}
-                    dangerouslySetInnerHTML={{ __html: datePart }}
-                  />
-                )}
-              </Box>
-            </Box>
-            <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {row.last_trade_price}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: row.change_value < 0
-                    ? (theme) => theme.palette.error.main
-                    : (theme) => theme.palette.success.main,
-                }}
-              >
-                {row.change_value} ({row.change_perc}%)
-              </Typography>
-            </Box>
-          </Box>
+                      return (
+                        <Box
+                          key={index}
+                          onClick={() => handleCardClick(row)}
+                          sx={{
+                            m: 0.2, // Reduce margin
+                            border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                            borderRadius: 1.5,
+                            backgroundColor: (theme) => theme.palette.background.paper,
+                            boxShadow: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "0 0 4px rgba(255, 255, 255, 0.08)"
+                                : "0 0 4px rgba(0, 0, 0, 0.04)",
+                            overflow: "hidden",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* Top row */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              px: 0.8,
+                              py: 0.5, // Reduce vertical padding
+                            }}
+                          >
+                            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                              <Avatar
+                                alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
+                                src="/path-to-your-logo.png"
+                                variant="square"
+                                sx={{ width: 28, height: 28, mr: 0.6, flexShrink: 0 }} // Smaller avatar, smaller margin
+                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  overflow: "hidden",
+                                  flexWrap: "nowrap",
+                                  minWidth: 0,
+                                }}
+                              >
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontWeight: 700,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    mr: 0.3, // Reduce margin
+                                  }}
+                                  dangerouslySetInnerHTML={{ __html: mainName }}
+                                />
+                                <Box sx={{ display: "flex", alignItems: "center", ml: 0.4 }}>
+                                  <ShoppingBagIcon fontSize="inherit" sx={{ fontSize: 10, color: "text.disabled" }} />
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontSize: 10,
+                                      fontWeight: 300,
+                                      ml: 0.2,
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {row.total_buy} X {row.buy_avg_rate}
+                                  </Typography>
+                                </Box>
+                                {datePart && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ opacity: 0.7, ml: 0.4, whiteSpace: "nowrap" }}
+                                    dangerouslySetInnerHTML={{ __html: datePart }}
+                                  />
+                                )}
+                              </Box>
+                            </Box>
+                            <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                {row.last_trade_price}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: row.change_value < 0
+                                    ? (theme) => theme.palette.error.main
+                                    : (theme) => theme.palette.success.main,
+                                }}
+                              >
+                                {row.change_value} ({row.change_perc}%)
+                              </Typography>
+                            </Box>
+                          </Box>
 
-          {/* Bottom row */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              py: 0.3, // Reduce vertical padding
-              px: 0.5, // Add small horizontal padding
-              borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-              textAlign: "center",
-              width: "100%",
-            }}
-          >
-            <Box sx={{ flex: 0.5, pr: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {isNaN(currentValue)
-                  ? "---"
-                  : currentValue >= 1000
-                    ? `${(currentValue / 1000).toFixed(2)}K`
-                    : currentValue.toFixed(2)}
-              </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Current Value
-              </Typography>
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "error.main" }}>
-                {todaysPL.toFixed(2)}
-              </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Today&apos;s P&amp;L
-              </Typography>
-            </Box>
-            <Box sx={{ flex: 0.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "success.main" }}>
-                {unrealizedPL >= 1000
-                  ? `+${(unrealizedPL / 1000).toFixed(2)}K`
-                  : `+${unrealizedPL.toFixed(2)}`}{" "}
-                <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
-                  ({unrealizedPLPerc}%)
-                </Typography>
-              </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Unrealized P&amp;L
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      );
-    })}
+                          {/* Bottom row */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              py: 0.3, // Reduce vertical padding
+                              px: 0.5, // Add small horizontal padding
+                              borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                              textAlign: "center",
+                              width: "100%",
+                            }}
+                          >
+                            <Box sx={{ flex: 0.5, pr: 2 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                {isNaN(currentValue)
+                                  ? "---"
+                                  : currentValue >= 1000
+                                    ? `${(currentValue / 1000).toFixed(2)}K`
+                                    : currentValue.toFixed(2)}
+                              </Typography>
+                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                Current Value
+                              </Typography>
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "error.main" }}>
+                                {todaysPL.toFixed(2)}
+                              </Typography>
+                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                Today&apos;s P&amp;L
+                              </Typography>
+                            </Box>
+                            <Box sx={{ flex: 0.5 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "success.main" }}>
+                                {unrealizedPL >= 1000
+                                  ? `+${(unrealizedPL / 1000).toFixed(2)}K`
+                                  : `+${unrealizedPL.toFixed(2)}`}{" "}
+                                <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
+                                  ({unrealizedPLPerc}%)
+                                </Typography>
+                              </Typography>
+                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                Unrealized P&amp;L
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                      );
+                    })}
                   </>
                 ) : (
                   <Box
                     sx={{
                       overflowX: "auto",
                       overflowY: "auto",
-                      maxHeight: "500px",
+                      maxHeight: "400px", // adjust as needed
                       border: "1px solid #ddd",
+                      borderRadius: "0px",
                       mx: 1,
-                      my: 1,
+                      scrollbarWidth: "none",
+                      "&::-webkit-scrollbar": {
+                        display: "none",
+                      },
                     }}
                   >
-                    <Table style={{ minWidth: "1250px", fontSize: "12px", margin: 0 }}>
+                    <Table style={{ minWidth: "1350px", fontSize: "12px", margin: 0 }}>
                       <TableHead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
                         <TableRow>
                           <TableCell>Market Type</TableCell>
@@ -1542,39 +1586,39 @@ useEffect(() => {
                           <TableCell>Sell Avg Rate</TableCell>
                           <TableCell>Net Qty</TableCell>
                           <TableCell>Last Trade Price</TableCell>
-                          <TableCell>MYM HTML</TableCell>
+                          <TableCell>MTM</TableCell>
                           <TableCell>Auto Closed Date</TableCell>
                           <TableCell>Close Btn</TableCell>
                         </TableRow>
                       </TableHead>
-                     <TableBody>
-  {positionData.map((row, index) => {
-    const isEven = index % 2 === 0;
-    const rowBgColor = theme.palette.mode === "dark"
-      ? isEven ? "#2a2a2a" : "#1f1f1f"
-      : isEven ? "#f9f9f9" : "#ffffff";
+                      <TableBody>
+                        {positionData.map((row, index) => {
+                          const isEven = index % 2 === 0;
+                          const rowBgColor = theme.palette.mode === "dark"
+                            ? isEven ? "#2a2a2a" : "#1f1f1f"
+                            : isEven ? "#f9f9f9" : "#ffffff";
 
-    return (
-      <TableRow key={index} style={{ backgroundColor: rowBgColor }}>
-        <TableCell>{row.market_type_name}</TableCell>
-        <TableCell><span dangerouslySetInnerHTML={{ __html: row.script_name }} /></TableCell>
-        <TableCell>{row.total_buy}</TableCell>
-        <TableCell>{row.buy_avg_rate}</TableCell>
-        <TableCell>{row.total_sell}</TableCell>
-        <TableCell>{row.sell_avg_rate}</TableCell>
-        <TableCell>{row.net_qty}</TableCell>
-        <TableCell>{row.last_trade_price}</TableCell>
-        <TableCell><span dangerouslySetInnerHTML={{ __html: row.mym_html }} /></TableCell>
-        <TableCell>{row.trade_auto_closed_date}</TableCell>
-        <TableCell>
-          <Button variant="contained" color="error" onClick={() => alert("Close Position")}>
-            Close
-          </Button>
-        </TableCell>
-      </TableRow>
-    );
-  })}
-</TableBody>
+                          return (
+                            <TableRow key={index} style={{ backgroundColor: rowBgColor }}>
+                              <TableCell>{row.market_type_name}</TableCell>
+                              <TableCell><span dangerouslySetInnerHTML={{ __html: row.script_name }} /></TableCell>
+                              <TableCell>{row.total_buy}</TableCell>
+                              <TableCell>{row.buy_avg_rate}</TableCell>
+                              <TableCell>{row.total_sell}</TableCell>
+                              <TableCell>{row.sell_avg_rate}</TableCell>
+                              <TableCell>{row.net_qty}</TableCell>
+                              <TableCell>{row.last_trade_price}</TableCell>
+                              <TableCell><span dangerouslySetInnerHTML={{ __html: row.mym_html }} /></TableCell>
+                              <TableCell>{row.trade_auto_closed_date}</TableCell>
+                              <TableCell>
+                                <Button variant="contained" color="error" onClick={() => alert("Close Position")}>
+                                  Close
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
                     </Table>
                   </Box>
                 )}
@@ -1585,325 +1629,336 @@ useEffect(() => {
 
             {/* Slide-up panel inside dialog */}
             {/* --- Drawer Panel Inside Dialog --- */}
-<Slide direction="up" in={drawerOpen} mountOnEnter unmountOnExit>
-  <Box
-    sx={{
-      position: "fixed",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: "100%",
-      bgcolor: "background.paper",
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      boxShadow: "0px -8px 30px rgba(0, 0, 0, 0.3)",
-      p: 2,
-      maxHeight: "85vh",
-      display: "flex",
-      flexDirection: "column",
-      zIndex: 1400,
-    }}
-  >
-    {/* Fixed Header */}
-    <Box sx={{ flexShrink: 0 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-          <Avatar
-            alt={selectedRow?.script_name?.replace(/<\/?[^>]+(>|$)/g, "")}
-            src="/path-to-your-logo.png"
-            variant="square"
-            sx={{ width: 50, height: 50, mr: 1, flexShrink: 0 }}
-          />
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
-            sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-          />
-        </Box>
-        <IconButton size="large" onClick={handleDrawerClose}>
-          <ArrowDropDownIcon />
-        </IconButton>
-      </Box>
-
-      {/* Summary Info */}
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Total Buy</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Total Sell</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Buy Avg Rate</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Sell Avg Rate</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
-        </Box>
-      </Box>
-
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Market Type</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.market_type_name}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">Net Qty</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">LTP</Typography>
-          <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
-        </Box>
-        <Box sx={{ flex: "1 1 22%" }}>
-          <Typography variant="caption">MTM</Typography>
-          <Typography
-            variant="body2"
-            fontWeight={600}
-            dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
-          />
-        </Box>
-      </Box>
-
-      <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-        <Typography variant="caption">Auto Closed Date</Typography>
-        <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
-      </Box>
-
-      {/* Action Buttons */}
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <Button
-          fullWidth
-          sx={{
-            background: "linear-gradient(135deg, #0d47a1, #1565c0)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            textTransform: "uppercase",
-            boxShadow: "0 4px 10px rgba(13, 71, 161, 0.4)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              transform: "scale(1.03)",
-              boxShadow: "0 6px 16px rgba(13, 71, 161, 0.6)",
-              background: "linear-gradient(135deg, #0b3c91, #0d47a1)",
-            },
-          }}
-          onClick={handleViewTradesClick}
-        >
-          {expanded ? "Hide Trades" : "View Trades"}
-        </Button>
-
-        <Button
-          fullWidth
-          sx={{
-            background: "linear-gradient(135deg, #b71c1c, #c62828)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            textTransform: "uppercase",
-            boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              transform: "scale(1.03)",
-              boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
-              background: "linear-gradient(135deg, #8e0000, #b71c1c)",
-            },
-          }}
-          onClick={() => alert("Close Position")}
-        >
-          Close Position
-        </Button>
-      </Box>
-    </Box>
-
-    {/* Scrollable Trades */}
-{expanded && (
-  <Fade in={expanded} timeout={600}>
-    <Box
-      sx={{
-        mt: 2,
-        overflowY: "auto",
-        maxHeight: "60vh", // adjust this height based on your layout
-        pr: 1,
+ {drawerOpen && (
+  <>
+    <Slide
+      direction="up"
+      in={drawerOpen}
+      mountOnEnter
+      unmountOnExit
+      onExited={() => {
+        setExpanded(false); // optional reset of expanded state
       }}
     >
-      {loadingTrades ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "150px", // enough height for centering
-          }}
-        >
-          <CircularProgress size={32} thickness={4} />
-        </Box>
-      ) : tradesData.length > 0 ? (
-        tradesData.map((item, index) => {
-          const [mainName, subName] = item.scrp_name.split(" ", 2);
-          const cleanRate = item.trd_rate?.split("(")[0].trim();
-          const isBuy = item.trd_type === "Buy";
-          const isSell = item.trd_type === "Sell";
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          bgcolor: "background.paper",
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          boxShadow: "0px -8px 30px rgba(0, 0, 0, 0.3)",
+          p: 2,
+          maxHeight: "85vh",
+          display: "flex",
+          flexDirection: "column",
+          zIndex: 1400,
+        }}
+      >
+        {/* Fixed Header */}
+        <Box sx={{ flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+              <Avatar
+                alt={selectedRow?.script_name?.replace(/<\/?[^>]+(>|$)/g, "")}
+                src="/path-to-your-logo.png"
+                variant="square"
+                sx={{ width: 50, height: 50, mr: 1, flexShrink: 0 }}
+              />
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
+                sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+              />
+            </Box>
+            <IconButton size="large" onClick={handleDrawerClose}>
+              <ArrowDropDownIcon />
+            </IconButton>
+          </Box>
 
-          const borderGradient = isBuy
-            ? "linear-gradient(to right, #1976d2, #0d47a1)"
-            : isSell
-            ? "linear-gradient(to right, #c62828, #b71c1c)"
-            : "#ccc";
+          {/* Summary Info */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Total Buy</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Total Sell</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Buy Avg Rate</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Sell Avg Rate</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
+            </Box>
+          </Box>
 
-          const boxShadowColor = isBuy
-            ? "rgba(25, 118, 210, 0.3)"
-            : isSell
-            ? "rgba(198, 40, 40, 0.3)"
-            : "rgba(0,0,0,0.1)";
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Market Type</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.market_type_name}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">Net Qty</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">LTP</Typography>
+              <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 22%" }}>
+              <Typography variant="caption">MTM</Typography>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
+              />
+            </Box>
+          </Box>
 
-          return (
-            <Card
-              key={item.trd_id || index}
+          <Box sx={{ flex: "1 1 100%", mb: 2 }}>
+            <Typography variant="caption">Auto Closed Date</Typography>
+            <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              fullWidth
               sx={{
-                mb: 1,
-                borderRadius: 2,
-                position: "relative",
-                border: "1px solid transparent",
-                backgroundImage: (theme) =>
-                  `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${
-                    theme.palette.mode === "dark" ? "#333" : "#fff"
-                  }), ${borderGradient}`,
-                backgroundOrigin: "border-box",
-                backgroundClip: "content-box, border-box",
-                boxShadow: `0 4px 12px ${boxShadowColor}`,
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                background: "linear-gradient(135deg, #0d47a1, #1565c0)",
+                color: "#fff",
+                borderRadius: "6px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                boxShadow: "0 4px 10px rgba(13, 71, 161, 0.4)",
+                transition: "all 0.3s ease",
                 "&:hover": {
-                  transform: "scale(1.02)",
-                  boxShadow: `0 8px 20px ${boxShadowColor}`,
+                  transform: "scale(1.03)",
+                  boxShadow: "0 6px 16px rgba(13, 71, 161, 0.6)",
+                  background: "linear-gradient(135deg, #0b3c91, #0d47a1)",
                 },
               }}
+              onClick={handleViewTradesClick}
             >
-              {item.is_hot && (
+              {expanded ? "Hide Trades" : "View Trades"}
+            </Button>
+
+            <Button
+              fullWidth
+              sx={{
+                background: "linear-gradient(135deg, #b71c1c, #c62828)",
+                color: "#fff",
+                borderRadius: "6px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "scale(1.03)",
+                  boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
+                  background: "linear-gradient(135deg, #8e0000, #b71c1c)",
+                },
+              }}
+              onClick={() => alert("Close Position")}
+            >
+              Close Position
+            </Button>
+          </Box>
+        </Box>
+
+        {/* Scrollable Trades */}
+        {expanded && (
+          <Fade in={expanded} timeout={600}>
+            <Box
+              sx={{
+                mt: 2,
+                overflowY: "auto",
+                maxHeight: "60vh",
+                pr: 1,
+              }}
+            >
+              {loadingTrades ? (
                 <Box
                   sx={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    backgroundColor: "gold",
-                    color: "#000",
-                    fontSize: "0.7em",
-                    px: 1,
-                    py: 0.3,
-                    borderBottomLeftRadius: 4,
-                    fontWeight: 700,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "150px",
                   }}
                 >
-                  HOT
+                  <CircularProgress size={32} thickness={4} />
                 </Box>
-              )}
+              ) : tradesData.length > 0 ? (
+                tradesData.map((item, index) => {
+                  const [mainName, subName] = item.scrp_name.split(" ", 2);
+                  const cleanRate = item.trd_rate?.split("(")[0].trim();
+                  const isBuy = item.trd_type === "Buy";
+                  const isSell = item.trd_type === "Sell";
 
-              <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    {mainName}{" "}
-                    <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
-                  </Typography>
-                  <Typography variant="caption">ID: #{item.trd_id}</Typography>
-                </Box>
+                  const borderGradient = isBuy
+                    ? "linear-gradient(to right, #1976d2, #0d47a1)"
+                    : isSell
+                      ? "linear-gradient(to right, #c62828, #b71c1c)"
+                      : "#ccc";
 
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      dangerouslySetInnerHTML={{ __html: item.device_type_html }}
-                      sx={{ mr: 0.3 }}
-                    />
-                    <Typography
-                      variant="body2"
+                  const boxShadowColor = isBuy
+                    ? "rgba(25, 118, 210, 0.3)"
+                    : isSell
+                      ? "rgba(198, 40, 40, 0.3)"
+                      : "rgba(0,0,0,0.1)";
+
+                  return (
+                    <Card
+                      key={item.trd_id || index}
                       sx={{
-                        color: isBuy ? "#1976d2" : isSell ? "#c62828" : "#000",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        display: "flex",
-                        alignItems: "center",
+                        mb: 1,
+                        borderRadius: 2,
+                        position: "relative",
+                        border: "1px solid transparent",
+                        backgroundImage: (theme) =>
+                          `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${
+                            theme.palette.mode === "dark" ? "#333" : "#fff"
+                          }), ${borderGradient}`,
+                        backgroundOrigin: "border-box",
+                        backgroundClip: "content-box, border-box",
+                        boxShadow: `0 4px 12px ${boxShadowColor}`,
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.02)",
+                          boxShadow: `0 8px 20px ${boxShadowColor}`,
+                        },
                       }}
                     >
-                      {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
-                      <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
-                        {item.trd_type2}
-                      </span>
-                    </Typography>
-                  </Box>
+                      {item.is_hot && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            backgroundColor: "gold",
+                            color: "#000",
+                            fontSize: "0.7em",
+                            px: 1,
+                            py: 0.3,
+                            borderBottomLeftRadius: 4,
+                            fontWeight: 700,
+                          }}
+                        >
+                          HOT
+                        </Box>
+                      )}
 
-                  <Typography variant="body2">
-                    ({item.trd_lot}) {item.actual_lot_qty} @{" "}
-                    <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
-                      {cleanRate}
-                    </span>
-                  </Typography>
-                </Box>
+                      <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                            {mainName}{" "}
+                            <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
+                          </Typography>
+                          <Typography variant="caption">ID: #{item.trd_id}</Typography>
+                        </Box>
 
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="caption">{item.trd_time}</Typography>
-                  <Typography variant="caption">
-                    Commission:{" "}
-                    <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          );
-        })
-      ) : (
-        <Typography variant="body2">No trades found</Typography>
-      )}
-    </Box>
-  </Fade>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Typography
+                              variant="body2"
+                              component="span"
+                              dangerouslySetInnerHTML={{ __html: item.device_type_html }}
+                              sx={{ mr: 0.3 }}
+                            />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: isBuy ? "#1976d2" : isSell ? "#c62828" : "#000",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
+                              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
+                                {item.trd_type2}
+                              </span>
+                            </Typography>
+                          </Box>
+
+                          <Typography variant="body2">
+                            ({item.trd_lot}) {item.actual_lot_qty} @{" "}
+                            <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
+                              {cleanRate}
+                            </span>
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Typography variant="caption">{item.trd_time}</Typography>
+                          <Typography variant="caption">
+                            Commission:{" "}
+                            <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <Typography variant="body2">No trades found</Typography>
+              )}
+            </Box>
+          </Fade>
+        )}
+      </Box>
+    </Slide>
+
+    {/* Backdrop */}
+    <Box
+      onClick={handleDrawerClose}
+      sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backdropFilter: "blur(5px)",
+        backgroundColor: "rgba(0,0,0,0.2)",
+        zIndex: 1200,
+      }}
+    />
+  </>
 )}
 
-
-  </Box>
-</Slide>
-
-              {drawerOpen && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backdropFilter: "blur(5px)",
-            backgroundColor: "rgba(0,0,0,0.2)",
-            zIndex: 1200,
-          }}
-        />
-      )}
 
 
           </Box>
         </Dialog>
 
-<Grid item xs={12} sm={6} md={3}>
-  <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-    <InfoCardHorizontal
-      title="Pending Orders"
-      icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
-      content={[
-        `Pending orders: ${dashboardData.today_pending_trades}`,
-      ]}
-      bgcolor="rgba(255, 152, 0, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+            <InfoCardHorizontal
+              title="Pending Orders"
+              icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
+              content={[
+                `Pending orders: ${dashboardData.today_pending_trades}`,
+              ]}
+              bgcolor="rgba(255, 152, 0, 0.1)"
+            />
+          </Box>
+        </Grid>
 
 
         <Dialog
@@ -1914,65 +1969,65 @@ useEffect(() => {
               setPendingOrdersDialogOpen(false);
             }
           }}
-           fullWidth
-  maxWidth="xl"
-  disableEscapeKeyDown
-  PaperProps={{
-    sx: {
-      overflow: "hidden", // ✅ Hide outer scrollbar
-      maxHeight: isMobile ? "100vh" : "90vh",
-    },
-  }}
->
+          fullWidth
+          maxWidth="xl"
+          disableEscapeKeyDown
+          PaperProps={{
+            sx: {
+              overflow: "hidden", // ✅ Hide outer scrollbar
+              maxHeight: isMobile ? "100vh" : "90vh",
+            },
+          }}
+        >
           <Box sx={{ p: 0 }}>
             {/* Header */}
-           <Box
-  sx={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    px: 3,
-    py: 1,
-    backdropFilter: "blur(6px)",
-    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-    color: "#fff",
-    borderTopLeftRadius: "0px", // same as requested
-    borderTopRightRadius: "0px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    position: "relative",
-  }}
->
-  <Typography
-    variant="h6"
-    fontWeight={800}
-    sx={{
-      textTransform: "uppercase",
-      letterSpacing: 1.5,
-      fontSize: "1rem",
-      display: "flex",
-      alignItems: "center",
-      textShadow: "0 0 6px rgba(33,203,243,0.9)",
-    }}
-  >
-    <PendingActionsIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-    Pending Orders
-  </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 3,
+                py: 1,
+                backdropFilter: "blur(6px)",
+                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                color: "#fff",
+                borderTopLeftRadius: "0px", // same as requested
+                borderTopRightRadius: "0px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                position: "relative",
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{
+                  textTransform: "uppercase",
+                  letterSpacing: 1.5,
+                  fontSize: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
+                }}
+              >
+                <PendingActionsIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+                Pending Orders
+              </Typography>
 
-  <IconButton
-    size="small"
-    sx={{
-      color: "#fff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      borderRadius: "50%",
-      "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-      },
-    }}
-    onClick={() => setPendingOrdersDialogOpen(false)}
-  >
-    <CloseIcon fontSize="small" />
-  </IconButton>
-</Box>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "50%",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+                onClick={() => setPendingOrdersDialogOpen(false)}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
 
             {/* Filters & Search */}
@@ -2207,35 +2262,35 @@ useEffect(() => {
                         </tr>
                       </thead>
                       <tbody>
-                       {pendingPaginatedOrders.map((item, index) => {
-  let rowBgColor;
-  if (item.trd_type === "Buy") {
-    rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-  } else if (item.trd_type === "Sell") {
-    rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-  } else {
-    rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-  }
+                        {pendingPaginatedOrders.map((item, index) => {
+                          let rowBgColor;
+                          if (item.trd_type === "Buy") {
+                            rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
+                          } else if (item.trd_type === "Sell") {
+                            rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
+                          } else {
+                            rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
+                          }
 
-  return (
-    <tr key={item.trd_id || index} style={{ backgroundColor: rowBgColor }}>
-      <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-      <td>{item.trd_matchedtime}</td>
-      <td>#{item.trd_id}</td>
-      <td>{item.client_full_name}</td>
-      <td>{item.mrkt_name}</td>
-      <td dangerouslySetInnerHTML={{ __html: item.scrp_name }} />
-      <td>{item.trd_type}</td>
-      <td>{item.trd_type2}</td>
-      <td>{item.trd_lot}</td>
-      <td>{item.actual_lot_qty}</td>
-      <td>{item.trd_rate}</td>
-      <td>{item.trd_status}</td>
-      <td>{item.trd_time}</td>
-      <td>{item.trd_comm_amnt}</td>
-    </tr>
-  );
-})}
+                          return (
+                            <tr key={item.trd_id || index} style={{ backgroundColor: rowBgColor }}>
+                              <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                              <td>{item.trd_matchedtime}</td>
+                              <td>#{item.trd_id}</td>
+                              <td>{item.client_full_name}</td>
+                              <td>{item.mrkt_name}</td>
+                              <td dangerouslySetInnerHTML={{ __html: item.scrp_name }} />
+                              <td>{item.trd_type}</td>
+                              <td>{item.trd_type2}</td>
+                              <td>{item.trd_lot}</td>
+                              <td>{item.actual_lot_qty}</td>
+                              <td>{item.trd_rate}</td>
+                              <td>{item.trd_status}</td>
+                              <td>{item.trd_time}</td>
+                              <td>{item.trd_comm_amnt}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </Box>
@@ -2247,302 +2302,375 @@ useEffect(() => {
           </Box>
         </Dialog>
 
-         <Grid item xs={12} sm={6} md={3}>
-      <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-        <InfoCardHorizontal
-          title="Rejection Logs"
-          icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
-          content={[
-            `Today: ${dashboardData.today_rejection}`,
-            `Total: ${dashboardData.total_rejection}`,
-          ]}
-          bgcolor="rgba(206, 48, 48, 0.1)"
-        />
-      </Box>
-    </Grid>
-
-        <Dialog
-          open={rejectionDialogOpen}
-          fullScreen={isMobile}
-          onClose={(event, reason) => {
-            if (reason !== "backdropClick") {
-              setrejectionDialogOpen(false);
-            }
-          }}
-            fullWidth
+        <Grid item xs={12} sm={6} md={3}>
+          <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Rejection Logs"
+              icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
+              content={[
+                `Today: ${dashboardData.today_rejection}`,
+                `Total: ${dashboardData.total_rejection}`,
+              ]}
+              bgcolor="rgba(206, 48, 48, 0.1)"
+            />
+          </Box>
+        </Grid>
+   <Dialog
+  open={rejectionDialogOpen}
+  fullScreen={isMobile}
+  onClose={(event, reason) => {
+    if (reason !== "backdropClick") {
+      setrejectionDialogOpen(false);
+    }
+  }}
+  fullWidth
   maxWidth="xl"
   disableEscapeKeyDown
   PaperProps={{
     sx: {
-      overflow: "hidden", // ✅ Hide outer scrollbar
+      overflow: "hidden",
       maxHeight: isMobile ? "100vh" : "90vh",
+      overflowY: "auto",
     },
   }}
 >
-          <Box sx={{ p: 0 }}>
-            {/* Header */}
-            <Box
-  sx={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    px: 3,
-    py: 1,
-    backdropFilter: "blur(6px)",
-    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-    color: "#fff",
-    width: "100%",
-    borderTopLeftRadius: "8px",
-    borderTopRightRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    position: "relative",
-  }}
->
-  <Typography
-    variant="h6"
-    fontWeight={800}
-    sx={{
-      textTransform: "uppercase",
-      letterSpacing: 1.5,
-      fontSize: "1rem",
-      display: "flex",
-      alignItems: "center",
-      textShadow: "0 0 6px rgba(33,203,243,0.9)",
-    }}
-  >
-    <ReportIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-    Rejection Logs
-  </Typography>
-
-  <IconButton
-    size="small"
-    sx={{
-      color: "#fff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      borderRadius: "50%",
-      "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-      },
-    }}
-    onClick={() => setrejectionDialogOpen(false)}
-  >
-    <CloseIcon fontSize="small" />
-  </IconButton>
-</Box>
-
-<Box
-  sx={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    px: 2,
-    py: 1,
-    flexWrap: "wrap",
-    gap: 1,
-  }}
->
-  <FormControl size="small" sx={{ minWidth: 120 }}>
-    <InputLabel>Filter</InputLabel>
-    <Select
-      value={filterType}
-      onChange={(e) => setFilterType(e.target.value)}
-      label="Filter"
+  <Box sx={{ p: 0 }}>
+    {/* Header */}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        px: 3,
+        py: 1,
+        backdropFilter: "blur(6px)",
+        background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+        color: "#fff",
+        width: "100%",
+        borderTopLeftRadius: "8px",
+        borderTopRightRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+        position: "relative",
+      }}
     >
-      <MenuItem value="today">Today</MenuItem>
-      <MenuItem value="total">Total</MenuItem>
-    </Select>
-  </FormControl>
+      <Typography
+        variant="h6"
+        fontWeight={800}
+        sx={{
+          textTransform: "uppercase",
+          letterSpacing: 1.5,
+          fontSize: "1rem",
+          display: "flex",
+          alignItems: "center",
+          textShadow: "0 0 6px rgba(33,203,243,0.9)",
+        }}
+      >
+        <ReportIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+        Rejection Logs
+      </Typography>
 
-  <TextField
-    size="small"
-    label="Search"
-    variant="outlined"
-    sx={{ flex: 1, minWidth: 200 }}
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-  />
-</Box>
+      <IconButton
+        size="small"
+        sx={{
+          color: "#fff",
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
+          borderRadius: "50%",
+          "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 0.2)",
+          },
+        }}
+        onClick={() => setrejectionDialogOpen(false)}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </Box>
 
+    {/* Filter + Search */}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        px: 1,
+        py: 1,
+        backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
+        borderRadius: 1,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 120,
+            "& .MuiOutlinedInput-root": {
+              height: 26,
+              "& fieldset": {
+                borderColor: "black",
+              },
+              "&:hover fieldset": {
+                borderColor: "black",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "black",
+              },
+            },
+          }}
+        >
+          <InputLabel>Filter</InputLabel>
+          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} label="Filter">
+            <MenuItem value="today">Today</MenuItem>
+            <MenuItem value="total">Total</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          size="small"
+          placeholder="Search logs"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          fullWidth
+          sx={{
+            ml: 1,
+            "& .MuiOutlinedInput-root": {
+              height: 26,
+              "& fieldset": {
+                borderColor: "black",
+              },
+              "&:hover fieldset": {
+                borderColor: "black",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "black",
+              },
+            },
+          }}
+        />
+      </Box>
+    </Box>
 
-            {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <CircularProgress size={24} />
-              </Box>
-            ) : rejectionLogs.length > 0 ? (
-              <>
-                {isMobile ? (
-                  <>
-                    {filteredLogs.map((log, index) => (
-                      <Card
-                        key={index}
-                        sx={{
-                          mb: 0.5,
-                          mx: 0.5,
-                          mt: 0.5,
-                          borderRadius: 2,
-                          border: "2px solid",
-                          borderImage: log.trade_type === "Buy"
-                            ? "linear-gradient(to right, #2196f3, #21cbf3) 1"
-                            : log.trade_type === "Sell"
-                              ? "linear-gradient(to right, #f44336, #e57373) 1"
-                              : "linear-gradient(to right, #ddd, #ddd) 1",
-                          boxShadow: `0 2px 8px rgba(0,0,0,0.1)`,
-                          backgroundColor: (theme) => theme.palette.background.paper,
-                          color: (theme) => theme.palette.text.primary,
-                          transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                          "&:hover": {
-                            transform: "scale(1.02)",
-                            boxShadow: `0 8px 20px rgba(0,0,0,0.15)`,
-                          },
-                        }}
-                      >
-                        <CardContent sx={{ p: 1, pb: "8px !important" }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                              {log.trade_rate} &nbsp;
-                              {log.trade_qty} Qty&nbsp;
-                              <Box component="span" sx={{ fontWeight: 400, display: "inline" }}>
-                                {log.trade_lot} Lot
-                              </Box>
-                            </Typography>
+    {/* Content */}
+    {loading ? (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+        <CircularProgress size={24} />
+      </Box>
+    ) : filteredLogs.length === 0 ? (
+      <Typography sx={{ fontSize: "14px", px: 1 }}>
+        No rejection logs found.
+      </Typography>
+    ) : isMobile ? (
+      <>
+        {visibleMobileLogs.map((log, index) => {
+          const isBuy = log.trade_type === "Buy";
+          const isSell = log.trade_type === "Sell";
 
-                            <Typography variant="caption" sx={{ fontWeight: 500, fontStyle: "italic" }}>
-                              {log.datetime}
-                            </Typography>
-                          </Box>
+          const borderGradient = isBuy
+            ? "linear-gradient(to right, #2196f3, #21cbf3)"
+            : isSell
+              ? "linear-gradient(to right, #f44336, #ff7961)"
+              : "#ccc";
 
-                          <Box sx={{ justifyContent: "space-between", display: "flex", flexWrap: "wrap", gap: 1 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 700,
-                                color:
-                                  log.trade_type === "Sell"
-                                    ? (theme) => theme.palette.error.main
-                                    : log.trade_type === "Buy"
-                                      ? (theme) => theme.palette.info.main
-                                      : (theme) => theme.palette.text.primary,
-                              }}
-                            >
-                              {log.trade_type}
-                              <Box
-                                component="span"
-                                sx={{
-                                  fontSize: "0.8em",
-                                  ml: 0.5,
-                                  color: (theme) => theme.palette.text.secondary,
-                                  fontWeight: 400,
-                                }}
-                              >
-                                ({log.type})
-                              </Box>
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: (theme) => theme.palette.text.primary }}>
-                              {log.full_name}
-                            </Typography>
-                          </Box>
+          const boxShadowColor = isBuy
+            ? "rgba(33, 150, 243, 0.3)"
+            : isSell
+              ? "rgba(244, 67, 54, 0.3)"
+              : "rgba(0,0,0,0.1)";
 
-                          <Typography variant="body2" sx={{ mb: 0, color: (theme) => theme.palette.error.main, fontWeight: 600 }}>
-                            {log.log_message}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <Box
-                      sx={{
-                        overflowX: "auto",
-                        overflowY: "auto",
-                        maxHeight: "400px",
-                        border: "1px solid",
-                        borderColor: (theme) => theme.palette.divider,
-                        mx: 1,
-                      }}
-                    >
-                      <table
-                        className="table table-striped table-bordered"
-                        style={{
-                          minWidth: "1350px",
-                          fontSize: "12px",
-                          margin: 0,
-                        }}
-                      >
-                        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                          <tr>
-                            {[
-                              "Type",
-                              "Datetime",
-                              "Client",
-                              "Script",
-                              "Trade Type",
-                              "Lot",
-                              "Qty",
-                              "Rate",
-                              "Message",
-                            ].map((header) => (
-                              <th
-                                key={header}
-                                style={{
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                         {filteredLogs.map((log, index) => {
-  let rowBgColor;
-  if (log.trade_type === "Buy") {
-    rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-  } else if (log.trade_type === "Sell") {
-    rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-  } else {
-    rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-  }
+          return (
+            <Card
+              key={index}
+              sx={{
+                mb: 1,
+                mx: 1,
+                borderRadius: 2,
+                border: "1px solid transparent",
+                backgroundImage: (theme) =>
+                  `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
+                backgroundOrigin: "border-box",
+                backgroundClip: "content-box, border-box",
+                boxShadow: `0 4px 12px ${boxShadowColor}`,
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "scale(1.02)",
+                  boxShadow: `0 8px 20px ${boxShadowColor}`,
+                },
+              }}
+            >
+              <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    {log.trade_rate} &nbsp;
+                    {log.trade_qty} Qty&nbsp;
+                    <span style={{ fontWeight: 400 }}>{log.trade_lot} Lot</span>
+                  </Typography>
+                  <Typography variant="caption" sx={{ fontStyle: "italic" }}>
+                    {log.datetime}
+                  </Typography>
+                </Box>
 
-  return (
-    <tr key={index} style={{ backgroundColor: rowBgColor }}>
-      <td style={{ color: "inherit" }}>{log.type}</td>
-      <td style={{ color: "inherit" }}>{log.datetime}</td>
-      <td style={{ color: "inherit" }}>{log.full_name}</td>
-      <td style={{ color: "inherit" }}>{log.script_name}</td>
-      <td style={{ color: "inherit" }}>{log.trade_type}</td>
-      <td style={{ color: "inherit" }}>{log.trade_lot}</td>
-      <td style={{ color: "inherit" }}>{log.trade_qty}</td>
-      <td style={{ color: "inherit" }}>{log.trade_rate}</td>
-      <td style={{ color: "inherit" }}>{log.log_message}</td>
-    </tr>
-  );
-})}
-                        </tbody>
-                      </table>
-                    </Box>
-                  </>
-                )}
-              </>
-            ) : (
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  px: 1,
-                  color: (theme) => theme.palette.text.primary,
-                }}
-              >
-                No rejection logs found.
-              </Typography>
-            )}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      color: isSell
+                        ? "#f44336"
+                        : isBuy
+                          ? "#2196f3"
+                          : "inherit",
+                    }}
+                  >
+                    {log.trade_type}
+                    <span style={{ fontWeight: 400, marginLeft: 4 }}>({log.type})</span>
+                  </Typography>
+                  <Typography variant="body2">{log.full_name}</Typography>
+                </Box>
+
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: "#d32f2f",
+                  }}
+                >
+                  {log.log_message}
+                </Typography>
+              </CardContent>
+            </Card>
+          );
+        })}
+
+        {visibleLogCount < filteredLogs.length && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+            <Button variant="outlined" size="small" onClick={handleRejectionLoadMore}>
+              Load More
+            </Button>
           </Box>
-        </Dialog>
+        )}
+      </>
+    ) : (
+      <>
+        <Box
+          sx={{
+            overflowX: "auto",
+            overflowY: "auto",
+            maxHeight: "400px",
+            border: "1px solid #ddd",
+            borderRadius: "0px",
+            mx: 1,
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}
+        >
+          <table
+            className="table table-striped table-bordered"
+            style={{
+              minWidth: "1400px",
+              fontSize: "12px",
+              margin: 0,
+              backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+              color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            }}
+          >
+            <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+              <tr>
+                {["Type", "Datetime", "Client", "Script", "Trade Type", "Lot", "Qty", "Rate", "Message"].map((header) => (
+                  <th key={header} style={{ fontWeight: 600 }}>
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedLogs.map((log, index) => {
+                let bgColor =
+                  log.trade_type === "Buy"
+                    ? theme.palette.mode === "dark"
+                      ? "#264653"
+                      : "#e0f7fa"
+                    : log.trade_type === "Sell"
+                      ? theme.palette.mode === "dark"
+                        ? "#6d2c41"
+                        : "#fce4ec"
+                      : theme.palette.mode === "dark"
+                        ? "#333"
+                        : "#f5f5f5";
+
+                return (
+                  <tr key={index} style={{ backgroundColor: bgColor }}>
+                    <td>{log.type}</td>
+                    <td>{log.datetime}</td>
+                    <td>{log.full_name}</td>
+                    <td>{log.script_name}</td>
+                    <td>{log.trade_type}</td>
+                    <td>{log.trade_lot}</td>
+                    <td>{log.trade_qty}</td>
+                    <td>{log.trade_rate}</td>
+                    <td>{log.log_message}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Box>
+
+        {/* Pagination */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <Button
+              size="small"
+              disabled={logCurrentPage === 0}
+              onClick={() => setLogCurrentPage((prev) => prev - 1)}
+              color="secondary"
+              sx={{ mr: 1 }}
+            >
+              Prev
+            </Button>
+
+            {[...Array(logTotalPages)].map((_, i) => {
+              if (i === 0 || i === logTotalPages - 1 || (i >= logCurrentPage - 1 && i <= logCurrentPage + 1)) {
+                return (
+                  <Button
+                    key={i}
+                    size="small"
+                    variant={i === logCurrentPage ? "contained" : "outlined"}
+                    color="secondary"
+                    onClick={() => setLogCurrentPage(i)}
+                    sx={{ mx: 0.3, minWidth: "30px" }}
+                  >
+                    {i + 1}
+                  </Button>
+                );
+              }
+
+              if ((i === 1 && logCurrentPage > 2) || (i === logTotalPages - 2 && logCurrentPage < logTotalPages - 3)) {
+                return (
+                  <Typography key={i} sx={{ mx: 0.5 }}>
+                    ...
+                  </Typography>
+                );
+              }
+
+              return null;
+            })}
+
+            <Button
+              size="small"
+              disabled={logCurrentPage + 1 >= logTotalPages}
+              onClick={() => setLogCurrentPage((prev) => prev + 1)}
+              color="secondary"
+              sx={{ ml: 1 }}
+            >
+              Next
+            </Button>
+          </Box>
+        </Box>
+      </>
+    )}
+  </Box>
+</Dialog>
+
+
 
 
         {/* <Box
@@ -2569,9 +2697,9 @@ useEffect(() => {
         {/*--------------------- Sector-wise Distribution ---------------------- */}
         <Grid item xs={12} md={8}>
           <Paper elevation={0} sx={glassStyles}>
-            <Box sx={{ mb: 1}}> 
+            <Box sx={{ mb: 1 }}>
               {!isMobile ? (
-                 <Box
+                <Box
                   sx={{
                     position: 'relative',
                     display: 'flex',
@@ -2611,7 +2739,7 @@ useEffect(() => {
                 </Box>
               )}
             </Box>
-            <Divider sx={{ mb: 0.5}} /> {/* Reduced vertical margin */}
+            <Divider sx={{ mb: 0.5 }} /> {/* Reduced vertical margin */}
             <Box sx={{ height: 220, m: 0, p: 0 }}> {/* Reduced chart height */}
               <Doughnut
                 ref={sectorChart}
@@ -3331,103 +3459,103 @@ useEffect(() => {
         </Grid>
 
 
-<Dialog
-  open={candleOpen}
-  onClose={() => setCandleOpen(false)}
-  fullWidth
-  fullScreen={isMobile}
-  maxWidth="md"
-  PaperProps={{
-    sx: {
-      borderRadius: isMobile ? 0 : 2,
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      minHeight: "100vh", // Ensures 100% height on mobile
-    },
-  }}
->
-  {/* Header */}
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      px: 3,
-      py: 1,
-      backdropFilter: "blur(6px)",
-      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-      color: "white",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-      borderTopLeftRadius: isMobile ? 0 : "8px",
-      borderTopRightRadius: isMobile ? 0 : "8px",
-      zIndex: 10,
-    }}
-  >
-    <Typography
-      variant="h6"
-      fontWeight={800}
-      sx={{
-        textTransform: "uppercase",
-        letterSpacing: 1.5,
-        fontSize: "1rem",
-        display: "flex",
-        alignItems: "center",
-        textShadow: "0 0 6px rgba(33,203,243,0.9)",
-      }}
-    >
-      <ShowChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-      {selectedStock?.name || "Stock Details"}
-    </Typography>
+        <Dialog
+          open={candleOpen}
+          onClose={() => setCandleOpen(false)}
+          fullWidth
+          fullScreen={isMobile}
+          maxWidth="md"
+          PaperProps={{
+            sx: {
+              borderRadius: isMobile ? 0 : 2,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh", // Ensures 100% height on mobile
+            },
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 3,
+              py: 1,
+              backdropFilter: "blur(6px)",
+              background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+              color: "white",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+              borderTopLeftRadius: isMobile ? 0 : "8px",
+              borderTopRightRadius: isMobile ? 0 : "8px",
+              zIndex: 10,
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={800}
+              sx={{
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+                fontSize: "1rem",
+                display: "flex",
+                alignItems: "center",
+                textShadow: "0 0 6px rgba(33,203,243,0.9)",
+              }}
+            >
+              <ShowChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+              {selectedStock?.name || "Stock Details"}
+            </Typography>
 
-    <IconButton
-      size="small"
-      sx={{
-        color: "#fff",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderRadius: "50%",
-        "&:hover": {
-          backgroundColor: "rgba(255, 255, 255, 0.2)",
-        },
-      }}
-      onClick={() => setCandleOpen(false)}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  </Box>
+            <IconButton
+              size="small"
+              sx={{
+                color: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                },
+              }}
+              onClick={() => setCandleOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
-  {/* Tabs */}
-  <Tabs
-    value={tabValue}
-    onChange={handleTabChange}
-    textColor="inherit"
-    indicatorColor="secondary"
-    variant="scrollable"
-    scrollButtons="auto"
-    sx={{
-      bgcolor: "background.paper",
-      ".MuiTab-root": { fontWeight: 600, textTransform: "none" },
-    }}
-  >
-    <Tab label="Basic" />
-    <Tab label="Trades" />
-    <Tab label="Positions" />
-    <Tab label="Charts" />
-  </Tabs>
+          {/* Tabs */}
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            textColor="inherit"
+            indicatorColor="secondary"
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              bgcolor: "background.paper",
+              ".MuiTab-root": { fontWeight: 600, textTransform: "none" },
+            }}
+          >
+            <Tab label="Basic" />
+            <Tab label="Trades" />
+            <Tab label="Positions" />
+            <Tab label="Charts" />
+          </Tabs>
 
-  {/* Content - takes full remaining height */}
-  <DialogContent
-    dividers
-    sx={{
-      px: 0,
-      py: 0,
-      flex: 1, // Grows to fill remaining vertical space
-      overflow: "auto", // Allows scrolling
-      display: "flex",
-      flexDirection: "column",
-      bgcolor: "background.default",
-    }}
-  >
+          {/* Content - takes full remaining height */}
+          <DialogContent
+            dividers
+            sx={{
+              px: 0,
+              py: 0,
+              flex: 1, // Grows to fill remaining vertical space
+              overflow: "auto", // Allows scrolling
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: "background.default",
+            }}
+          >
             {tabValue === 0 && selectedStock && (
               <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
                 <Grid container spacing={2}>
@@ -3486,487 +3614,487 @@ useEffect(() => {
               </Paper>
             )}
 
-           {tabValue === 1 && selectedStock && (
-  <>
-    {loadingTrades ? (
-      <Typography sx={{ p: 2 }}>Loading...</Typography>
-    ) : tradesError ? (
-      <Typography color="error" sx={{ p: 2 }}>{tradesError}</Typography>
-    ) : tradesData.length === 0 ? (
-      <Typography sx={{ p: 2 }}>No trades found</Typography>
-    ) : (
-      <>
-        {/* Pagination Logic */}
-        {(() => {
-          const pageSize = 10;
-          const totalPages = Math.ceil(tradesData.length / pageSize);
-          const paginatedTrades = tradesData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+            {tabValue === 1 && selectedStock && (
+              <>
+                {loadingTrades ? (
+                  <Typography sx={{ p: 2 }}>Loading...</Typography>
+                ) : tradesError ? (
+                  <Typography color="error" sx={{ p: 2 }}>{tradesError}</Typography>
+                ) : tradesData.length === 0 ? (
+                  <Typography sx={{ p: 2 }}>No trades found</Typography>
+                ) : (
+                  <>
+                    {/* Pagination Logic */}
+                    {(() => {
+                      const pageSize = 10;
+                      const totalPages = Math.ceil(tradesData.length / pageSize);
+                      const paginatedTrades = tradesData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
-          return (
-            <>
-              {isMobile ? (
-                paginatedTrades.map((item, index) => {
-                  const [mainName, subName] = item.scrp_name.split(" ", 2);
-                  const cleanRate = item.trd_rate?.split("(")[0].trim();
-                  const isBuy = item.trd_type === "Buy";
-                  const isSell = item.trd_type === "Sell";
+                      return (
+                        <>
+                          {isMobile ? (
+                            paginatedTrades.map((item, index) => {
+                              const [mainName, subName] = item.scrp_name.split(" ", 2);
+                              const cleanRate = item.trd_rate?.split("(")[0].trim();
+                              const isBuy = item.trd_type === "Buy";
+                              const isSell = item.trd_type === "Sell";
 
-                  const borderGradient = isBuy
-                    ? "linear-gradient(to right, #2196f3, #21cbf3)"
-                    : isSell
-                      ? "linear-gradient(to right, #f44336, #ff7961)"
-                      : "#ccc";
+                              const borderGradient = isBuy
+                                ? "linear-gradient(to right, #2196f3, #21cbf3)"
+                                : isSell
+                                  ? "linear-gradient(to right, #f44336, #ff7961)"
+                                  : "#ccc";
 
-                  const boxShadowColor = isBuy
-                    ? "rgba(33, 150, 243, 0.3)"
-                    : isSell
-                      ? "rgba(244, 67, 54, 0.3)"
-                      : "rgba(0,0,0,0.1)";
+                              const boxShadowColor = isBuy
+                                ? "rgba(33, 150, 243, 0.3)"
+                                : isSell
+                                  ? "rgba(244, 67, 54, 0.3)"
+                                  : "rgba(0,0,0,0.1)";
 
-                  return (
-                    <Card
-                      key={item.trd_id || index}
-                      sx={{
-                        mb: 1,
-                        mx: 1,
-                        borderRadius: 2,
-                        border: "1px solid transparent",
-                        backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
-                        backgroundOrigin: "border-box",
-                        backgroundClip: "content-box, border-box",
-                        boxShadow: `0 4px 12px ${boxShadowColor}`,
-                        position: "relative",
-                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                        "&:hover": {
-                          transform: "scale(1.02)",
-                          boxShadow: `0 8px 20px ${boxShadowColor}`,
-                        },
-                      }}
-                    >
-                      {item.is_hot && (
+                              return (
+                                <Card
+                                  key={item.trd_id || index}
+                                  sx={{
+                                    mb: 1,
+                                    mx: 1,
+                                    borderRadius: 2,
+                                    border: "1px solid transparent",
+                                    backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
+                                    backgroundOrigin: "border-box",
+                                    backgroundClip: "content-box, border-box",
+                                    boxShadow: `0 4px 12px ${boxShadowColor}`,
+                                    position: "relative",
+                                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                                    "&:hover": {
+                                      transform: "scale(1.02)",
+                                      boxShadow: `0 8px 20px ${boxShadowColor}`,
+                                    },
+                                  }}
+                                >
+                                  {item.is_hot && (
+                                    <Box
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        backgroundColor: "gold",
+                                        color: "#000",
+                                        fontSize: "0.7em",
+                                        px: 1,
+                                        py: 0.3,
+                                        borderBottomLeftRadius: 4,
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      HOT
+                                    </Box>
+                                  )}
+                                  <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                        {mainName} <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
+                                      </Typography>
+                                      <Typography variant="caption">ID: #{item.trd_id}</Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                                        <Typography
+                                          variant="body2"
+                                          component="span"
+                                          dangerouslySetInnerHTML={{ __html: item.device_type_html }}
+                                          sx={{ mr: 0.3 }}
+                                        />
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            color: isBuy ? "#2196f3" : isSell ? "#f44336" : "inherit",
+                                            fontWeight: 700,
+                                            textTransform: "uppercase",
+                                          }}
+                                        >
+                                          {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
+                                          <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.trd_type2}</span>
+                                        </Typography>
+                                      </Box>
+
+                                      <Typography variant="body2">
+                                        ({item.trd_lot}) {item.actual_lot_qty} @{" "}
+                                        <span style={{ fontWeight: 700 }}>{cleanRate}</span>
+                                      </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Typography variant="caption">{item.trd_time}</Typography>
+                                      <Typography variant="caption">
+                                        Commission: <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
+                                      </Typography>
+                                    </Box>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })
+                          ) : (
+                            <Box sx={{ overflowX: "auto", border: "1px solid #ddd", mx: 1 }}>
+                              <table
+                                className="table table-striped table-bordered"
+                                style={{
+                                  minWidth: "1350px",
+                                  fontSize: "12px",
+                                  margin: 0,
+                                  backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                                }}
+                              >
+                                <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                                  <tr>
+                                    {["Device", "Time", "Trade ID", "Client", "Market", "Script", "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
+                                      <th key={header} style={{ fontWeight: 600 }}>
+                                        {header}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {paginatedTrades.map((item, index) => (
+                                    <tr
+                                      key={item.trd_id || index}
+                                      style={{
+                                        backgroundColor:
+                                          item.trd_type === "Buy"
+                                            ? theme.palette.mode === "dark" ? "#264653" : "#e0f7fa"
+                                            : item.trd_type === "Sell"
+                                              ? theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec"
+                                              : theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
+                                      }}
+                                    >
+                                      <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                      <td>{item.trd_matchedtime}</td>
+                                      <td>#{item.trd_id}</td>
+                                      <td>{item.client_full_name}</td>
+                                      <td>{item.mrkt_name}</td>
+                                      <td>{item.scrp_name}</td>
+                                      <td>{item.trd_type}</td>
+                                      <td>{item.trd_type2}</td>
+                                      <td>{item.trd_lot}</td>
+                                      <td>{item.actual_lot_qty}</td>
+                                      <td>{item.trd_rate}</td>
+                                      <td>{item.trd_status}</td>
+                                      <td>{item.trd_time}</td>
+                                      <td>{item.trd_comm_amnt}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </Box>
+                          )}
+
+                          {/* Pagination Controls */}
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                              <Button
+                                size="small"
+                                disabled={currentPage === 0}
+                                onClick={() => setCurrentPage((prev) => prev - 1)}
+                                color="secondary"
+                                sx={{ mr: 1 }}
+                              >
+                                Prev
+                              </Button>
+
+                              {[...Array(totalPages)].map((_, i) => {
+                                if (
+                                  i === 0 ||
+                                  i === totalPages - 1 ||
+                                  (i >= currentPage - 1 && i <= currentPage + 1)
+                                ) {
+                                  return (
+                                    <Button
+                                      key={i}
+                                      size="small"
+                                      variant={i === currentPage ? "contained" : "outlined"}
+                                      color="secondary"
+                                      onClick={() => setCurrentPage(i)}
+                                      sx={{ mx: 0.3, minWidth: "30px" }}
+                                    >
+                                      {i + 1}
+                                    </Button>
+                                  );
+                                }
+                                if (
+                                  (i === 1 && currentPage > 2) ||
+                                  (i === totalPages - 2 && currentPage < totalPages - 3)
+                                ) {
+                                  return (
+                                    <Typography key={i} sx={{ mx: 0.5 }}>
+                                      ...
+                                    </Typography>
+                                  );
+                                }
+                                return null;
+                              })}
+
+                              <Button
+                                size="small"
+                                disabled={currentPage + 1 >= totalPages}
+                                onClick={() => setCurrentPage((prev) => prev + 1)}
+                                color="secondary"
+                                sx={{ ml: 1 }}
+                              >
+                                Next
+                              </Button>
+                            </Box>
+                          </Box>
+                        </>
+                      );
+                    })()}
+                  </>
+                )}
+              </>
+            )}
+
+            {tabValue === 2 && (
+              <>
+                {/* Content */}
+                {loading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : positionData.length === 0 ? (
+                  <Typography sx={{ p: 2 }}>No position data found.</Typography>
+                ) : isMobile ? (
+                  <Box sx={{ p: 1 }}>
+                    {positionData.map((row, index) => {
+                      const scriptHtml = row?.script_name || "";
+                      const parts = scriptHtml.split("<br>");
+                      const mainName = parts[0] || "";
+                      const datePart = parts[1] || "";
+
+                      const currentValue = row.total_buy * row.last_trade_price;
+                      const todaysPL = -203.0;
+                      const unrealizedPL = 8170;
+                      const unrealizedPLPerc = 10.62;
+
+                      return (
                         <Box
+                          key={index}
                           sx={{
-                            position: "absolute",
-                            top: 0,
-                            right: 0,
-                            backgroundColor: "gold",
-                            color: "#000",
-                            fontSize: "0.7em",
-                            px: 1,
-                            py: 0.3,
-                            borderBottomLeftRadius: 4,
-                            fontWeight: 700,
+                            m: 0.5,
+                            border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                            borderRadius: 2,
+                            backgroundColor: (theme) => theme.palette.background.paper,
+                            boxShadow: 1,
                           }}
                         >
-                          HOT
-                        </Box>
-                      )}
-                      <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                            {mainName} <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
-                          </Typography>
-                          <Typography variant="caption">ID: #{item.trd_id}</Typography>
-                        </Box>
+                          {/* Top Row */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              px: 1,
+                              pt: 0.8,
+                              pb: 0.6,
+                            }}
+                          >
+                            {/* Left: Avatar + Script Name + Expiry */}
+                            <Box sx={{ display: "flex", alignItems: "flex-start", minWidth: 0, flex: 1 }}>
+                              <Avatar
+                                alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
+                                src="/path-to-your-logo.png"
+                                variant="square"
+                                sx={{ width: 28, height: 28, mr: 1 }}
+                              />
+                              <Box sx={{ minWidth: 0 }}>
+                                <Typography
+                                  variant="subtitle2"
+                                  fontWeight={700}
+                                  sx={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    lineHeight: 1.2,
+                                  }}
+                                  dangerouslySetInnerHTML={{ __html: mainName }}
+                                />
+                                {datePart && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      opacity: 0.7,
+                                      fontWeight: 500,
+                                      lineHeight: 1.2,
+                                      whiteSpace: "nowrap",
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: datePart }}
+                                  />
+                                )}
+                              </Box>
+                            </Box>
 
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                              variant="body2"
-                              component="span"
-                              dangerouslySetInnerHTML={{ __html: item.device_type_html }}
-                              sx={{ mr: 0.3 }}
-                            />
-                            <Typography
-                              variant="body2"
+                            {/* Center-right: Shopping Bag + Qty × Rate */}
+                            <Box
                               sx={{
-                                color: isBuy ? "#2196f3" : isSell ? "#f44336" : "inherit",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0,
+                                mx: 1.5,
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
-                              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.trd_type2}</span>
-                            </Typography>
+
+                              <ShoppingBagIcon sx={{ fontSize: 11, color: "text.disabled" }} />
+                              <Typography
+                                variant="body2"
+                                sx={{ fontSize: 11, fontWeight: 500 }}
+                              >
+                                {row.total_buy} × {row.buy_avg_rate}
+                              </Typography>
+                            </Box>
+
+                            {/* Right: Last Trade Price + % Change */}
+                            <Box sx={{ textAlign: "right", minWidth: 70 }}>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 700 }}
+                              >
+                                {row.last_trade_price}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color:
+                                    row.change_value < 0
+                                      ? (theme) => theme.palette.error.main
+                                      : (theme) => theme.palette.success.main,
+                                }}
+                              >
+                                {row.change_value} ({row.change_perc}%)
+                              </Typography>
+                            </Box>
                           </Box>
 
-                          <Typography variant="body2">
-                            ({item.trd_lot}) {item.actual_lot_qty} @{" "}
-                            <span style={{ fontWeight: 700 }}>{cleanRate}</span>
-                          </Typography>
-                        </Box>
 
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography variant="caption">{item.trd_time}</Typography>
-                          <Typography variant="caption">
-                            Commission: <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
-                          </Typography>
+                          {/* Bottom Row */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                              py: 0.5,
+                              px: 1,
+                            }}
+                          >
+                            <Box>
+                              <Typography variant="subtitle2">
+                                {isNaN(currentValue)
+                                  ? "---"
+                                  : currentValue >= 1000
+                                    ? `${(currentValue / 1000).toFixed(2)}K`
+                                    : currentValue.toFixed(2)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Current Value
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" color="error.main">
+                                {todaysPL.toFixed(2)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Today’s P&L
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" color="success.main">
+                                +{unrealizedPL >= 1000
+                                  ? `${(unrealizedPL / 1000).toFixed(2)}K`
+                                  : unrealizedPL.toFixed(2)}
+                                <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
+                                  ({unrealizedPLPerc}%)
+                                </Typography>
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Unrealized P&L
+                              </Typography>
+                            </Box>
+                          </Box>
                         </Box>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              ) : (
-                <Box sx={{ overflowX: "auto", border: "1px solid #ddd", mx: 1 }}>
-                  <table
-                    className="table table-striped table-bordered"
-                    style={{
-                      minWidth: "1350px",
-                      fontSize: "12px",
-                      margin: 0,
-                      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                      );
+                    })}
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      overflowX: "auto",
+                      overflowY: "auto",
+                      maxHeight: "calc(100vh - 250px)",
+                      border: "1px solid #ddd",
+                      mx: 1,
+                      my: 1,
                     }}
                   >
-                    <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                      <tr>
-                        {["Device", "Time", "Trade ID", "Client", "Market", "Script", "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
-                          <th key={header} style={{ fontWeight: 600 }}>
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedTrades.map((item, index) => (
-                        <tr
-                          key={item.trd_id || index}
-                          style={{
-                            backgroundColor:
-                              item.trd_type === "Buy"
-                                ? theme.palette.mode === "dark" ? "#264653" : "#e0f7fa"
-                                : item.trd_type === "Sell"
-                                  ? theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec"
-                                  : theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
-                          }}
-                        >
-                          <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                          <td>{item.trd_matchedtime}</td>
-                          <td>#{item.trd_id}</td>
-                          <td>{item.client_full_name}</td>
-                          <td>{item.mrkt_name}</td>
-                          <td>{item.scrp_name}</td>
-                          <td>{item.trd_type}</td>
-                          <td>{item.trd_type2}</td>
-                          <td>{item.trd_lot}</td>
-                          <td>{item.actual_lot_qty}</td>
-                          <td>{item.trd_rate}</td>
-                          <td>{item.trd_status}</td>
-                          <td>{item.trd_time}</td>
-                          <td>{item.trd_comm_amnt}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </Box>
-              )}
-
-              {/* Pagination Controls */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                  <Button
-                    size="small"
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                    color="secondary"
-                    sx={{ mr: 1 }}
-                  >
-                    Prev
-                  </Button>
-
-                  {[...Array(totalPages)].map((_, i) => {
-                    if (
-                      i === 0 ||
-                      i === totalPages - 1 ||
-                      (i >= currentPage - 1 && i <= currentPage + 1)
-                    ) {
-                      return (
-                        <Button
-                          key={i}
-                          size="small"
-                          variant={i === currentPage ? "contained" : "outlined"}
-                          color="secondary"
-                          onClick={() => setCurrentPage(i)}
-                          sx={{ mx: 0.3, minWidth: "30px" }}
-                        >
-                          {i + 1}
-                        </Button>
-                      );
-                    }
-                    if (
-                      (i === 1 && currentPage > 2) ||
-                      (i === totalPages - 2 && currentPage < totalPages - 3)
-                    ) {
-                      return (
-                        <Typography key={i} sx={{ mx: 0.5 }}>
-                          ...
-                        </Typography>
-                      );
-                    }
-                    return null;
-                  })}
-
-                  <Button
-                    size="small"
-                    disabled={currentPage + 1 >= totalPages}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    color="secondary"
-                    sx={{ ml: 1 }}
-                  >
-                    Next
-                  </Button>
-                </Box>
-              </Box>
-            </>
-          );
-        })()}
-      </>
-    )}
-  </>
-)}
-
-{tabValue === 2 && (
-  <>
-    {/* Content */}
-    {loading ? (
-      <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-        <CircularProgress />
-      </Box>
-    ) : positionData.length === 0 ? (
-      <Typography sx={{ p: 2 }}>No position data found.</Typography>
-    ) : isMobile ? (
-      <Box sx={{ p: 1 }}>
-        {positionData.map((row, index) => {
-          const scriptHtml = row?.script_name || "";
-          const parts = scriptHtml.split("<br>");
-          const mainName = parts[0] || "";
-          const datePart = parts[1] || "";
-
-          const currentValue = row.total_buy * row.last_trade_price;
-          const todaysPL = -203.0;
-          const unrealizedPL = 8170;
-          const unrealizedPLPerc = 10.62;
-
-          return (
-            <Box
-              key={index}
-              sx={{
-                m: 0.5,
-                border: (theme) => `1px solid ${theme.palette.primary.main}`,
-                borderRadius: 2,
-                backgroundColor: (theme) => theme.palette.background.paper,
-                boxShadow: 1,
-              }}
-            >
-              {/* Top Row */}
-          <Box
-  sx={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    px: 1,
-    pt: 0.8,
-    pb: 0.6,
-  }}
->
-  {/* Left: Avatar + Script Name + Expiry */}
-  <Box sx={{ display: "flex", alignItems: "flex-start", minWidth: 0, flex: 1 }}>
-    <Avatar
-      alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
-      src="/path-to-your-logo.png"
-      variant="square"
-      sx={{ width: 28, height: 28, mr: 1 }}
-    />
-    <Box sx={{ minWidth: 0 }}>
-      <Typography
-        variant="subtitle2"
-        fontWeight={700}
-        sx={{
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          lineHeight: 1.2,
-        }}
-        dangerouslySetInnerHTML={{ __html: mainName }}
-      />
-      {datePart && (
-        <Typography
-          variant="caption"
-          sx={{
-            opacity: 0.7,
-            fontWeight: 500,
-            lineHeight: 1.2,
-            whiteSpace: "nowrap",
-          }}
-          dangerouslySetInnerHTML={{ __html: datePart }}
-        />
-      )}
-    </Box>
-  </Box>
-
-  {/* Center-right: Shopping Bag + Qty × Rate */}
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 0,
-      mx: 1.5,
-      whiteSpace: "nowrap",
-    }}
-  >
-
-    <ShoppingBagIcon sx={{ fontSize: 11, color: "text.disabled" }} />
-    <Typography
-      variant="body2"
-      sx={{ fontSize: 11, fontWeight: 500 }}
-    >
-      {row.total_buy} × {row.buy_avg_rate}
-    </Typography>
-  </Box>
-
-  {/* Right: Last Trade Price + % Change */}
-  <Box sx={{ textAlign: "right", minWidth: 70 }}>
-    <Typography
-      variant="subtitle2"
-      sx={{ fontWeight: 700 }}
-    >
-      {row.last_trade_price}
-    </Typography>
-    <Typography
-      variant="caption"
-      sx={{
-        color:
-          row.change_value < 0
-            ? (theme) => theme.palette.error.main
-            : (theme) => theme.palette.success.main,
-      }}
-    >
-      {row.change_value} ({row.change_perc}%)
-    </Typography>
-  </Box>
-</Box>
-
-
-              {/* Bottom Row */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                  py: 0.5,
-                  px: 1,
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2">
-                    {isNaN(currentValue)
-                      ? "---"
-                      : currentValue >= 1000
-                      ? `${(currentValue / 1000).toFixed(2)}K`
-                      : currentValue.toFixed(2)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Current Value
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="error.main">
-                    {todaysPL.toFixed(2)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Today’s P&L
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="success.main">
-                    +{unrealizedPL >= 1000
-                      ? `${(unrealizedPL / 1000).toFixed(2)}K`
-                      : unrealizedPL.toFixed(2)}
-                    <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
-                      ({unrealizedPLPerc}%)
-                    </Typography>
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Unrealized P&L
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          );
-        })}
-      </Box>
-    ) : (
-      <Box
-        sx={{
-          overflowX: "auto",
-          overflowY: "auto",
-          maxHeight: "calc(100vh - 250px)",
-          border: "1px solid #ddd",
-          mx: 1,
-          my: 1,
-        }}
-      >
-        <Table sx={{ minWidth: 1250, fontSize: "12px" }}>
-          <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-            <TableRow>
-              <TableCell>Market Type</TableCell>
-              <TableCell>Script</TableCell>
-              <TableCell>Total Buy</TableCell>
-              <TableCell>Buy Avg Rate</TableCell>
-              <TableCell>Total Sell</TableCell>
-              <TableCell>Sell Avg Rate</TableCell>
-              <TableCell>Net Qty</TableCell>
-              <TableCell>Last Trade Price</TableCell>
-              <TableCell>MYM HTML</TableCell>
-              <TableCell>Auto Closed Date</TableCell>
-              <TableCell>Close Btn</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {positionData.map((row, index) => {
-              const isEven = index % 2 === 0;
-              const rowBgColor =
-                theme.palette.mode === "dark"
-                  ? isEven
-                    ? "#2a2a2a"
-                    : "#1f1f1f"
-                  : isEven
-                  ? "#f9f9f9"
-                  : "#ffffff";
-              return (
-                <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
-                  <TableCell>{row.market_type_name}</TableCell>
-                  <TableCell>
-                    <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-                  </TableCell>
-                  <TableCell>{row.total_buy}</TableCell>
-                  <TableCell>{row.buy_avg_rate}</TableCell>
-                  <TableCell>{row.total_sell}</TableCell>
-                  <TableCell>{row.sell_avg_rate}</TableCell>
-                  <TableCell>{row.net_qty}</TableCell>
-                  <TableCell>{row.last_trade_price}</TableCell>
-                  <TableCell>
-                    <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-                  </TableCell>
-                  <TableCell>{row.trade_auto_closed_date}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => alert("Close Position")}
-                    >
-                      Close
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Box>
-    )}
-  </>
-)}
+                    <Table sx={{ minWidth: 1250, fontSize: "12px" }}>
+                      <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                        <TableRow>
+                          <TableCell>Market Type</TableCell>
+                          <TableCell>Script</TableCell>
+                          <TableCell>Total Buy</TableCell>
+                          <TableCell>Buy Avg Rate</TableCell>
+                          <TableCell>Total Sell</TableCell>
+                          <TableCell>Sell Avg Rate</TableCell>
+                          <TableCell>Net Qty</TableCell>
+                          <TableCell>Last Trade Price</TableCell>
+                          <TableCell>MTM</TableCell>
+                          <TableCell>Auto Closed Date</TableCell>
+                          <TableCell>Close Btn</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {positionData.map((row, index) => {
+                          const isEven = index % 2 === 0;
+                          const rowBgColor =
+                            theme.palette.mode === "dark"
+                              ? isEven
+                                ? "#2a2a2a"
+                                : "#1f1f1f"
+                              : isEven
+                                ? "#f9f9f9"
+                                : "#ffffff";
+                          return (
+                            <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
+                              <TableCell>{row.market_type_name}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+                              </TableCell>
+                              <TableCell>{row.total_buy}</TableCell>
+                              <TableCell>{row.buy_avg_rate}</TableCell>
+                              <TableCell>{row.total_sell}</TableCell>
+                              <TableCell>{row.sell_avg_rate}</TableCell>
+                              <TableCell>{row.net_qty}</TableCell>
+                              <TableCell>{row.last_trade_price}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+                              </TableCell>
+                              <TableCell>{row.trade_auto_closed_date}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="contained"
+                                  color="error"
+                                  onClick={() => alert("Close Position")}
+                                >
+                                  Close
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                )}
+              </>
+            )}
 
             {tabValue === 3 && selectedStock && (
               <Box>
@@ -4044,5 +4172,4 @@ export default PersonalDashboard;
 //   //   </div>
 //   // );
 // }
-
 
