@@ -36,7 +36,8 @@ import {
   MapMarker, MapDirection, SearchMap,
   TrafficIndicator, StreetViewMap, NotFound,
   Watchlist,
-  StockDetailMobile
+  StockDetailMobile,
+  Ledger
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
 // import Watchlist from '../Dashboard/Watchlist';
@@ -51,6 +52,7 @@ function Application(props) {
         { /* Home */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
+          <Route path="/ledger" element={<Ledger />} />
           <Route path="dashboard/watchlist" element={<Watchlist />} />
           <Route path="dashboard/stock-details" element={<StockDetailMobile />} />
         </Route>

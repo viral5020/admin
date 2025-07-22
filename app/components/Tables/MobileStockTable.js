@@ -535,3 +535,7 @@ const MobileStockTable = ({
 };
 
 export default MobileStockTable;
+
+// remark
+// date
+// 

@@ -24,9 +24,8 @@ function App(props) {
     <ThemeWrapper>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />}/>
-            
-          
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
           <Route path="app/*" element={<Application history={history} />} />
           <Route element={<Outer />}>
             {/* <Route path="login" element={<Login />} /> */}

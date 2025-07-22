@@ -39,12 +39,12 @@ module.exports = [
   //       link: '/app/dashboard/sales-marketing',
   //       icon: 'ion-ios-card-outline'
   //     },
-      // {
-      //   key: 'crypto',
-      //   name: 'Cryptocurrency',
-      //   link: '/app/dashboard/cryptocurrency',
-      //   icon: 'ion-ios-medal-outline'
-      // },
+  // {
+  //   key: 'crypto',
+  //   name: 'Cryptocurrency',
+  //   link: '/app/dashboard/cryptocurrency',
+  //   icon: 'ion-ios-medal-outline'
+  // },
   //     {
   //       key: 'dashboard_widgets',
   //       name: 'Dashboard Widgets',
@@ -210,37 +210,43 @@ module.exports = [
   //       link: '/login',
   //       icon: 'ion-ios-person-outline'
   //     },
+  // {
+  //   key: 'login3',
+  //   name: 'Login Ver.3',
+  //   link: '/login-v3',
+  //   icon: 'ion-ios-contact-outline'
+  // },
   {
-        key: 'Dashboard',
-        name: 'Dashboard',
-        link: '/app',
-        icon: 'ion-ios-contact-outline'
-      },
-      // {
-      //   key: 'login3',
-      //   name: 'Login Ver.3',
-      //   link: '/login-v3',
-      //   icon: 'ion-ios-contact-outline'
-      // },
-      {
-        key: 'crypto',
-        name: 'Watchlist',
-        link: '/app/dashboard/watchlist',
-        icon: 'ion-ios-medal-outline'
-      },
-      {
-        key: 'crypto',
-        name: 'StockDetailMobile',
-        link: '/app/dashboard/stock-details',
-        icon: 'ion-ios-medal-outline',
-        hideInSidebar: true, 
-      },
-      {
-        key: 'login2',
-        name: 'Login',
-        link: '/login',
-        icon: 'ion-ios-contact-outline'
-      },
+    key: 'Dashboard',
+    name: 'Dashboard',
+    link: '/app',
+    icon: 'ion-ios-contact-outline'
+  },
+  {
+    key: 'crypto',
+    name: 'Watchlist',
+    link: '/app/dashboard/watchlist',
+    icon: 'ion-ios-medal-outline'
+  },
+  {
+    key: 'ledger',
+    name: 'Ledger',
+    link: '/app/ledger',
+    icon: 'ion-ios-medal-outline'
+  },
+  {
+    key: 'login2',
+    name: 'Login',
+    link: '/login',
+    icon: 'ion-ios-contact-outline'
+  },
+  {
+    key: 'crypto',
+    name: 'StockDetailMobile',
+    link: '/app/dashboard/stock-details',
+    icon: 'ion-ios-medal-outline',
+    hideInSidebar: true,
+  },
   //     {
   //       key: 'register',
   //       name: 'Register',
