@@ -35,7 +35,7 @@ function MainMenu(props) {
   const { dataMenu } = props;
 
   const getMenus = (menuArray, paddingLevel) => menuArray.map((item, index) => {
-    if(item.hideInSidebar){
+    if (item.hideInSidebar) {
       return;
     }
     if (item.child || item.linkParent) {
@@ -78,7 +78,7 @@ function MainMenu(props) {
               unmountOnExit
             >
               <List className={classes.dense} component="nav">
-                { getMenus(item.child, item.level) }
+                {getMenus(item.child, item.level)}
               </List>
             </Collapse>
           )}
@@ -110,12 +110,17 @@ function MainMenu(props) {
         <Box
           sx={{
             flex: 1,
-            pl: paddingLevel,
+            pl: '56px',
             display: 'flex',
             justifyContent: 'space-between'
           }}
         >
-          <ListItemText classes={{ primary: classes.primary }} inset primary={item.name} />
+          {item.icon && (
+            <ListItemIcon className={classes.icon}>
+              <i className={item.icon} />
+            </ListItemIcon>
+          )}
+          <ListItemText classes={{ primary: classes.primary }} primary={item.name} />
           {item.badge && (
             <Chip color="primary" label={item.badge} className={classes.badge} />
           )}
