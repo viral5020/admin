@@ -1,5 +1,3 @@
-
-
 module.exports = [
   // {
   //   key: 'home',
@@ -222,25 +220,25 @@ module.exports = [
     key: 'Dashboard',
     name: 'Dashboard',
     link: '/app',
-    icon: 'ion-ios-contact-outline'
+    icon: 'grid-outline'
   },
   {
     key: 'crypto',
     name: 'Watchlist',
     link: '/app/dashboard/watchlist',
-    icon: 'ion-ios-medal-outline'
+    icon: 'medal-outline'
   },
   {
     key: 'ledger',
     name: 'Ledger',
     link: '/app/ledger',
-    icon: 'ion-ios-medal-outline'
+    icon: 'medal-outline'
   },
   {
     key: 'login2',
     name: 'Login',
     link: '/login',
-    icon: 'ion-ios-contact-outline'
+    icon: 'person-outline'
   },
   {
     key: 'crypto',

@@ -1,5 +1,7 @@
 
 const ionIcon = [
+  'ion-ios-cellular-outline',
+  'ion-ios-bar-chart-outline',
   'ion-ios-add',
   'ion-ios-add-circle',
   'ion-ios-add-circle-outline',

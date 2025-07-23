@@ -14,6 +14,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { openAction } from 'dan-redux/modules/ui';
 import useStyles from './sidebar-jss';
+import { position } from 'stylis';
 
 // eslint-disable-next-line
 function MainMenu(props) {
@@ -110,14 +111,15 @@ function MainMenu(props) {
         <Box
           sx={{
             flex: 1,
-            pl: '56px',
+            pl: '30px',
             display: 'flex',
             justifyContent: 'space-between'
           }}
         >
           {item.icon && (
             <ListItemIcon className={classes.icon}>
-              <i className={item.icon} />
+              {/* <i className={item.icon} /> */}
+              <ion-icon name={item.icon} style={{ width: '22px', height: '22px', position: 'relative', top: '4px' }}></ion-icon>
             </ListItemIcon>
           )}
           <ListItemText classes={{ primary: classes.primary }} primary={item.name} />
