@@ -43,6 +43,10 @@ import DropdownMenu from './DropdownMenu'
 import ApexCharts from './Apexcharts.js';
 import axios from 'axios';
 
+import SearchIcon from "@mui/icons-material/Search";
+import InputAdornment from "@mui/material/InputAdornment";
+// import TextField from "@mui/material/TextField";
+
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
@@ -209,9 +213,10 @@ function PersonalDashboard() {
   const [searchText, setSearchText] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(null);
 
-
   const [positionDialogOpen, setpositionDialogOpen] = useState(false);
   const [positionData, setPositionData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const [rejectionDialogOpen, setrejectionDialogOpen] = useState(false);
   const [rejectionLogs, setRejectionLogs] = useState([]);
@@ -256,6 +261,10 @@ function PersonalDashboard() {
     setPendingSearchText(value);
     setPendingCurrentPage(0);
   };
+
+  const filteredPositions = positionData.filter((row) =>
+  row?.script_name?.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   const filteredPendingOrders = pendingOrders.filter((order) =>
     order.scrp_name?.toLowerCase().includes(pendingSearchText.toLowerCase()) ||
@@ -1395,17 +1404,54 @@ function PersonalDashboard() {
               </IconButton>
             </Box>
 
+           <Box sx={{ px: 1, py: 0.5, backgroundColor: "background.default" }}>
+  <TextField
+    fullWidth
+    variant="outlined"
+    placeholder="Search positions..."
+    size="small"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start" sx={{ mr: 0.5 }}>
+          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
+        </InputAdornment>
+      ),
+    }}
+    sx={{
+      '& .MuiOutlinedInput-root': {
+        borderRadius: 2,
+        height: 36,
+        fontSize: 13,
+        '& fieldset': {
+          borderColor: '#ccc',
+        },
+        '&:hover fieldset': {
+          borderColor: '#666',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: '#000', // 🔥 Black border on focus
+        },
+      },
+      '& input': {
+        py: 0.5,
+      },
+    }}
+  />
+</Box>
+
 
             {/* Body */}
             {loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
                 <CircularProgress />
               </Box>
-            ) : positionData.length > 0 ? (
+            ) : filteredPositions.length > 0 ? (
               <>
                 {isMobile ? (
                   <>
-                    {positionData.map((row, index) => {
+                    {filteredPositions.map((row, index) => {
                       const scriptHtml = row?.script_name || "";
                       const parts = scriptHtml.split("<br>");
                       const mainName = parts[0] || "";
@@ -1592,7 +1638,7 @@ function PersonalDashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {positionData.map((row, index) => {
+                        {filteredPositions.map((row, index) => {
                           const isEven = index % 2 === 0;
                           const rowBgColor = theme.palette.mode === "dark"
                             ? isEven ? "#2a2a2a" : "#1f1f1f"
@@ -3859,11 +3905,11 @@ function PersonalDashboard() {
                   <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
                     <CircularProgress />
                   </Box>
-                ) : positionData.length === 0 ? (
+                ) : filteredPositions.length === 0 ? (
                   <Typography sx={{ p: 2 }}>No position data found.</Typography>
                 ) : isMobile ? (
                   <Box sx={{ p: 1 }}>
-                    {positionData.map((row, index) => {
+                    {filteredPositions.map((row, index) => {
                       const scriptHtml = row?.script_name || "";
                       const parts = scriptHtml.split("<br>");
                       const mainName = parts[0] || "";
@@ -4024,16 +4070,24 @@ function PersonalDashboard() {
                   </Box>
                 ) : (
                   <Box
-                    sx={{
-                      overflowX: "auto",
-                      overflowY: "auto",
-                      maxHeight: "calc(100vh - 250px)",
-                      border: "1px solid #ddd",
-                      mx: 1,
-                      my: 1,
-                    }}
-                  >
-                    <Table sx={{ minWidth: 1250, fontSize: "12px" }}>
+  sx={{
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1,
+    height: "100%",
+    overflow: "hidden",
+    mx: 1,
+    my: 1,
+  }}
+>
+  <Box
+    sx={{
+      flexGrow: 1,
+      overflow: "auto",
+      border: "1px solid #ddd",
+    }}
+  >
+                    <Table sx={{ minWidth: 1350, fontSize: "12px" }}>
                       <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
                         <TableRow>
                           <TableCell>Market Type</TableCell>
@@ -4050,7 +4104,7 @@ function PersonalDashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {positionData.map((row, index) => {
+                        {filteredPositions.map((row, index) => {
                           const isEven = index % 2 === 0;
                           const rowBgColor =
                             theme.palette.mode === "dark"
@@ -4090,6 +4144,7 @@ function PersonalDashboard() {
                         })}
                       </TableBody>
                     </Table>
+                  </Box>
                   </Box>
                 )}
               </>

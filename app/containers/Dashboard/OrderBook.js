@@ -232,17 +232,61 @@ const OrderBook = () => {
                             </tbody>
                         </table>
                     </Box>
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                        <Button disabled={currentPage === 0} onClick={() => setCurrentPage(prev => prev - 1)}>Prev</Button>
+   {/* Page Numbers */}
+                         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                             <Button
+                                 size="small"
+                                 disabled={currentPage === 0}
+                                 onClick={() => setCurrentPage((prev) => prev - 1)}
+                                 color="secondary"
+                                 sx={{ mr: 1 }}
+                             >
+                                 Prev
+                             </Button>
+ 
+                             {[...Array(totalPages)].map((_, i) => {
+                                 if (
+                                     i === 0 ||
+                                     i === totalPages - 1 ||
+                                     (i >= currentPage - 1 && i <= currentPage + 1)
+                                 ) {
+                                     return (
+                                         <Button
+                                             key={i}
+                                             size="small"
+                                             variant={i === currentPage ? 'contained' : 'outlined'}
+                                             color="secondary"
+                                             onClick={() => setCurrentPage(i)}
+                                             sx={{ mx: 0.3, minWidth: '30px' }}
+                                         >
+                                             {i + 1}
+                                         </Button>
+                                     );
+                                 }
+                                 if (
+                                     (i === 1 && currentPage > 2) ||
+                                     (i === totalPages - 2 && currentPage < totalPages - 3)
+                                 ) {
+                                     return (
+                                         <Typography key={i} sx={{ mx: 0.5 }}>
+                                             ...
+                                         </Typography>
+                                     );
+                                 }
+                                 return null;
+                             })}
+ 
+                             <Button
+                                 size="small"
+                                 disabled={currentPage + 1 >= totalPages}
+                                 onClick={() => setCurrentPage((prev) => prev + 1)}
+                                 color="secondary"
+                                 sx={{ ml: 1 }}
+                             >
+                                 Next
+                             </Button>
+                         </Box>
 
-                        {[...Array(totalPages)].map((_, i) => (
-                            <Button key={i} onClick={() => setCurrentPage(i)} variant={i === currentPage ? "contained" : "outlined"} sx={{ mx: 0.3 }}>
-                                {i + 1}
-                            </Button>
-                        ))}
-
-                        <Button disabled={currentPage + 1 >= totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>Next</Button>
-                    </Box>
                 </>
             )}
         </Box>

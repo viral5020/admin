@@ -28,6 +28,7 @@ import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import InputAdornment from "@mui/material/InputAdornment";
 
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -102,40 +103,50 @@ const OrderPage = () => {
         }
     };
 
-    const fetchPositions = async () => {
-        setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        try {
-            const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
-                sEcho: 1,
-                iDisplayStart: 0,
-                iDisplayLength: 10,
-                sSearch: "",
-            });
+  const fetchPositions = async (search = "") => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    try {
+        const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
+            is_app: "1",
+            login_user_id: dataStored.user_id,
+            auth_key: dataStored.auth_key,
+            sEcho: 1,
+            iDisplayStart: 0,
+            iDisplayLength: 10,
+            sSearch: search,
+        });
 
-            if (response.data && response.data.aaData) {
-                setPositionData(response.data.aaData);
-            } else {
-                setPositionData([]);
-            }
-        } catch (error) {
-            console.error("Error fetching position data:", error);
+        if (response.data && response.data.aaData) {
+            setPositionData(response.data.aaData);
+        } else {
             setPositionData([]);
-        } finally {
-            setLoading(false);
         }
-    };
+    } catch (error) {
+        console.error("Error fetching position data:", error);
+        setPositionData([]);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     useEffect(() => {
         fetchPositions();
     }, []);
 
-    const handleSearch = () => {
-        fetchPositions();
-    };
+   const handleSearch = () => {
+    fetchPositions(searchText.trim());
+};
+
+useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+        fetchPositions(searchText.trim());
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounce);
+}, [searchText]);
+
 
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
@@ -143,12 +154,52 @@ const OrderPage = () => {
     };
 
     return (
-        <Box sx={{ p: 0, position: "relative" }}>
-            {/* Body */}
-            {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-                    <CircularProgress />
-                </Box>
+      <Box sx={{ p: 0, position: "relative" }}>
+    {/* 🔍 Search Bar */}
+   <Box sx={{ px: 2, py: 1 }}>
+  {/* 🔍 Search Input */}
+  <TextField
+    fullWidth
+    variant="outlined"
+    placeholder="Search positions..."
+    size="small"
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start" sx={{ mr: 0.5 }}>
+          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
+        </InputAdornment>
+      ),
+    }}
+    sx={{
+      '& .MuiOutlinedInput-root': {
+        borderRadius: 2,
+        height: 36,
+        fontSize: 13,
+        '& fieldset': {
+          borderColor: '#ccc',
+        },
+        '&:hover fieldset': {
+          borderColor: '#666',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: '#000',
+        },
+      },
+      '& input': {
+        py: 0.5,
+      },
+    }}
+  />
+</Box>
+
+
+    {/* Body */}
+    {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <CircularProgress />
+        </Box>
             ) : positionData.length > 0 ? (
                 <>
                     {isMobile ? (
@@ -309,66 +360,77 @@ const OrderPage = () => {
                             })}
                         </>
                     ) : (
-                        <Box
-                            sx={{
-                                overflowX: "auto",
-                                overflowY: "auto",
-                                maxHeight: "400px", // adjust as needed
-                                border: "1px solid #ddd",
-                                borderRadius: "0px",
-                                mx: 1,
-                                scrollbarWidth: "none",
-                                "&::-webkit-scrollbar": {
-                                    display: "none",
-                                },
-                            }}
-                        >
-                            <Table style={{ minWidth: "1350px", fontSize: "12px", margin: 0 }}>
-                                <TableHead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                                    <TableRow>
-                                        <TableCell>Market Type</TableCell>
-                                        <TableCell>Script</TableCell>
-                                        <TableCell>Total Buy</TableCell>
-                                        <TableCell>Buy Avg Rate</TableCell>
-                                        <TableCell>Total Sell</TableCell>
-                                        <TableCell>Sell Avg Rate</TableCell>
-                                        <TableCell>Net Qty</TableCell>
-                                        <TableCell>Last Trade Price</TableCell>
-                                        <TableCell>MTM</TableCell>
-                                        <TableCell>Auto Closed Date</TableCell>
-                                        <TableCell>Close Btn</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {positionData.map((row, index) => {
-                                        const isEven = index % 2 === 0;
-                                        const rowBgColor = theme.palette.mode === "dark"
-                                            ? isEven ? "#2a2a2a" : "#1f1f1f"
-                                            : isEven ? "#f9f9f9" : "#ffffff";
+                      <Box
+  sx={{
+    height: 'calc(100vh - 120px)', // Adjust based on your layout
+    overflow: 'hidden',
+    mx: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }}
+>
+  <Paper
+    sx={{
+      flex: 1,
+      overflow: 'auto',
+      scrollbarWidth: 'none', // Firefox
+      '&::-webkit-scrollbar': {
+        display: 'none', // Chrome, Safari, Edge
+      },
+    }}
+  >
+    <Table stickyHeader sx={{ minWidth: 1350, fontSize: '12px' }}>
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Market Type</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Script</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Total Buy</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Buy Avg Rate</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Total Sell</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Sell Avg Rate</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Net Qty</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Last Trade Price</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>MTM</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Auto Closed Date</TableCell>
+          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Close Btn</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {positionData.map((row, index) => {
+          const isEven = index % 2 === 0;
+          const rowBgColor = theme.palette.mode === "dark"
+            ? isEven ? "#2a2a2a" : "#1f1f1f"
+            : isEven ? "#f9f9f9" : "#ffffff";
 
-                                        return (
-                                            <TableRow key={index} style={{ backgroundColor: rowBgColor }}>
-                                                <TableCell>{row.market_type_name}</TableCell>
-                                                <TableCell><span dangerouslySetInnerHTML={{ __html: row.script_name }} /></TableCell>
-                                                <TableCell>{row.total_buy}</TableCell>
-                                                <TableCell>{row.buy_avg_rate}</TableCell>
-                                                <TableCell>{row.total_sell}</TableCell>
-                                                <TableCell>{row.sell_avg_rate}</TableCell>
-                                                <TableCell>{row.net_qty}</TableCell>
-                                                <TableCell>{row.last_trade_price}</TableCell>
-                                                <TableCell><span dangerouslySetInnerHTML={{ __html: row.mym_html }} /></TableCell>
-                                                <TableCell>{row.trade_auto_closed_date}</TableCell>
-                                                <TableCell>
-                                                    <Button variant="contained" color="error" onClick={() => alert("Close Position")}>
-                                                        Close
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </Box>
+          return (
+            <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
+              <TableCell>{row.market_type_name}</TableCell>
+              <TableCell>
+                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+              </TableCell>
+              <TableCell>{row.total_buy}</TableCell>
+              <TableCell>{row.buy_avg_rate}</TableCell>
+              <TableCell>{row.total_sell}</TableCell>
+              <TableCell>{row.sell_avg_rate}</TableCell>
+              <TableCell>{row.net_qty}</TableCell>
+              <TableCell>{row.last_trade_price}</TableCell>
+              <TableCell>
+                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+              </TableCell>
+              <TableCell>{row.trade_auto_closed_date}</TableCell>
+              <TableCell>
+                <Button variant="contained" color="error" onClick={() => alert("Close Position")}>
+                  Close
+                </Button>
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  </Paper>
+</Box>
+
                     )}
                 </>
             ) : (
