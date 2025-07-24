@@ -293,7 +293,7 @@ const MobileStockTable = ({
                     const time = new Date(stock.time).toLocaleString();
 
                     if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
-                        return false;
+                        return <></>;
                     }
 
                     const isQty = stock.qty > 0 ? true : false;

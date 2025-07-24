@@ -47,6 +47,18 @@ export const Ledger = loadable(() =>
   import('./Dashboard/Ledger'), {
   fallback: <Loading />,
 });
+export const EditDeleteLogs = loadable(() =>
+  import('./Dashboard/EditDeleteLogs'), {
+  fallback: <Loading />,
+});
+export const OrderBook = loadable(() =>
+  import('./Dashboard/OrderBook'), {
+  fallback: <Loading />,
+});
+export const Positions = loadable(() =>
+  import('./Dashboard/Positions'), {
+  fallback: <Loading />,
+});
 
 // Widgets
 export const Infographics = loadable(() =>

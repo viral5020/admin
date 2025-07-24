@@ -808,8 +808,8 @@ function PersonalDashboard() {
   }, [positionDialogOpen]);
 
   useEffect(() => {
-  setExpanded(false); // collapse trades on new selection
-}, [selectedRow]);
+    setExpanded(false); // collapse trades on new selection
+  }, [selectedRow]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -1629,318 +1629,317 @@ function PersonalDashboard() {
 
             {/* Slide-up panel inside dialog */}
             {/* --- Drawer Panel Inside Dialog --- */}
- {drawerOpen && (
-  <>
-    <Slide
-      direction="up"
-      in={drawerOpen}
-      mountOnEnter
-      unmountOnExit
-      onExited={() => {
-        setExpanded(false); // optional reset of expanded state
-      }}
-    >
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          bgcolor: "background.paper",
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
-          boxShadow: "0px -8px 30px rgba(0, 0, 0, 0.3)",
-          p: 2,
-          maxHeight: "85vh",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 1400,
-        }}
-      >
-        {/* Fixed Header */}
-        <Box sx={{ flexShrink: 0 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-              <Avatar
-                alt={selectedRow?.script_name?.replace(/<\/?[^>]+(>|$)/g, "")}
-                src="/path-to-your-logo.png"
-                variant="square"
-                sx={{ width: 50, height: 50, mr: 1, flexShrink: 0 }}
-              />
-              <Typography
-                variant="h6"
-                fontWeight={700}
-                dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
-                sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-              />
-            </Box>
-            <IconButton size="large" onClick={handleDrawerClose}>
-              <ArrowDropDownIcon />
-            </IconButton>
-          </Box>
-
-          {/* Summary Info */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Total Buy</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Total Sell</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Buy Avg Rate</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Sell Avg Rate</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Market Type</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.market_type_name}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">Net Qty</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">LTP</Typography>
-              <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 22%" }}>
-              <Typography variant="caption">MTM</Typography>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
-              />
-            </Box>
-          </Box>
-
-          <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-            <Typography variant="caption">Auto Closed Date</Typography>
-            <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
-          </Box>
-
-          {/* Action Buttons */}
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              fullWidth
-              sx={{
-                background: "linear-gradient(135deg, #0d47a1, #1565c0)",
-                color: "#fff",
-                borderRadius: "6px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                boxShadow: "0 4px 10px rgba(13, 71, 161, 0.4)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.03)",
-                  boxShadow: "0 6px 16px rgba(13, 71, 161, 0.6)",
-                  background: "linear-gradient(135deg, #0b3c91, #0d47a1)",
-                },
-              }}
-              onClick={handleViewTradesClick}
-            >
-              {expanded ? "Hide Trades" : "View Trades"}
-            </Button>
-
-            <Button
-              fullWidth
-              sx={{
-                background: "linear-gradient(135deg, #b71c1c, #c62828)",
-                color: "#fff",
-                borderRadius: "6px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.03)",
-                  boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
-                  background: "linear-gradient(135deg, #8e0000, #b71c1c)",
-                },
-              }}
-              onClick={() => alert("Close Position")}
-            >
-              Close Position
-            </Button>
-          </Box>
-        </Box>
-
-        {/* Scrollable Trades */}
-        {expanded && (
-          <Fade in={expanded} timeout={600}>
-            <Box
-              sx={{
-                mt: 2,
-                overflowY: "auto",
-                maxHeight: "60vh",
-                pr: 1,
-              }}
-            >
-              {loadingTrades ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "150px",
+            {drawerOpen && (
+              <>
+                <Slide
+                  direction="up"
+                  in={drawerOpen}
+                  mountOnEnter
+                  unmountOnExit
+                  onExited={() => {
+                    setExpanded(false); // optional reset of expanded state
                   }}
                 >
-                  <CircularProgress size={32} thickness={4} />
-                </Box>
-              ) : tradesData.length > 0 ? (
-                tradesData.map((item, index) => {
-                  const [mainName, subName] = item.scrp_name.split(" ", 2);
-                  const cleanRate = item.trd_rate?.split("(")[0].trim();
-                  const isBuy = item.trd_type === "Buy";
-                  const isSell = item.trd_type === "Sell";
+                  <Box
+                    sx={{
+                      position: "fixed",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      width: "100%",
+                      bgcolor: "background.paper",
+                      borderTopLeftRadius: 16,
+                      borderTopRightRadius: 16,
+                      boxShadow: "0px -8px 30px rgba(0, 0, 0, 0.3)",
+                      p: 2,
+                      maxHeight: "85vh",
+                      display: "flex",
+                      flexDirection: "column",
+                      zIndex: 1400,
+                    }}
+                  >
+                    {/* Fixed Header */}
+                    <Box sx={{ flexShrink: 0 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 1,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                          <Avatar
+                            alt={selectedRow?.script_name?.replace(/<\/?[^>]+(>|$)/g, "")}
+                            src="/path-to-your-logo.png"
+                            variant="square"
+                            sx={{ width: 50, height: 50, mr: 1, flexShrink: 0 }}
+                          />
+                          <Typography
+                            variant="h6"
+                            fontWeight={700}
+                            dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
+                            sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                          />
+                        </Box>
+                        <IconButton size="large" onClick={handleDrawerClose}>
+                          <ArrowDropDownIcon />
+                        </IconButton>
+                      </Box>
 
-                  const borderGradient = isBuy
-                    ? "linear-gradient(to right, #1976d2, #0d47a1)"
-                    : isSell
-                      ? "linear-gradient(to right, #c62828, #b71c1c)"
-                      : "#ccc";
+                      {/* Summary Info */}
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Total Buy</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Total Sell</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Buy Avg Rate</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Sell Avg Rate</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
+                        </Box>
+                      </Box>
 
-                  const boxShadowColor = isBuy
-                    ? "rgba(25, 118, 210, 0.3)"
-                    : isSell
-                      ? "rgba(198, 40, 40, 0.3)"
-                      : "rgba(0,0,0,0.1)";
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Market Type</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.market_type_name}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">Net Qty</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">LTP</Typography>
+                          <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
+                        </Box>
+                        <Box sx={{ flex: "1 1 22%" }}>
+                          <Typography variant="caption">MTM</Typography>
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
+                          />
+                        </Box>
+                      </Box>
 
-                  return (
-                    <Card
-                      key={item.trd_id || index}
-                      sx={{
-                        mb: 1,
-                        borderRadius: 2,
-                        position: "relative",
-                        border: "1px solid transparent",
-                        backgroundImage: (theme) =>
-                          `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${
-                            theme.palette.mode === "dark" ? "#333" : "#fff"
-                          }), ${borderGradient}`,
-                        backgroundOrigin: "border-box",
-                        backgroundClip: "content-box, border-box",
-                        boxShadow: `0 4px 12px ${boxShadowColor}`,
-                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                        "&:hover": {
-                          transform: "scale(1.02)",
-                          boxShadow: `0 8px 20px ${boxShadowColor}`,
-                        },
-                      }}
-                    >
-                      {item.is_hot && (
+                      <Box sx={{ flex: "1 1 100%", mb: 2 }}>
+                        <Typography variant="caption">Auto Closed Date</Typography>
+                        <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
+                      </Box>
+
+                      {/* Action Buttons */}
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button
+                          fullWidth
+                          sx={{
+                            background: "linear-gradient(135deg, #0d47a1, #1565c0)",
+                            color: "#fff",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            boxShadow: "0 4px 10px rgba(13, 71, 161, 0.4)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.03)",
+                              boxShadow: "0 6px 16px rgba(13, 71, 161, 0.6)",
+                              background: "linear-gradient(135deg, #0b3c91, #0d47a1)",
+                            },
+                          }}
+                          onClick={handleViewTradesClick}
+                        >
+                          {expanded ? "Hide Trades" : "View Trades"}
+                        </Button>
+
+                        <Button
+                          fullWidth
+                          sx={{
+                            background: "linear-gradient(135deg, #b71c1c, #c62828)",
+                            color: "#fff",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.03)",
+                              boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
+                              background: "linear-gradient(135deg, #8e0000, #b71c1c)",
+                            },
+                          }}
+                          onClick={() => alert("Close Position")}
+                        >
+                          Close Position
+                        </Button>
+                      </Box>
+                    </Box>
+
+                    {/* Scrollable Trades */}
+                    {expanded && (
+                      <Fade in={expanded} timeout={600}>
                         <Box
                           sx={{
-                            position: "absolute",
-                            top: 0,
-                            right: 0,
-                            backgroundColor: "gold",
-                            color: "#000",
-                            fontSize: "0.7em",
-                            px: 1,
-                            py: 0.3,
-                            borderBottomLeftRadius: 4,
-                            fontWeight: 700,
+                            mt: 2,
+                            overflowY: "auto",
+                            maxHeight: "60vh",
+                            pr: 1,
                           }}
                         >
-                          HOT
-                        </Box>
-                      )}
-
-                      <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                            {mainName}{" "}
-                            <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
-                          </Typography>
-                          <Typography variant="caption">ID: #{item.trd_id}</Typography>
-                        </Box>
-
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                              variant="body2"
-                              component="span"
-                              dangerouslySetInnerHTML={{ __html: item.device_type_html }}
-                              sx={{ mr: 0.3 }}
-                            />
-                            <Typography
-                              variant="body2"
+                          {loadingTrades ? (
+                            <Box
                               sx={{
-                                color: isBuy ? "#1976d2" : isSell ? "#c62828" : "#000",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
                                 display: "flex",
+                                justifyContent: "center",
                                 alignItems: "center",
+                                height: "150px",
                               }}
                             >
-                              {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
-                              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
-                                {item.trd_type2}
-                              </span>
-                            </Typography>
-                          </Box>
+                              <CircularProgress size={32} thickness={4} />
+                            </Box>
+                          ) : tradesData.length > 0 ? (
+                            tradesData.map((item, index) => {
+                              const [mainName, subName] = item.scrp_name.split(" ", 2);
+                              const cleanRate = item.trd_rate?.split("(")[0].trim();
+                              const isBuy = item.trd_type === "Buy";
+                              const isSell = item.trd_type === "Sell";
 
-                          <Typography variant="body2">
-                            ({item.trd_lot}) {item.actual_lot_qty} @{" "}
-                            <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
-                              {cleanRate}
-                            </span>
-                          </Typography>
+                              const borderGradient = isBuy
+                                ? "linear-gradient(to right, #1976d2, #0d47a1)"
+                                : isSell
+                                  ? "linear-gradient(to right, #c62828, #b71c1c)"
+                                  : "#ccc";
+
+                              const boxShadowColor = isBuy
+                                ? "rgba(25, 118, 210, 0.3)"
+                                : isSell
+                                  ? "rgba(198, 40, 40, 0.3)"
+                                  : "rgba(0,0,0,0.1)";
+
+                              return (
+                                <Card
+                                  key={item.trd_id || index}
+                                  sx={{
+                                    mb: 1,
+                                    borderRadius: 2,
+                                    position: "relative",
+                                    border: "1px solid transparent",
+                                    backgroundImage: (theme) =>
+                                      `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"
+                                      }), ${borderGradient}`,
+                                    backgroundOrigin: "border-box",
+                                    backgroundClip: "content-box, border-box",
+                                    boxShadow: `0 4px 12px ${boxShadowColor}`,
+                                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                                    "&:hover": {
+                                      transform: "scale(1.02)",
+                                      boxShadow: `0 8px 20px ${boxShadowColor}`,
+                                    },
+                                  }}
+                                >
+                                  {item.is_hot && (
+                                    <Box
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        backgroundColor: "gold",
+                                        color: "#000",
+                                        fontSize: "0.7em",
+                                        px: 1,
+                                        py: 0.3,
+                                        borderBottomLeftRadius: 4,
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      HOT
+                                    </Box>
+                                  )}
+
+                                  <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                        {mainName}{" "}
+                                        <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
+                                      </Typography>
+                                      <Typography variant="caption">ID: #{item.trd_id}</Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                                        <Typography
+                                          variant="body2"
+                                          component="span"
+                                          dangerouslySetInnerHTML={{ __html: item.device_type_html }}
+                                          sx={{ mr: 0.3 }}
+                                        />
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            color: isBuy ? "#1976d2" : isSell ? "#c62828" : "#000",
+                                            fontWeight: 700,
+                                            textTransform: "uppercase",
+                                            display: "flex",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
+                                          <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
+                                            {item.trd_type2}
+                                          </span>
+                                        </Typography>
+                                      </Box>
+
+                                      <Typography variant="body2">
+                                        ({item.trd_lot}) {item.actual_lot_qty} @{" "}
+                                        <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
+                                          {cleanRate}
+                                        </span>
+                                      </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                      <Typography variant="caption">{item.trd_time}</Typography>
+                                      <Typography variant="caption">
+                                        Commission:{" "}
+                                        <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
+                                      </Typography>
+                                    </Box>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })
+                          ) : (
+                            <Typography variant="body2">No trades found</Typography>
+                          )}
                         </Box>
+                      </Fade>
+                    )}
+                  </Box>
+                </Slide>
 
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography variant="caption">{item.trd_time}</Typography>
-                          <Typography variant="caption">
-                            Commission:{" "}
-                            <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
-                          </Typography>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              ) : (
-                <Typography variant="body2">No trades found</Typography>
-              )}
-            </Box>
-          </Fade>
-        )}
-      </Box>
-    </Slide>
-
-    {/* Backdrop */}
-    <Box
-      onClick={handleDrawerClose}
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backdropFilter: "blur(5px)",
-        backgroundColor: "rgba(0,0,0,0.2)",
-        zIndex: 1200,
-      }}
-    />
-  </>
-)}
+                {/* Backdrop */}
+                <Box
+                  onClick={handleDrawerClose}
+                  sx={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backdropFilter: "blur(5px)",
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    zIndex: 1200,
+                  }}
+                />
+              </>
+            )}
 
 
 
@@ -2315,360 +2314,360 @@ function PersonalDashboard() {
             />
           </Box>
         </Grid>
-   <Dialog
-  open={rejectionDialogOpen}
-  fullScreen={isMobile}
-  onClose={(event, reason) => {
-    if (reason !== "backdropClick") {
-      setrejectionDialogOpen(false);
-    }
-  }}
-  fullWidth
-  maxWidth="xl"
-  disableEscapeKeyDown
-  PaperProps={{
-    sx: {
-      overflow: "hidden",
-      maxHeight: isMobile ? "100vh" : "90vh",
-      overflowY: "auto",
-    },
-  }}
->
-  <Box sx={{ p: 0 }}>
-    {/* Header */}
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        px: 3,
-        py: 1,
-        backdropFilter: "blur(6px)",
-        background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-        color: "#fff",
-        width: "100%",
-        borderTopLeftRadius: "8px",
-        borderTopRightRadius: "8px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-        position: "relative",
-      }}
-    >
-      <Typography
-        variant="h6"
-        fontWeight={800}
-        sx={{
-          textTransform: "uppercase",
-          letterSpacing: 1.5,
-          fontSize: "1rem",
-          display: "flex",
-          alignItems: "center",
-          textShadow: "0 0 6px rgba(33,203,243,0.9)",
-        }}
-      >
-        <ReportIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-        Rejection Logs
-      </Typography>
-
-      <IconButton
-        size="small"
-        sx={{
-          color: "#fff",
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
-          borderRadius: "50%",
-          "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
-          },
-        }}
-        onClick={() => setrejectionDialogOpen(false)}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </Box>
-
-    {/* Filter + Search */}
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        px: 1,
-        py: 1,
-        backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
-        borderRadius: 1,
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-        <FormControl
-          size="small"
-          sx={{
-            minWidth: 120,
-            "& .MuiOutlinedInput-root": {
-              height: 26,
-              "& fieldset": {
-                borderColor: "black",
-              },
-              "&:hover fieldset": {
-                borderColor: "black",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "black",
-              },
+        <Dialog
+          open={rejectionDialogOpen}
+          fullScreen={isMobile}
+          onClose={(event, reason) => {
+            if (reason !== "backdropClick") {
+              setrejectionDialogOpen(false);
+            }
+          }}
+          fullWidth
+          maxWidth="xl"
+          disableEscapeKeyDown
+          PaperProps={{
+            sx: {
+              overflow: "hidden",
+              maxHeight: isMobile ? "100vh" : "90vh",
+              overflowY: "auto",
             },
           }}
         >
-          <InputLabel>Filter</InputLabel>
-          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} label="Filter">
-            <MenuItem value="today">Today</MenuItem>
-            <MenuItem value="total">Total</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField
-          size="small"
-          placeholder="Search logs"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          fullWidth
-          sx={{
-            ml: 1,
-            "& .MuiOutlinedInput-root": {
-              height: 26,
-              "& fieldset": {
-                borderColor: "black",
-              },
-              "&:hover fieldset": {
-                borderColor: "black",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "black",
-              },
-            },
-          }}
-        />
-      </Box>
-    </Box>
-
-    {/* Content */}
-    {loading ? (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-        <CircularProgress size={24} />
-      </Box>
-    ) : filteredLogs.length === 0 ? (
-      <Typography sx={{ fontSize: "14px", px: 1 }}>
-        No rejection logs found.
-      </Typography>
-    ) : isMobile ? (
-      <>
-        {visibleMobileLogs.map((log, index) => {
-          const isBuy = log.trade_type === "Buy";
-          const isSell = log.trade_type === "Sell";
-
-          const borderGradient = isBuy
-            ? "linear-gradient(to right, #2196f3, #21cbf3)"
-            : isSell
-              ? "linear-gradient(to right, #f44336, #ff7961)"
-              : "#ccc";
-
-          const boxShadowColor = isBuy
-            ? "rgba(33, 150, 243, 0.3)"
-            : isSell
-              ? "rgba(244, 67, 54, 0.3)"
-              : "rgba(0,0,0,0.1)";
-
-          return (
-            <Card
-              key={index}
+          <Box sx={{ p: 0 }}>
+            {/* Header */}
+            <Box
               sx={{
-                mb: 1,
-                mx: 1,
-                borderRadius: 2,
-                border: "1px solid transparent",
-                backgroundImage: (theme) =>
-                  `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
-                backgroundOrigin: "border-box",
-                backgroundClip: "content-box, border-box",
-                boxShadow: `0 4px 12px ${boxShadowColor}`,
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                  boxShadow: `0 8px 20px ${boxShadowColor}`,
-                },
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 3,
+                py: 1,
+                backdropFilter: "blur(6px)",
+                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                color: "#fff",
+                width: "100%",
+                borderTopLeftRadius: "8px",
+                borderTopRightRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                position: "relative",
               }}
             >
-              <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    {log.trade_rate} &nbsp;
-                    {log.trade_qty} Qty&nbsp;
-                    <span style={{ fontWeight: 400 }}>{log.trade_lot} Lot</span>
-                  </Typography>
-                  <Typography variant="caption" sx={{ fontStyle: "italic" }}>
-                    {log.datetime}
-                  </Typography>
-                </Box>
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{
+                  textTransform: "uppercase",
+                  letterSpacing: 1.5,
+                  fontSize: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
+                }}
+              >
+                <ReportIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+                Rejection Logs
+              </Typography>
 
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 700,
-                      color: isSell
-                        ? "#f44336"
-                        : isBuy
-                          ? "#2196f3"
-                          : "inherit",
-                    }}
-                  >
-                    {log.trade_type}
-                    <span style={{ fontWeight: 400, marginLeft: 4 }}>({log.type})</span>
-                  </Typography>
-                  <Typography variant="body2">{log.full_name}</Typography>
-                </Box>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "50%",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+                onClick={() => setrejectionDialogOpen(false)}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
-                <Typography
-                  variant="body2"
+            {/* Filter + Search */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 1,
+                py: 1,
+                backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
+                borderRadius: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                <FormControl
+                  size="small"
                   sx={{
-                    fontWeight: 600,
-                    color: "#d32f2f",
+                    minWidth: 120,
+                    "& .MuiOutlinedInput-root": {
+                      height: 26,
+                      "& fieldset": {
+                        borderColor: "black",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "black",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "black",
+                      },
+                    },
                   }}
                 >
-                  {log.log_message}
-                </Typography>
-              </CardContent>
-            </Card>
-          );
-        })}
+                  <InputLabel>Filter</InputLabel>
+                  <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} label="Filter">
+                    <MenuItem value="today">Today</MenuItem>
+                    <MenuItem value="total">Total</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  size="small"
+                  placeholder="Search logs"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  fullWidth
+                  sx={{
+                    ml: 1,
+                    "& .MuiOutlinedInput-root": {
+                      height: 26,
+                      "& fieldset": {
+                        borderColor: "black",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "black",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "black",
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
 
-        {visibleLogCount < filteredLogs.length && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-            <Button variant="outlined" size="small" onClick={handleRejectionLoadMore}>
-              Load More
-            </Button>
-          </Box>
-        )}
-      </>
-    ) : (
-      <>
-        <Box
-          sx={{
-            overflowX: "auto",
-            overflowY: "auto",
-            maxHeight: "400px",
-            border: "1px solid #ddd",
-            borderRadius: "0px",
-            mx: 1,
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-          }}
-        >
-          <table
-            className="table table-striped table-bordered"
-            style={{
-              minWidth: "1400px",
-              fontSize: "12px",
-              margin: 0,
-              backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-              color: theme.palette.mode === "dark" ? "#fff" : "#000",
-            }}
-          >
-            <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-              <tr>
-                {["Type", "Datetime", "Client", "Script", "Trade Type", "Lot", "Qty", "Rate", "Message"].map((header) => (
-                  <th key={header} style={{ fontWeight: 600 }}>
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedLogs.map((log, index) => {
-                let bgColor =
-                  log.trade_type === "Buy"
-                    ? theme.palette.mode === "dark"
-                      ? "#264653"
-                      : "#e0f7fa"
-                    : log.trade_type === "Sell"
-                      ? theme.palette.mode === "dark"
-                        ? "#6d2c41"
-                        : "#fce4ec"
-                      : theme.palette.mode === "dark"
-                        ? "#333"
-                        : "#f5f5f5";
+            {/* Content */}
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : filteredLogs.length === 0 ? (
+              <Typography sx={{ fontSize: "14px", px: 1 }}>
+                No rejection logs found.
+              </Typography>
+            ) : isMobile ? (
+              <>
+                {visibleMobileLogs.map((log, index) => {
+                  const isBuy = log.trade_type === "Buy";
+                  const isSell = log.trade_type === "Sell";
 
-                return (
-                  <tr key={index} style={{ backgroundColor: bgColor }}>
-                    <td>{log.type}</td>
-                    <td>{log.datetime}</td>
-                    <td>{log.full_name}</td>
-                    <td>{log.script_name}</td>
-                    <td>{log.trade_type}</td>
-                    <td>{log.trade_lot}</td>
-                    <td>{log.trade_qty}</td>
-                    <td>{log.trade_rate}</td>
-                    <td>{log.log_message}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Box>
+                  const borderGradient = isBuy
+                    ? "linear-gradient(to right, #2196f3, #21cbf3)"
+                    : isSell
+                      ? "linear-gradient(to right, #f44336, #ff7961)"
+                      : "#ccc";
 
-        {/* Pagination */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-            <Button
-              size="small"
-              disabled={logCurrentPage === 0}
-              onClick={() => setLogCurrentPage((prev) => prev - 1)}
-              color="secondary"
-              sx={{ mr: 1 }}
-            >
-              Prev
-            </Button>
+                  const boxShadowColor = isBuy
+                    ? "rgba(33, 150, 243, 0.3)"
+                    : isSell
+                      ? "rgba(244, 67, 54, 0.3)"
+                      : "rgba(0,0,0,0.1)";
 
-            {[...Array(logTotalPages)].map((_, i) => {
-              if (i === 0 || i === logTotalPages - 1 || (i >= logCurrentPage - 1 && i <= logCurrentPage + 1)) {
-                return (
-                  <Button
-                    key={i}
-                    size="small"
-                    variant={i === logCurrentPage ? "contained" : "outlined"}
-                    color="secondary"
-                    onClick={() => setLogCurrentPage(i)}
-                    sx={{ mx: 0.3, minWidth: "30px" }}
+                  return (
+                    <Card
+                      key={index}
+                      sx={{
+                        mb: 1,
+                        mx: 1,
+                        borderRadius: 2,
+                        border: "1px solid transparent",
+                        backgroundImage: (theme) =>
+                          `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
+                        backgroundOrigin: "border-box",
+                        backgroundClip: "content-box, border-box",
+                        boxShadow: `0 4px 12px ${boxShadowColor}`,
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.02)",
+                          boxShadow: `0 8px 20px ${boxShadowColor}`,
+                        },
+                      }}
+                    >
+                      <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                            {log.trade_rate} &nbsp;
+                            {log.trade_qty} Qty&nbsp;
+                            <span style={{ fontWeight: 400 }}>{log.trade_lot} Lot</span>
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontStyle: "italic" }}>
+                            {log.datetime}
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 700,
+                              color: isSell
+                                ? "#f44336"
+                                : isBuy
+                                  ? "#2196f3"
+                                  : "inherit",
+                            }}
+                          >
+                            {log.trade_type}
+                            <span style={{ fontWeight: 400, marginLeft: 4 }}>({log.type})</span>
+                          </Typography>
+                          <Typography variant="body2">{log.full_name}</Typography>
+                        </Box>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: "#d32f2f",
+                          }}
+                        >
+                          {log.log_message}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
+                {visibleLogCount < filteredLogs.length && (
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                    <Button variant="outlined" size="small" onClick={handleRejectionLoadMore}>
+                      Load More
+                    </Button>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <>
+                <Box
+                  sx={{
+                    overflowX: "auto",
+                    overflowY: "auto",
+                    maxHeight: "400px",
+                    border: "1px solid #ddd",
+                    borderRadius: "0px",
+                    mx: 1,
+                    scrollbarWidth: "none",
+                    "&::-webkit-scrollbar": {
+                      display: "none",
+                    },
+                  }}
+                >
+                  <table
+                    className="table table-striped table-bordered"
+                    style={{
+                      minWidth: "1400px",
+                      fontSize: "12px",
+                      margin: 0,
+                      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    }}
                   >
-                    {i + 1}
-                  </Button>
-                );
-              }
+                    <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                      <tr>
+                        {["Type", "Datetime", "Client", "Script", "Trade Type", "Lot", "Qty", "Rate", "Message"].map((header) => (
+                          <th key={header} style={{ fontWeight: 600 }}>
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedLogs.map((log, index) => {
+                        let bgColor =
+                          log.trade_type === "Buy"
+                            ? theme.palette.mode === "dark"
+                              ? "#264653"
+                              : "#e0f7fa"
+                            : log.trade_type === "Sell"
+                              ? theme.palette.mode === "dark"
+                                ? "#6d2c41"
+                                : "#fce4ec"
+                              : theme.palette.mode === "dark"
+                                ? "#333"
+                                : "#f5f5f5";
 
-              if ((i === 1 && logCurrentPage > 2) || (i === logTotalPages - 2 && logCurrentPage < logTotalPages - 3)) {
-                return (
-                  <Typography key={i} sx={{ mx: 0.5 }}>
-                    ...
-                  </Typography>
-                );
-              }
+                        return (
+                          <tr key={index} style={{ backgroundColor: bgColor }}>
+                            <td>{log.type}</td>
+                            <td>{log.datetime}</td>
+                            <td>{log.full_name}</td>
+                            <td>{log.script_name}</td>
+                            <td>{log.trade_type}</td>
+                            <td>{log.trade_lot}</td>
+                            <td>{log.trade_qty}</td>
+                            <td>{log.trade_rate}</td>
+                            <td>{log.log_message}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </Box>
 
-              return null;
-            })}
+                {/* Pagination */}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <Button
+                      size="small"
+                      disabled={logCurrentPage === 0}
+                      onClick={() => setLogCurrentPage((prev) => prev - 1)}
+                      color="secondary"
+                      sx={{ mr: 1 }}
+                    >
+                      Prev
+                    </Button>
 
-            <Button
-              size="small"
-              disabled={logCurrentPage + 1 >= logTotalPages}
-              onClick={() => setLogCurrentPage((prev) => prev + 1)}
-              color="secondary"
-              sx={{ ml: 1 }}
-            >
-              Next
-            </Button>
+                    {[...Array(logTotalPages)].map((_, i) => {
+                      if (i === 0 || i === logTotalPages - 1 || (i >= logCurrentPage - 1 && i <= logCurrentPage + 1)) {
+                        return (
+                          <Button
+                            key={i}
+                            size="small"
+                            variant={i === logCurrentPage ? "contained" : "outlined"}
+                            color="secondary"
+                            onClick={() => setLogCurrentPage(i)}
+                            sx={{ mx: 0.3, minWidth: "30px" }}
+                          >
+                            {i + 1}
+                          </Button>
+                        );
+                      }
+
+                      if ((i === 1 && logCurrentPage > 2) || (i === logTotalPages - 2 && logCurrentPage < logTotalPages - 3)) {
+                        return (
+                          <Typography key={i} sx={{ mx: 0.5 }}>
+                            ...
+                          </Typography>
+                        );
+                      }
+
+                      return null;
+                    })}
+
+                    <Button
+                      size="small"
+                      disabled={logCurrentPage + 1 >= logTotalPages}
+                      onClick={() => setLogCurrentPage((prev) => prev + 1)}
+                      color="secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      Next
+                    </Button>
+                  </Box>
+                </Box>
+              </>
+            )}
           </Box>
-        </Box>
-      </>
-    )}
-  </Box>
-</Dialog>
+        </Dialog>
 
 
 

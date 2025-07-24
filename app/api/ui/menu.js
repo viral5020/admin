@@ -226,13 +226,31 @@ module.exports = [
     key: 'crypto',
     name: 'Watchlist',
     link: '/app/dashboard/watchlist',
-    icon: 'medal-outline'
+    icon: 'list-outline'
   },
   {
     key: 'ledger',
     name: 'Ledger',
     link: '/app/ledger',
-    icon: 'medal-outline'
+    icon: 'time-outline'
+  },
+  {
+    key: 'editDeleteLogs',
+    name: 'Edit Delete',
+    link: '/app/dashboard/edit-Delete-Logs',
+    icon: 'create-outline'
+  },
+  {
+    key: 'orderBook',
+    name: 'Order Book',
+    link: '/app/dashboard/order-Book',
+    icon: 'create-outline'
+  },
+  {
+    key: 'positions',
+    name: 'Positions',
+    link: '/app/dashboard/positions',
+    icon: 'create-outline'
   },
   {
     key: 'login2',
