@@ -84,21 +84,41 @@ const EditDeleteLogs = () => {
                 <Box
                     sx={{
                         display: 'flex',
-                        justifyContent: 'end',
-                        alignItems: 'center',
-                        mb: isMobile ? 1 : 0,
-                        mx: 1,
-                        flexWrap: 'wrap',
                         gap: 2,
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 2.5,
+                        mx: 1,
+                        flexWrap: 'nowrap', // ensures everything stays on one line
                     }}
                 >
+                    {!isMobile && (
+                        <TextField
+                            select
+                            label="Rows per page"
+                            value={pageSize}
+                            onChange={(e) => {
+                                setPageSize(Number(e.target.value));
+                                setCurrentPage(0);
+                            }}
+                            size="small"
+                            sx={{ width: 150, flexShrink: 0 }}
+                        >
+                            {[10, 25, 50].map((option) => (
+                                <MenuItem key={option} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    )}
+
                     <TextField
                         variant="outlined"
                         placeholder="Search logs..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         size="small"
-                        sx={{ maxWidth: 300 }}
+                        sx={{ flex: 1, minWidth: 200 }} // takes all available space
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
@@ -108,6 +128,11 @@ const EditDeleteLogs = () => {
                         }}
                     />
                 </Box>
+
+
+                {logs.length === 0 && !loading && (
+                    <Typography textAlign='center'>No Logs Found</Typography>
+                )}
 
                 {/* Table */}
                 {loading ? (
@@ -320,25 +345,6 @@ const EditDeleteLogs = () => {
                                 Next
                             </Button>
                         </Box>
-
-                        {/* Page Size */}
-                        <TextField
-                            select
-                            label="Rows per page"
-                            value={pageSize}
-                            onChange={(e) => {
-                                setPageSize(Number(e.target.value));
-                                setCurrentPage(0);
-                            }}
-                            size="small"
-                            sx={{ width: 150 }}
-                        >
-                            {[10, 25, 50].map((option) => (
-                                <MenuItem key={option} value={option}>
-                                    {option}
-                                </MenuItem>
-                            ))}
-                        </TextField>
                     </Box>) : (
                     // Mobile: Load More button
                     logs.length < totalRecords && (
