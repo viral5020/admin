@@ -194,7 +194,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
             }, {
                 label: 'Strike', value: strike, onChange: setStrike, options: ['Demo Option 1', 'Demo Option 2']
             }].map(({ label, value, onChange, options }) => (
-                <Grid item xs={12} sm={6} md={2.4} key={label} >
+                <Grid item xs={12} sm={6} md={2.4} key={label}>
                     <Autocomplete
                         value={value}
                         onChange={(_, newValue) => onChange(newValue)}
@@ -204,7 +204,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                         inputValue={value}
                         onInputChange={(_, newInputValue) => onChange(newInputValue)}
                         renderOption={(props, option) => {
-                            const isMatch = String(option).toLowerCase() === value.toLowerCase();
+                            const isMatch = String(option)?.toLowerCase() === value?.toLowerCase();
 
                             return (
                                 <li {...props}
@@ -327,36 +327,6 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
                                 ),
                             }}
                         />
-
-                        {/* {isMobile && (
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<AddSharpIcon sx={{ position: 'relative', left: '4px' }} />}
-                                // onClick={() => setFilterOpen(true)}
-                                sx={{
-                                    backgroundColor: isDarkMode ? '#1B5E2044' : '#E8F5E944',
-                                    borderColor: isDarkMode ? '#66BB6A' : '#4CAF50',
-                                    color: isDarkMode ? '#C8E6C9' : '#388E3C',
-                                    borderRadius: '20px',
-                                    px: 0,
-                                    py: 0,
-                                    minHeight: '10px',
-                                    minWidth: '39px', 
-                                    '& .MuiButton-startIcon': {
-                                        marginRight: '6px', // Adjust icon spacing if needed
-                                    },
-                                    '&:hover': {
-                                        // backgroundColor: isDarkMode ? '#2E7D32' : '#C8E6C9',
-                                        borderColor: isDarkMode ? '#81C784' : '#66BB6A',
-                                        color: isDarkMode ? '#E8F5E9' : '#2E7D32',
-                                    },
-                                }}
-                            >
-                            </Button>
-
-                        )} */}
-
                     </Box>
                 </Grid>
             </Grid>

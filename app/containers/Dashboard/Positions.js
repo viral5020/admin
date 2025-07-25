@@ -103,49 +103,49 @@ const OrderPage = () => {
         }
     };
 
-  const fetchPositions = async (search = "") => {
-    setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-        const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            sEcho: 1,
-            iDisplayStart: 0,
-            iDisplayLength: 10,
-            sSearch: search,
-        });
+    const fetchPositions = async (search = "") => {
+        setLoading(true);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        try {
+            const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
+                is_app: "1",
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                sEcho: 1,
+                iDisplayStart: 0,
+                iDisplayLength: 10,
+                sSearch: search,
+            });
 
-        if (response.data && response.data.aaData) {
-            setPositionData(response.data.aaData);
-        } else {
+            if (response.data && response.data.aaData) {
+                setPositionData(response.data.aaData);
+            } else {
+                setPositionData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching position data:", error);
             setPositionData([]);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error("Error fetching position data:", error);
-        setPositionData([]);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
     useEffect(() => {
         fetchPositions();
     }, []);
 
-   const handleSearch = () => {
-    fetchPositions(searchText.trim());
-};
-
-useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    const handleSearch = () => {
         fetchPositions(searchText.trim());
-    }, 500); // 500ms debounce
+    };
 
-    return () => clearTimeout(delayDebounce);
-}, [searchText]);
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            fetchPositions(searchText.trim());
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(delayDebounce);
+    }, [searchText]);
 
 
     const handleViewTradesClick = () => {
@@ -154,52 +154,52 @@ useEffect(() => {
     };
 
     return (
-      <Box sx={{ p: 0, position: "relative" }}>
-    {/* 🔍 Search Bar */}
-   <Box sx={{ px: 2, py: 1 }}>
-  {/* 🔍 Search Input */}
-  <TextField
-    fullWidth
-    variant="outlined"
-    placeholder="Search positions..."
-    size="small"
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start" sx={{ mr: 0.5 }}>
-          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
-        </InputAdornment>
-      ),
-    }}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-        height: 36,
-        fontSize: 13,
-        '& fieldset': {
-          borderColor: '#ccc',
-        },
-        '&:hover fieldset': {
-          borderColor: '#666',
-        },
-        '&.Mui-focused fieldset': {
-          borderColor: '#000',
-        },
-      },
-      '& input': {
-        py: 0.5,
-      },
-    }}
-  />
-</Box>
+        <Box sx={{ p: 0, position: "relative" }}>
+            {/* 🔍 Search Bar */}
+            <Box sx={{ px: 2, py: 1 }}>
+                {/* 🔍 Search Input */}
+                <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Search positions..."
+                    size="small"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                                <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            height: 36,
+                            fontSize: 13,
+                            '& fieldset': {
+                                borderColor: '#ccc',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: '#666',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#000',
+                            },
+                        },
+                        '& input': {
+                            py: 0.5,
+                        },
+                    }}
+                />
+            </Box>
 
 
-    {/* Body */}
-    {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-            <CircularProgress />
-        </Box>
+            {/* Body */}
+            {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+                    <CircularProgress />
+                </Box>
             ) : positionData.length > 0 ? (
                 <>
                     {isMobile ? (
@@ -360,76 +360,125 @@ useEffect(() => {
                             })}
                         </>
                     ) : (
-                      <Box
-  sx={{
-    height: 'calc(100vh - 120px)', // Adjust based on your layout
-    overflow: 'hidden',
-    mx: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  }}
->
-  <Paper
-    sx={{
-      flex: 1,
-      overflow: 'auto',
-      scrollbarWidth: 'none', // Firefox
-      '&::-webkit-scrollbar': {
-        display: 'none', // Chrome, Safari, Edge
-      },
-    }}
-  >
-    <Table stickyHeader sx={{ minWidth: 1350, fontSize: '12px' }}>
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Market Type</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Script</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Total Buy</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Buy Avg Rate</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Total Sell</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Sell Avg Rate</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Net Qty</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Last Trade Price</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>MTM</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Auto Closed Date</TableCell>
-          <TableCell sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>Close Btn</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {positionData.map((row, index) => {
-          const isEven = index % 2 === 0;
-          const rowBgColor = theme.palette.mode === "dark"
-            ? isEven ? "#2a2a2a" : "#1f1f1f"
-            : isEven ? "#f9f9f9" : "#ffffff";
+                        <Box
+                            sx={{
+                                height: 'calc(100vh - 120px)', // Adjust based on your layout
+                                overflow: 'hidden',
+                                mx: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            <Paper
+                                sx={{
+                                    flex: 1,
+                                    overflow: 'auto',
+                                    scrollbarWidth: 'none', // Firefox
+                                    '&::-webkit-scrollbar': {
+                                        display: 'none', // Chrome, Safari, Edge
+                                    },
+                                }}
+                            >
+                                <table
+                                    style={{
+                                        minWidth: '1350px',
+                                        fontSize: '12px',
+                                        borderCollapse: 'collapse',
+                                    }}
+                                >
+                                    <thead>
+                                        <tr>
+                                            {[
+                                                'Market Type',
+                                                'Script',
+                                                'Total Buy',
+                                                'Buy Avg Rate',
+                                                'Total Sell',
+                                                'Sell Avg Rate',
+                                                'Net Qty',
+                                                'Last Trade Price',
+                                                'MTM',
+                                                'Auto Closed Date',
+                                                'Close Btn',
+                                            ].map((heading, i) => (
+                                                <th
+                                                    key={i}
+                                                    style={{
+                                                        backgroundColor: theme.palette.mode === 'dark' ? '#444' : '#e0e0e0',
+                                                        textAlign: 'left',
+                                                        padding: '8px',
+                                                        position: 'sticky',
+                                                        top: 0,
+                                                        zIndex: 1,
+                                                    }}
+                                                >
+                                                    {heading}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {positionData.map((row, index) => {
+                                            const isEven = index % 2 === 0;
+                                            const rowBgColor =
+                                                theme.palette.mode === 'dark'
+                                                    ? isEven
+                                                        ? '#2a2a2a'
+                                                        : '#1f1f1f'
+                                                    : isEven
+                                                        ? '#f9f9f9'
+                                                        : '#ffffff';
 
-          return (
-            <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
-              <TableCell>{row.market_type_name}</TableCell>
-              <TableCell>
-                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-              </TableCell>
-              <TableCell>{row.total_buy}</TableCell>
-              <TableCell>{row.buy_avg_rate}</TableCell>
-              <TableCell>{row.total_sell}</TableCell>
-              <TableCell>{row.sell_avg_rate}</TableCell>
-              <TableCell>{row.net_qty}</TableCell>
-              <TableCell>{row.last_trade_price}</TableCell>
-              <TableCell>
-                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-              </TableCell>
-              <TableCell>{row.trade_auto_closed_date}</TableCell>
-              <TableCell>
-                <Button variant="contained" color="error" onClick={() => alert("Close Position")}>
-                  Close
-                </Button>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
-  </Paper>
-</Box>
+                                            return (
+                                                <tr key={index} style={{ backgroundColor: rowBgColor }}>
+                                                    <td style={{ padding: '8px' }}>{row.market_type_name}</td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <div
+                                                            style={{
+                                                                display: 'inline-block',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                maxWidth: '180px',
+                                                                lineHeight: 1.2,
+                                                                verticalAlign: 'middle',
+                                                            }}
+                                                            dangerouslySetInnerHTML={{ __html: row.script_name }}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>{row.total_buy}</td>
+                                                    <td style={{ padding: '8px' }}>{row.buy_avg_rate}</td>
+                                                    <td style={{ padding: '8px' }}>{row.total_sell}</td>
+                                                    <td style={{ padding: '8px' }}>{row.sell_avg_rate}</td>
+                                                    <td style={{ padding: '8px' }}>{row.net_qty}</td>
+                                                    <td style={{ padding: '8px' }}>{row.last_trade_price}</td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>{row.trade_auto_closed_date}</td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <button
+                                                            style={{
+                                                                backgroundColor: '#d32f2f',
+                                                                border: 'none',
+                                                                color: '#fff',
+                                                                padding: '6px 12px',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                            onClick={() => alert('Close Position')}
+                                                        >
+                                                            Close
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+
+                            </Paper>
+                        </Box>
 
                     )}
                 </>

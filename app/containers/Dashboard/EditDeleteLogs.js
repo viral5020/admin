@@ -78,21 +78,21 @@ const EditDeleteLogs = () => {
     }, [searchText]);
 
     return (
-        <Box sx={{ px: isMobile ? 0 : 2, py: 2 }}>
-            <Paper sx={{ p: isMobile ? 0 : 2, borderRadius: 2, py: 2 }}>
-                {/* Title and Search */}
-                <Box
-                    sx={{
-                        display: 'flex',
-                        gap: 2,
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 2.5,
-                        mx: 1,
-                        flexWrap: 'nowrap', // ensures everything stays on one line
-                    }}
-                >
-                    {!isMobile && (
+        <>
+            {!isMobile ? (
+                <Paper sx={{ p: 2, borderRadius: 2 }}>
+                    {/** 💻 Desktop View */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: 2,
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 2.5,
+                            mx: 1,
+                            flexWrap: 'nowrap', // ensures everything stays on one line
+                        }}
+                    >
                         <TextField
                             select
                             label="Rows per page"
@@ -110,8 +110,172 @@ const EditDeleteLogs = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-                    )}
 
+                        <TextField
+                            variant="outlined"
+                            placeholder="Search logs..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            size="small"
+                            sx={{ flex: 1, minWidth: 200 }} // takes all available space
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
+                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Box>
+
+                    {logs.length === 0 && !loading && (
+                        <Typography textAlign='center'>No Logs Found</Typography>
+                    )}
+                    {/** Keep everything here as-is including search bar, table, and pagination */}
+                    {loading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (<>
+                        <TableContainer
+                            sx={{
+                                maxHeight: '70vh',
+                                overflow: 'auto',
+                                '&::-webkit-scrollbar': {
+                                    height: 6, // horizontal scrollbar height
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    backgroundColor: '#f1f1f1',
+                                    borderRadius: 4,
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    backgroundColor: '#888',
+                                    borderRadius: 4,
+                                },
+                                '&::-webkit-scrollbar-thumb:hover': {
+                                    backgroundColor: '#555',
+                                },
+                            }}
+                        >
+
+                            <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Log</TableCell>
+                                        <TableCell>User</TableCell>
+                                        <TableCell>Script</TableCell>
+                                        <TableCell>Type</TableCell>
+                                        <TableCell>Lot</TableCell>
+                                        <TableCell>Qty</TableCell>
+                                        <TableCell>Rate</TableCell>
+                                        <TableCell>Added By</TableCell>
+                                        <TableCell>DateTime</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {logs.map((log, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell sx={{ fontWeight: 700, color: log.log_type === 'DEL' ? 'error.main' : 'success.main' }}>
+                                                {log.log_type}
+                                            </TableCell>
+                                            <TableCell>{log.user_full_name}</TableCell>
+                                            <TableCell>{log.script_name}</TableCell>
+                                            <TableCell>{log.trade_type}</TableCell>
+                                            <TableCell>{log.trade_lot}</TableCell>
+                                            <TableCell>{log.trade_qty}</TableCell>
+                                            <TableCell>{log.trade_rate}</TableCell>
+                                            <TableCell>{log.added_by}</TableCell>
+                                            <TableCell>{log.added_datetime}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+
+
+                        {/* Pagination Controls */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                pt: 2,
+                                flexWrap: 'wrap',
+                                gap: 2,
+                            }}
+                        >
+                            {/* Page Numbers */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Button
+                                    size="small"
+                                    disabled={currentPage === 0}
+                                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                                    color="secondary"
+                                    sx={{ mr: 1 }}
+                                >
+                                    Prev
+                                </Button>
+
+                                {[...Array(totalPages)].map((_, i) => {
+                                    if (
+                                        i === 0 ||
+                                        i === totalPages - 1 ||
+                                        (i >= currentPage - 1 && i <= currentPage + 1)
+                                    ) {
+                                        return (
+                                            <Button
+                                                key={i}
+                                                size="small"
+                                                variant={i === currentPage ? 'contained' : 'outlined'}
+                                                color="secondary"
+                                                onClick={() => setCurrentPage(i)}
+                                                sx={{ mx: 0.3, minWidth: '30px' }}
+                                            >
+                                                {i + 1}
+                                            </Button>
+                                        );
+                                    }
+                                    if (
+                                        (i === 1 && currentPage > 2) ||
+                                        (i === totalPages - 2 && currentPage < totalPages - 3)
+                                    ) {
+                                        return (
+                                            <Typography key={i} sx={{ mx: 0.5 }}>
+                                                ...
+                                            </Typography>
+                                        );
+                                    }
+                                    return null;
+                                })}
+
+                                <Button
+                                    size="small"
+                                    disabled={currentPage + 1 >= totalPages}
+                                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                                    color="secondary"
+                                    sx={{ ml: 1 }}
+                                >
+                                    Next
+                                </Button>
+                            </Box>
+                        </Box>
+                    </>)}
+                    {/* ...your full content */}
+                </Paper>
+            ) : (<>
+                {/** Header */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 2,
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1.5,
+                        mt: 0.5,
+                        mx: 1,
+                        flexWrap: 'nowrap', // ensures everything stays on one line
+                    }}
+                >
                     <TextField
                         variant="outlined"
                         placeholder="Search logs..."
@@ -129,17 +293,15 @@ const EditDeleteLogs = () => {
                     />
                 </Box>
 
-
                 {logs.length === 0 && !loading && (
                     <Typography textAlign='center'>No Logs Found</Typography>
                 )}
 
-                {/* Table */}
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                         <CircularProgress />
                     </Box>
-                ) : isMobile ? (
+                ) : (
                     logs.map((log, index) => {
                         const isBuy = log.trade_type?.toLowerCase() === "buy";
                         const isSell = log.trade_type?.toLowerCase() === "sell";
@@ -222,149 +384,27 @@ const EditDeleteLogs = () => {
                             </Card>
                         );
                     })
-                ) : (
-                    <TableContainer
-                        sx={{
-                            maxHeight: '70vh',
-                            overflow: 'auto',
-                            '&::-webkit-scrollbar': {
-                                height: 6, // horizontal scrollbar height
-                            },
-                            '&::-webkit-scrollbar-track': {
-                                backgroundColor: '#f1f1f1',
-                                borderRadius: 4,
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                                backgroundColor: '#888',
-                                borderRadius: 4,
-                            },
-                            '&::-webkit-scrollbar-thumb:hover': {
-                                backgroundColor: '#555',
-                            },
-                        }}
-                    >
-
-                        <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Log</TableCell>
-                                    <TableCell>User</TableCell>
-                                    <TableCell>Script</TableCell>
-                                    <TableCell>Type</TableCell>
-                                    <TableCell>Lot</TableCell>
-                                    <TableCell>Qty</TableCell>
-                                    <TableCell>Rate</TableCell>
-                                    <TableCell>Added By</TableCell>
-                                    <TableCell>DateTime</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {logs.map((log, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell sx={{ fontWeight: 700, color: log.log_type === 'DEL' ? 'error.main' : 'success.main' }}>
-                                            {log.log_type}
-                                        </TableCell>
-                                        <TableCell>{log.user_full_name}</TableCell>
-                                        <TableCell>{log.script_name}</TableCell>
-                                        <TableCell>{log.trade_type}</TableCell>
-                                        <TableCell>{log.trade_lot}</TableCell>
-                                        <TableCell>{log.trade_qty}</TableCell>
-                                        <TableCell>{log.trade_rate}</TableCell>
-                                        <TableCell>{log.added_by}</TableCell>
-                                        <TableCell>{log.added_datetime}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
                 )}
 
-                {/* Pagination Controls */}
-                {!isMobile ? (
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            pt: 2,
-                            flexWrap: 'wrap',
-                            gap: 2,
-                        }}
-                    >
-                        {/* Page Numbers */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <Button
-                                size="small"
-                                disabled={currentPage === 0}
-                                onClick={() => setCurrentPage((prev) => prev - 1)}
-                                color="secondary"
-                                sx={{ mr: 1 }}
-                            >
-                                Prev
-                            </Button>
-
-                            {[...Array(totalPages)].map((_, i) => {
-                                if (
-                                    i === 0 ||
-                                    i === totalPages - 1 ||
-                                    (i >= currentPage - 1 && i <= currentPage + 1)
-                                ) {
-                                    return (
-                                        <Button
-                                            key={i}
-                                            size="small"
-                                            variant={i === currentPage ? 'contained' : 'outlined'}
-                                            color="secondary"
-                                            onClick={() => setCurrentPage(i)}
-                                            sx={{ mx: 0.3, minWidth: '30px' }}
-                                        >
-                                            {i + 1}
-                                        </Button>
-                                    );
-                                }
-                                if (
-                                    (i === 1 && currentPage > 2) ||
-                                    (i === totalPages - 2 && currentPage < totalPages - 3)
-                                ) {
-                                    return (
-                                        <Typography key={i} sx={{ mx: 0.5 }}>
-                                            ...
-                                        </Typography>
-                                    );
-                                }
-                                return null;
-                            })}
-
-                            <Button
-                                size="small"
-                                disabled={currentPage + 1 >= totalPages}
-                                onClick={() => setCurrentPage((prev) => prev + 1)}
-                                color="secondary"
-                                sx={{ ml: 1 }}
-                            >
-                                Next
-                            </Button>
-                        </Box>
-                    </Box>) : (
-                    // Mobile: Load More button
-                    logs.length < totalRecords && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                            <Button
-                                variant="contained"
-                                onClick={() => {
-                                    const nextPage = currentPage + 1;
-                                    setCurrentPage(nextPage);
-                                    fetchLogs(searchText, nextPage, true);
-                                }}
-                                disabled={loading}
-                            >
-                                {loading ? 'Loading...' : 'Load More'}
-                            </Button>
-                        </Box>
-                    )
+                {/* LOAD MORE */}
+                {logs.length < totalRecords && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                const nextPage = currentPage + 1;
+                                setCurrentPage(nextPage);
+                                fetchLogs(searchText, nextPage, true);
+                            }}
+                            disabled={loading}
+                        >
+                            {loading ? 'Loading...' : 'Load More'}
+                        </Button>
+                    </Box>
                 )}
-            </Paper>
-        </Box>
+            </>
+            )}
+        </>
     );
 };
 
