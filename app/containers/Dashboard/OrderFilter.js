@@ -48,6 +48,24 @@ const OrderFilter = ({ isDarkMode }) => {
         }
     };
 
+
+const inputBoxStyle = {
+  backgroundColor: isDarkMode ? '#263238' : '#fff',
+  borderRadius: 1,
+  '& .MuiOutlinedInput-root': {
+    height: 40,
+    '& fieldset': {
+      borderColor: '#c4c4c4',
+    },
+    '&:hover fieldset': {
+      borderColor: '#000',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#000',
+    },
+  },
+};
+
     // Autocomplete handlers
     const handleFetch = (term, type) => {
         if (!term) return;
@@ -76,149 +94,175 @@ const OrderFilter = ({ isDarkMode }) => {
     const today = dayjs().format('YYYY-MM-DD');
 
     return (
-        <Box sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-                {/* (1) Status Multi-select */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        multiple
-                        options={statusOptions}
-                        getOptionLabel={(opt) => opt.label}
-                        value={status}
-                        onChange={(e, val) => setStatus(val)}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Status" size="small" />
-                        )}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        disableCloseOnSelect
-                        sx={{ backgroundColor: isDarkMode ? '#263238' : '#fff', borderRadius: 1 }}
-                    />
-                </Grid>
+    <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
+  <Grid container spacing={1}>
+    {/* (1) Status Multi-select - wider */}
+    <Grid item xs={12} sm={6} md={4} lg={3.6}>
+      <Autocomplete
+        multiple
+        options={statusOptions}
+        getOptionLabel={(opt) => opt.label}
+        value={status}
+        onChange={(e, val) => setStatus(val)}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        disableCloseOnSelect
+        renderInput={(params) => (
+          <TextField {...params} label="Status" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (2) Trade After */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <TextField
-                        label="Trade After"
-                        type="date"
-                        size="small"
-                        value={tradeAfter}
-                        onChange={(e) => setTradeAfter(e.target.value)}
-                        InputProps={{ inputProps: { max: today } }}
-                        fullWidth
-                    />
-                </Grid>
+    {/* (2) Trade After */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <TextField
+        label="Trade After"
+        type="date"
+        size="small"
+        value={tradeAfter}
+        onChange={(e) => setTradeAfter(e.target.value)}
+        InputProps={{ inputProps: { max: today } }}
+        InputLabelProps={{ shrink: true }}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (3) Trade Before */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <TextField
-                        label="Trade Before"
-                        type="date"
-                        size="small"
-                        value={tradeBefore}
-                        onChange={(e) => setTradeBefore(e.target.value)}
-                        InputProps={{ inputProps: { max: today } }}
-                        fullWidth
-                    />
-                </Grid>
+    {/* (3) Trade Before */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <TextField
+        label="Trade Before"
+        type="date"
+        size="small"
+        value={tradeBefore}
+        onChange={(e) => setTradeBefore(e.target.value)}
+        InputProps={{ inputProps: { max: today } }}
+        InputLabelProps={{ shrink: true }}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (4) Order Type */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Select Order Type</InputLabel>
-                        <Select
-                            value={orderType}
-                            onChange={(e) => setOrderType(e.target.value)}
-                            label="Select Order Type"
-                        >
-                            <MenuItem value="">Select Order Type</MenuItem>
-                            {orderTypes.map((type) => (
-                                <MenuItem key={type} value={type}>{type}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
+    {/* (4) Order Type - wider */}
+    <Grid item xs={12} sm={6} md={4} lg={3.6}>
+      <FormControl fullWidth size="small" sx={inputBoxStyle}>
+        <InputLabel>Select Order Type</InputLabel>
+        <Select
+          value={orderType}
+          onChange={(e) => setOrderType(e.target.value)}
+          label="Select Order Type"
+        >
+          <MenuItem value="">Select Order Type</MenuItem>
+          {orderTypes.map((type) => (
+            <MenuItem key={type} value={type}>
+              {type}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
 
-                {/* (5) Market Name */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        freeSolo
-                        options={marketOptions}
-                        value={market}
-                        onInputChange={(e, val) => {
-                            setMarket(val);
-                            handleFetch(val, 'market');
-                        }}
-                        onChange={(e, val) => setMarket(val || '')}
-                        renderInput={(params) => <TextField {...params} label="Market" size="small" />}
-                        fullWidth
-                    />
-                </Grid>
+    {/* ➤ Moved Market to second row (after Order Type) */}
 
-                {/* (6) Script Name */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        freeSolo
-                        options={scriptOptions.length ? scriptOptions : []}
-                        value={script}
-                        onInputChange={(e, val) => {
-                            setScript(val);
-                            handleFetch(val, 'script');
-                        }}
-                        onChange={(e, val) => setScript(val || '')}
-                        renderInput={(params) => <TextField {...params} label="Script" size="small" />}
-                        fullWidth
-                    />
-                </Grid>
+    {/* (5) Market Name */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Autocomplete
+        freeSolo
+        options={marketOptions}
+        value={market}
+        onInputChange={(e, val) => {
+          setMarket(val);
+          handleFetch(val, 'market');
+        }}
+        onChange={(e, val) => setMarket(val || '')}
+        renderInput={(params) => (
+          <TextField {...params} label="Market" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (7) Client Name */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        freeSolo
-                        options={clientOptions}
-                        value={client}
-                        onInputChange={(e, val) => {
-                            setClient(val);
-                            handleFetch(val, 'client');
-                        }}
-                        onChange={(e, val) => setClient(val || '')}
-                        renderInput={(params) => <TextField {...params} label="Client" size="small" />}
-                        fullWidth
-                    />
-                </Grid>
+    {/* (6) Script Name */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Autocomplete
+        freeSolo
+        options={scriptOptions}
+        value={script}
+        onInputChange={(e, val) => {
+          setScript(val);
+          handleFetch(val, 'script');
+        }}
+        onChange={(e, val) => setScript(val || '')}
+        renderInput={(params) => (
+          <TextField {...params} label="Script" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (8) Master Name */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        freeSolo
-                        options={masterOptions}
-                        value={master}
-                        onInputChange={(e, val) => {
-                            setMaster(val);
-                            handleFetch(val, 'master');
-                        }}
-                        onChange={(e, val) => setMaster(val || '')}
-                        renderInput={(params) => <TextField {...params} label="Master" size="small" />}
-                        fullWidth
-                    />
-                </Grid>
+    {/* (7) Client Name */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Autocomplete
+        freeSolo
+        options={clientOptions}
+        value={client}
+        onInputChange={(e, val) => {
+          setClient(val);
+          handleFetch(val, 'client');
+        }}
+        onChange={(e, val) => setClient(val || '')}
+        renderInput={(params) => (
+          <TextField {...params} label="Client" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
 
-                {/* (9) Broker Name */}
-                <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4}>
-                    <Autocomplete
-                        freeSolo
-                        options={brokerOptions}
-                        value={broker}
-                        onInputChange={(e, val) => {
-                            setBroker(val);
-                            handleFetch(val, 'broker');
-                        }}
-                        onChange={(e, val) => setBroker(val || '')}
-                        renderInput={(params) => <TextField {...params} label="Broker" size="small" />}
-                        fullWidth
-                    />
-                </Grid>
-            </Grid>
-        </Box>
+    {/* (8) Master Name */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Autocomplete
+        freeSolo
+        options={masterOptions}
+        value={master}
+        onInputChange={(e, val) => {
+          setMaster(val);
+          handleFetch(val, 'master');
+        }}
+        onChange={(e, val) => setMaster(val || '')}
+        renderInput={(params) => (
+          <TextField {...params} label="Master" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
+
+    {/* (9) Broker Name */}
+    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Autocomplete
+        freeSolo
+        options={brokerOptions}
+        value={broker}
+        onInputChange={(e, val) => {
+          setBroker(val);
+          handleFetch(val, 'broker');
+        }}
+        onChange={(e, val) => setBroker(val || '')}
+        renderInput={(params) => (
+          <TextField {...params} label="Broker" size="small" sx={inputBoxStyle} />
+        )}
+        fullWidth
+        sx={inputBoxStyle}
+      />
+    </Grid>
+  </Grid>
+</Box>
+
+
     );
 };
 
