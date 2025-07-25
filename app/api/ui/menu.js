@@ -253,6 +253,12 @@ module.exports = [
     icon: 'create-outline'
   },
   {
+    key: 'Blocked Scripts',
+    name: 'Blocked Scripts',
+    link: '/app/dashboard/blocked-scripts',
+    icon: 'create-outline'
+  },
+  {
     key: 'login2',
     name: 'Login',
     link: '/login',

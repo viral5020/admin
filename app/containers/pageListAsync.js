@@ -51,6 +51,10 @@ export const EditDeleteLogs = loadable(() =>
   import('./Dashboard/EditDeleteLogs'), {
   fallback: <Loading />,
 });
+export const BlockedScripts = loadable(() =>
+  import('./Dashboard/BlockedScripts'), {
+  fallback: <Loading />,
+});
 export const OrderBook = loadable(() =>
   import('./Dashboard/OrderBook'), {
   fallback: <Loading />,

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDebounce } from '@uidotdev/usehooks';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import OrderFilter from './OrderFilter';
 // import { useTheme } from '@mui/material/styles';
@@ -17,9 +17,16 @@ const OrderBook = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const isDarkMode = theme.palette.mode === 'dark';
 
+    const isFirstRender = useIsFirstRender();
+
+    const [status, setStatus] = useState([]);
+    const [end_date, setEnd_date] = useState('');
+    const [start_end, setStart_end] = useState('');
+    const [orderType, setOrderType] = useState('');
+
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(10);
+    // const [visibleCount, setVisibleCount] = useState(10);
     const [filterType, setFilterType] = useState("today");
 
     const [searchText, setSearchText] = useState("");
@@ -27,14 +34,17 @@ const OrderBook = () => {
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState();
+    const [totalRecords, setTotalRecords] = useState();
+    const [isFilterChange, setIsFilterChange] = useState(false);
 
     const ordersPerPage = 10;
 
     // Fetch orders
     const fetchOrders = async (type = "today", searchValue = "") => {
+        // isFilterChange ? setCurrentPage(0) : null;
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
         const formData = {
             sEcho: 1,
             iDisplayStart: (currentPage * ordersPerPage),
@@ -44,6 +54,11 @@ const OrderBook = () => {
             login_user_id: dataStored?.user_id,
             auth_key: dataStored?.auth_key,
             isTodayTrade: type === "today" ? "today" : "",
+
+            status: status, // doubt
+            end_date: end_date,
+            start_end: start_end,
+            orderType: orderType, // doubt
         };
 
         try {
@@ -53,9 +68,14 @@ const OrderBook = () => {
                 body: JSON.stringify(formData),
             });
             const data = await response.json();
-            setOrders(data.aaData || []);
+            isMobile ?
+                isFilterChange ? setOrders(data.aaData || []) : setOrders(prev => [...prev, ...data.aaData])
+                : setOrders(data.aaData || []);
+
             const totalPage = Math.ceil(data.iTotalRecords / ordersPerPage);
             setTotalPages(totalPage);
+            setTotalRecords(data.iTotalRecords);
+            setIsFilterChange(false);
         } catch (error) {
             console.error("Error fetching orders:", error);
         } finally {
@@ -64,41 +84,45 @@ const OrderBook = () => {
     };
 
     useEffect(() => {
-        fetchOrders(filterType, searchText);
+        setIsFilterChange(true);
+        setCurrentPage(0);
+        // !isFirstRender && fetchOrders(filterType, searchText, true);
     }, [filterType, debouncedSearchText]);
 
     // Handlers
     const handleFilterChange = (e) => {
         setFilterType(e.target.value);
-        setCurrentPage(0);
-        setVisibleCount(10);
     };
 
     const handleSearchChange = (value) => {
         setSearchText(value);
-        setCurrentPage(0);
-        setVisibleCount(10);
     };
 
-    const handleLoadMore = () => {
-        setVisibleCount(prev => prev + 10);
-    };
+    useEffect(() => {
+        console.log('currentPage', currentPage);
+        !isFirstRender && fetchOrders(filterType, searchText);
+    }, [currentPage, ordersPerPage]);
 
-    const visibleOrders = useMemo(() => orders.slice(0, visibleCount), [orders, visibleCount]);
-
-    // const paginatedOrders = useMemo(() => {
-    //     console.log('currentPage', currentPage);
-    //     const start = currentPage * ordersPerPage;
-    //     return orders.slice(start, start + ordersPerPage);
-    // }, [orders, currentPage]);
+    useEffect(() => {
+    }, [currentPage])
 
     useEffect(() => {
         fetchOrders(filterType, searchText);
-    }, [currentPage, ordersPerPage]);
+    }, [])
 
     return (
         <Box sx={{ p: 0, mt: 2 }}>
-            <OrderFilter isDarkMode={isDarkMode} />
+            <OrderFilter
+                isDarkMode={isDarkMode}
+                setStatus={setStatus}
+                setEnd_date={setEnd_date}
+                setStart_end={setStart_end}
+                setOrderType={setOrderType}
+                status={status}
+                end_date={end_date}
+                start_end={start_end}
+                orderType={orderType}
+            />
             <Box sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -129,15 +153,11 @@ const OrderBook = () => {
             </Box>
 
             {/* Body */}
-            {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                    <CircularProgress size={24} />
-                </Box>
-            ) : orders.length === 0 ? (
+            {orders.length === 0 ? (
                 <Typography sx={{ px: 1, mt: 2 }}>No orders found.</Typography>
             ) : isMobile ? (
                 <>
-                    {visibleOrders.map((item, index) => {
+                    {orders.map((item, index) => {
                         const [mainName, subName] = item.scrp_name.split(" ", 2);
                         const cleanRate = item.trd_rate?.split("(")[0].trim();
                         const isBuy = item.trd_type === "Buy";
@@ -231,10 +251,16 @@ const OrderBook = () => {
                             </Card>
                         );
                     })}
-                    {visibleCount < orders.length && (
-                        <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                            <Button variant="outlined" onClick={handleLoadMore} size="small">Load More</Button>
-                        </Box>
+                    {orders.length < totalRecords && (
+                        <>
+                            {loading ? (
+                                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                                    <CircularProgress size={24} />
+                                </Box>)
+                                : < Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                                    <Button variant="outlined" onClick={() => setCurrentPage(prev => prev + 1)} size="small">Load More</Button>
+                                </Box>}
+                        </>
                     )}
                 </>
             ) : (
