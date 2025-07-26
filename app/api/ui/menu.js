@@ -244,19 +244,19 @@ module.exports = [
     key: 'orderBook',
     name: 'Order Book',
     link: '/app/dashboard/order-Book',
-    icon: 'create-outline'
+    icon: 'receipt-outline'
   },
   {
     key: 'positions',
     name: 'Positions',
     link: '/app/dashboard/positions',
-    icon: 'create-outline'
+    icon: 'cube-outline'
   },
   {
     key: 'Blocked Scripts',
     name: 'Blocked Scripts',
     link: '/app/dashboard/blocked-scripts',
-    icon: 'create-outline'
+    icon: 'ban-outline'
   },
   {
     key: 'login2',

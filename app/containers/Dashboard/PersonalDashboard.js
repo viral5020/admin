@@ -50,6 +50,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
+import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
 
 const animationVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -386,7 +387,6 @@ function PersonalDashboard() {
   });
 
 
-
   const InfoCardHorizontal = ({ title, icon, content, bgcolor }) => (
     <Paper
       elevation={0}
@@ -433,171 +433,51 @@ function PersonalDashboard() {
   const fetchPositions = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-      const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-        is_app: "1",
-        login_user_id: dataStored.user_id,
-        auth_key: dataStored.auth_key,
-        sEcho: 1,
-        iDisplayStart: 0,
-        iDisplayLength: 10,
-        sSearch: "",
-      });
-
-      if (response.data && response.data.aaData) {
-        setPositionData(response.data.aaData);
-      } else {
-        setPositionData([]);
-      }
-    } catch (error) {
-      console.error("Error fetching position data:", error);
-      setPositionData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const fetchPendingOrders = async () => {
-    setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/datatables/order_book_new",
-        {
-          is_pending: "true",
-          is_app: "1",
-          login_user_id: dataStored.user_id,
-          auth_key: dataStored.auth_key,
-          sEcho: 1,
-          iDisplayStart: 0,
-          iDisplayLength: 10,
-          // script_id: "1",
-          sSearch: "",
-        }
-      );
-
-      if (response.data && response.data.aaData) {
-        setPendingOrders(response.data.aaData);
-      } else {
-        setPendingOrders([]);
-      }
-    } catch (error) {
-      console.error("Error fetching pending orders:", error);
-      setPendingOrders([]);
-    }
+    const result = await apifetchPositions(dataStored.user_id, dataStored.auth_key);
+    setPositionData(result);
     setLoading(false);
   };
 
-  const fetchRejectionLogs = async () => {
+    const fetchLoginData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-      const response = await axios.post("http://128.199.126.171/~goldorg/datatables/rejection_log_view", {
-        is_app: "1",
-        login_user_id: dataStored.user_id,
-        auth_key: dataStored.auth_key,
-        sEcho: 1,
-        isTodayTrade: filterType,
-        iDisplayStart: 0,
-        iDisplayLength: 10000,
-        sSearch: searchQuery || "",
-      });
-      setRejectionLogs(response.data.aaData || []);
-    } catch (error) {
-      console.error("Error fetching rejection logs:", error);
-    }
+    const result = await fetchLoginDataAPI(dataStored.user_id, dataStored.auth_key);
+    setLoginData(result);
     setLoading(false);
-  };
-
-
-  const fetchLoginData = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-      const res = await axios.post('http://128.199.126.171/~goldorg/datatables/get_login_data_details', {
-        is_app: 1,
-        login_user_id: dataStored.user_id,
-        auth_key: dataStored.auth_key,
-      });
-
-      if (res.data.status === 'ok' && Array.isArray(res.data.data)) {
-        setLoginData(res.data.data.slice(0, 5));
-      }
-    } catch (error) {
-      console.error('Login data fetch failed:', error);
-    } finally {
-      setLoading(false);
-    }
   };
 
 
   const fetchOrders = async (type = "today", searchValue = "") => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const result = await fetchOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
+    setOrders(result);
+    setLoading(false);
+  };
 
-    const formData = {
-      sEcho: 1,
-      iDisplayStart: 0,
-      iDisplayLength: 10000,
-      sSearch: searchValue,
-      is_app: 1,
-      login_user_id: dataStored.user_id,
-      auth_key: dataStored.auth_key,
-      isTodayTrade: type === "today" ? "today" : "",
-    };
+ const fetchPendingOrders = async () => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const result = await fetchPendingOrdersAPI(dataStored.user_id, dataStored.auth_key);
+    setPendingOrders(result);
+    setLoading(false);
+  };
 
-    try {
-      const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      setOrders(data.aaData || []);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
+    const fetchRejectionLogs = async () => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const result = await fetchRejectionLogsAPI(dataStored.user_id,dataStored.auth_key,filterType,searchQuery);
+    setRejectionLogs(result);
+    setLoading(false);
   };
 
   const fetchTradesData = async () => {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     if (!selectedRow) return;
-
     setLoadingTrades(true);
-    try {
-      const response = await fetch(
-        "http://128.199.126.171/~goldorg/datatables/order_book_new",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            isTodayTrade: "today",
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            sEcho: 1,
-            iDisplayStart: 0,
-            iDisplayLength: 10,
-            script_id: selectedRow?.script_id,
-            sSearch: "",
-          }),
-        }
-      );
-
-      const result = await response.json();
-      setTradesData(result?.aaData || []);
-    } catch (err) {
-      console.error("Error fetching trades", err);
-      setTradesData([]);
-    } finally {
-      setLoadingTrades(false);
-    }
+    const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
+    setTradesData(result);
+    setLoadingTrades(false);
   };
 
   const handleViewTradesClick = () => {
@@ -667,122 +547,48 @@ function PersonalDashboard() {
   }, [rejectionDialogOpen, filterType, searchQuery]);
 
   useEffect(() => {
-    const fetchTrendStocks = async () => {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      try {
-        const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/tranding_trades", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-          }),
-        });
-
-        const data = await response.json();
-        if (data && data.status === "ok" && data.data) {
-          const mapped = data.data.map((item) => ({
-            Id: item.script_id,
-            name: item.script_name || "N/A",
-            ltp: item.ltp, // keep as number, format in JSX
-            per: item.per,
-            rateChange: item.rateChange,
-          }));
-          setTrendStocks(mapped);
-        }
-      } catch (error) {
-        console.error("Failed to fetch Scripts in Trends:", error);
-      }
-    };
+     const fetchTrendStocks = async () => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const result = await fetchTrendStocksAPI(dataStored.user_id, dataStored.auth_key);
+    setTrendStocks(result);
+  };
 
     fetchTrendStocks();
   }, []);
 
   useEffect(() => {
     const fetchTrades = async () => {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      if (tabValue === 1 && selectedStock) {
-        setLoadingTrades(true);
-        setTradesError(null);
-        try {
-          const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              isTodayTrade: "today",
-              is_app: "1",
-              login_user_id: dataStored.user_id,
-              auth_key: dataStored.auth_key,
-              sEcho: 1,
-              iDisplayStart: 0,
-              iDisplayLength: 10,
-              script_id: selectedStock.script_id,
-              sSearch: "",
-            }),
-          });
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    if (tabValue === 1 && selectedStock) {
+      setLoadingTrades(true);
+      setTradesError(null);
 
-          const data = await response.json();
-
-          if (data && data.aaData) {
-            setTradesData(data.aaData);
-          } else {
-            setTradesData([]);
-          }
-        } catch (error) {
-          setTradesError("Failed to load trades data");
-        } finally {
-          setLoadingTrades(false);
-        }
+      try {
+        const result = await fetchTradesAPI(dataStored.user_id,dataStored.auth_key,selectedStock.script_id);
+        setTradesData(result);
+      } catch (error) {
+        setTradesError("Failed to load trades data");
+        setTradesData([]);
+      } finally {
+        setLoadingTrades(false);
       }
-    };
+    }
+  };
 
     fetchTrades();
   }, [tabValue, selectedStock]);
 
   useEffect(() => {
-    const fetchPositions = async () => {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      if (tabValue === 2 && selectedStock) {
-        setLoading(true);
-        setPositionData([]); // optional: clear old data
-        try {
-          const response = await fetch("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              is_app: "1",
-              login_user_id: dataStored.user_id,
-              auth_key: dataStored.auth_key,
-              isActive: "active",
-              sEcho: 1,
-              iDisplayStart: 0,
-              iDisplayLength: 10,
-              script_id: selectedStock.script_id,
-              sSearch: "",
-            }),
-          });
-
-          const data = await response.json();
-          if (data && data.aaData) {
-            setPositionData(data.aaData);
-          } else {
-            setPositionData([]);
-          }
-        } catch (error) {
-          console.error("Error fetching position data:", error);
-          setPositionData([]);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
+      const fetchPositions = async () => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    if (tabValue === 2 && selectedStock) {
+      setLoading(true);
+      setPositionData([]); // clear old data
+      const result = await fetchStockPositionsAPI(dataStored.user_id,dataStored.auth_key,selectedStock.script_id);
+      setPositionData(result);
+      setLoading(false);
+    }
+  };
 
     fetchPositions();
   }, [tabValue, selectedStock]);
@@ -822,31 +628,12 @@ function PersonalDashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      try {
-        const response = await axios.post(
-          'http://128.199.126.171/~goldorg/ajaxfiles/dashboard_count_trade',
-          {
-            is_app: '1',
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-          }
-        );
-
-        if (response.data.status === 'ok') {
-          setDashboardData({
-            today_rejection: response.data.today_rejection,
-            total_rejection: response.data.total_rejection,
-            total_position: response.data.total_position,
-            today_trades: response.data.today_trades,
-            week_trades: response.data.week_trades,
-            today_pending_trades: response.data.today_pending_trades,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      }
-    };
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const result = await fetchDashboardDataAPI(dataStored.user_id, dataStored.auth_key);
+    if (result) {
+      setDashboardData(result);
+    }
+  };
 
     fetchDashboardData();
   }, []);
