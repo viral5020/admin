@@ -212,7 +212,7 @@ export const fetchTradesAPI = async (userId, authKey, scriptId) => {
     return data?.aaData || [];
   } catch (error) {
     console.error("Failed to fetch trades:", error);
-    throw error; // rethrow so the component can handle it
+    throw error; // rethrow so the component can handle it  
   }
 };
 
