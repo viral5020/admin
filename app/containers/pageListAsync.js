@@ -55,6 +55,10 @@ export const BlockedScripts = loadable(() =>
   import('./Dashboard/BlockedScripts'), {
   fallback: <Loading />,
 });
+export const MaxQTYDetails = loadable(() =>
+  import('./Dashboard/MaxQTYDetails'), {
+  fallback: <Loading />,
+});
 export const OrderBook = loadable(() =>
   import('./Dashboard/OrderBook'), {
   fallback: <Loading />,

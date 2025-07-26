@@ -259,6 +259,12 @@ module.exports = [
     icon: 'ban-outline'
   },
   {
+    key: 'Max QTY details',
+    name: 'Max QTY details',
+    link: '/app/dashboard/max-qty-details',
+    icon: 'ban-outline'
+  },
+  {
     key: 'login2',
     name: 'Login',
     link: '/login',

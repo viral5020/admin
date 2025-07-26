@@ -40,7 +40,8 @@ import {
   Ledger, EditDeleteLogs,
   OrderBook,
   Positions,
-  BlockedScripts
+  BlockedScripts,
+  MaxQTYDetails
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
 // import Watchlist from '../Dashboard/Watchlist';
@@ -62,6 +63,7 @@ function Application(props) {
           <Route path="dashboard/order-Book" element={<OrderBook />} />
           <Route path="dashboard/positions" element={<Positions />} />
           <Route path="dashboard/blocked-scripts" element={<BlockedScripts />} />
+          <Route path="dashboard/max-qty-details" element={<MaxQTYDetails />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />
