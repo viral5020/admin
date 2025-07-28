@@ -35,19 +35,21 @@ const EditDeleteLogs = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [userLevels, setUserLevels] = useState([]);
+    const [selectedUserLevel, setSelectedUserLevel] = useState('');
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     const fetchLogs = async (search = '', append = false) => {
-        console.log('#### append', append);
         setLoading(true);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
         try {
             const response = await axios.post(
                 'http://128.199.126.171/~goldorg/datatables/script_qty_list',
                 {
                     is_app: '1',
-                    login_user_id: '41297',
-                    auth_key: 'IGKBp4OuFS',
+                     login_user_id: dataStored?.user_id,
+            auth_key: dataStored?.auth_key,
                     sEcho: 1,
                     iDisplayStart: currentPage * pageSize,
                     iDisplayLength: pageSize,
@@ -69,6 +71,33 @@ const EditDeleteLogs = () => {
         !isMobile ? fetchLogs(searchText) : fetchLogs(searchText, true);
     }, [currentPage, pageSize]);
 
+
+    useEffect(() => {
+        const fetchUserLevels = async () => {
+             const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            try {
+                const res = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_user_level', {
+                    is_app: '1',
+                    login_user_id: dataStored?.user_id,
+            auth_key: dataStored?.auth_key,
+                });
+
+                if (Array.isArray(res.data)) {
+                    setUserLevels(res.data);
+                } else if (res.data?.data && Array.isArray(res.data.data)) {
+                    setUserLevels(res.data.data);
+                } else {
+                    console.error('❌ Invalid user level data:', res.data);
+                }
+            } catch (err) {
+                console.error('⚠️ Failed to fetch user levels:', err);
+            }
+        };
+
+        fetchUserLevels();
+    }, []);
+
+
     useEffect(() => {
         const delay = setTimeout(() => {
             setCurrentPage(0);
@@ -84,14 +113,31 @@ const EditDeleteLogs = () => {
                     <Box
                         sx={{
                             display: 'flex',
-                            gap: 2,
+                            gap: 0.2,
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            mb: 2.5,
+                            mb: 0.5,
                             mx: 1,
-                            flexWrap: 'nowrap',
+                            flexWrap: 'wrap',
                         }}
                     >
+                        {/* User Level Dropdown */}
+                        <TextField
+                            select
+                            label="User Level"
+                            value={selectedUserLevel}
+                            onChange={(e) => setSelectedUserLevel(e.target.value)}
+                            size="small"
+                            sx={{ width: 180, flexShrink: 0 }}
+                        >
+                            {userLevels.map((level) => (
+                                <MenuItem key={level.user_level_id} value={level.user_level_id}>
+                                    {level.user_level_name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        {/* Rows Per Page */}
                         <TextField
                             select
                             label="Rows per page"
@@ -101,7 +147,7 @@ const EditDeleteLogs = () => {
                                 setCurrentPage(0);
                             }}
                             size="small"
-                            sx={{ width: 150, flexShrink: 0 }}
+                            sx={{ width: 150 }}
                         >
                             {[10, 25, 50].map((option) => (
                                 <MenuItem key={option} value={option}>
@@ -110,6 +156,7 @@ const EditDeleteLogs = () => {
                             ))}
                         </TextField>
 
+                        {/* Search Field */}
                         <TextField
                             variant="outlined"
                             placeholder="Search logs..."
@@ -119,13 +166,14 @@ const EditDeleteLogs = () => {
                             sx={{ flex: 1, minWidth: 200 }}
                             InputProps={{
                                 startAdornment: (
-                                    <InputAdornment position="start">
+                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
                                         <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                                     </InputAdornment>
                                 ),
                             }}
                         />
                     </Box>
+
 
                     {logs.length === 0 && !loading && (
                         <Typography textAlign="center">No Logs Found</Typography>
@@ -254,30 +302,47 @@ const EditDeleteLogs = () => {
                     <Box
                         sx={{
                             display: 'flex',
-                            gap: 2,
-                            justifyContent: 'space-between',
                             alignItems: 'center',
-                            mb: 1.5,
-                            mt: 0.5,
-                            mx: 1,
+                            gap: 0.2,
+                            mb: 0.5,
+                            mx: 0.2,
+                            flexWrap: 'nowrap',
                         }}
                     >
+                        {/* User Level Dropdown (fixed width) */}
+                        <TextField
+                            select
+                            label="User Level"
+                            value={selectedUserLevel}
+                            onChange={(e) => setSelectedUserLevel(e.target.value)}
+                            size="small"
+                            sx={{ width: 150, flexShrink: 0 }}
+                        >
+                            {userLevels.map((level) => (
+                                <MenuItem key={level.user_level_id} value={level.user_level_id}>
+                                    {level.user_level_name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        {/* Search Field (flex-grow to fill space) */}
                         <TextField
                             variant="outlined"
                             placeholder="Search logs..."
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
+                            fullWidth
                             InputProps={{
                                 startAdornment: (
-                                    <InputAdornment position="start">
+                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
                                         <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                                     </InputAdornment>
                                 ),
                             }}
                         />
                     </Box>
+
 
                     {logs.length === 0 && !loading && (
                         <Typography textAlign="center">No Logs Found</Typography>

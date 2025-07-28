@@ -68,13 +68,15 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
       body: JSON.stringify(formData),
     });
 
-    const data = await response.json();
+    // Try both formats
+    const data = response.data || response;  // if using axios or custom client
     return data.aaData || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
   }
 };
+
 
 
 export const fetchPendingOrdersAPI = async (userId, authKey) => {
@@ -166,7 +168,7 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
       }),
     });
 
-    const data = await response.json();
+    const data = response.data || response; // ✅ no .json()
 
     if (data && data.status === "ok" && data.data) {
       return data.data.map((item) => ({
