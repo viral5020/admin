@@ -265,6 +265,12 @@ module.exports = [
     icon: 'reader-outline'
   },
   {
+    key: 'Rejection Logs',
+    name: 'Rejection Logs',
+    link: '/app/dashboard/rejection-logs',
+    icon: 'reader-outline'
+  },
+  {
     key: 'login2',
     name: 'Login',
     link: '/login',

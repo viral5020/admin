@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import axios from "axios";
+import { setScriptBlockSettingAPI } from "./API/API";
 
 const OrderPage = () => {
   const theme = useTheme();
@@ -30,25 +31,6 @@ const OrderPage = () => {
   const [marketOptions, setMarketOptions] = useState([]);
   const [scriptOptions, setScriptOptions] = useState([]);
   const [isScriptNameDisable, setIsScriptNameDisable] = useState(true)
-
-  // Fetch dropdown options
-  // const fetchMarketOptions = async () => {
-  //   try {
-  //     const res = await axios.get("/ajaxfiles/get_market_name_search");
-  //     setMarketOptions(res.data?.markets || []);
-  //   } catch (err) {
-  //     console.error("Error loading market options", err);
-  //   }
-  // };
-
-  // const fetchScriptOptions = async () => {
-  //   try {
-  //     const res = await axios.get("/ajaxfiles/get_script_name_search");
-  //     setScriptOptions(res.data?.scripts || []);
-  //   } catch (err) {
-  //     console.error("Error loading script options", err);
-  //   }
-  // };
 
   // Main data fetch
   const fetchPositionData = async () => {
@@ -95,8 +77,6 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
-    // fetchMarketOptions();
-    // fetchScriptOptions();
     fetchPositionData(); // Initial load
     handleFetch('', "market");
   }, []);
@@ -126,7 +106,6 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
-    console.log('market', market);
     if (Object.keys(market || {}).length === 0) {
       setScript([]);
       setIsScriptNameDisable(true);
@@ -171,6 +150,27 @@ const OrderPage = () => {
         break;
     }
   };
+
+  async function handleAddScript() {
+    console.log("handleAddScriptAPI called...");
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const scriptIds = script.map(script => script.id);
+    console.log('market.id', market.id);
+    console.log('scriptIds', scriptIds);
+    //const data = await setScriptBlockSettingAPI(dataStored.user_id, dataStored.auth_key, market.id, scriptIds);
+    // if (data.status === 'ok') {
+    setMarket(null);
+    setScript([]);
+    // }
+  }
+
+  async function handleRemoveScript(script_block_id) {
+    console.log("handleRemoveScriptAPI called...");
+    console.log('script_block_id', script_block_id);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const scriptIds = script.map(script => script.id);
+    // await removeBlockListAPI(dataStored.user_id, dataStored.auth_key, script_block_id)
+  }
 
   return (
     <Box sx={{ p: 2 }}>
@@ -217,20 +217,6 @@ const OrderPage = () => {
               sx={inputBoxStyle}
             />
           </Grid>
-          {/* <Autocomplete
-            options={marketOptions}
-            getOptionLabel={(option) =>
-              typeof option === "string" ? option : option.name
-            }
-            value={selectedMarket}
-            onChange={(e, value) => setSelectedMarket(value)}
-            renderInput={(params) => (
-              <TextField {...params} label="Market" size="small" />
-            )}
-            sx={{ minWidth: 150 }}
-          /> */}
-
-
 
           {/* Script Name */}
           <Grid item xs={12} sm={6} md={3} lg={2.4}>
@@ -307,25 +293,11 @@ const OrderPage = () => {
             </Tooltip>
           </Grid>
 
-
-          {/* <Autocomplete
-            multiple
-            options={scriptOptions}
-            getOptionLabel={(option) =>
-              typeof option === "string" ? option : option.name
-            }
-            value={selectedScripts}
-            onChange={(e, value) => setSelectedScripts(value)}
-            renderInput={(params) => (
-              <TextField {...params} label="Script(s)" size="small" />
-            )}
-            sx={{ minWidth: 150 }}
-          /> */}
-
           <Button
+            disabled={script.length <= 0}
             variant="contained"
             color="secondary"
-            onClick={() => alert("Add clicked")}
+            onClick={handleAddScript}
             sx={{
               px: 2,
               borderRadius: 1,
@@ -384,6 +356,7 @@ const OrderPage = () => {
               minHeight: 60,
             }}
           >
+            {/* {console.log('%%% row', row)} */}
             {/* Left: Script + Market */}
             <Box
               sx={{
@@ -429,7 +402,7 @@ const OrderPage = () => {
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                alert("Remove clicked");
+                handleRemoveScript(row.script_block_id);
               }}
               sx={{
                 textTransform: "none",

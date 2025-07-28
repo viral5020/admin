@@ -59,6 +59,10 @@ export const MaxQTYDetails = loadable(() =>
   import('./Dashboard/MaxQTYDetails'), {
   fallback: <Loading />,
 });
+export const RejectionLogs = loadable(() =>
+  import('./Dashboard/RejectionLogs'), {
+  fallback: <Loading />,
+});
 export const OrderBook = loadable(() =>
   import('./Dashboard/OrderBook'), {
   fallback: <Loading />,
