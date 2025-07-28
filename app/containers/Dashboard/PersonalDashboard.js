@@ -3166,8 +3166,6 @@ function PersonalDashboard() {
                   : [
                     { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50', qty: 100, rate: '425.00', id: '#31452392', time: '12-07-2025 06:01:23', commission: 0 },
                   ];
-              console.log('SSSS stocks', stocks)
-              console.log("XXXXX")
 
               return (
                 <Grid key={index} item xs={12} md={4}>
