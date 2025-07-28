@@ -357,7 +357,7 @@ function Watchlist() {
   const description = brand.desc;
   const { classes } = useStyles();
   const [searchText, setSearchText] = useState('');
-  const [isStockOpen, setIsStockOpen] = useState();
+  const [isStockOpen, setIsStockOpen] = useState(false);
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
   const [dummyData, setDummyData] = useState(dummyWatchlistData)
 
@@ -433,7 +433,10 @@ function Watchlist() {
                   : <StockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
-                    watchList={dummyWatchlistData}
+                    // watchList={dummyWatchlistData}
+                    dummyData={dummyData}
+                    setDummyData={setDummyData}
+                    isDarkMode={isDarkMode}
                   />}
               </AccordionDetails>
             </Accordion>
@@ -447,7 +450,7 @@ function Watchlist() {
         <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} />
       )
         :
-        <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
+        <Dialog open={!!isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
           <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box display="flex" alignItems="center" gap={1}>
               <Typography variant="h6">{isStockOpen?.scriptName}</Typography>

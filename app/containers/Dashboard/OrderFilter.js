@@ -30,7 +30,7 @@ const OrderFilter = ({ isDarkMode, setStatus,
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [market, setMarket] = useState('');
-    const [script, setScript] = useState('');
+    const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
@@ -52,12 +52,17 @@ const OrderFilter = ({ isDarkMode, setStatus,
     useEffect(() => {
         console.log('market', market);
         if (Object.keys(market || {}).length === 0) {
+            setScript([]);
             setIsScriptNameDisable(true);
         } else {
             market.id ? handleFetch('', 'script') : null;
             setIsScriptNameDisable(false);
         }
     }, [market])
+
+    useEffect(() => {
+        console.log('script', script);
+    }, [script])
 
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
@@ -217,6 +222,7 @@ const OrderFilter = ({ isDarkMode, setStatus,
                         onBlur={() => {  // on focus out, if inputvalue don't match with any options then setMarket(null)
                             const matched = marketOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text);
                             (!matched) && setMarket(null);  // clear if unmatched
+                            // handleFetch('', 'market');
                         }}
                         renderInput={(params) => <TextField {...params} label="Market" size="small" sx={inputBoxStyle} />}
                         noOptionsText="No Market found"
@@ -233,28 +239,72 @@ const OrderFilter = ({ isDarkMode, setStatus,
                         title={isScriptNameDisable ? "First Select Market Name" : ""}
                     >
                         <Autocomplete
+                            multiple
                             disabled={isScriptNameDisable}
                             options={scriptOptions}
-                            getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                            value={script || null}
-                            inputValue={script?.text || ''}
+                            getOptionLabel={(option) =>
+                                typeof option === 'string' ? option : option?.text || ''
+                            }
+                            value={Array.isArray(script) ? script : []}
+                            filterSelectedOptions
                             onInputChange={(e, val, reason) => {
-                                (reason === 'input') && setScript({ text: val }); // tempararyly set Script value
-                                handleFetch(val, 'script');
+                                if (reason === 'input') {
+                                    handleFetch(val, 'script');
+                                }
                             }}
-                            onChange={(e, val) => setScript(val)}
-                            onBlur={() => {  // on focus out, if inputvalue don't match with any options then setScript(null)
-                                console.log('scriptOptions', scriptOptions);
-                                console.log('script?.text', script?.text);
-                                console.log('opt?.text', opt?.text);
-                                const matched = scriptOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === script?.text);
-                                (!matched) && setScript(null);  // clear if unmatched
+                            onChange={(e, val) => {
+                                setScript(val);
                             }}
-                            renderInput={(params) => <TextField {...params} label="Script" size="small" sx={inputBoxStyle} />}
+                            renderOption={(props, option) => {
+                                const optionText = typeof option === 'string' ? option : option.text;
+                                const isSelected = script.some(
+                                    (item) =>
+                                        (typeof item === 'string' ? item : item.text) === optionText
+                                );
+
+                                return (
+                                    <li
+                                        {...props}
+                                        style={{
+                                            backgroundColor: isSelected
+                                                ? isDarkMode
+                                                    ? '#333'
+                                                    : '#e0f7fa'
+                                                : 'inherit',
+                                            color: isSelected ? '#999' : 'inherit',
+                                            pointerEvents: isSelected ? 'none' : 'auto',
+                                            opacity: isSelected ? 0.6 : 1,
+                                        }}
+                                        aria-disabled={isSelected}
+                                    >
+                                        {optionText}
+                                    </li>
+                                );
+                            }}
+
+                            // onBlur={() => {
+                            //     // Filter only those scripts which exist in scriptOptions
+                            //     const validScripts = script.filter((selectedItem) =>
+                            //         scriptOptions.some((opt) =>
+                            //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
+                            //         )
+                            //     );
+                            //     console.log('validScripts', validScripts);
+                            //     setScript(validScripts);
+                            // }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Script"
+                                    size="small"
+                                    sx={inputBoxStyle}
+                                />
+                            )}
                             noOptionsText="No Script found"
                             fullWidth
                             sx={inputBoxStyle}
                         />
+
                     </Tooltip>
                 </Grid>
 
