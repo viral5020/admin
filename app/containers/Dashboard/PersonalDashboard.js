@@ -183,7 +183,8 @@ const exampleStock = {
 const boxHeight = 300;
 
 function PersonalDashboard() {
-  const theme = useTheme(); const [trendStocks, setTrendStocks] = useState([]);
+  const theme = useTheme();
+  const [trendStocks, setTrendStocks] = useState([]);
 
   const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
 
@@ -264,8 +265,8 @@ function PersonalDashboard() {
   };
 
   const filteredPositions = positionData.filter((row) =>
-  row?.script_name?.toLowerCase().includes(searchTerm.toLowerCase())
-);
+    row?.script_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const filteredPendingOrders = pendingOrders.filter((order) =>
     order.scrp_name?.toLowerCase().includes(pendingSearchText.toLowerCase()) ||
@@ -438,7 +439,7 @@ function PersonalDashboard() {
     setLoading(false);
   };
 
-    const fetchLoginData = async () => {
+  const fetchLoginData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     const result = await fetchLoginDataAPI(dataStored.user_id, dataStored.auth_key);
@@ -455,7 +456,7 @@ function PersonalDashboard() {
     setLoading(false);
   };
 
- const fetchPendingOrders = async () => {
+  const fetchPendingOrders = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     const result = await fetchPendingOrdersAPI(dataStored.user_id, dataStored.auth_key);
@@ -463,10 +464,10 @@ function PersonalDashboard() {
     setLoading(false);
   };
 
-    const fetchRejectionLogs = async () => {
+  const fetchRejectionLogs = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const result = await fetchRejectionLogsAPI(dataStored.user_id,dataStored.auth_key,filterType,searchQuery);
+    const result = await fetchRejectionLogsAPI(dataStored.user_id, dataStored.auth_key, filterType, searchQuery);
     setRejectionLogs(result);
     setLoading(false);
   };
@@ -547,48 +548,48 @@ function PersonalDashboard() {
   }, [rejectionDialogOpen, filterType, searchQuery]);
 
   useEffect(() => {
-     const fetchTrendStocks = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const result = await fetchTrendStocksAPI(dataStored.user_id, dataStored.auth_key);
-    setTrendStocks(result);
-  };
+    const fetchTrendStocks = async () => {
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      const result = await fetchTrendStocksAPI(dataStored.user_id, dataStored.auth_key);
+      setTrendStocks(result);
+    };
 
     fetchTrendStocks();
   }, []);
 
   useEffect(() => {
     const fetchTrades = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (tabValue === 1 && selectedStock) {
-      setLoadingTrades(true);
-      setTradesError(null);
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      if (tabValue === 1 && selectedStock) {
+        setLoadingTrades(true);
+        setTradesError(null);
 
-      try {
-        const result = await fetchTradesAPI(dataStored.user_id,dataStored.auth_key,selectedStock.script_id);
-        setTradesData(result);
-      } catch (error) {
-        setTradesError("Failed to load trades data");
-        setTradesData([]);
-      } finally {
-        setLoadingTrades(false);
+        try {
+          const result = await fetchTradesAPI(dataStored.user_id, dataStored.auth_key, selectedStock.script_id);
+          setTradesData(result);
+        } catch (error) {
+          setTradesError("Failed to load trades data");
+          setTradesData([]);
+        } finally {
+          setLoadingTrades(false);
+        }
       }
-    }
-  };
+    };
 
     fetchTrades();
   }, [tabValue, selectedStock]);
 
   useEffect(() => {
-      const fetchPositions = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (tabValue === 2 && selectedStock) {
-      setLoading(true);
-      setPositionData([]); // clear old data
-      const result = await fetchStockPositionsAPI(dataStored.user_id,dataStored.auth_key,selectedStock.script_id);
-      setPositionData(result);
-      setLoading(false);
-    }
-  };
+    const fetchPositions = async () => {
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      if (tabValue === 2 && selectedStock) {
+        setLoading(true);
+        setPositionData([]); // clear old data
+        const result = await fetchStockPositionsAPI(dataStored.user_id, dataStored.auth_key, selectedStock.script_id);
+        setPositionData(result);
+        setLoading(false);
+      }
+    };
 
     fetchPositions();
   }, [tabValue, selectedStock]);
@@ -628,12 +629,12 @@ function PersonalDashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const result = await fetchDashboardDataAPI(dataStored.user_id, dataStored.auth_key);
-    if (result) {
-      setDashboardData(result);
-    }
-  };
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      const result = await fetchDashboardDataAPI(dataStored.user_id, dataStored.auth_key);
+      if (result) {
+        setDashboardData(result);
+      }
+    };
 
     fetchDashboardData();
   }, []);
@@ -1191,42 +1192,42 @@ function PersonalDashboard() {
               </IconButton>
             </Box>
 
-           <Box sx={{ px: 1, py: 0.5, backgroundColor: "background.default" }}>
-  <TextField
-    fullWidth
-    variant="outlined"
-    placeholder="Search positions..."
-    size="small"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start" sx={{ mr: 0.5 }}>
-          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
-        </InputAdornment>
-      ),
-    }}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-        height: 36,
-        fontSize: 13,
-        '& fieldset': {
-          borderColor: '#ccc',
-        },
-        '&:hover fieldset': {
-          borderColor: '#666',
-        },
-        '&.Mui-focused fieldset': {
-          borderColor: '#000', // 🔥 Black border on focus
-        },
-      },
-      '& input': {
-        py: 0.5,
-      },
-    }}
-  />
-</Box>
+            <Box sx={{ px: 1, py: 0.5, backgroundColor: "background.default" }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Search positions..."
+                size="small"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                      <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    height: 36,
+                    fontSize: 13,
+                    '& fieldset': {
+                      borderColor: '#ccc',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#666',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#000', // 🔥 Black border on focus
+                    },
+                  },
+                  '& input': {
+                    py: 0.5,
+                  },
+                }}
+              />
+            </Box>
 
 
             {/* Body */}
@@ -3136,6 +3137,7 @@ function PersonalDashboard() {
           </Paper>
         </Grid>
 
+        {console.log("ZZZZZZZZZZ")}
         {/*--------------------- LAST 3 CARDS ---------------------*/}
         <Grid item xs={12}>
           <Grid container spacing={0.5}>
@@ -3164,6 +3166,8 @@ function PersonalDashboard() {
                   : [
                     { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50', qty: 100, rate: '425.00', id: '#31452392', time: '12-07-2025 06:01:23', commission: 0 },
                   ];
+              console.log('SSSS stocks', stocks)
+              console.log("XXXXX")
 
               return (
                 <Grid key={index} item xs={12} md={4}>
@@ -3857,81 +3861,81 @@ function PersonalDashboard() {
                   </Box>
                 ) : (
                   <Box
-  sx={{
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    height: "100%",
-    overflow: "hidden",
-    mx: 1,
-    my: 1,
-  }}
->
-  <Box
-    sx={{
-      flexGrow: 1,
-      overflow: "auto",
-      border: "1px solid #ddd",
-    }}
-  >
-                    <Table sx={{ minWidth: 1350, fontSize: "12px" }}>
-                      <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                        <TableRow>
-                          <TableCell>Market Type</TableCell>
-                          <TableCell>Script</TableCell>
-                          <TableCell>Total Buy</TableCell>
-                          <TableCell>Buy Avg Rate</TableCell>
-                          <TableCell>Total Sell</TableCell>
-                          <TableCell>Sell Avg Rate</TableCell>
-                          <TableCell>Net Qty</TableCell>
-                          <TableCell>Last Trade Price</TableCell>
-                          <TableCell>MTM</TableCell>
-                          <TableCell>Auto Closed Date</TableCell>
-                          <TableCell>Close Btn</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {filteredPositions.map((row, index) => {
-                          const isEven = index % 2 === 0;
-                          const rowBgColor =
-                            theme.palette.mode === "dark"
-                              ? isEven
-                                ? "#2a2a2a"
-                                : "#1f1f1f"
-                              : isEven
-                                ? "#f9f9f9"
-                                : "#ffffff";
-                          return (
-                            <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
-                              <TableCell>{row.market_type_name}</TableCell>
-                              <TableCell>
-                                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-                              </TableCell>
-                              <TableCell>{row.total_buy}</TableCell>
-                              <TableCell>{row.buy_avg_rate}</TableCell>
-                              <TableCell>{row.total_sell}</TableCell>
-                              <TableCell>{row.sell_avg_rate}</TableCell>
-                              <TableCell>{row.net_qty}</TableCell>
-                              <TableCell>{row.last_trade_price}</TableCell>
-                              <TableCell>
-                                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-                              </TableCell>
-                              <TableCell>{row.trade_auto_closed_date}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="contained"
-                                  color="error"
-                                  onClick={() => alert("Close Position")}
-                                >
-                                  Close
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </Box>
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: 1,
+                      height: "100%",
+                      overflow: "hidden",
+                      mx: 1,
+                      my: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        overflow: "auto",
+                        border: "1px solid #ddd",
+                      }}
+                    >
+                      <Table sx={{ minWidth: 1350, fontSize: "12px" }}>
+                        <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                          <TableRow>
+                            <TableCell>Market Type</TableCell>
+                            <TableCell>Script</TableCell>
+                            <TableCell>Total Buy</TableCell>
+                            <TableCell>Buy Avg Rate</TableCell>
+                            <TableCell>Total Sell</TableCell>
+                            <TableCell>Sell Avg Rate</TableCell>
+                            <TableCell>Net Qty</TableCell>
+                            <TableCell>Last Trade Price</TableCell>
+                            <TableCell>MTM</TableCell>
+                            <TableCell>Auto Closed Date</TableCell>
+                            <TableCell>Close Btn</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {filteredPositions.map((row, index) => {
+                            const isEven = index % 2 === 0;
+                            const rowBgColor =
+                              theme.palette.mode === "dark"
+                                ? isEven
+                                  ? "#2a2a2a"
+                                  : "#1f1f1f"
+                                : isEven
+                                  ? "#f9f9f9"
+                                  : "#ffffff";
+                            return (
+                              <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
+                                <TableCell>{row.market_type_name}</TableCell>
+                                <TableCell>
+                                  <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+                                </TableCell>
+                                <TableCell>{row.total_buy}</TableCell>
+                                <TableCell>{row.buy_avg_rate}</TableCell>
+                                <TableCell>{row.total_sell}</TableCell>
+                                <TableCell>{row.sell_avg_rate}</TableCell>
+                                <TableCell>{row.net_qty}</TableCell>
+                                <TableCell>{row.last_trade_price}</TableCell>
+                                <TableCell>
+                                  <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+                                </TableCell>
+                                <TableCell>{row.trade_auto_closed_date}</TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => alert("Close Position")}
+                                  >
+                                    Close
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </Box>
                   </Box>
                 )}
               </>

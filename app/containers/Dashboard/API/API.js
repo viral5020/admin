@@ -156,7 +156,7 @@ export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
 
 export const fetchTrendStocksAPI = async (userId, authKey) => {
   try {
-    const response = await fetchClient("/ajaxfiles/tranding_trades", {
+    const data = await fetchClient("/ajaxfiles/tranding_trades", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -168,8 +168,6 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
       }),
     });
 
-    const data = response.data || response; // ✅ no .json()
-
     if (data && data.status === "ok" && data.data) {
       return data.data.map((item) => ({
         Id: item.script_id,
@@ -179,7 +177,6 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
         rateChange: item.rateChange,
       }));
     }
-
     return [];
   } catch (error) {
     console.error("Failed to fetch Scripts in Trends:", error);
