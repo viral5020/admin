@@ -253,16 +253,16 @@ module.exports = [
     icon: 'cube-outline'
   },
   {
-    key: 'Blocked Scripts',
-    name: 'Blocked Scripts',
-    link: '/app/dashboard/blocked-scripts',
+    key: 'Banned Scripts',
+    name: 'Banned Scripts',
+    link: '/app/dashboard/Banned-scripts',
     icon: 'ban-outline'
   },
   {
     key: 'Max QTY details',
     name: 'Max QTY details',
     link: '/app/dashboard/max-qty-details',
-    icon: 'ban-outline'
+    icon: 'reader-outline'
   },
   {
     key: 'login2',

@@ -228,21 +228,34 @@ const OrderBook = () => {
     {/* Row 2 */}
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 700,
-            color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
-            ml: 0.5,
-            m: 0,
-            lineHeight: 1,
-          }}
-        >
-          {item.trd_type}
-          <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
-        </Typography>
-      </Box>
+  <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+
+  <Typography
+    component="span"
+    variant="body2"
+    sx={{
+      ml: 0.5,
+      fontSize: "1rem",
+    }}
+  >
+    {isBuy ? "📈" : isSell ? "📉" : ""}
+  </Typography>
+
+  <Typography
+    variant="body2"
+    sx={{
+      fontWeight: 700,
+      color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
+      ml: 0.5,
+      m: 0,
+      lineHeight: 1,
+    }}
+  >
+    {item.trd_type}
+    <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
+  </Typography>
+</Box>
+
       <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
         ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
       </Typography>

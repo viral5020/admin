@@ -62,7 +62,7 @@ function Application(props) {
           <Route path="dashboard/edit-Delete-Logs" element={<EditDeleteLogs />} />
           <Route path="dashboard/order-Book" element={<OrderBook />} />
           <Route path="dashboard/positions" element={<Positions />} />
-          <Route path="dashboard/blocked-scripts" element={<BlockedScripts />} />
+          <Route path="dashboard/banned-scripts" element={<BlockedScripts />} />
           <Route path="dashboard/max-qty-details" element={<MaxQTYDetails />} />
         </Route>
 
