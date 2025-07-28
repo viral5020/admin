@@ -3,8 +3,6 @@ import axios from 'axios';
 import {
     Box,
     Button,
-    Card,
-    CardContent,
     CircularProgress,
     InputAdornment,
     MenuItem,
@@ -22,7 +20,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useIsFirstRender } from '@uidotdev/usehooks';
-
+import AddIcon from '@mui/icons-material/Add';
 
 const EditDeleteLogs = () => {
     const theme = useTheme();
@@ -35,8 +33,21 @@ const EditDeleteLogs = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
+
     const [userLevels, setUserLevels] = useState([]);
     const [selectedUserLevel, setSelectedUserLevel] = useState('');
+
+    // filter panel state
+    const [showFilters, setShowFilters] = useState(false);
+    const [marketOptions, setMarketOptions] = useState([]);
+    const [scriptOptions, setScriptOptions] = useState([]);
+    const [marketName, setMarketName] = useState('');
+    const [scriptName, setScriptName] = useState('');
+    const [positionLimit, setPositionLimit] = useState('');
+    const [minOrder, setMinOrder] = useState('');
+    const [maxOrder, setMaxOrder] = useState('');
+    const [minBet, setMinBet] = useState('');
+    const [maxBet, setMaxBet] = useState('');
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
@@ -48,17 +59,25 @@ const EditDeleteLogs = () => {
                 'http://128.199.126.171/~goldorg/datatables/script_qty_list',
                 {
                     is_app: '1',
-                     login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
+                    login_user_id: dataStored?.user_id,
+                    auth_key: dataStored?.auth_key,
                     sEcho: 1,
                     iDisplayStart: currentPage * pageSize,
                     iDisplayLength: pageSize,
                     sSearch: search,
+                    user_level: selectedUserLevel,
+                    market_name: marketName,
+                    script_name: scriptName,
+                    position_limit: positionLimit,
+                    min_order: minOrder,
+                    max_order: maxOrder,
+                    min_bet: minBet,
+                    max_bet: maxBet,
                 }
             );
 
             const newData = response.data.aaData || [];
-            setLogs(prevLogs => append ? [...prevLogs, ...newData] : newData);
+            setLogs(prev => append ? [...prev, ...newData] : newData);
             setTotalRecords(response.data.iTotalRecords || 0);
         } catch (err) {
             console.error('Failed to fetch logs:', err);
@@ -68,359 +87,463 @@ const EditDeleteLogs = () => {
     };
 
     useEffect(() => {
-        !isMobile ? fetchLogs(searchText) : fetchLogs(searchText, true);
-    }, [currentPage, pageSize]);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-
-    useEffect(() => {
         const fetchUserLevels = async () => {
-             const dataStored = JSON.parse(sessionStorage.getItem("data"));
             try {
                 const res = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_user_level', {
                     is_app: '1',
                     login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
+                    auth_key: dataStored?.auth_key,
                 });
-
-                if (Array.isArray(res.data)) {
-                    setUserLevels(res.data);
-                } else if (res.data?.data && Array.isArray(res.data.data)) {
-                    setUserLevels(res.data.data);
-                } else {
-                    console.error('❌ Invalid user level data:', res.data);
-                }
+                const levels = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
+                setUserLevels(levels);
             } catch (err) {
-                console.error('⚠️ Failed to fetch user levels:', err);
+                console.error('Failed to fetch user levels:', err);
             }
         };
 
-        fetchUserLevels();
-    }, []);
+        const fetchFilters = async () => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    try {
+        const res = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter', {
+            is_app: '1',
+            login_user_id: dataStored?.user_id,
+            auth_key: dataStored?.auth_key,
+        });
 
+        const staticMarket = { value: "3", label: "Cricket" };
+        const marketList = Array.isArray(res.data?.market_list) ? res.data.market_list : [];
+        const scriptList = Array.isArray(res.data?.script_list) ? res.data.script_list : [];
+
+        const updatedMarkets = [...marketList, staticMarket];
+
+        let updatedScripts = [...scriptList];
+
+        if (marketName === "3") {
+            const staticScripts = [
+                { value: "169", label: "MATCH_ODDS" },
+                { value: "170", label: "FANCY_ODDS" },
+            ];
+            updatedScripts = [...updatedScripts, ...staticScripts];
+        }
+
+        setMarketOptions(updatedMarkets);
+        setScriptOptions(updatedScripts);
+    } catch (err) {
+        console.error('Failed to fetch filters:', err);
+    }
+};
+
+
+        fetchUserLevels();
+        fetchFilters();
+    }, [marketName]);
+
+    useEffect(() => {
+        !isMobile ? fetchLogs(searchText) : fetchLogs(searchText, true);
+    }, [currentPage, pageSize]);
 
     useEffect(() => {
         const delay = setTimeout(() => {
             setCurrentPage(0);
-            !isFirstRender && fetchLogs(searchText);
+            if (!isFirstRender) fetchLogs(searchText);
         }, 500);
         return () => clearTimeout(delay);
     }, [searchText]);
 
-    return (
+   useEffect(() => {
+    if (!isFirstRender) {
+        setCurrentPage(0);
+        fetchLogs(searchText);
+    }
+}, [selectedUserLevel]);
+
+    const handleSubmit = () => {
+        // validation & payload building
+        if (marketName !== "3") {
+            if (!selectedUserLevel || !marketName || !scriptName || positionLimit === "" || maxOrder === "" ||
+                parseFloat(positionLimit) < 0 || parseFloat(maxOrder) < 0
+            ) {
+                console.error("fill required fields");
+                return;
+            }
+            console.log({
+                user_type: selectedUserLevel,
+                market_type_id: marketName,
+                script_id: scriptName,
+                position_limit: positionLimit,
+                maximum_order: maxOrder,
+                min_order: minOrder
+            });
+        } else {
+            if (!marketName || !scriptName || minBet === "" || maxBet === "" ||
+                parseFloat(minBet) < 0 || parseFloat(maxBet) < 0
+            ) {
+                console.error("fill required for cricket");
+                return;
+            }
+            console.log({
+                user_type: selectedUserLevel,
+                market_type_id: marketName,
+                script_id: scriptName,
+                min_order: minBet,
+                maximum_order: maxBet
+            });
+        }
+    };
+
+    const handleCancel = () => {
+  setMarketName('');
+  setScriptName('');
+  setPositionLimit('');
+  setMinOrder('');
+  setMaxOrder('');
+  setMinBet('');
+  setMaxBet('');
+  setShowFilters(false);
+};
+const handleFilterToggle = () => {
+    if (showFilters) {
+        // Reset all filter fields
+        setMarketName('');
+        setScriptName('');
+        setPositionLimit('');
+        setMinOrder('');
+        setMaxOrder('');
+        setMinBet('');
+        setMaxBet('');
+    }
+    setShowFilters(prev => !prev);
+};
+
+
+   return (
+  <>
+    <Paper sx={{ p: 2, borderRadius: 2 }}>
+      {/* Filters and Controls */}
+      {!isMobile ? (
+        // Desktop View Controls
+        <Box sx={{
+          display: 'flex',
+          gap: 0.5,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 1,
+          mx: 1,
+          flexWrap: 'wrap',
+        }}>
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            <TextField
+              select
+              label="User Level"
+              value={selectedUserLevel}
+              onChange={(e) => { setSelectedUserLevel(e.target.value); setCurrentPage(0); }}
+              size="small"
+              sx={{ width: 180 }}
+            >
+              {userLevels.map(level => (
+                <MenuItem key={level.user_level_id} value={level.user_level_id}>
+                  {level.user_level_name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              select
+              label="Rows per page"
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(0); }}
+              size="small"
+              sx={{ width: 150 }}
+            >
+              {[10, 25, 50].map(option => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </TextField>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexGrow: 1 }}>
+            <TextField
+              variant="outlined"
+              placeholder="Search logs..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              size="small"
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+            <Button
+  variant="outlined"
+  size="small"
+  startIcon={<AddIcon />}
+  onClick={handleFilterToggle} // replace this
+>
+  {showFilters ? 'CANCEL' : 'ADD POSITION'}
+</Button>
+          </Box>
+        </Box>
+      ) : (
+        // Mobile View Controls
+       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+  {/* User Level and Filter Side-by-Side */}
+  <Box sx={{ display: 'flex', gap: 1 }}>
+    <TextField
+      select
+      label="User Level"
+      value={selectedUserLevel}
+      onChange={(e) => { setSelectedUserLevel(e.target.value); setCurrentPage(0); }}
+      size="small"
+      fullWidth
+      sx={{ flex: 1 }}
+    >
+      {userLevels.map(level => (
+        <MenuItem key={level.user_level_id} value={level.user_level_id}>
+          {level.user_level_name}
+        </MenuItem>
+      ))}
+    </TextField>
+<Button
+  variant="outlined"
+  size="small"
+  startIcon={<AddIcon />}
+  onClick={handleFilterToggle} // replace this
+>
+  {showFilters ? 'CANCEL' : 'ADD POSITION'}
+</Button>
+  </Box>
+
+  {/* Search Field Below */}
+  <TextField
+    variant="outlined"
+    placeholder="Search logs..."
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    size="small"
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+        </InputAdornment>
+      ),
+    }}
+    fullWidth
+  />
+</Box>
+
+      )}
+
+      {/* Filters Section (Shared) */}
+     {showFilters && (
+  <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+    <TextField select label="Market" value={marketName}
+      onChange={e => setMarketName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
+      {marketOptions.map(m =>
+        <MenuItem key={m.value || m.market_name} value={m.value || m.market_name}>
+          {m.label || m.market_name}
+        </MenuItem>
+      )}
+    </TextField>
+
+    <TextField select label="Script" value={scriptName}
+      onChange={e => setScriptName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
+      {scriptOptions.map(s =>
+        <MenuItem key={s.value || s.script_name} value={s.value || s.script_name}>
+          {s.label || s.script_name}
+        </MenuItem>
+      )}
+    </TextField>
+
+    {[{ label: 'Position', val: positionLimit, set: setPositionLimit },
+    { label: 'Min Order', val: minOrder, set: setMinOrder },
+    { label: 'Max Order', val: maxOrder, set: setMaxOrder },
+    { label: 'Min Bet', val: minBet, set: setMinBet },
+    { label: 'Max Bet', val: maxBet, set: setMaxBet }].map(({ label, val, set }) => (
+      <TextField
+        key={label}
+        label={label}
+        type="number"
+        value={val}
+        onChange={(e) => set(e.target.value)}
+        size="small"
+        fullWidth={isMobile}
+        sx={{ width: isMobile ? '100%' : 150 }}
+      />
+    ))}
+
+   <Box sx={{ display: 'flex', gap: 1 }}>
+  <Button
+    variant="outlined"
+    color="secondary"
+    onClick={handleSubmit}
+    sx={{ flex: 1 }}
+  >
+    ADD
+  </Button>
+  <Button
+    variant="outlined"
+    color="error"
+    onClick={handleCancel}
+    sx={{ flex: 1 }}
+  >
+    CANCEL
+  </Button>
+</Box>
+
+  </Box>
+)}
+
+
+      {/* Logs Table or Cards */}
+      {logs.length === 0 && !loading ? (
+        <Typography textAlign="center">No Logs Found</Typography>
+      ) : loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
+      ) : (
         <>
-            {!isMobile ? (
-                <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            gap: 0.2,
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 0.5,
-                            mx: 1,
-                            flexWrap: 'wrap',
-                        }}
-                    >
-                        {/* User Level Dropdown */}
-                        <TextField
-                            select
-                            label="User Level"
-                            value={selectedUserLevel}
-                            onChange={(e) => setSelectedUserLevel(e.target.value)}
-                            size="small"
-                            sx={{ width: 180, flexShrink: 0 }}
-                        >
-                            {userLevels.map((level) => (
-                                <MenuItem key={level.user_level_id} value={level.user_level_id}>
-                                    {level.user_level_name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+          {!isMobile ? (
+            // Desktop: Table
+            <TableContainer sx={{ maxHeight: '70vh' }}>
+              <Table stickyHeader size="small" sx={{ minWidth: 600 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Level</TableCell>
+                    <TableCell>Market</TableCell>
+                    <TableCell>Script</TableCell>
+                    <TableCell>Position</TableCell>
+                    <TableCell>Max Order</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {logs.map((log, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{log.level_name}</TableCell>
+                      <TableCell>{log.market_name || '-'}</TableCell>
+                      <TableCell>{log.script_name || '-'}</TableCell>
+                      <TableCell>{log.position_limit}</TableCell>
+                      <TableCell>{log.max_order}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            // Mobile: Card UI
+            <Box>
+  {logs.map((log, index) => (
+    <Box
+      key={index}
+      sx={{
+        mb: 0.5,
+        borderRadius: 2,
+        background: 'linear-gradient(to right, #2196f3, #21cbf3)',
+        p: '1px',
+        boxShadow: '0 2px 8px rgba(33, 203, 243, 0.2)',
+      }}
+    >
+      <Box
+        sx={{
+          borderRadius: 2,
+          backgroundColor: '#fff',
+          p: 0.5,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Typography fontWeight="bold" fontSize="15px">
+          {log.script_name || '-'}
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography fontSize="13px" color="text.secondary">
+            {log.level_name || '-'}
+          </Typography>
+          <Typography fontSize="13px" color="text.secondary">
+            {log.market_name || '-'}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography fontSize="14px" fontWeight={500}>
+            {Number(log.position_limit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Typography>
+          <Typography fontSize="14px" fontWeight={500}>
+            {Number(log.max_order).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  ))}
+</Box>
 
-                        {/* Rows Per Page */}
-                        <TextField
-                            select
-                            label="Rows per page"
-                            value={pageSize}
-                            onChange={(e) => {
-                                setPageSize(Number(e.target.value));
-                                setCurrentPage(0);
-                            }}
-                            size="small"
-                            sx={{ width: 150 }}
-                        >
-                            {[10, 25, 50].map((option) => (
-                                <MenuItem key={option} value={option}>
-                                    {option}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+          )}
 
-                        {/* Search Field */}
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Box>
+          {/* Pagination */}
+     <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'flex-start',
+    gap: 1,
+    pt: 2,
+    flexWrap: 'wrap',
+  }}
+>
+  <Button
+    size="small"
+    disabled={currentPage === 0}
+    onClick={() => setCurrentPage((prev) => prev - 1)}
+    color="secondary"
+    variant="outlined"
+  >
+    Prev
+  </Button>
 
+  {[...Array(totalPages)].map((_, i) => {
+    if (
+      i === 0 ||
+      i === totalPages - 1 ||
+      (i >= currentPage - 1 && i <= currentPage + 1)
+    ) {
+      return (
+        <Button
+          key={i}
+          size="small"
+          variant={i === currentPage ? 'contained' : 'outlined'}
+          onClick={() => setCurrentPage(i)}
+          color="secondary"
+        >
+          {i + 1}
+        </Button>
+      );
+    }
+    if (
+      (i === 1 && currentPage > 2) ||
+      (i === totalPages - 2 && currentPage < totalPages - 3)
+    ) {
+      return (
+        <Typography key={i} sx={{ color: 'secondary.main' }}>
+          ...
+        </Typography>
+      );
+    }
+    return null;
+  })}
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign="center">No Logs Found</Typography>
-                    )}
-
-                    {loading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                            <CircularProgress />
-                        </Box>
-                    ) : (
-                        <>
-                            <TableContainer
-                                sx={{
-                                    maxHeight: '70vh',
-                                    overflow: 'auto',
-                                    '&::-webkit-scrollbar': {
-                                        height: 6,
-                                    },
-                                    '&::-webkit-scrollbar-track': {
-                                        backgroundColor: '#f1f1f1',
-                                        borderRadius: 4,
-                                    },
-                                    '&::-webkit-scrollbar-thumb': {
-                                        backgroundColor: '#888',
-                                        borderRadius: 4,
-                                    },
-                                    '&::-webkit-scrollbar-thumb:hover': {
-                                        backgroundColor: '#555',
-                                    },
-                                }}
-                            >
-                                <Table stickyHeader size="small" sx={{ minWidth: 600 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>level_name</TableCell>
-                                            <TableCell>market_name</TableCell>
-                                            <TableCell>script_name</TableCell>
-                                            <TableCell>position_limit</TableCell>
-                                            <TableCell>max_order</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {logs.map((log, i) => (
-                                            <TableRow key={i}>
-                                                <TableCell>{log.level_name}</TableCell>
-                                                <TableCell>{log.market_name || '-'}</TableCell>
-                                                <TableCell>{log.script_name || '-'}</TableCell>
-                                                <TableCell>{log.position_limit}</TableCell>
-                                                <TableCell>{log.max_order}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    pt: 2,
-                                    flexWrap: 'wrap',
-                                    gap: 2,
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    <Button
-                                        size="small"
-                                        disabled={currentPage === 0}
-                                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                                        color="secondary"
-                                        sx={{ mr: 1 }}
-                                    >
-                                        Prev
-                                    </Button>
-
-                                    {[...Array(totalPages)].map((_, i) => {
-                                        if (
-                                            i === 0 ||
-                                            i === totalPages - 1 ||
-                                            (i >= currentPage - 1 && i <= currentPage + 1)
-                                        ) {
-                                            return (
-                                                <Button
-                                                    key={i}
-                                                    size="small"
-                                                    variant={i === currentPage ? 'contained' : 'outlined'}
-                                                    color="secondary"
-                                                    onClick={() => setCurrentPage(i)}
-                                                    sx={{ mx: 0.3, minWidth: '30px' }}
-                                                >
-                                                    {i + 1}
-                                                </Button>
-                                            );
-                                        }
-                                        if (
-                                            (i === 1 && currentPage > 2) ||
-                                            (i === totalPages - 2 && currentPage < totalPages - 3)
-                                        ) {
-                                            return (
-                                                <Typography key={i} sx={{ mx: 0.5 }}>
-                                                    ...
-                                                </Typography>
-                                            );
-                                        }
-                                        return null;
-                                    })}
-
-                                    <Button
-                                        size="small"
-                                        disabled={currentPage + 1 >= totalPages}
-                                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                                        color="secondary"
-                                        sx={{ ml: 1 }}
-                                    >
-                                        Next
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </>
-                    )}
-                </Paper>
-            ) : (
-                <>
-                    {/* Mobile Cards */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.2,
-                            mb: 0.5,
-                            mx: 0.2,
-                            flexWrap: 'nowrap',
-                        }}
-                    >
-                        {/* User Level Dropdown (fixed width) */}
-                        <TextField
-                            select
-                            label="User Level"
-                            value={selectedUserLevel}
-                            onChange={(e) => setSelectedUserLevel(e.target.value)}
-                            size="small"
-                            sx={{ width: 150, flexShrink: 0 }}
-                        >
-                            {userLevels.map((level) => (
-                                <MenuItem key={level.user_level_id} value={level.user_level_id}>
-                                    {level.user_level_name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-
-                        {/* Search Field (flex-grow to fill space) */}
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Box>
+  <Button
+    size="small"
+    disabled={currentPage + 1 >= totalPages}
+    onClick={() => setCurrentPage((prev) => prev + 1)}
+    color="secondary"
+    variant="outlined"
+  >
+    Next
+  </Button>
+</Box>
 
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign="center">No Logs Found</Typography>
-                    )}
-
-                    {logs.map((log, index) => (
-                        <Box
-                            key={index}
-                            sx={{
-                                mb: 0.5,
-                                mx: 0.5,
-                                borderRadius: 3,
-                                background: 'linear-gradient(to right, #2196f3, #21cbf3)',
-                                p: '2px', // thin gradient border
-                                boxShadow: '0 4px 12px rgba(33, 203, 243, 0.5)',
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    borderRadius: 3,
-                                    backgroundColor: '#fff',
-                                    p: 1,
-                                }}
-                            >
-                                {/* Script Title */}
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    {log.script_name || '-'}
-                                </Typography>
-
-                                {/* First Row: Group & Exchange */}
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography variant="body2">
-                                        <strong></strong> {log.level_name}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        <strong></strong> {log.market_name || '-'}
-                                    </Typography>
-                                </Box>
-
-                                {/* Second Row: Qty & Rate */}
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography variant="body2">
-                                        <strong></strong> {log.position_limit}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        <strong></strong> {log.max_order}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                    ))}
-
-                    {logs.length < totalRecords && (
-                        <>
-
-                            {loading ? (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                                    <CircularProgress />
-                                </Box>
-                            ) : (<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => {
-                                        const nextPage = currentPage + 1;
-                                        setCurrentPage(nextPage);  // this will call fetchLogs in useeffcet
-                                        // fetchLogs(searchText, nextPage, true);
-                                    }}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Loading...' : 'Load More'}
-                                </Button>
-                            </Box>)}
-                        </>
-                    )}
-                </>
-            )}
         </>
-    );
+      )}
+    </Paper>
+  </>
+);
+
 };
 
 export default EditDeleteLogs;
