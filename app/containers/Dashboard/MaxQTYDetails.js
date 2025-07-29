@@ -428,28 +428,28 @@ const handleFilterToggle = () => {
             </TableContainer>
           ) : (
             // Mobile: Card UI
-            <Box>
+    <Box>
   {logs.map((log, index) => (
     <Box
       key={index}
       sx={{
         mb: 0.5,
         borderRadius: 2,
-        background: 'linear-gradient(to right, #2196f3, #21cbf3)',
+        background: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
         p: '1px',
-        boxShadow: '0 2px 8px rgba(33, 203, 243, 0.2)',
+        boxShadow: `0 2px 8px ${theme.palette.mode === 'dark' ? 'rgba(33, 203, 243, 0.1)' : 'rgba(33, 203, 243, 0.2)'}`,
       }}
     >
       <Box
         sx={{
           borderRadius: 2,
-          backgroundColor: '#fff',
+          backgroundColor: theme.palette.background.paper,
           p: 0.5,
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        <Typography fontWeight="bold" fontSize="15px">
+        <Typography fontWeight="bold" fontSize="15px" color="text.primary">
           {log.script_name || '-'}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -461,10 +461,10 @@ const handleFilterToggle = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography fontSize="14px" fontWeight={500}>
+          <Typography fontSize="14px" fontWeight={500} color="text.primary">
             {Number(log.position_limit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </Typography>
-          <Typography fontSize="14px" fontWeight={500}>
+          <Typography fontSize="14px" fontWeight={500} color="text.primary">
             {Number(log.max_order).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </Typography>
         </Box>
@@ -472,6 +472,7 @@ const handleFilterToggle = () => {
     </Box>
   ))}
 </Box>
+
 
           )}
 
