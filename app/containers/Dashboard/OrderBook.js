@@ -193,83 +193,83 @@ const OrderBook = () => {
                 : "rgba(0,0,0,0.1)";
 
             return (
-      <Card
-  key={item.trd_id || index}
-  sx={{
-    mb: 1,
-    mx: 1,
-    borderRadius: 2,
-    border: "1px solid transparent",
-    backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
-    backgroundOrigin: "border-box",
-    backgroundClip: "content-box, border-box",
-    boxShadow: `0 4px 12px ${boxShadowColor}`,
-    "&:hover": {
-      transform: "scale(1.02)",
-      boxShadow: `0 8px 20px ${boxShadowColor}`,
-    },
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-  }}
->
-  <CardContent
-    sx={{
-      p: 0.5,
-      "&:last-child": { pb: 0.5 },
-    }}
-  >
-    {/* Row 1 */}
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
-        {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
-      </Typography>
-      <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>ID: #{item.trd_id}</Typography>
-    </Box>
+              <Card
+                key={item.trd_id || index}
+                sx={{
+                  mb: 1,
+                  mx: 1,
+                  borderRadius: 2,
+                  border: "1px solid transparent",
+                  backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
+                  backgroundOrigin: "border-box",
+                  backgroundClip: "content-box, border-box",
+                  boxShadow: `0 4px 12px ${boxShadowColor}`,
+                  "&:hover": {
+                    transform: "scale(1.02)",
+                    boxShadow: `0 8px 20px ${boxShadowColor}`,
+                  },
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: 0.5,
+                    "&:last-child": { pb: 0.5 },
+                  }}
+                >
+                  {/* Row 1 */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
+                      {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
+                    </Typography>
+                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>ID: #{item.trd_id}</Typography>
+                  </Box>
 
-    {/* Row 2 */}
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-  <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                  {/* Row 2 */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
 
-  <Typography
-    component="span"
-    variant="body2"
-    sx={{
-      ml: 0.5,
-      fontSize: "1rem",
-    }}
-  >
-    {isBuy ? "📈" : isSell ? "📉" : ""}
-  </Typography>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          ml: 0.5,
+                          fontSize: "1rem",
+                        }}
+                      >
+                        {isBuy ? "📈" : isSell ? "📉" : ""}
+                      </Typography>
 
-  <Typography
-    variant="body2"
-    sx={{
-      fontWeight: 700,
-      color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
-      ml: 0.5,
-      m: 0,
-      lineHeight: 1,
-    }}
-  >
-    {item.trd_type}
-    <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
-  </Typography>
-</Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
+                          ml: 0.5,
+                          m: 0,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {item.trd_type}
+                        <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
+                      </Typography>
+                    </Box>
 
-      <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
-        ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
-      </Typography>
-    </Box>
+                    <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
+                      ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
+                    </Typography>
+                  </Box>
 
-    {/* Row 3 */}
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>{item.trd_time}</Typography>
-      <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-        Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
-      </Typography>
-    </Box>
-  </CardContent>
-</Card>
+                  {/* Row 3 */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>{item.trd_time}</Typography>
+                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+                      Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
 
 
             );

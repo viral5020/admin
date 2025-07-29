@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { setScriptBlockSettingAPI } from "./API/API";
+import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
 
 const OrderPage = () => {
   const theme = useTheme();
@@ -87,23 +88,6 @@ const OrderPage = () => {
     }, 500);
     return () => clearTimeout(delayDebounce);
   }, [searchText, selectedMarket, selectedScripts]);
-
-  const inputBoxStyle = {
-    backgroundColor: isDarkMode ? '#263238' : '#fff',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-root': {
-      height: 40,
-      '& fieldset': {
-        borderColor: '#c4c4c4',
-      },
-      '&:hover fieldset': {
-        borderColor: '#000',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#000',
-      },
-    },
-  };
 
   useEffect(() => {
     if (Object.keys(market || {}).length === 0) {
@@ -194,104 +178,14 @@ const OrderPage = () => {
             width: "100%",
           }}
         >
-          {/* Market Name */}
-          <Grid item xs={12} sm={6} md={3} lg={2.4}>
-            <Autocomplete
-              options={marketOptions}
-              getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-              value={market || null}
-              inputValue={market?.text || ''}
-              onInputChange={(e, val, reason) => {
-                (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
-                handleFetch(val, 'market');
-              }}
-              onChange={(e, val) => setMarket(val)}
-              onBlur={() => {  // on focus out, if inputvalue don't match with any options then setMarket(null)
-                const matched = marketOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text);
-                (!matched) && setMarket(null);  // clear if unmatched
-                // handleFetch('', 'market');
-              }}
-              renderInput={(params) => <TextField {...params} label="Market" size="small" sx={inputBoxStyle} />}
-              noOptionsText="No Market found"
-              fullWidth
-              sx={inputBoxStyle}
-            />
-          </Grid>
 
-          {/* Script Name */}
-          <Grid item xs={12} sm={6} md={3} lg={2.4}>
-            <Tooltip arrow disableHoverListener={!isScriptNameDisable}
-              title={isScriptNameDisable ? "First Select Market Name" : ""}
-            >
-              <Autocomplete
-                multiple
-                disabled={isScriptNameDisable}
-                options={scriptOptions}
-                getOptionLabel={(option) =>
-                  typeof option === 'string' ? option : option?.text || ''
-                }
-                value={Array.isArray(script) ? script : []}
-                filterSelectedOptions
-                onInputChange={(e, val, reason) => {
-                  if (reason === 'input') {
-                    handleFetch(val, 'script');
-                  }
-                }}
-                onChange={(e, val) => {
-                  setScript(val);
-                }}
-                renderOption={(props, option) => {
-                  const optionText = typeof option === 'string' ? option : option.text;
-                  const isSelected = script.some(
-                    (item) =>
-                      (typeof item === 'string' ? item : item.text) === optionText
-                  );
-
-                  return (
-                    <li
-                      {...props}
-                      style={{
-                        backgroundColor: isSelected
-                          ? isDarkMode
-                            ? '#333'
-                            : '#e0f7fa'
-                          : 'inherit',
-                        color: isSelected ? '#999' : 'inherit',
-                        pointerEvents: isSelected ? 'none' : 'auto',
-                        opacity: isSelected ? 0.6 : 1,
-                      }}
-                      aria-disabled={isSelected}
-                    >
-                      {optionText}
-                    </li>
-                  );
-                }}
-
-                // onBlur={() => {
-                //     // Filter only those scripts which exist in scriptOptions
-                //     const validScripts = script.filter((selectedItem) =>
-                //         scriptOptions.some((opt) =>
-                //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
-                //         )
-                //     );
-                //     console.log('validScripts', validScripts);
-                //     setScript(validScripts);
-                // }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Script"
-                    size="small"
-                    sx={inputBoxStyle}
-                  />
-                )}
-                noOptionsText="No Script found"
-                fullWidth
-                sx={inputBoxStyle}
-              />
-
-            </Tooltip>
-          </Grid>
+          <MarketScriptNameFilter
+            isDarkMode={isDarkMode}
+            market={market}
+            script={script}
+            setScript={setScript}
+            setMarket={setMarket}
+          />
 
           <Button
             disabled={script.length <= 0}

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Grid, Autocomplete, TextField, MenuItem, Select, InputLabel, FormControl, useMediaQuery,
-    Tooltip
+    Tooltip,
+    FormLabel,
+    RadioGroup,
+    FormControlLabel,
+    Radio
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
+import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
+import DateFilter from './filters/DateFilter';
+import RadioFilter from './filters/RadioFilterField';
+import { getInputBoxStyle } from './filters/inputBoxStyle';
 
 const statusOptions = [
-    { label: 'All', value: 'all' },
+    // { label: 'All', value: 'all' },
     { label: 'Pending Order', value: 'is_pending' },
     { label: 'Executed Order', value: 'is_executed' },
 ];
@@ -26,8 +35,8 @@ const OrderFilter = ({ isDarkMode, setStatus,
     start_end,
     orderType
 }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const theme = useTheme();
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [market, setMarket] = useState('');
     const [script, setScript] = useState([]);
@@ -35,112 +44,14 @@ const OrderFilter = ({ isDarkMode, setStatus,
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
 
-    const [marketSelectedVal, setMarketSelectedVal] = useState({});
-    const [scriptSelectedVal, setScriptSelectedVal] = useState({});
-    const [clientSelectedVal, setClientSelectedVal] = useState({});
-    const [masterSelectedVal, setMasterSelectedVal] = useState({});
-    const [brokerSelectedVal, setBrokerSelectedVal] = useState({});
-
-    const [marketOptions, setMarketOptions] = useState([]);
-    const [scriptOptions, setScriptOptions] = useState([]);
-    const [clientOptions, setClientOptions] = useState([]);
-    const [masterOptions, setMasterOptions] = useState([]);
-    const [brokerOptions, setBrokerOptions] = useState([]);
-
-    const [isScriptNameDisable, setIsScriptNameDisable] = useState(true)
-
-    useEffect(() => {
-        console.log('market', market);
-        if (Object.keys(market || {}).length === 0) {
-            setScript([]);
-            setIsScriptNameDisable(true);
-        } else {
-            market.id ? handleFetch('', 'script') : null;
-            setIsScriptNameDisable(false);
-        }
-    }, [market])
-
-    useEffect(() => {
-        console.log('script', script);
-    }, [script])
-
-    // Utility fetcher
-    async function fetchOptions(url, params, setter) {
-        try {
-            const { data } = await axios.post(url, params); // POST request with body
-            const results = data.results;
-            setter(Array.isArray(results) ? results : []);
-        } catch (err) {
-            console.error(`Error fetching from ${url}`, err);
-            setter([]);
-        }
-    };
-
-    useEffect(() => {
-        handleFetch('', "market");
-        handleFetch('', 'client');
-        handleFetch('', 'master');
-        handleFetch('', 'broker');
-    }, []);
-
-    const inputBoxStyle = {
-        backgroundColor: isDarkMode ? '#263238' : '#fff',
-        borderRadius: 1,
-        '& .MuiOutlinedInput-root': {
-            height: 40,
-            '& fieldset': {
-                borderColor: '#c4c4c4',
-            },
-            '&:hover fieldset': {
-                borderColor: '#000',
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: '#000',
-            },
-        },
-    };
-
-    // Autocomplete handlers
-    function handleFetch(term, type) {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        // if (!term) return;
-        let params = {
-            is_app: 1,
-            login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
-        }
-
-        const url = 'http://128.199.126.171/~goldorg/ajaxfiles'
-
-        switch (type) {
-            case 'market':
-                fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions);
-                break;
-            case 'script':
-                fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: market.id }, setScriptOptions);
-                break;
-            case 'client':
-                fetchOptions(`${url}/get_client_name_search`, { term: 1 }, setClientOptions);
-                break;
-            case 'master':
-                fetchOptions(`${url}/get_master_name_search`, { term: 1 }, setMasterOptions);
-                break;
-            case 'broker':
-                fetchOptions(`${url}/get_broker_name_search`, { term: 1, term2: 2 }, setBrokerOptions);
-                break;
-            default:
-                break;
-        }
-    };
-
     const today = dayjs().format('YYYY-MM-DD');
 
     return (
         <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
-            <Grid container spacing={1}>
+            <Grid container spacing={1} sx={{ p: 0 }}>
                 {/* (1) Status Multi-select - wider */}
-                <Grid item xs={12} sm={6} md={4} lg={3.6}>
-                    <Autocomplete
+                <Grid item xs={12} sm={6} md={4} lg={3.6} sx={{ p: 0 }}>
+                    {/* <Autocomplete
                         multiple
                         options={statusOptions}
                         getOptionLabel={(opt) => opt.label}
@@ -153,42 +64,55 @@ const OrderFilter = ({ isDarkMode, setStatus,
                         )}
                         fullWidth
                         sx={inputBoxStyle}
+                    /> */}
+                    {/* <FormControl component="fieldset" fullWidth sx={{ ...inputBoxStyle, p: 0 }}>
+                        <FormLabel component="legend" sx={{ fontSize: '0.8rem' }}>Status</FormLabel>
+                        <RadioGroup
+                            row
+                            value={status?.value || ""}
+                            onChange={(e) => {
+                                const selected = statusOptions.find((opt) => opt.value === e.target.value);
+                                setStatus(selected);
+                            }}
+                            sx={{ p: 0 }}
+                        >
+                            {statusOptions.map((option) => (
+                                <FormControlLabel
+                                    key={option.value}
+                                    value={option.value}
+                                    control={<Radio size="small" />}
+                                    label={option.label}
+                                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8rem' }, mx: 0 }} />
+                            ))}
+                        </RadioGroup>
+                    </FormControl> */}
+                    <RadioFilter
+                        label="Status"
+                        options={statusOptions}
+                        value={status}
+                        onChange={setStatus}
                     />
                 </Grid>
 
                 {/* (2) Trade After */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <TextField
-                        label="Trade After"
-                        type="date"
-                        size="small"
-                        value={end_date}
-                        onChange={(e) => setEnd_date(e.target.value)}
-                        InputProps={{ inputProps: { max: today } }}
-                        InputLabelProps={{ shrink: true }}
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
+                <DateFilter
+                    label="Trade After"
+                    value={end_date}
+                    onChange={setEnd_date}
+                    maxDate={today}
+                />
 
                 {/* (3) Trade Before */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <TextField
-                        label="Trade Before"
-                        type="date"
-                        size="small"
-                        value={start_end}
-                        onChange={(e) => setStart_end(e.target.value)}
-                        InputProps={{ inputProps: { max: today } }}
-                        InputLabelProps={{ shrink: true }}
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
+                <DateFilter
+                    label="Trade Before"
+                    value={start_end}
+                    onChange={setStart_end}
+                    maxDate={today}
+                />
 
                 {/* (4) Order Type - wider */}
                 <Grid item xs={12} sm={6} md={4} lg={3.6}>
-                    <FormControl fullWidth size="small" sx={inputBoxStyle}>
+                    <FormControl fullWidth size="small" sx={getInputBoxStyle(isDarkMode)}>
                         <InputLabel>Select Order Type</InputLabel>
                         <Select
                             value={orderType}
@@ -207,177 +131,22 @@ const OrderFilter = ({ isDarkMode, setStatus,
 
                 {/* ➤ Moved Market to second row (after Order Type) */}
 
-                {/* (5) Market Name */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Autocomplete
-                        options={marketOptions}
-                        getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                        value={market || null}
-                        inputValue={market?.text || ''}
-                        onInputChange={(e, val, reason) => {
-                            (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
-                            handleFetch(val, 'market');
-                        }}
-                        onChange={(e, val) => setMarket(val)}
-                        onBlur={() => {  // on focus out, if inputvalue don't match with any options then setMarket(null)
-                            const matched = marketOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text);
-                            (!matched) && setMarket(null);  // clear if unmatched
-                            // handleFetch('', 'market');
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Market" size="small" sx={inputBoxStyle} />}
-                        noOptionsText="No Market found"
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
-
-
-
-                {/* (6) Script Name */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Tooltip arrow disableHoverListener={!isScriptNameDisable}
-                        title={isScriptNameDisable ? "First Select Market Name" : ""}
-                    >
-                        <Autocomplete
-                            multiple
-                            disabled={isScriptNameDisable}
-                            options={scriptOptions}
-                            getOptionLabel={(option) =>
-                                typeof option === 'string' ? option : option?.text || ''
-                            }
-                            value={Array.isArray(script) ? script : []}
-                            filterSelectedOptions
-                            onInputChange={(e, val, reason) => {
-                                if (reason === 'input') {
-                                    handleFetch(val, 'script');
-                                }
-                            }}
-                            onChange={(e, val) => {
-                                setScript(val);
-                            }}
-                            renderOption={(props, option) => {
-                                const optionText = typeof option === 'string' ? option : option.text;
-                                const isSelected = script.some(
-                                    (item) =>
-                                        (typeof item === 'string' ? item : item.text) === optionText
-                                );
-
-                                return (
-                                    <li
-                                        {...props}
-                                        style={{
-                                            backgroundColor: isSelected
-                                                ? isDarkMode
-                                                    ? '#333'
-                                                    : '#e0f7fa'
-                                                : 'inherit',
-                                            color: isSelected ? '#999' : 'inherit',
-                                            pointerEvents: isSelected ? 'none' : 'auto',
-                                            opacity: isSelected ? 0.6 : 1,
-                                        }}
-                                        aria-disabled={isSelected}
-                                    >
-                                        {optionText}
-                                    </li>
-                                );
-                            }}
-
-                            // onBlur={() => {
-                            //     // Filter only those scripts which exist in scriptOptions
-                            //     const validScripts = script.filter((selectedItem) =>
-                            //         scriptOptions.some((opt) =>
-                            //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
-                            //         )
-                            //     );
-                            //     console.log('validScripts', validScripts);
-                            //     setScript(validScripts);
-                            // }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Script"
-                                    size="small"
-                                    sx={inputBoxStyle}
-                                />
-                            )}
-                            noOptionsText="No Script found"
-                            fullWidth
-                            sx={inputBoxStyle}
-                        />
-
-                    </Tooltip>
-                </Grid>
-
-                {/* (7) Client Name */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Autocomplete
-                        options={clientOptions}
-                        getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                        value={client || null}
-                        inputValue={client?.text || ''}
-                        onInputChange={(e, val, reason) => {
-                            (reason === 'input') && setClient({ text: val });
-                            handleFetch(val, 'client');
-                        }}
-                        onChange={(e, val) => setClient(val)}
-                        onBlur={() => {
-                            const matched = clientOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === client?.text);
-                            (!matched) && setClient(null);
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Client" size="small" sx={inputBoxStyle} />}
-                        noOptionsText="No Client found"
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
-
-                {/* (8) Master Name */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Autocomplete
-                        options={masterOptions}
-                        getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                        value={master || null}
-                        inputValue={master?.text || ''}
-                        onInputChange={(e, val, reason) => {
-                            (reason === 'input') && setMaster({ text: val });
-                            handleFetch(val, 'master');
-                        }}
-                        onChange={(e, val) => setMaster(val)}
-                        onBlur={() => {
-                            const matched = masterOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === master?.text);
-                            (!matched) && setMaster(null);
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Master" size="small" sx={inputBoxStyle} />}
-                        noOptionsText="No Master found"
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
-
-                {/* (9) Broker Name */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Autocomplete
-                        options={brokerOptions}
-                        getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                        value={broker || null}
-                        inputValue={broker?.text || ''}
-                        onInputChange={(e, val, reason) => {
-                            (reason === 'input') && setBroker({ text: val });
-                            handleFetch(val, 'broker');
-                        }}
-                        onChange={(e, val) => setBroker(val)}
-                        onBlur={() => {
-                            const matched = brokerOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === broker?.text);
-                            (!matched) && setBroker(null);
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Broker" size="small" sx={inputBoxStyle} />}
-                        noOptionsText="No Broker found"
-                        fullWidth
-                        sx={inputBoxStyle}
-                    />
-                </Grid>
-
-
+                <MarketScriptNameFilter
+                    isDarkMode={isDarkMode}
+                    market={market}
+                    script={script}
+                    setScript={setScript}
+                    setMarket={setMarket}
+                />
+                <ClientMasterBrokerFilter
+                    isDarkMode={isDarkMode}
+                    client={client}
+                    master={master}
+                    broker={broker}
+                    setClient={setClient}
+                    setMaster={setMaster}
+                    setBroker={setBroker}
+                />
             </Grid>
         </Box>
 

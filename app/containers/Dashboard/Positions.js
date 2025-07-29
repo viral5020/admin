@@ -21,6 +21,7 @@ import {
     Fade,
     Card,
     CardContent,
+    Grid,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { styled } from "@mui/material/styles";
@@ -29,7 +30,10 @@ import axios from 'axios';
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import InputAdornment from "@mui/material/InputAdornment";
-
+import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
+import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
+import RadioFilter from "./filters/RadioFilterField";
+import DateFilter from "./filters/DateFilter";
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     maxHeight: "65vh",
@@ -47,6 +51,8 @@ const TableHeaderCell = styled(TableCell)({
 
 const OrderPage = () => {
     const theme = useTheme();
+    const isDarkMode = theme.palette.mode === 'dark';
+
     const [positionData, setPositionData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
@@ -57,6 +63,16 @@ const OrderPage = () => {
     const [expanded, setExpanded] = useState(false);
     const [tradesData, setTradesData] = useState([]);
     const [loadingTrades, setLoadingTrades] = useState(false);
+
+    const [market, setMarket] = useState('');
+    const [script, setScript] = useState([]);
+    const [client, setClient] = useState('');
+    const [master, setMaster] = useState('');
+    const [broker, setBroker] = useState('');
+
+    const [all_outstanding, setAll_outstanding] = useState('');
+    const [client_wise_value, setClient_wise_value] = useState('');
+    const [exparyDate, setExparyDate] = useState('');
 
     const handleCardClick = (row) => {
         setSelectedRow(row);
@@ -153,8 +169,54 @@ const OrderPage = () => {
         setExpanded((prev) => !prev);
     };
 
+    const allOutstandingOptions = [
+        { label: 'All', value: '1' },
+        { label: 'Outstanding', value: '0' }
+    ];
+
+    const ClientWiseOptions = [
+        { label: ' t.scritp_name', value: 't.scritp_name' },
+        { label: 'u.user_full_name', value: 'u.user_full_name' }
+    ]
+
     return (
         <Box sx={{ p: 0, position: "relative" }}>
+            {/* <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}></Box> */}
+            <Grid container spacing={1} mt={1}>
+                <RadioFilter
+                    label="All Outstanding"
+                    options={allOutstandingOptions}
+                    value={all_outstanding}
+                    onChange={setAll_outstanding}
+                />
+                <RadioFilter
+                    label="Client Wise Value"
+                    options={ClientWiseOptions}
+                    value={client_wise_value}
+                    onChange={setClient_wise_value}
+                />
+                <DateFilter
+                    label="Expary date"
+                    value={exparyDate}
+                    onChange={setExparyDate}
+                />
+                <MarketScriptNameFilter
+                    isDarkMode={isDarkMode}
+                    market={market}
+                    script={script}
+                    setScript={setScript}
+                    setMarket={setMarket}
+                />
+                <ClientMasterBrokerFilter
+                    isDarkMode={isDarkMode}
+                    client={client}
+                    master={master}
+                    broker={broker}
+                    setClient={setClient}
+                    setMaster={setMaster}
+                    setBroker={setBroker}
+                />
+            </Grid>
             {/* 🔍 Search Bar */}
             <Box sx={{ px: 2, py: 1 }}>
                 {/* 🔍 Search Input */}
