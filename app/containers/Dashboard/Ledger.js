@@ -247,25 +247,24 @@ export default function LedgerPage() {
         </Box>
 
         {/* Filter Popup */}
-       {showFilter && (
+ {showFilter && (
   <Paper
     ref={filterRef}
-    elevation={6}
+    elevation={4}
     sx={{
       position: 'absolute',
       top: 100,
       right: 16,
       zIndex: 20,
-      p: 2,
-      borderRadius: 2,
-      border: '1px solid rgba(0,0,0,0.1)',
-      width: isMobile ? '90%' : '360px',
-      maxWidth: '95vw',
+      p: 1.2,
+      borderRadius: 1.5,
+      border: '1px solid rgba(0,0,0,0.3)',
+      width: isMobile ? '92%' : '300px',
       backgroundColor: theme.palette.background.paper,
-      boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
     }}
   >
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0, mt: 0, mb: 0 }}>
 
       {/* Start Date */}
       <TextField
@@ -276,159 +275,194 @@ export default function LedgerPage() {
         InputLabelProps={{ shrink: true }}
         value={filters.start_date}
         onChange={(e) => setFilters(prev => ({ ...prev, start_date: e.target.value }))}
+        sx={{ mb: 0 }}
       />
 
-      <Divider />
-
-      {/* Only Bills */}
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.onlyBills}
-              onChange={(e) => setFilters(prev => ({ ...prev, onlyBills: e.target.checked }))}
-              color="secondary"
-            />
-          }
-          label="Only Bills"
+      {/* Bills */}
+        <FormGroup sx={{ minWidth: 50, p: 0.5 }}>
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={filters.onlyBills}
+          onChange={(e) => setFilters(prev => ({ ...prev, onlyBills: e.target.checked }))}
+          color="secondary"
+          size="small"
         />
-        {filters.onlyBills && (
-          <Box sx={{ pl: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyDebitBill}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyDebitBill: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Debit"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyCreditBill}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyCreditBill: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Credit"
-            />
-          </Box>
-        )}
-      </FormGroup>
+      }
+      label={<Typography fontSize="0.8rem">Only Bills</Typography>}
+    />
+    {filters.onlyBills && (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
 
-      <Divider />
 
-      {/* Only Cash */}
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.onlyCashEntry}
-              onChange={(e) =>
-                setFilters(prev => ({ ...prev, onlyCashEntry: e.target.checked }))
-              }
-              color="secondary"
-            />
-          }
-          label="Only Cash"
-        />
-        {filters.onlyCashEntry && (
-          <Box sx={{ pl: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyDebitCash}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyDebitCash: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Debit"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyCreditCash}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyCreditCash: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Credit"
-            />
-          </Box>
-        )}
-      </FormGroup>
+  {filters.onlyBills && (
+    <>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyDebitBill}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, onlyDebitBill: e.target.checked }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Debit Bill</Typography>}
+        sx={{ m: 0 }}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyCreditBill}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyCreditBill: e.target.checked,
+              }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Credit Bill</Typography>}
+        sx={{ m: 0 }}
+      />
+    </>
+  )}
+</Box>
 
-      <Divider />
+    )}
+  </FormGroup>
 
-      {/* Only JV Entry */}
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filters.onlyJVEntry}
-              onChange={(e) =>
-                setFilters(prev => ({ ...prev, onlyJVEntry: e.target.checked }))
-              }
-              color="secondary"
-            />
-          }
-          label="Only JV Entry"
-        />
-        {filters.onlyJVEntry && (
-          <Box sx={{ pl: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyDebitJV}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyDebitJV: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Debit"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.onlyCreditJV}
-                  onChange={(e) =>
-                    setFilters(prev => ({ ...prev, onlyCreditJV: e.target.checked }))
-                  }
-                  color="secondary"
-                />
-              }
-              label="Credit"
-            />
-          </Box>
-        )}
-      </FormGroup>
+  {/* Cash */}
+  <FormGroup sx={{ minWidth: 50, p: 0.5 }}>
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={filters.onlyCashEntry}
+        onChange={(e) =>
+          setFilters((prev) => ({ ...prev, onlyCashEntry: e.target.checked }))
+        }
+        color="secondary"
+        size="small"
+      />
+    }
+    label={<Typography fontSize="0.8rem">Only Cash</Typography>}
+  />
+  {filters.onlyCashEntry && (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyDebitCash}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyDebitCash: e.target.checked,
+              }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Debit Cash</Typography>}
+        sx={{ m: 0 }}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyCreditCash}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyCreditCash: e.target.checked,
+              }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Credit Cash</Typography>}
+        sx={{ m: 0 }}
+      />
+    </Box>
+  )}
+</FormGroup>
 
-      <Divider />
 
-      <Box sx={{ textAlign: 'right' }}>
+  {/* JV */}
+  <FormGroup sx={{ minWidth: 50, p: 0.5 }}>
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={filters.onlyJVEntry}
+        onChange={(e) =>
+          setFilters((prev) => ({ ...prev, onlyJVEntry: e.target.checked }))
+        }
+        color="secondary"
+        size="small"
+      />
+    }
+    label={<Typography fontSize="0.8rem">Only JV</Typography>}
+  />
+  {filters.onlyJVEntry && (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyDebitJV}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyDebitJV: e.target.checked,
+              }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Debit JV</Typography>}
+        sx={{ m: 0 }}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={filters.onlyCreditJV}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyCreditJV: e.target.checked,
+              }))
+            }
+            color="secondary"
+            size="small"
+          />
+        }
+        label={<Typography fontSize="0.75rem">Only Credit JV</Typography>}
+        sx={{ m: 0 }}
+      />
+    </Box>
+  )}
+</FormGroup>
+
+
+      {/* Apply Button */}
+      <Box sx={{ textAlign: 'right', mt: 0.5 }}>
         <Button
           variant="contained"
           size="small"
           color="secondary"
           onClick={applyFilters}
+          sx={{ minWidth: 'auto', px: 2, py: 0.5 }}
         >
-          Apply Filter
+          Apply
         </Button>
       </Box>
     </Box>
   </Paper>
 )}
+
 
 
 
