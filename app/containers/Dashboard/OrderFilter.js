@@ -33,16 +33,20 @@ const OrderFilter = ({ isDarkMode, setStatus,
     status,
     end_date,
     start_end,
-    orderType
+    orderType,
+    setMarket,
+    setScript,
+    setClient,
+    setMaster,
+    setBroker,
+    market,
+    script,
+    client,
+    master,
+    broker,
 }) => {
     // const theme = useTheme();
     // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-    const [broker, setBroker] = useState('');
 
     const today = dayjs().format('YYYY-MM-DD');
 
@@ -83,7 +87,7 @@ const OrderFilter = ({ isDarkMode, setStatus,
                             onChange={(e) => setOrderType(e.target.value)}
                             label="Select Order Type"
                         >
-                            <MenuItem value="">Select Order Type</MenuItem>
+                            {/* <MenuItem value="">Select Order Type</MenuItem> */}
                             {orderTypes.map((type) => (
                                 <MenuItem key={type} value={type}>
                                     {type}

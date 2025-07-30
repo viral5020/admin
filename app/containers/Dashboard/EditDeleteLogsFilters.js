@@ -6,9 +6,9 @@ import { Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
 
 const EditDeleteLogsFilters = ({
     setEnd_date,
-    setStart_end,
+    setStart_date,
     end_date,
-    start_end,
+    start_date,
     setIs_deleted,
     is_deleted,
     is_updated,
@@ -61,8 +61,8 @@ const EditDeleteLogsFilters = ({
 
                 <DateFilter
                     label="Trade Before"
-                    value={start_end}
-                    onChange={setStart_end}
+                    value={start_date}
+                    onChange={setStart_date}
                 />
 
                 <MarketScriptNameFilter

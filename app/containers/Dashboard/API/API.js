@@ -123,7 +123,18 @@ export const fetchPendingOrdersAPI = async (userId, authKey) => {
 };
 
 
-export const fetchRejectionLogsAPI = async (userId, authKey, filterType = "", searchQuery = "") => {
+export const fetchRejectionLogsAPI = async (
+  userId,
+  authKey,
+  filterType = "",
+  searchQuery = "",
+  marketId,
+  scriptId,
+  clientId,
+  masterId,
+  end_date,
+  start_date,
+) => {
   try {
     const response = await axiosInstance.post("/datatables/rejection_log_view", {
       is_app: "1",
@@ -134,6 +145,14 @@ export const fetchRejectionLogsAPI = async (userId, authKey, filterType = "", se
       iDisplayStart: 0,
       iDisplayLength: 10000,
       sSearch: searchQuery || "",
+
+      market_type_id: marketId,
+      script_id: scriptId,
+      user_id: clientId,
+      master_user_id: masterId,
+
+      end_date: end_date,
+      start_date: start_date,
     });
 
     return response.data.aaData || [];

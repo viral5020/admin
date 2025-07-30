@@ -139,15 +139,15 @@ const OrderPage = () => {
                 iDisplayLength: 100000,
                 sSearch: search,
 
-                // all_outstanding = 1
-                // group_by=u.user_full_name
-                // expiry_date=
-                // broker_id=
-                // market_type_id =
-                // script_id =
+                all_outstanding: all_outstanding,
+                expiry_date: exparyDate,
+                group_by: client_wise_value,
 
-                // user_id =
-                // master_user_id =
+                market_type_id: market?.id,
+                script_id: script?.id,
+                broker_id: broker?.id,
+                master_user_id: master?.id,
+                user_id: client?.id,
             });
 
             if (response.data && response.data.aaData) {

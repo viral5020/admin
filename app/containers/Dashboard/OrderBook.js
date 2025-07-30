@@ -19,10 +19,10 @@ const OrderBook = () => {
   const isDarkMode = theme.palette.mode === 'dark';
   const isFirstRender = useIsFirstRender();
 
-  const [status, setStatus] = useState([]);
+  const [status, setStatus] = useState();  // []
   const [end_date, setEnd_date] = useState('');
   const [start_end, setStart_end] = useState('');
-  const [orderType, setOrderType] = useState('');
+  const [orderType, setOrderType] = useState('');  // trade_type
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState("today");
@@ -33,6 +33,13 @@ const OrderBook = () => {
   const [totalRecords, setTotalRecords] = useState();
   const [isFilterChange, setIsFilterChange] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+
+  const [market, setMarket] = useState({});
+  const [script, setScript] = useState([]);
+  const [client, setClient] = useState({});
+  const [master, setMaster] = useState({});
+  const [broker, setBroker] = useState({});
 
   const ordersPerPage = 10;
 
@@ -58,18 +65,14 @@ const OrderBook = () => {
       isTodayTrade: type === "today" ? "today" : "",
       end_date: end_date,
       start_end: start_end, //2025-07-30
-
-      // market_type_id=
-      // script_id=
-      // broker_id =
-      // is_pending =
-      // is_executed =
-
-      // user_id =
-      // master_user_id =
-      // trade_type=
-
-      // orderType: orderType, ``BAKI 6``
+      market_type_id: market?.id,
+      script_id: script?.id,
+      broker_id: broker?.id,
+      master_user_id: master?.id,
+      user_id: client?.id,
+      is_pending: status === 'is_pending',
+      is_executed: status === ' is_executed',
+      trade_type: orderType,
     };
 
     try {
@@ -133,6 +136,16 @@ const OrderBook = () => {
             end_date={end_date}
             start_end={start_end}
             orderType={orderType}
+            setMarket={setMarket}
+            setScript={setScript}
+            setClient={setClient}
+            setMaster={setMaster}
+            setBroker={setBroker}
+            market={market}
+            script={script}
+            client={client}
+            master={master}
+            broker={broker}
           />
         </Box>
       </Drawer>
@@ -149,6 +162,16 @@ const OrderBook = () => {
           end_date={end_date}
           start_end={start_end}
           orderType={orderType}
+          setMarket={setMarket}
+          setScript={setScript}
+          setClient={setClient}
+          setMaster={setMaster}
+          setBroker={setBroker}
+          market={market}
+          script={script}
+          client={client}
+          master={master}
+          broker={broker}
         />
       )}
 
@@ -416,9 +439,9 @@ const OrderBook = () => {
                           ({item.trd_lot})
                         </Box>
                       </td>
-                     <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-  {item.trd_rate}
-</td>
+                      <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                        {item.trd_rate}
+                      </td>
                       <td>{item.trd_status}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_comm_amnt}</td>
