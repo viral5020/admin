@@ -295,61 +295,84 @@ const RejectionLogs = () => {
 
       ) : (
         <>
-          <Box
+                      <Box
             sx={{
-              overflowX: 'auto',
-              overflowY: 'auto',
-              maxHeight: '400px',
-              border: '1px solid #ddd',
+              overflowX: "auto",
+              overflowY: "auto",
+              maxHeight: "400px",
+              border: "1px solid #ddd",
+              borderRadius: "0px",
               mx: 1,
-              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
             }}
           >
             <table
               className="table table-striped table-bordered"
               style={{
-                minWidth: '1400px',
-                fontSize: '12px',
+                minWidth: "1400px",
+                fontSize: "12px",
                 margin: 0,
-                backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#fff',
-                color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+                backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
               }}
             >
-              <thead style={{ backgroundColor: theme.palette.mode === 'dark' ? '#444' : '#e0e0e0' }}>
+              <thead
+                style={{
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                }}
+              >
                 <tr>
-                  {['Type', 'Datetime', 'Client', 'Script', 'Trade Type', 'Lot', 'Qty', 'Rate', 'Message'].map(
-                    (header) => (
-                      <th key={header} style={{ fontWeight: 600 }}>
-                        {header}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "Type",
+                    "Datetime",
+                    "Script",
+                    "Trade Type",
+                    "Qty (Lot)",
+                    "Rate",
+                    "Message",
+                  ].map((header) => (
+                    <th key={header} style={{ fontWeight: 600 }}>
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {paginatedLogs.map((log, index) => {
-                  const bgColor =
-                    log.trade_type === 'Buy'
-                      ? theme.palette.mode === 'dark'
-                        ? '#264653'
-                        : '#e0f7fa'
-                      : log.trade_type === 'Sell'
-                        ? theme.palette.mode === 'dark'
-                          ? '#6d2c41'
-                          : '#fce4ec'
-                        : theme.palette.mode === 'dark'
-                          ? '#333'
-                          : '#f5f5f5';
-
+                  // Split script name and date
+                  const [scriptBase, ...rest] = log.script_name.split(" ");
+                  const scriptSuffix = rest.join(" ");
+          
                   return (
-                    <tr key={index} style={{ backgroundColor: bgColor }}>
+                    <tr key={index}>
                       <td>{log.type}</td>
                       <td>{log.datetime}</td>
-                      <td>{log.full_name}</td>
-                      <td>{log.script_name}</td>
-                      <td>{log.trade_type}</td>
-                      <td>{log.trade_lot}</td>
-                      <td>{log.trade_qty}</td>
+                      <td>
+                        <span style={{ fontWeight: "bold" }}>{scriptBase}</span>{" "}
+                        {scriptSuffix}
+                      </td>
+                    <td
+  style={{
+    color:
+      log.trade_type === "Buy"
+        ? "green"
+        : log.trade_type === "Sell"
+        ? "red"
+        : undefined,
+    fontWeight: 700,
+  }}
+>
+  {log.trade_type.toUpperCase()}
+</td>
+
+                     <td>
+            <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
+            {log.trade_lot ? ` (${log.trade_lot})` : ""}
+          </td>
                       <td>{log.trade_rate}</td>
                       <td>{log.log_message}</td>
                     </tr>
