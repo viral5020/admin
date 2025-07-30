@@ -43,7 +43,7 @@ const RejectionLogs = () => {
   // const [broker, setBroker] = useState('');
 
   const [end_date, setEnd_date] = useState('');
-  const [start_end, setStart_end] = useState('');
+  const [start_date, setStart_date] = useState('');
 
   const [is_updated, setIs_updated] = useState(false);
   const [is_deleted, setIs_deleted] = useState(false);
@@ -56,14 +56,14 @@ const RejectionLogs = () => {
         dataStored.user_id,
         dataStored.auth_key,
         filterType,
-        searchQuery
-        // market_type_id
-        // script_id
-        // start_date
-        // end_date
+        searchQuery,
 
-        // user_id
-        // master_user_id
+        market?.id,
+        script?.id,
+        client?.id,
+        master?.id,
+        end_date,
+        start_date,
       );
       setLogs(result || []);
     } catch (err) {
@@ -125,8 +125,8 @@ const RejectionLogs = () => {
 
           <DateFilter
             label="Trade Before"
-            value={start_end}
-            onChange={setStart_end}
+            value={start_date}
+            onChange={setStart_date}
           />
 
           <MarketScriptNameFilter
@@ -295,7 +295,7 @@ const RejectionLogs = () => {
 
       ) : (
         <>
-                      <Box
+          <Box
             sx={{
               overflowX: "auto",
               overflowY: "auto",
@@ -346,7 +346,7 @@ const RejectionLogs = () => {
                   // Split script name and date
                   const [scriptBase, ...rest] = log.script_name.split(" ");
                   const scriptSuffix = rest.join(" ");
-          
+
                   return (
                     <tr key={index}>
                       <td>{log.type}</td>
@@ -355,24 +355,24 @@ const RejectionLogs = () => {
                         <span style={{ fontWeight: "bold" }}>{scriptBase}</span>{" "}
                         {scriptSuffix}
                       </td>
-                    <td
-  style={{
-    color:
-      log.trade_type === "Buy"
-        ? "green"
-        : log.trade_type === "Sell"
-        ? "red"
-        : undefined,
-    fontWeight: 700,
-  }}
->
-  {log.trade_type.toUpperCase()}
-</td>
+                      <td
+                        style={{
+                          color:
+                            log.trade_type === "Buy"
+                              ? "green"
+                              : log.trade_type === "Sell"
+                                ? "red"
+                                : undefined,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {log.trade_type.toUpperCase()}
+                      </td>
 
-                     <td>
-            <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
-            {log.trade_lot ? ` (${log.trade_lot})` : ""}
-          </td>
+                      <td>
+                        <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
+                        {log.trade_lot ? ` (${log.trade_lot})` : ""}
+                      </td>
                       <td>{log.trade_rate}</td>
                       <td>{log.log_message}</td>
                     </tr>

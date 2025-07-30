@@ -55,7 +55,7 @@ const EditDeleteLogs = () => {
     // const [broker, setBroker] = useState('');
 
     const [end_date, setEnd_date] = useState('');
-    const [start_end, setStart_end] = useState('');
+    const [start_date, setStart_date] = useState('');
 
     const [is_updated, setIs_updated] = useState(false);
     const [is_deleted, setIs_deleted] = useState(false);
@@ -63,28 +63,30 @@ const EditDeleteLogs = () => {
 
     const fetchLogs = async (search = '', page = currentPage, append = false) => {
         setLoading(true);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
         try {
             const response = await axios.post(
                 'http://128.199.126.171/~goldorg/datatables/trade_log_view.php',
                 {
                     is_app: '1',
-                    login_user_id: '41297',
-                    auth_key: 'IGKBp4OuFS',
+                    login_user_id: dataStored.user_id,
+                    auth_key: dataStored.auth_key,
                     sEcho: 1,
                     iDisplayStart: page * pageSize,
                     iDisplayLength: pageSize,
                     sSearch: search,
 
-                    // market_type_id=,
-                    // script_id =,
-                    // start_date =,
-                    // end_date =,
-                    // is_deleted = true,
-                    // is_updated=true,
+                    market_type_id: market?.id,
+                    script_id: script?.id,
+                    // broker_id: broker?.id,
+                    master_user_id: master?.id,
+                    user_id: client?.id,
 
-                    // user_id =,
-                    // master_user_id =,
+                    end_date: end_date,
+                    start_date: start_date,
 
+                    is_deleted: is_deleted,
+                    is_updated: is_updated,
                 }
             );
 
@@ -153,8 +155,8 @@ const EditDeleteLogs = () => {
 
                         <DateFilter
                             label="Trade Before"
-                            value={start_end}
-                            onChange={setStart_end}
+                            value={start_date}
+                            onChange={setStart_date}
                         />
 
                         <MarketScriptNameFilter
@@ -176,9 +178,9 @@ const EditDeleteLogs = () => {
                     </Grid> */}
                     <EditDeleteLogsFilters
                         setEnd_date={setEnd_date}
-                        setStart_end={setStart_end}
+                        setStart_date={setStart_date}
                         end_date={end_date}
-                        start_end={start_end}
+                        start_date={start_date}
                         setIs_deleted={setIs_deleted}
                         is_deleted={is_deleted}
                         is_updated={is_updated}
@@ -397,9 +399,9 @@ const EditDeleteLogs = () => {
                             </Box>
                             <EditDeleteLogsFilters
                                 setEnd_date={setEnd_date}
-                                setStart_end={setStart_end}
+                                setStart_date={setStart_date}
                                 end_date={end_date}
-                                start_end={start_end}
+                                start_date={start_date}
                                 setIs_deleted={setIs_deleted}
                                 is_deleted={is_deleted}
                                 is_updated={is_updated}
