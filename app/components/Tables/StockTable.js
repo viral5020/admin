@@ -195,7 +195,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     return 'rgba(158, 158, 158)';             // neutral gray
   };
 
-  const getCondition = (val, showIcon) => {
+  const getCondition = (val, showIcon, showVal) => {
     const theme = useTheme();
     return (
       <Box
@@ -210,6 +210,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           display: 'inline-flex',
           alignItems: 'center',
           fontWeight: 600,
+          mr: showIcon ? 1 : 0,
           // fontSize: '0.75rem',
           // lineHeight: 1.1,
         }}
@@ -222,15 +223,17 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           ) : (
             <TrendingFlat fontSize="inherit" sx={{ mr: 0.5 }} />
           ))}
-        {val}%
+        {showVal ? val + '%' : ''}
       </Box>
     )
   };
 
   const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
     const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
-    const rowBgColor = getCellBgColor(rowVal);
-    const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
+    // const rowBgColor = getCellBgColor(rowVal);
+    // const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
+    const rowBgColor = 'inherit';
+    const rowBgColorFirstCol = 'inherit';
 
     if (itemCell.id === 'scriptName') {
       return (
@@ -245,6 +248,9 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
+                {console.log('dataArray[itemCell.priceChange]', dataArray[itemCell.priceChange])}
+                {console.log('dataArray', dataArray)}
+                {getCondition(dataArray['priceChange'], true, false)}
                 {dataArray.scriptName}
               </Typography>
             </Box>
@@ -275,7 +281,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
             ...tableCellStyle,
             backgroundColor: rowBgColor,
           }}>
-          {getCondition(dataArray[itemCell.id], itemCell.id === 'priceChangePercent')}
+          {getCondition(dataArray[itemCell.id], false, true)}
         </TableCell>
       );
     }

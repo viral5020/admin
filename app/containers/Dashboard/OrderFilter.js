@@ -63,15 +63,15 @@ const OrderFilter = ({ isDarkMode, setStatus,
                 {/* (2) Trade After */}
                 <DateFilter
                     label="Trade After"
-                    value={end_date}
-                    onChange={setEnd_date}
+                    value={start_end}
+                    onChange={setStart_end}
                 />
 
                 {/* (3) Trade Before */}
                 <DateFilter
                     label="Trade Before"
-                    value={start_end}
-                    onChange={setStart_end}
+                    value={end_date}
+                    onChange={setEnd_date}
                 />
 
                 {/* (4) Order Type - wider */}

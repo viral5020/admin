@@ -36,6 +36,12 @@ const OrderBook = () => {
 
   const ordersPerPage = 10;
 
+  useEffect(() => {
+    console.log('end_date', end_date);
+    console.log('start_end', start_end);
+  }, [start_end, end_date])
+
+
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   const fetchOrders = async (type = "today", searchValue = "") => {
@@ -50,10 +56,20 @@ const OrderBook = () => {
       login_user_id: dataStored?.user_id,
       auth_key: dataStored?.auth_key,
       isTodayTrade: type === "today" ? "today" : "",
-      // status: status,
-      // end_date: end_date,
-      // start_end: start_end,
-      // orderType: orderType,
+      end_date: end_date,
+      start_end: start_end, //2025-07-30
+
+      // market_type_id=
+      // script_id=
+      // broker_id =
+      // is_pending =
+      // is_executed =
+
+      // user_id =
+      // master_user_id =
+      // trade_type=
+
+      // orderType: orderType, ``BAKI 6``
     };
 
     try {

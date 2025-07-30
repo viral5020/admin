@@ -57,6 +57,13 @@ const RejectionLogs = () => {
         dataStored.auth_key,
         filterType,
         searchQuery
+        // market_type_id
+        // script_id
+        // start_date
+        // end_date
+
+        // user_id
+        // master_user_id
       );
       setLogs(result || []);
     } catch (err) {

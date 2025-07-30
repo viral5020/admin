@@ -21,6 +21,19 @@ const DateFilter = ({
                 label={label}
                 type="date"
                 size="small"
+                // value={
+                //     value
+                //         ? (() => {
+                //             const [dd, mm, yyyy] = value.split('-');
+                //             return `${yyyy}-${mm}-${dd}`;
+                //         })()
+                //         : ''
+                // }
+                // onChange={(e) => {
+                //     const [yyyy, mm, dd] = e.target.value.split('-');
+                //     const formatted = `${dd}-${mm}-${yyyy}`;
+                //     onChange(formatted);
+                // }}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 InputProps={{ inputProps: isMaxDateToday && { max: today } }}

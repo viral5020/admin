@@ -138,6 +138,16 @@ const OrderPage = () => {
                 iDisplayStart: 0,
                 iDisplayLength: 10,
                 sSearch: search,
+
+                // all_outstanding = 1
+                // group_by=u.user_full_name
+                // expiry_date=
+                // broker_id=
+                // market_type_id =
+                // script_id =
+
+                // user_id =
+                // master_user_id =
             });
 
             if (response.data && response.data.aaData) {

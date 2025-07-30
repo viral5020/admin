@@ -74,6 +74,17 @@ const EditDeleteLogs = () => {
                     iDisplayStart: page * pageSize,
                     iDisplayLength: pageSize,
                     sSearch: search,
+
+                    // market_type_id=,
+                    // script_id =,
+                    // start_date =,
+                    // end_date =,
+                    // is_deleted = true,
+                    // is_updated=true,
+
+                    // user_id =,
+                    // master_user_id =,
+
                 }
             );
 
