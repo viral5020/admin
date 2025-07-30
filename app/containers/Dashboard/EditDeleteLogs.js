@@ -18,9 +18,20 @@ import {
     TextField,
     Typography,
     useMediaQuery,
-    useTheme,
+    useTheme, Grid,
+    FormGroup,
+    FormControlLabel,
+    Checkbox,
+    Drawer,
+    IconButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import DateFilter from './filters/DateFilter';
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
+import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
+import EditDeleteLogsFilters from './EditDeleteLogsFilters';
+import FilterBtn from './filters/FilterBtn';
 
 const EditDeleteLogs = () => {
     const theme = useTheme();
@@ -35,6 +46,20 @@ const EditDeleteLogs = () => {
     const [totalRecords, setTotalRecords] = useState(0);
 
     const totalPages = Math.ceil(totalRecords / pageSize);
+    const [filterDrawer, setFilterDrawer] = useState(false);
+
+    const [market, setMarket] = useState('');
+    const [script, setScript] = useState([]);
+    const [client, setClient] = useState('');
+    const [master, setMaster] = useState('');
+    // const [broker, setBroker] = useState('');
+
+    const [end_date, setEnd_date] = useState('');
+    const [start_end, setStart_end] = useState('');
+
+    const [is_updated, setIs_updated] = useState(false);
+    const [is_deleted, setIs_deleted] = useState(false);
+
 
     const fetchLogs = async (search = '', page = currentPage, append = false) => {
         setLoading(true);
@@ -82,6 +107,83 @@ const EditDeleteLogs = () => {
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {/** 💻 Desktop View */}
+                    {/* <Grid container spacing={1} sx={{ mb: 1.5 }}>
+                        <Grid item xs={12} sm={6} md={3} lg={2.4} >
+                            <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            size="small"
+                                            checked={is_updated}
+                                            onChange={(e) => setIs_updated(e.target.checked)}
+                                        />
+                                    }
+                                    label="Update"
+                                    sx={{ mr: 2, ml: 0.5 }}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            size="small"
+                                            checked={is_deleted}
+                                            onChange={(e) => setIs_deleted(e.target.checked)}
+                                        />
+                                    }
+                                    label="Delete"
+                                />
+                            </FormGroup>
+                        </Grid>
+
+                        <DateFilter
+                            label="Trade After"
+                            value={end_date}
+                            onChange={setEnd_date}
+                        />
+
+                        <DateFilter
+                            label="Trade Before"
+                            value={start_end}
+                            onChange={setStart_end}
+                        />
+
+                        <MarketScriptNameFilter
+                            market={market}
+                            script={script}
+                            setScript={setScript}
+                            setMarket={setMarket}
+                        />
+
+                        <ClientMasterBrokerFilter
+                            client={client}
+                            master={master}
+                            // broker={broker}
+                            setClient={setClient}
+                            setMaster={setMaster}
+                            // setBroker={setBroker}
+                            showBroker={false}
+                        />
+                    </Grid> */}
+                    <EditDeleteLogsFilters
+                        setEnd_date={setEnd_date}
+                        setStart_end={setStart_end}
+                        end_date={end_date}
+                        start_end={start_end}
+                        setIs_deleted={setIs_deleted}
+                        is_deleted={is_deleted}
+                        is_updated={is_updated}
+                        setIs_updated={setIs_updated}
+                        market={market}
+                        script={script}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                        client={client}
+                        master={master}
+                        // broker={broker}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                    // setBroker={setBroker}
+                    />
+
                     <Box
                         sx={{
                             display: 'flex',
@@ -276,6 +378,37 @@ const EditDeleteLogs = () => {
                         flexWrap: 'nowrap', // ensures everything stays on one line
                     }}
                 >
+                    <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                        <Box sx={{ width: 280, p: 2 }} role="presentation">
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6">Filters</Typography>
+                                <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
+                            </Box>
+                            <EditDeleteLogsFilters
+                                setEnd_date={setEnd_date}
+                                setStart_end={setStart_end}
+                                end_date={end_date}
+                                start_end={start_end}
+                                setIs_deleted={setIs_deleted}
+                                is_deleted={is_deleted}
+                                is_updated={is_updated}
+                                setIs_updated={setIs_updated}
+                                market={market}
+                                script={script}
+                                setScript={setScript}
+                                setMarket={setMarket}
+                                client={client}
+                                master={master}
+                                // broker={broker}
+                                setClient={setClient}
+                                setMaster={setMaster}
+                            // setBroker={setBroker}
+                            />
+                        </Box>
+                    </Drawer>
+
+                    <FilterBtn setFilterOpen={setFilterDrawer} />
+
                     <TextField
                         variant="outlined"
                         placeholder="Search logs..."
@@ -409,31 +542,3 @@ const EditDeleteLogs = () => {
 };
 
 export default EditDeleteLogs;
-
-{/**
-
-            "trade_id": "31502628",
-           > "log_type": "DEL",
-           > "user_full_name": "DEMO DEV 3 (949391)",
-           > "script_name": "NIFTY 31JUL2025",
-           > "trade_type": "Sell",
-           > "trade_lot": "1",
-           > "trade_qty": "75",
-           > "trade_rate": "25000",
-           >  "added_datetime": "2025-07-23 01:06:01"
-           "added_by": "Auto",
-
-
-             
-          > "type": "INS",
-          > "datetime": "2025-07-24 09:24:00",
-          >  "full_name": "DEMO DEV 3 (949391) / Demo master nnn",
-        > "script_name": "NASDAQ 19SEP2025",
-        >    "trade_type": "Buy",
-         >   "trade_lot": "1.000",
-          >  "trade_qty": "70",
-          >  "trade_rate": "23,383.25",
-            "log_message": "Invalid Server Time"
-        },
-
-*/}

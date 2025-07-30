@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Grid,
     FormControl,
@@ -15,25 +15,32 @@ const RadioFilter = ({
     options,
     value,
     onChange,
+    flag = true,
     // gridProps = {},
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
 
+    useEffect(() => {
+
+    }, [])
+
     return (
-        <Grid item>
+        <Grid item xs={flag && 12} sm={flag && 6} md={flag && 3} lg={flag && 2.4} >
             <FormControl
                 component="fieldset"
                 fullWidth
                 sx={{
                     ...getInputBoxStyle(isDarkMode),
                     px: 1.5,
-                    pl: 3,
-                    py: 1,
+                    pl: 2.5,
+                    pt: 0.4,
                     pb: 1,
                     borderRadius: 1,
                     border: isDarkMode ? '1px solid #444' : '1px solid #ccc',
                     backgroundColor: isDarkMode ? '#1e1e1e' : '#fff',
+                    position: 'relative',
+                    top: '-6px',
                 }}
             >
                 <FormLabel
@@ -60,7 +67,7 @@ const RadioFilter = ({
                         '& .MuiFormControlLabel-root': {
                             my: 0,
                             py: 0,
-                            height: 16,
+                            height: 17,
                             mr: 0,
                         },
                         '& .MuiRadio-root': {

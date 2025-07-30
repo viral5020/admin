@@ -4,8 +4,11 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import AutocompleteFilter from './AutocompleteFilter';
+import { useTheme } from '@emotion/react';
 
-const MarketScriptNameFilter = ({ isDarkMode, script, setScript, setMarket, market }) => {
+const MarketScriptNameFilter = ({ script, setScript, setMarket, market }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [marketOptions, setMarketOptions] = useState([]);
   const [scriptOptions, setScriptOptions] = useState([]);
 

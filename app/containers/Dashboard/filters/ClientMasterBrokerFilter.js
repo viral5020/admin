@@ -5,9 +5,9 @@ import {
 import axios from 'axios';
 import { getInputBoxStyle } from './inputBoxStyle';
 import AutocompleteFilter from './AutocompleteFilter';
+import { useTheme } from '@emotion/react';
 
 const ClientMasterBrokerFilter = ({
-    isDarkMode,
     client,
     master,
     broker,
@@ -18,6 +18,9 @@ const ClientMasterBrokerFilter = ({
     showMaster = true,
     showBroker = true,
 }) => {
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === 'dark';
+
     const [clientOptions, setClientOptions] = useState([]);
     const [masterOptions, setMasterOptions] = useState([]);
     const [brokerOptions, setBrokerOptions] = useState([]);

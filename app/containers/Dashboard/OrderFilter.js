@@ -48,49 +48,15 @@ const OrderFilter = ({ isDarkMode, setStatus,
 
     return (
         <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
-            <Grid container spacing={1} sx={{ p: 0 }}>
+            <Grid container spacing={1}>
                 {/* (1) Status Multi-select - wider */}
-                <Grid item xs={12} sm={6} md={4} lg={3.6} sx={{ p: 0 }}>
-                    {/* <Autocomplete
-                        multiple
-                        options={statusOptions}
-                        getOptionLabel={(opt) => opt.label}
-                        value={status}
-                        onChange={(e, val) => setStatus(val)}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        disableCloseOnSelect
-                        renderInput={(params) => (
-                            <TextField {...params} label="Status" size="small" sx={inputBoxStyle} />
-                        )}
-                        fullWidth
-                        sx={inputBoxStyle}
-                    /> */}
-                    {/* <FormControl component="fieldset" fullWidth sx={{ ...inputBoxStyle, p: 0 }}>
-                        <FormLabel component="legend" sx={{ fontSize: '0.8rem' }}>Status</FormLabel>
-                        <RadioGroup
-                            row
-                            value={status?.value || ""}
-                            onChange={(e) => {
-                                const selected = statusOptions.find((opt) => opt.value === e.target.value);
-                                setStatus(selected);
-                            }}
-                            sx={{ p: 0 }}
-                        >
-                            {statusOptions.map((option) => (
-                                <FormControlLabel
-                                    key={option.value}
-                                    value={option.value}
-                                    control={<Radio size="small" />}
-                                    label={option.label}
-                                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8rem' }, mx: 0 }} />
-                            ))}
-                        </RadioGroup>
-                    </FormControl> */}
+                <Grid item xs={12} sm={6} md={4} lg={3.6}>
                     <RadioFilter
                         label="Status"
                         options={statusOptions}
                         value={status}
                         onChange={setStatus}
+                        flag={false}
                     />
                 </Grid>
 
@@ -99,7 +65,6 @@ const OrderFilter = ({ isDarkMode, setStatus,
                     label="Trade After"
                     value={end_date}
                     onChange={setEnd_date}
-                    maxDate={today}
                 />
 
                 {/* (3) Trade Before */}
@@ -107,7 +72,6 @@ const OrderFilter = ({ isDarkMode, setStatus,
                     label="Trade Before"
                     value={start_end}
                     onChange={setStart_end}
-                    maxDate={today}
                 />
 
                 {/* (4) Order Type - wider */}
@@ -132,14 +96,12 @@ const OrderFilter = ({ isDarkMode, setStatus,
                 {/* ➤ Moved Market to second row (after Order Type) */}
 
                 <MarketScriptNameFilter
-                    isDarkMode={isDarkMode}
                     market={market}
                     script={script}
                     setScript={setScript}
                     setMarket={setMarket}
                 />
                 <ClientMasterBrokerFilter
-                    isDarkMode={isDarkMode}
                     client={client}
                     master={master}
                     broker={broker}

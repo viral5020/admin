@@ -16,16 +16,11 @@ import PapperBlock from '../PapperBlock/PapperBlock';
 import EnhancedTableToolbar from './tableParts/TableToolbar';
 import EnhancedTableHead from './tableParts/TableHeader';
 import useStyles from './tableStyle-jss';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel, Popover, IconButton } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 import { lighten, darken, alpha } from '@mui/material/styles';
 import { maxWidth } from '@mui/system';
-import StarSharpIcon from '@mui/icons-material/StarSharp';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import toast, { Toaster } from 'react-hot-toast';
-
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
@@ -130,7 +125,7 @@ const columnData = [
 ];
 
 
-function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDummyData }) {
+function StockTable({ searchText, setIsStockOpen, watchList }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   // const [openDialog, setOpenDialog] = useState(false);
@@ -141,9 +136,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
 
   const [showShadow, setShowShadow] = useState(false);
   const tableWrapperRef = useRef(null);
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const longPressTimer = useRef(null);
 
   const handleScroll = () => {
     if (tableWrapperRef.current) {
@@ -235,91 +227,12 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
     )
   };
 
-  const removeItem = (id) => {
-    console.log("remoe=veItem calledd...")
-    setTimeout(() => {
-      setDummyData((prev) => prev.filter((item) => item.id !== id));
-    }, [500])
-  };
-
-  function showToast(msg, onUndo) {
-    let didUndo = false;
-
-    const toastId = toast.custom((t) => (
-      <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
-        <Typography sx={{ fontSize: '0.9rem' }}>
-          {/* {scriptName} Removed */}
-          {msg}
-        </Typography>
-        {onUndo && <Button
-          size="small"
-          sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0 }}
-          onClick={() => {
-            didUndo = true;
-            onUndo();
-            toast.dismiss(t.id);
-          }}
-        >
-          Undo
-        </Button>}
-      </Box>
-    ), {
-      id: msg, // optional: prevent duplicate toasts
-      duration: 60000,
-      position: 'bottom-center',
-    });
-  };
-
-  const handleMouseEnter = (e) => {
-    setAnchorEl(e.currentTarget);
-  };
-
-  const handleMouseLeave = () => {
-    setAnchorEl(null);
-  };
-
-  const handleTouchStart = (e) => {
-    longPressTimer.current = setTimeout(() => {
-      setAnchorEl(e.currentTarget);
-    }, 500); // long press delay (adjust if needed)
-  };
-
-  const handleTouchEnd = () => {
-    clearTimeout(longPressTimer.current);
-  };
-
-  const open = Boolean(anchorEl);
-
-  function handleRemove(stock, idx, isQty) {
-    if (isQty) {
-      showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
-    } else {
-      function onUndo() {
-        setDummyData(prev => [
-          ...prev.slice(0, idx),
-          stock,
-          ...prev.slice(idx)
-        ]);
-      }
-      removeItem(stock.id);
-      showToast(`${stock.scriptName} Removed `, onUndo);
-    }
-  }
-
-  function handleStar(stock, isFavorite) {
-    console.log("handle star called...");
-    showToast(`${stock.scriptName} ${isFavorite ? 'removed from' : 'added in'} favorites.`);
-  }
-
   const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
     const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
     const rowBgColor = getCellBgColor(rowVal);
     const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
 
     if (itemCell.id === 'scriptName') {
-      const isQty = itemCell.qty > 0 ? true : false;
-      const isFavorite = index % 3 == 0 ? true : false;
-
       return (
         <>
           <TableCell
@@ -327,19 +240,14 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
             sx={{
               ...firstColumnStyle,
               backgroundColor: rowBgColorFirstCol,
-              position: 'relative',
             }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
+          // sortDirection={'desc'}
           >
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="body1" sx={{ fontWeight: 500 }} noWrap>
+              <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
                 {dataArray.scriptName}
               </Typography>
             </Box>
-
             <Box
               sx={{
                 position: 'absolute',
@@ -348,67 +256,10 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
                 right: '-36px',
                 width: '36px',
                 pointerEvents: 'none',
-                background: showShadow
-                  ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)'
-                  : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
+                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
                 zIndex: 10,
               }}
             />
-
-            <Popover
-              open={open}
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              PaperProps={{
-                sx: {
-                  p: 1,
-                  display: 'flex',
-                  gap: 1,
-                  alignItems: 'center',
-                  borderRadius: 1,
-                },
-              }}
-            >
-              <IconButton
-                onClick={() => handleStar(item, isFavorite)}
-                sx={{
-                  backgroundColor: isDarkMode ? '#eca52e' : '#ffb63c',
-                  '&:hover': { backgroundColor: isDarkMode ? '#d5942a' : '#e5a833' },
-                  color: '#fff',
-                }}
-              >
-                {isFavorite ? (
-                  <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} />
-                ) : (
-                  <StarSharpIcon sx={{ fontSize: '2rem' }} />
-                )}
-              </IconButton>
-
-              <IconButton
-                onClick={() => handleRemove(item, index, isQty)}
-                sx={{
-                  backgroundColor: isQty
-                    ? isDarkMode ? '#696969' : '#797979'
-                    : isDarkMode ? '#d73733' : '#e0362a',
-                  '&:hover': {
-                    backgroundColor: isQty
-                      ? isDarkMode ? '#5a5a5a' : '#686868'
-                      : isDarkMode ? '#c5312f' : '#c62f26',
-                  },
-                  color: '#fff',
-                }}
-              >
-                <DeleteIcon sx={{ fontSize: '2rem' }} />
-              </IconButton>
-            </Popover>
           </TableCell>
         </>
       );
@@ -522,7 +373,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
           <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my: 0 }}>
             <TableHeader columnData={columnData} />
             <TableBody>
-              {dummyData.map(stock => {
+              {watchList.map(stock => {
                 if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                   return false;
                 }
@@ -541,7 +392,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, isDarkMode, setDumm
           </Table>
         </Box>
       </div>
-      <Toaster limit={3} />
     </Paper>
   );
 }

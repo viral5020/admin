@@ -22,8 +22,11 @@ import {
     Card,
     CardContent,
     Grid,
+    Drawer,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from '@mui/icons-material/Close';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { styled } from "@mui/material/styles";
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
@@ -34,6 +37,8 @@ import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
 import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
 import RadioFilter from "./filters/RadioFilterField";
 import DateFilter from "./filters/DateFilter";
+import PositionFilter from "./PositionFilter";
+import FilterBtn from "./filters/FilterBtn";
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     maxHeight: "65vh",
@@ -52,6 +57,7 @@ const TableHeaderCell = styled(TableCell)({
 const OrderPage = () => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
+    const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
 
     const [positionData, setPositionData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -59,7 +65,6 @@ const OrderPage = () => {
     // const [filter, setFilter] = useState("today");
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
     const [expanded, setExpanded] = useState(false);
     const [tradesData, setTradesData] = useState([]);
     const [loadingTrades, setLoadingTrades] = useState(false);
@@ -73,6 +78,8 @@ const OrderPage = () => {
     const [all_outstanding, setAll_outstanding] = useState('');
     const [client_wise_value, setClient_wise_value] = useState('');
     const [exparyDate, setExparyDate] = useState('');
+
+    const [filterDrawer, setFilterDrawer] = useState(false);
 
     const handleCardClick = (row) => {
         setSelectedRow(row);
@@ -175,50 +182,68 @@ const OrderPage = () => {
     ];
 
     const ClientWiseOptions = [
-        { label: ' t.scritp_name', value: 't.scritp_name' },
-        { label: 'u.user_full_name', value: 'u.user_full_name' }
+        { label: ' Scritp name', value: 't.scritp_name' },
+        { label: 'User Name', value: 'u.user_full_name' }
     ]
 
     return (
         <Box sx={{ p: 0, position: "relative" }}>
-            {/* <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}></Box> */}
-            <Grid container spacing={1} mt={1}>
-                <RadioFilter
-                    label="All Outstanding"
-                    options={allOutstandingOptions}
-                    value={all_outstanding}
-                    onChange={setAll_outstanding}
-                />
-                <RadioFilter
-                    label="Client Wise Value"
-                    options={ClientWiseOptions}
-                    value={client_wise_value}
-                    onChange={setClient_wise_value}
-                />
-                <DateFilter
-                    label="Expary date"
-                    value={exparyDate}
-                    onChange={setExparyDate}
-                />
-                <MarketScriptNameFilter
-                    isDarkMode={isDarkMode}
+            {/* Filter Drawer for Mobile */}
+            {isMobile ? <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                <Box sx={{ width: 280, p: 2 }} role="presentation">
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h6">Filters</Typography>
+                        <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
+                    </Box>
+                    <PositionFilter
+                        ClientWiseOptions={ClientWiseOptions}
+                        allOutstandingOptions={allOutstandingOptions}
+                        setExparyDate={setExparyDate}
+                        exparyDate={exparyDate}
+                        setClient_wise_value={setClient_wise_value}
+                        client_wise_value={client_wise_value}
+                        setAll_outstanding={setAll_outstanding}
+                        all_outstanding={all_outstanding}
+                        market={market}
+                        script={script}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                        client={client}
+                        master={master}
+                        broker={broker}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        setBroker={setBroker}
+                    />
+                </Box>
+            </Drawer>
+                : <PositionFilter
+                    ClientWiseOptions={ClientWiseOptions}
+                    allOutstandingOptions={allOutstandingOptions}
+                    setExparyDate={setExparyDate}
+                    exparyDate={exparyDate}
+                    setClient_wise_value={setClient_wise_value}
+                    client_wise_value={client_wise_value}
+                    setAll_outstanding={setAll_outstanding}
+                    all_outstanding={all_outstanding}
                     market={market}
                     script={script}
                     setScript={setScript}
                     setMarket={setMarket}
-                />
-                <ClientMasterBrokerFilter
-                    isDarkMode={isDarkMode}
                     client={client}
                     master={master}
                     broker={broker}
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
-                />
-            </Grid>
+                />}
             {/* 🔍 Search Bar */}
-            <Box sx={{ px: 2, py: 1 }}>
+            <Box sx={{
+                px: 2, py: 1, display: "flex",
+                alignItems: "center", gap: 2
+            }}>
+                {isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
+
                 {/* 🔍 Search Input */}
                 <TextField
                     fullWidth
@@ -235,6 +260,7 @@ const OrderPage = () => {
                         ),
                     }}
                     sx={{
+                        // width:'100%'
                         '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
                             height: 36,

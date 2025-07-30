@@ -11,6 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import OrderFilter from './OrderFilter';
+import FilterBtn from './filters/FilterBtn';
 
 const OrderBook = () => {
   const theme = useTheme();
@@ -49,10 +50,10 @@ const OrderBook = () => {
       login_user_id: dataStored?.user_id,
       auth_key: dataStored?.auth_key,
       isTodayTrade: type === "today" ? "today" : "",
-      status: status,
-      end_date: end_date,
-      start_end: start_end,
-      orderType: orderType,
+      // status: status,
+      // end_date: end_date,
+      // start_end: start_end,
+      // orderType: orderType,
     };
 
     try {
@@ -87,6 +88,10 @@ const OrderBook = () => {
   useEffect(() => {
     !isFirstRender && fetchOrders(filterType, searchText);
   }, [currentPage]);
+
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchOrders(filterType, searchText);
+  }, [isFilterChange])
 
   useEffect(() => {
     fetchOrders(filterType, searchText);
@@ -139,17 +144,11 @@ const OrderBook = () => {
         px: 1,
         backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
         borderRadius: 1,
+        gap: 1,
       }}>
         {/* IconButton LEFT of filter dropdown on mobile */}
-        {isMobile && (
-          <IconButton
-            onClick={toggleDrawer(true)}
-            size="small"
-            sx={{ border: '1px solid #ccc', mr: 1 }}
-          >
-            <FilterListIcon />
-          </IconButton>
-        )}
+        {isMobile && <FilterBtn setFilterOpen={setDrawerOpen} />}
+
 
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Filter</InputLabel>
@@ -165,7 +164,7 @@ const OrderBook = () => {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           fullWidth
-          sx={{ ml: 1 }}
+        // sx={{ ml: 1 }}
         />
       </Box>
 

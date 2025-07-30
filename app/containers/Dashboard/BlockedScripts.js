@@ -180,7 +180,6 @@ const OrderPage = () => {
         >
 
           <MarketScriptNameFilter
-            isDarkMode={isDarkMode}
             market={market}
             script={script}
             setScript={setScript}

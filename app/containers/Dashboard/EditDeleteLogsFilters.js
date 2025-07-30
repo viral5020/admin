@@ -1,0 +1,89 @@
+import React from 'react'
+import DateFilter from './filters/DateFilter'
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter'
+import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter'
+import { Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
+
+const EditDeleteLogsFilters = ({
+    setEnd_date,
+    setStart_end,
+    end_date,
+    start_end,
+    setIs_deleted,
+    is_deleted,
+    is_updated,
+    setIs_updated,
+    market,
+    script,
+    setScript,
+    setMarket,
+    client,
+    master,
+    // broker,
+    setClient,
+    setMaster,
+    // setBroker,
+}) => {
+    return (
+        <>
+            <Grid container spacing={1} sx={{ mb: 1.5 }}>
+                <Grid item xs={12} sm={6} md={3} lg={2.4} >
+                    <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    size="small"
+                                    checked={is_updated}
+                                    onChange={(e) => setIs_updated(e.target.checked)}
+                                />
+                            }
+                            label="Update"
+                            sx={{ mr: 2, ml: 0.5 }}
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    size="small"
+                                    checked={is_deleted}
+                                    onChange={(e) => setIs_deleted(e.target.checked)}
+                                />
+                            }
+                            label="Delete"
+                        />
+                    </FormGroup>
+                </Grid>
+
+                <DateFilter
+                    label="Trade After"
+                    value={end_date}
+                    onChange={setEnd_date}
+                />
+
+                <DateFilter
+                    label="Trade Before"
+                    value={start_end}
+                    onChange={setStart_end}
+                />
+
+                <MarketScriptNameFilter
+                    market={market}
+                    script={script}
+                    setScript={setScript}
+                    setMarket={setMarket}
+                />
+
+                <ClientMasterBrokerFilter
+                    client={client}
+                    master={master}
+                    // broker={broker}
+                    setClient={setClient}
+                    setMaster={setMaster}
+                    // setBroker={setBroker}
+                    showBroker={false}
+                />
+            </Grid>
+        </>
+    )
+}
+
+export default EditDeleteLogsFilters
