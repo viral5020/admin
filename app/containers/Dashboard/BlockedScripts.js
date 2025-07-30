@@ -206,7 +206,7 @@ const OrderPage = () => {
         {/* Second Row: Search Box */}
         <TextField
           fullWidth
-          placeholder="Search positions..."
+          placeholder="Search scripts..."
           size="small"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}

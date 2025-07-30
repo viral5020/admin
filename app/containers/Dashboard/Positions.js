@@ -109,7 +109,7 @@ const OrderPage = () => {
                         auth_key: dataStored.auth_key,
                         sEcho: 1,
                         iDisplayStart: 0,
-                        iDisplayLength: 10,
+                        iDisplayLength: 1000000,
                         script_id: selectedRow?.script_id,
                         sSearch: "",
                     }),
@@ -136,7 +136,7 @@ const OrderPage = () => {
                 auth_key: dataStored.auth_key,
                 sEcho: 1,
                 iDisplayStart: 0,
-                iDisplayLength: 10,
+                iDisplayLength: 100000,
                 sSearch: search,
             });
 

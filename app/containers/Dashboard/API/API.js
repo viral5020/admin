@@ -10,7 +10,7 @@ export const apifetchPositions = async (userId, authKey) => {
       auth_key: authKey,
       sEcho: 1,
       iDisplayStart: 0,
-      iDisplayLength: 10,
+      iDisplayLength: 1000000,
       sSearch: "",
     });
 

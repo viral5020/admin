@@ -290,36 +290,43 @@ const OrderBook = () => {
         </>
       ) : (
         <>
-          <Box sx={{
-            overflowX: 'auto',
-            overflowY: 'auto',
-            maxHeight: '69vh',
-            borderRadius: 1,
-            mx: 1,
-            '&::-webkit-scrollbar': {
-              width: '6px',
-              height: '6px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: theme.palette.mode === 'dark' ? '#777' : '#aaa',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: theme.palette.mode === 'dark' ? '#222' : '#f0f0f0',
-            },
-          }}>
-            <table style={{ minWidth: 1500, fontSize: "12px", margin: '0px' }}>
+          <Box
+            sx={{
+              overflowX: "auto",
+              overflowY: "auto",
+              maxHeight: "69vh",
+              border: "1px solid #ddd",
+              borderRadius: 1,
+              mx: 1,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
+          >
+            <table
+              className="table table-striped table-bordered"
+              style={{
+                minWidth: "1500px",
+                fontSize: "12px",
+                margin: 0,
+                backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              }}
+            >
               <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
                 <tr>
                   {[
-                    "Device", "Time", "Trade ID", "Client", "Market", "Script",
-                    "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status",
-                    "O. Time", "Comm Amt"
+                    "Device", "Time", "Script", "B/S", "Order Type",
+                    "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
                   ].map((header) => (
-                    <th key={header} style={{
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                      fontWeight: 600
-                    }}>
+                    <th
+                      key={header}
+                      style={{
+                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                        fontWeight: 600,
+                      }}
+                    >
                       {header}
                     </th>
                   ))}
@@ -327,32 +334,86 @@ const OrderBook = () => {
               </thead>
               <tbody>
                 {orders.map((item, index) => {
-                  let rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                  if (item.trd_type === "Buy") rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                  if (item.trd_type === "Sell") rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
+                  // let rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
+                  // if (item.trd_type === "Buy") rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
+                  // if (item.trd_type === "Sell") rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
+
+                  const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+                  let backgroundColor = "#9e9e9e";
+                  if (market === "NSEFUT") backgroundColor = "#1976d2";
+                  else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
+                  else if (market === "MCXFUT") backgroundColor = "#8e24aa";
+                  else if (market === "NYSE") backgroundColor = "#f57c00";
+
+                  const [scriptPrefix, ...scriptRest] = item.scrp_name.split(" ");
+                  const scriptSuffix = scriptRest.join(" ");
 
                   return (
-                    <tr key={item.trd_id || index} style={{ backgroundColor: rowBgColor }}>
+                    <tr key={item.trd_id || index} >
                       <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
                       <td>{item.trd_matchedtime}</td>
-                      <td>#{item.trd_id}</td>
-                      <td>{item.client_full_name}</td>
-                      <td>{item.mrkt_name}</td>
-                      <td>{item.scrp_name}</td>
-                      <td>{item.trd_type}</td>
+                      <td>
+                        <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Box component="span">
+                            <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
+                              {scriptPrefix}
+                            </Box>{" "}
+                            <Box component="span" sx={{ fontSize: "10px" }}>
+                              {scriptSuffix}
+                            </Box>
+                          </Box>
+                          <Box
+                            component="span"
+                            sx={{
+                              fontSize: "10px",
+                              px: 1,
+                              borderRadius: "8px",
+                              backgroundColor,
+                              color: "#fff",
+                              display: "inline-block",
+                            }}
+                          >
+                            {item.mrkt_name}
+                          </Box>
+                        </Box>
+                      </td>
+                      <td
+                        style={{
+                          color:
+                            item.trd_type === "Buy"
+                              ? theme.palette.success.main
+                              : item.trd_type === "Sell"
+                                ? theme.palette.error.main
+                                : theme.palette.text.primary,
+                          textTransform: "uppercase",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {item.trd_type}
+                      </td>
                       <td>{item.trd_type2}</td>
-                      <td>{item.trd_lot}</td>
-                      <td>{item.actual_lot_qty}</td>
-                      <td>{item.trd_rate}</td>
+                      <td>
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          {item.actual_lot_qty}
+                        </Box>{" "}
+                        <Box component="span" sx={{ color: theme.palette.text.secondary }}>
+                          ({item.trd_lot})
+                        </Box>
+                      </td>
+                     <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
+  {item.trd_rate}
+</td>
                       <td>{item.trd_status}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_comm_amnt}</td>
+                      <td>#{item.trd_id}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </Box>
+
 
           <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
             <Button

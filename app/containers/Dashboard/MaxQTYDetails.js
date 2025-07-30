@@ -17,10 +17,22 @@ import {
     Typography,
     useMediaQuery,
     useTheme,
+    Chip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useIsFirstRender } from '@uidotdev/usehooks';
 import AddIcon from '@mui/icons-material/Add';
+
+const marketChipStyles = {
+  NSEEQT: { backgroundColor: "#1976d2", color: "#fff" }, // Blue
+  NSEFUT: { backgroundColor: "#9c27b0", color: "#fff" }, // Purple
+  NSEOPT: { backgroundColor: "#2e7d32", color: "#fff" },    // Green
+  GLOBALFUTURES: { backgroundColor: "#d32f2f", color: "#fff" },  // Red
+  FOREX: { backgroundColor: "#f9a825", color: "#000" },  // Amber
+  MCXFUT: { backgroundColor: "#25b6f9ff", color: "#000" },  // Amber
+  NSECDS: { backgroundColor: "#f94f25ff", color: "#000" },  // Amber
+   "GLOBAL FUTURES": { backgroundColor: "#e4f925ff", color: "#000" },
+};
 
 const EditDeleteLogs = () => {
     const theme = useTheme();
@@ -402,30 +414,43 @@ const handleFilterToggle = () => {
         <>
           {!isMobile ? (
             // Desktop: Table
-            <TableContainer sx={{ maxHeight: '70vh' }}>
-              <Table stickyHeader size="small" sx={{ minWidth: 600 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Level</TableCell>
-                    <TableCell>Market</TableCell>
-                    <TableCell>Script</TableCell>
-                    <TableCell>Position</TableCell>
-                    <TableCell>Max Order</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {logs.map((log, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{log.level_name}</TableCell>
-                      <TableCell>{log.market_name || '-'}</TableCell>
-                      <TableCell>{log.script_name || '-'}</TableCell>
-                      <TableCell>{log.position_limit}</TableCell>
-                      <TableCell>{log.max_order}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        <TableContainer sx={{ maxHeight: "70vh" }}>
+  <Table stickyHeader size="small" sx={{ minWidth: 400 }}>
+    <TableHead>
+      <TableRow>
+        <TableCell sx={{ width: "40%" }}>Script</TableCell>
+        <TableCell sx={{ width: "30%" }}>Position</TableCell>
+        <TableCell sx={{ width: "30%" }}>Max Order</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {logs.map((log, i) => (
+        <TableRow key={i}>
+          <TableCell>
+            <span>{log.script_name || "-"}</span>{" "}
+            {log.market_name && (
+               <Chip
+    label={log.market_name}
+    size="small"
+    sx={{
+      ml: 1,
+      height: 22,
+      fontSize: "0.75rem",
+      ...marketChipStyles[log.market_name] || {
+        backgroundColor: "#e0e0e0", // Default gray
+        color: "#000",
+      },
+    }}
+  />
+            )}
+          </TableCell>
+          <TableCell>{log.position_limit}</TableCell>
+          <TableCell>{log.max_order}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</TableContainer>
           ) : (
             // Mobile: Card UI
     <Box>
