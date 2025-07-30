@@ -698,11 +698,13 @@ function PersonalDashboard() {
           maxWidth="xl"
           disableEscapeKeyDown
           PaperProps={{
-            sx: {
-              overflow: "hidden", // ✅ Hide outer scrollbar
-              maxHeight: isMobile ? "100vh" : "90vh",
-              overflowY: 'auto'
-            },
+           sx: {
+      overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
+      maxHeight: isMobile ? "100vh" : "90vh",
+      height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
+      display: "flex",
+      flexDirection: "column",
+    },
           }}
         >
           <Box sx={{ p: 0 }}>
@@ -823,7 +825,7 @@ function PersonalDashboard() {
               </Box>
             </Box>
             {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+              <Box sx={{   height: 400, display: "flex", justifyContent: "center", mt: 1 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : orders.length > 0 ? (
@@ -970,7 +972,7 @@ function PersonalDashboard() {
                       sx={{
                         overflowX: "auto",
                         overflowY: "auto",
-                        maxHeight: "400px",
+                        Height: "400px",
                         border: "1px solid #ddd",
                         borderRadius: "0px",
                         mx: 1,
@@ -978,6 +980,9 @@ function PersonalDashboard() {
                         "&::-webkit-scrollbar": {
                           display: "none",
                         },
+                         display: "flex",
+    alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
+    justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
                       }}
                     >
                       <table
@@ -1088,9 +1093,6 @@ function PersonalDashboard() {
                       </table>
                     </Box>
 
-
-
-
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
                         <Button
@@ -1152,11 +1154,22 @@ function PersonalDashboard() {
                 )}
               </>
             ) : (
-              <Typography sx={{ fontSize: "14px", px: 1, color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                No orders found.
-              </Typography>
-            )}
-          </Box>
+                <Box
+      sx={{
+        height: "400px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        px: 1,
+      }}
+    >
+      <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+        No orders found.
+      </Typography>
+    </Box>
+  )}
+</Box>
+          
         </Dialog>
 
 
@@ -1837,7 +1850,16 @@ function PersonalDashboard() {
                               );
                             })
                           ) : (
-                            <Typography variant="body2">No trades found</Typography>
+                           <Box
+  sx={{
+    height: 400, // ✅ Fixed height
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  <Typography variant="body2">No trades found</Typography>
+</Box>
                           )}
                         </Box>
                       </Fade>
@@ -2003,7 +2025,7 @@ function PersonalDashboard() {
 
             {/* Content */}
             {loadingPending ? (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Box sx={{ height: 400, display: "flex", justifyContent: "center", mt: 2 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : pendingOrders.length > 0 ? (
@@ -2217,7 +2239,19 @@ function PersonalDashboard() {
                 )}
               </>
             ) : (
-              <Typography sx={{ px: 1, mt: 2 }}>No pending orders found.</Typography>
+                     <Box
+      sx={{
+        height: "400px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        px: 1,
+      }}
+    >
+      <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+        No pending orders found.
+      </Typography>
+    </Box>
             )}
           </Box>
         </Dialog>
@@ -2247,11 +2281,13 @@ function PersonalDashboard() {
           maxWidth="xl"
           disableEscapeKeyDown
           PaperProps={{
-            sx: {
-              overflow: "hidden",
-              maxHeight: isMobile ? "100vh" : "90vh",
-              overflowY: "auto",
-            },
+           sx: {
+      overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
+      maxHeight: isMobile ? "100vh" : "90vh",
+      height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
+      display: "flex",
+      flexDirection: "column",
+    },
           }}
         >
           <Box sx={{ p: 0 }}>
@@ -2369,13 +2405,31 @@ function PersonalDashboard() {
 
             {/* Content */}
             {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <CircularProgress size={24} />
-              </Box>
+             <Box
+    sx={{
+      flex: 1,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: 400,
+    }}
+  >
+    <CircularProgress size={24} />
+  </Box>
             ) : filteredLogs.length === 0 ? (
-              <Typography sx={{ fontSize: "14px", px: 1 }}>
-                No rejection logs found.
-              </Typography>
+              <Box
+    sx={{
+      flex: 1,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: 400,
+    }}
+  >
+    <Typography sx={{ fontSize: "14px", px: 1 }}>
+      No rejection logs found.
+    </Typography>
+  </Box>
             ) : isMobile ? (
               <>
                 {visibleMobileLogs.map((log, index) => {
