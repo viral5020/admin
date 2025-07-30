@@ -965,87 +965,126 @@ function PersonalDashboard() {
                   </>
                 ) : (
                   <>
-                    <Box
-                      sx={{
-                        overflowX: "auto",
-                        overflowY: "auto",
-                        maxHeight: "400px", // adjust as needed
-                        border: "1px solid #ddd",
-                        borderRadius: "0px",
-                        mx: 1,
-                        scrollbarWidth: "none",
-                        "&::-webkit-scrollbar": {
-                          display: "none",
-                        },
-                      }}
-                    >
-                      <table
-                        className="table table-striped table-bordered"
-                        style={{
-                          minWidth: "1500px",
-                          fontSize: "12px",
-                          margin: 0,
-                          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                        }}
-                      >
-                        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                          <tr>
-                            {[
-                              "Device", "Time", "Trade ID", "Client", "Market", "Script",
-                              "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status",
-                              "O. Time", "Comm Amt"
-                            ].map((header) => (
-                              <th
-                                key={header}
-                                style={{
-                                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedOrders.map((item, index) => {
-                            let rowBgColor;
-                            if (item.trd_type === "Buy") {
-                              rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                            } else if (item.trd_type === "Sell") {
-                              rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-                            } else {
-                              rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                            }
+                  
+<Box
+  sx={{
+    overflowX: "auto",
+    overflowY: "auto",
+    maxHeight: "400px",
+    border: "1px solid #ddd",
+    borderRadius: "0px",
+    mx: 1,
+    scrollbarWidth: "none",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
+  }}
+>
+  <table
+    className="table table-striped table-bordered"
+    style={{
+      minWidth: "1500px",
+      fontSize: "12px",
+      margin: 0,
+      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    }}
+  >
+    <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+      <tr>
+        {[
+          "Device", "Time", "Script", "B/S", "Order Type",
+          "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
+        ].map((header) => (
+          <th
+            key={header}
+            style={{
+              color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              fontWeight: 600,
+            }}
+          >
+            {header}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {paginatedOrders.map((item, index) => {
+        const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+        let backgroundColor = "#9e9e9e"; // default
 
-                            return (
-                              <tr
-                                key={item.trd_id || index}
-                                style={{
-                                  backgroundColor: rowBgColor,
-                                }}
-                              >
-                                <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                <td>{item.trd_matchedtime}</td>
-                                <td>#{item.trd_id}</td>
-                                <td>{item.client_full_name}</td>
-                                <td>{item.mrkt_name}</td>
-                                <td>{item.scrp_name}</td>
-                                <td>{item.trd_type}</td>
-                                <td>{item.trd_type2}</td>
-                                <td>{item.trd_lot}</td>
-                                <td>{item.actual_lot_qty}</td>
-                                <td>{item.trd_rate}</td>
-                                <td>{item.trd_status}</td>
-                                <td>{item.trd_time}</td>
-                                <td>{item.trd_comm_amnt}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </Box>
+        if (market === "NSEFUT") backgroundColor = "#1976d2";
+        else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
+        else if (market === "MCXFUT") backgroundColor = "#8e24aa";
+        else if (market === "NYSE") backgroundColor = "#f57c00";
+
+        return (
+          <tr key={item.trd_id || index}>
+            <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+            <td>{item.trd_matchedtime}</td>
+            <td>
+              {item.scrp_name}
+              <Box
+                component="span"
+                sx={{
+                  fontSize: "10px",
+                  px: 1,
+                  ml: 1,
+                  borderRadius: "8px",
+                  backgroundColor,
+                  color: "#fff",
+                  display: "inline-block",
+                }}
+              >
+                {item.mrkt_name}
+              </Box>
+            </td>
+            <td
+  style={{
+    color:
+      item.trd_type === "Buy"
+        ? theme.palette.success.main
+        : item.trd_type === "Sell"
+        ? theme.palette.error.main
+        : theme.palette.text.primary,
+    textTransform: "uppercase",
+    fontWeight: 700,
+  }}
+>
+  {item.trd_type}
+</td>
+
+            <td>{item.trd_type2}</td>
+           <td>
+  <Box component="span" sx={{ fontWeight: 700 }}>
+    {item.actual_lot_qty}
+  </Box>{" "}
+  <Box component="span" sx={{ color: theme.palette.text.secondary }}>
+    ({item.trd_lot})
+  </Box>
+</td>
+            <td
+  style={{
+    fontWeight: 700,
+    color: 'black',
+  }}
+>
+  {item.trd_rate}
+</td>
+
+            <td>{item.trd_status}</td>
+            <td>{item.trd_time}</td>
+            <td>{item.trd_comm_amnt}</td>
+            <td>#{item.trd_id}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</Box>
+
+
+
 
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
