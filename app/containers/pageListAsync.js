@@ -36,7 +36,7 @@ export const CryptoDashboard = loadable(() =>
   fallback: <Loading />,
 });
 export const Watchlist = loadable(() =>
-  import('./Dashboard/Watchlist'), {
+  import('./Dashboard/Watchlist/Watchlist'), {
   fallback: <Loading />,
 });
 export const StockDetailMobile = loadable(() =>

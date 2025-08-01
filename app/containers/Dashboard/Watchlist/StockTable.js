@@ -12,10 +12,10 @@ import TrendingDown from '@mui/icons-material/TrendingDown';
 import TrendingFlat from '@mui/icons-material/TrendingFlat';
 import { cryptoData } from 'dan-api/chart/chartMiniData';
 import { BarChart, Bar } from 'recharts';
-import PapperBlock from '../PapperBlock/PapperBlock';
-import EnhancedTableToolbar from './tableParts/TableToolbar';
-import EnhancedTableHead from './tableParts/TableHeader';
-import useStyles from './tableStyle-jss';
+import PapperBlock from '../../../components/PapperBlock/PapperBlock';
+import EnhancedTableToolbar from '../../../components/Tables/tableParts/TableToolbar';
+import EnhancedTableHead from '../../../components/Tables/tableParts/TableHeader';
+import useStyles from '../../../components/Tables/tableStyle-jss';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
@@ -236,23 +236,24 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     const rowBgColorFirstCol = 'inherit';
 
     if (itemCell.id === 'scriptName') {
+      const val = dataArray[itemCell.id];
       return (
         <>
           <TableCell
-            key={index.toString()}
+            key={dataArray.id + index.toString()}
             sx={{
               ...firstColumnStyle,
               backgroundColor: rowBgColorFirstCol,
+              // backgroundColor: val > 0 ? 'rgba(76, 175, 80, 0.08)' : val < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
             }}
           // sortDirection={'desc'}
           >
             <Box sx={{ position: 'relative' }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
-                {console.log('dataArray[itemCell.priceChange]', dataArray[itemCell.priceChange])}
-                {console.log('dataArray', dataArray)}
                 {getCondition(dataArray['priceChange'], true, false)}
                 {dataArray.scriptName}
               </Typography>
+              <hr style={{ margin: 0, padding: 0, color: getCellBgColorFisrtCol(rowVal) }} />
             </Box>
             <Box
               sx={{
@@ -276,12 +277,13 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
         <TableCell
           padding="normal"
           align={itemCell.numeric ? 'right' : 'left'}
-          key={index.toString()}
+          key={dataArray.id + index.toString()}
           sx={{
             ...tableCellStyle,
             backgroundColor: rowBgColor,
           }}>
-          {getCondition(dataArray[itemCell.id], false, true)}
+          {/* {getCondition(dataArray[itemCell.id], false, true)} */}
+          {dataArray[itemCell.id]}
         </TableCell>
       );
     }
@@ -290,7 +292,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
       <TableCell
         padding="normal"
         align={itemCell.numeric ? 'right' : 'left'}
-        key={index.toString()}
+        key={dataArray.id + index.toString()}
         sx={{
           ...tableCellStyle,
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
@@ -317,7 +319,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
         >
           {columnData.map((column) => (
             <TableCell
-              key={column.id}
+              key={'aa' + column.id}
               align={column.numeric ? 'right' : 'left'}
               sx={column.id === 'scriptName' ?
                 firstColumnHeaderStyle : { ...tableCellStyle, color: "white" }}
