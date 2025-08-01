@@ -89,7 +89,7 @@ const useStyles = makeStyles()((theme) => ({
   */
   stripped: {
     '& tbody tr:nth-of-type(even)': {
-      background: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[900], 0.5) : theme.palette.grey[50]
+      background: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[900], 0.9) : theme.palette.grey[100]
     }
   },
   hover: {

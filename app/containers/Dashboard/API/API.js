@@ -513,30 +513,12 @@ export const addMarketScriptAPI = async ({
 };
 
 
-// const eee = {
-//   "status": "ok",
-//   "message": "Market Added.",
-//   "scripts": [
-//     {
-//       "market_watch_id": "7930023",
-//       "market_type_id": "1",
-//       "market_type_name": "MCXFUT",
-//       "script_id": "161",
-//       "script_name": "ZINC",
-//       "script_expiry_id": "27292",
-//       "script_expiry_date": "2025-07-31",
-//       "script_expiry_type": "II",
-//       "script_expiry_orginal_format": "31JUL2025",
-//       "script_lot_qty": "5000",
-//       "min_order": "100",
-//       "max_order": "500000",
-//       "position_limit": "0",
-//       "quantity": 0
-//     }
-//   ]
-// }
-
-// const eee2 = {
-//   "status": "error",
-//   "message": "Market Already Added"
-// }
+export const getWatchListDataAPI = async () => {
+  try {
+    const response = await axiosInstance.post('ajaxfiles/market_watch_list1', { ...getDefaultParams() });
+    return response.data;
+  } catch (error) {
+    console.error('Error in getting watchlist data:', error);
+    throw error;
+  }
+};

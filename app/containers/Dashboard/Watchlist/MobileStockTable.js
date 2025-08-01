@@ -101,6 +101,9 @@ const MobileStockTable = ({
     setDummyData
 }) => {
 
+    useEffect(() => {
+        console.log('dummyData', dummyData);
+    }, [])
     const theme = createTheme({
         palette: {
             star: '#fff', // Don't think, Just remain this as it is

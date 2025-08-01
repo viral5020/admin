@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import brand from 'dan-api/dummy/brand';
 import { Helmet } from 'react-helmet';
 import Grid from '@mui/material/Grid';
@@ -30,9 +30,12 @@ import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from './MobileStockTable';
 import { Navigate } from 'react-router-dom';
 import BackToTop from '../BackToTop';
+import { getWatchListDataAPI } from '../API/API';
+import { TableBody, TableHead } from 'mui-datatables';
+import useStylesCx from '../../../components/Tables/tableStyle-jss';
 
 
-const generateCandleData = (name) => {
+const generateCandleData = () => {
   const base = 1000 + Math.random() * 100;
   const data = Array.from({ length: 10 }, (_, i) => {
     const open = base + Math.random() * 10;
@@ -347,6 +350,53 @@ const dummyWatchlistData = [
   }
 ];
 
+function getRandomPrice(min, max) {
+  return parseFloat((Math.random() * (max - min) + min).toFixed(2));
+}
+
+function getRandomFloat(min, max) {
+  return parseFloat((Math.random() * (max - min) + min).toFixed(2));
+}
+
+// e.g. "31JUL2025" → "31 JUL 2025"
+function formatDate(str) {
+  const match = str.match(/(\d{2})([A-Z]{3})(\d{4})/);
+  if (!match) return '';
+
+  const [, day, month, year] = match;
+  return `${day} ${month} ${year}`;
+}
+
+
+function generateDummyWatchlistData(scripts = []) {
+  return scripts.map((item, index) => {
+    const scriptName = `${item.script_name} ${formatDate(item.script_expiry_orginal_format)}`;
+    const maxOrder = parseInt(item.max_order, 10) || 0;
+    const qty = parseInt(item.quantity, 10) || 0;
+
+    return {
+      id: `${index + 1}`,
+      scriptName,
+      exchange: item.market_type_name || 'NSE',
+      open: getRandomPrice(280000, 290000),
+      close: getRandomPrice(270000, 285000),
+      high: getRandomPrice(285000, 295000),
+      low: getRandomPrice(265000, 280000),
+      bidRate: getRandomPrice(250000, 290000),
+      askRate: getRandomPrice(250000, 290000),
+      ltp: getRandomPrice(270000, 290000),
+      priceChange: getRandomFloat(-500, 500),
+      priceChangePercent: getRandomFloat(-2.5, 2.5),
+      qty,
+      time: new Date().getTime(),
+      maxOrder,
+      position: Math.random() > 0.5 ? 'Buy' : 'Sell',
+      isFavorite: item.favourite === '1',
+      lastChangedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
+    };
+  });
+}
+
 
 function Watchlist() {
   const theme = useTheme();
@@ -359,7 +409,7 @@ function Watchlist() {
   const [searchText, setSearchText] = useState('');
   const [isStockOpen, setIsStockOpen] = useState(null);
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
-  const [dummyData, setDummyData] = useState(dummyWatchlistData)
+  const [dummyData, setDummyData] = useState();
 
   const sections = [
     { title: 'Nifty 50 Stocks', key: 'nifty' },
@@ -379,6 +429,24 @@ function Watchlist() {
       return newSet;
     });
   };
+
+  async function getWatchListData() {
+    try {
+      const data = await getWatchListDataAPI();
+
+      console.log('data', data);
+      const dd = generateDummyWatchlistData(data.scripts)
+      console.log('dd', dd);
+      setDummyData(dd);
+    } catch (error) {
+      console.log('error', error);
+    }
+  }
+
+  useEffect(() => {
+    getWatchListData();
+  }, [])
+
 
   return (
     <>
@@ -433,7 +501,7 @@ function Watchlist() {
                   : <StockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
-                    watchList={dummyWatchlistData}
+                    watchList={dummyData}
                   />}
               </AccordionDetails>
             </Accordion>
