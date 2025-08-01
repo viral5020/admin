@@ -199,7 +199,7 @@ const MobileStockTable = ({
             </Box>
         ), {
             id: msg, // optional: prevent duplicate toasts
-            duration: 60000,
+            duration: 2000,
             position: 'bottom-center',
         });
     };

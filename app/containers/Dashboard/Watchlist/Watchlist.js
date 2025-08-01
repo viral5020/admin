@@ -3,8 +3,8 @@ import brand from 'dan-api/dummy/brand';
 import { Helmet } from 'react-helmet';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
-import useStyles from './dashboard-jss';
-import StockTable from 'dan-components/Tables/StockTable';
+import useStyles from '../dashboard-jss';
+import StockTable from './StockTable';
 import FilterComponent from './FilterComponent';
 import {
   Accordion,
@@ -24,12 +24,12 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'; // LHS icon
-import ApexCharts from './Apexcharts';
+import ApexCharts from '../Apexcharts';
 import { useTheme } from '@mui/material/styles';
 import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
-import MobileStockTable from 'dan-components/Tables/MobileStockTable';
+import MobileStockTable from './MobileStockTable';
 import { Navigate } from 'react-router-dom';
-import BackToTop from './BackToTop';
+import BackToTop from '../BackToTop';
 
 
 const generateCandleData = (name) => {
@@ -357,7 +357,7 @@ function Watchlist() {
   const description = brand.desc;
   const { classes } = useStyles();
   const [searchText, setSearchText] = useState('');
-  const [isStockOpen, setIsStockOpen] = useState();
+  const [isStockOpen, setIsStockOpen] = useState(null);
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
   const [dummyData, setDummyData] = useState(dummyWatchlistData)
 
@@ -447,7 +447,7 @@ function Watchlist() {
         <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} />
       )
         :
-        <Dialog open={isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
+        <Dialog open={!!isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
           <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box display="flex" alignItems="center" gap={1}>
               <Typography variant="h6">{isStockOpen?.scriptName}</Typography>

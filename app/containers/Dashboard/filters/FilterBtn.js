@@ -2,8 +2,9 @@ import { useTheme } from '@emotion/react';
 import { Button } from '@mui/material';
 import React from 'react'
 import FilterListIcon from '@mui/icons-material/FilterList';
+import AddIcon from '@mui/icons-material/Add';
 
-const FilterBtn = ({ setFilterOpen }) => {
+const FilterBtn = ({ setFilterOpen, icon }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
 
@@ -12,9 +13,14 @@ const FilterBtn = ({ setFilterOpen }) => {
             <Button
                 variant="outlined"
                 size="small"
-                startIcon={<FilterListIcon sx={{ position: 'relative', left: '4px' }} />}
+                startIcon={
+                    icon === 'add'
+                        ? <AddIcon sx={{ position: 'relative', left: '4px', fontSize: '30px !important' }} />
+                        : <FilterListIcon sx={{ position: 'relative', left: '4px' }} />
+                }
                 onClick={() => setFilterOpen(true)}
                 sx={{
+                    p: 0,
                     backgroundColor: isDarkMode ? '#263238' : '#fff',
                     borderColor: isDarkMode ? '#90a4ae' : '#607d8b',
                     color: isDarkMode ? '#cfd8dc' : '#607d8b',

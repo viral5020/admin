@@ -1,6 +1,16 @@
 import axios from "axios";
 import { fetchClient } from "./fetchconfig";
 import axiosInstance from "./axiosconfig";
+import { constant } from "../Watchlist/constant";
+
+function getDefaultParams() {
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  return {
+    is_app: "1",
+    login_user_id: dataStored.user_id,
+    auth_key: dataStored.auth_key,
+  }
+}
 
 export const apifetchPositions = async (userId, authKey) => {
   try {
@@ -438,3 +448,95 @@ export const removeBlockListAPI = async (userId, authKey, script_block_id) => {
     throw error;
   }
 };
+
+export const fetchStrikeDataAPI = async ({ expiry, script, index = 0, term = 'CE' }) => {
+  console.log('&&&&&& strike term', term);
+  if (!term || !expiry?.expiry_date || !script?.script_id) {
+    throw new Error('Missing term,expiry or script data');
+  }
+
+  const expiry_id = `${expiry.script_expiry_id}-${index}`;
+
+  const response = await axiosInstance.post('ajaxfiles/get_option_strike_price', {
+    ...getDefaultParams(),
+    expiry_id,
+    term,
+  });
+
+  // console.log('response.data', response.data);
+
+  return response.data?.data || [];
+};
+
+export const addMarketScriptAPI = async ({
+  market_type_id,
+  script_id,
+  script_expiry_id,
+  expiryTerm,
+  type,
+  strickObj
+}) => {
+  const defaultParams = getDefaultParams();
+  let payload;
+  if (String(market_type_id) === constant) {
+    payload = {
+      market_type_id,
+      script_id,
+      script_expiry_id: `${script_expiry_id}-${expiryTerm}`,
+      script_expiry_type: strickObj.check_script_name,
+      script_expiry_orginal_formate: `${strickObj.rate} ${type}`
+    }
+  } else {
+    let str = 'I'.repeat(expiryTerm + 1);  // 'I'.repeat(n) returns a string with 'I' repeated (expiryTerm + 1) times.
+    console.log('expiryTerm', expiryTerm)
+    console.log('str', str);
+    payload = {
+      market_type_id,
+      script_id,
+      script_expiry_id: script_expiry_id,
+      script_expiry_type: str,
+    }
+  }
+
+  try {
+    const res = await axiosInstance.post('ajaxfiles/add_market_watch', { ...getDefaultParams(), ...payload });
+
+    if (res.data.status === 'ok') {
+      return res.data || {};
+    } else {
+      throw new Error(res.data.message || 'Unknown error occurred');
+    }
+  } catch (err) {
+    console.error('Error in addMarketScript:', err.message || err);
+    throw err;
+  }
+};
+
+
+// const eee = {
+//   "status": "ok",
+//   "message": "Market Added.",
+//   "scripts": [
+//     {
+//       "market_watch_id": "7930023",
+//       "market_type_id": "1",
+//       "market_type_name": "MCXFUT",
+//       "script_id": "161",
+//       "script_name": "ZINC",
+//       "script_expiry_id": "27292",
+//       "script_expiry_date": "2025-07-31",
+//       "script_expiry_type": "II",
+//       "script_expiry_orginal_format": "31JUL2025",
+//       "script_lot_qty": "5000",
+//       "min_order": "100",
+//       "max_order": "500000",
+//       "position_limit": "0",
+//       "quantity": 0
+//     }
+//   ]
+// }
+
+// const eee2 = {
+//   "status": "error",
+//   "message": "Market Already Added"
+// }

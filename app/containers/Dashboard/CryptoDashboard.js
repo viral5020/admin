@@ -4,8 +4,8 @@ import { Helmet } from 'react-helmet';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 import useStyles from './dashboard-jss';
-import StockTable from 'dan-components/Tables/StockTable';
-import FilterComponent from './FilterComponent';
+import StockTable from './Watchlist/StockTable';
+import FilterComponent from './Watchlist/FilterComponent';
 import {
   Accordion,
   AccordionSummary,
