@@ -176,26 +176,26 @@ const EditDeleteLogs = () => {
                             showBroker={false}
                         />
                     </Grid> */}
-                    <EditDeleteLogsFilters
-                        setEnd_date={setEnd_date}
-                        setStart_date={setStart_date}
-                        end_date={end_date}
-                        start_date={start_date}
-                        setIs_deleted={setIs_deleted}
-                        is_deleted={is_deleted}
-                        is_updated={is_updated}
-                        setIs_updated={setIs_updated}
-                        market={market}
-                        script={script}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        client={client}
-                        master={master}
-                        // broker={broker}
-                        setClient={setClient}
-                        setMaster={setMaster}
-                    // setBroker={setBroker}
-                    />
+                  <EditDeleteLogsFilters
+    setEnd_date={setEnd_date}
+    setStart_date={setStart_date}
+    end_date={end_date}
+    start_date={start_date}
+    setIs_deleted={setIs_deleted}
+    is_deleted={is_deleted}
+    is_updated={is_updated}
+    setIs_updated={setIs_updated}
+    market={market}
+    script={script}
+    setScript={setScript}
+    setMarket={setMarket}
+    client={client}
+    master={master}
+    setClient={setClient}
+    setMaster={setMaster}
+    onApply={fetchLogs} 
+/>
+
 
                     <Box
                         sx={{
@@ -415,6 +415,7 @@ const EditDeleteLogs = () => {
                                 // broker={broker}
                                 setClient={setClient}
                                 setMaster={setMaster}
+                                onApply={fetchLogs} 
                             // setBroker={setBroker}
                             />
                         </Box>

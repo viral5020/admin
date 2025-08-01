@@ -126,42 +126,43 @@ const OrderPage = () => {
         }
     };
 
-    const fetchPositions = async (search = "") => {
-        setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        try {
-            const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
-                sEcho: 1,
-                iDisplayStart: 0,
-                iDisplayLength: 100000,
-                sSearch: search,
+   const fetchPositions = async () => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    try {
+        const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
+            is_app: "1",
+            login_user_id: dataStored.user_id,
+            auth_key: dataStored.auth_key,
+            sEcho: 1,
+            iDisplayStart: 0,
+            iDisplayLength: 100000,
+            sSearch: "",
 
-                all_outstanding: all_outstanding,
-                expiry_date: exparyDate,
-                group_by: client_wise_value,
+            all_outstanding: all_outstanding,
+            expiry_date: exparyDate,
+            group_by: client_wise_value,
 
-                market_type_id: market?.id,
-                script_id: script?.id,
-                broker_id: broker?.id,
-                master_user_id: master?.id,
-                user_id: client?.id,
-            });
+            market_type_id: market?.id,
+            script_id: script?.id,
+            broker_id: broker?.id,
+            master_user_id: master?.id,
+            user_id: client?.id,
+        });
 
-            if (response.data && response.data.aaData) {
-                setPositionData(response.data.aaData);
-            } else {
-                setPositionData([]);
-            }
-        } catch (error) {
-            console.error("Error fetching position data:", error);
+        if (response.data && response.data.aaData) {
+            setPositionData(response.data.aaData);
+        } else {
             setPositionData([]);
-        } finally {
-            setLoading(false);
         }
-    };
+    } catch (error) {
+        console.error("Error fetching position data:", error);
+        setPositionData([]);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
 
     useEffect(() => {
@@ -205,26 +206,28 @@ const OrderPage = () => {
                         <Typography variant="h6">Filters</Typography>
                         <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                     </Box>
-                    <PositionFilter
-                        ClientWiseOptions={ClientWiseOptions}
-                        allOutstandingOptions={allOutstandingOptions}
-                        setExparyDate={setExparyDate}
-                        exparyDate={exparyDate}
-                        setClient_wise_value={setClient_wise_value}
-                        client_wise_value={client_wise_value}
-                        setAll_outstanding={setAll_outstanding}
-                        all_outstanding={all_outstanding}
-                        market={market}
-                        script={script}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        client={client}
-                        master={master}
-                        broker={broker}
-                        setClient={setClient}
-                        setMaster={setMaster}
-                        setBroker={setBroker}
-                    />
+                   <PositionFilter
+    ClientWiseOptions={ClientWiseOptions}
+    allOutstandingOptions={allOutstandingOptions}
+    setExparyDate={setExparyDate}
+    exparyDate={exparyDate}
+    setClient_wise_value={setClient_wise_value}
+    client_wise_value={client_wise_value}
+    setAll_outstanding={setAll_outstanding}
+    all_outstanding={all_outstanding}
+    market={market}
+    script={script}
+    setScript={setScript}
+    setMarket={setMarket}
+    client={client}
+    master={master}
+    broker={broker}
+    setClient={setClient}
+    setMaster={setMaster}
+    setBroker={setBroker}
+    onApply={fetchPositions} 
+/>
+
                 </Box>
             </Drawer>
                 : <PositionFilter
@@ -246,6 +249,7 @@ const OrderPage = () => {
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
+                    onApply={fetchPositions} 
                 />}
             {/* 🔍 Search Bar */}
             <Box sx={{

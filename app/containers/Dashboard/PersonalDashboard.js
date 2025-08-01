@@ -664,26 +664,26 @@ function PersonalDashboard() {
   };
 
   return (
-    <Box sx={{ px: { xs: 2, md: 5 }, py: 4 }}>
+    <Box sx={{ px: { xs: 2, md: 5 }, py: 1 }}>
       <Helmet>
         <title>{brand.name} - Personal Dashboard</title>
       </Helmet>
 
       <Grid container spacing={1}>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-            <InfoCardHorizontal
-              title="Orders"
-              icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
-              content={[
-                `Today: ${dashboardData.today_trades}`,
-                `This Week: ${dashboardData.week_trades}`,
-              ]}
-              bgcolor="rgba(156, 39, 176, 0.1)"
-            />
-          </Box>
-        </Grid>
+    <Grid item xs={6} sm={6} md={3}>
+  <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+    <InfoCardHorizontal
+      title="Orders"
+      icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
+      content={[
+        `Today: ${dashboardData.today_trades}`,
+        `This Week: ${dashboardData.week_trades}`,
+      ]}
+      bgcolor="rgba(156, 39, 176, 0.1)"
+    />
+  </Box>
+</Grid>
 
 
         <Dialog
@@ -1174,16 +1174,16 @@ function PersonalDashboard() {
 
 
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-            <InfoCardHorizontal
-              title="Positions"
-              icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
-              content={[`Positions: ${dashboardData.total_position}`]}
-              bgcolor="rgba(76, 175, 80, 0.1)"
-            />
-          </Box>
-        </Grid>
+        <Grid item xs={6} sm={6} md={3}>
+  <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+    <InfoCardHorizontal
+      title="Positions"
+      icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
+      content={[`Positions: ${dashboardData.total_position}`]}
+      bgcolor="rgba(76, 175, 80, 0.1)"
+    />
+  </Box>
+</Grid>
 
         <Dialog
           open={positionDialogOpen}
@@ -1889,19 +1889,18 @@ function PersonalDashboard() {
           </Box>
         </Dialog>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-            <InfoCardHorizontal
-              title="Pending Orders"
-              icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
-              content={[
-                `Pending orders: ${dashboardData.today_pending_trades}`,
-              ]}
-              bgcolor="rgba(255, 152, 0, 0.1)"
-            />
-          </Box>
-        </Grid>
-
+       <Grid item xs={6} sm={6} md={3}>
+  <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+    <InfoCardHorizontal
+      title="Pending Orders"
+      icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
+      content={[
+        `Pending orders: ${dashboardData.today_pending_trades}`,
+      ]}
+      bgcolor="rgba(255, 152, 0, 0.1)"
+    />
+  </Box>
+</Grid>
 
         <Dialog
           open={pendingOrdersDialogOpen}
@@ -2256,19 +2255,19 @@ function PersonalDashboard() {
           </Box>
         </Dialog>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-            <InfoCardHorizontal
-              title="Rejection Logs"
-              icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
-              content={[
-                `Today: ${dashboardData.today_rejection}`,
-                `Total: ${dashboardData.total_rejection}`,
-              ]}
-              bgcolor="rgba(206, 48, 48, 0.1)"
-            />
-          </Box>
-        </Grid>
+       <Grid item xs={6} sm={6} md={3}>
+  <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+    <InfoCardHorizontal
+      title="Rejection Logs"
+      icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
+      content={[
+        `Today: ${dashboardData.today_rejection}`,
+        `Total: ${dashboardData.total_rejection}`,
+      ]}
+      bgcolor="rgba(206, 48, 48, 0.1)"
+    />
+  </Box>
+</Grid>
         <Dialog
           open={rejectionDialogOpen}
           fullScreen={isMobile}
@@ -3731,58 +3730,130 @@ function PersonalDashboard() {
                               );
                             })
                           ) : (
-                            <Box sx={{ overflowX: "auto", border: "1px solid #ddd", mx: 1 }}>
-                              <table
-                                className="table table-striped table-bordered"
+                             <Box
+                      sx={{
+                        overflowX: "auto",
+                        overflowY: "auto",
+                        Height: "400px",
+                        border: "1px solid #ddd",
+                        borderRadius: "0px",
+                        mx: 1,
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": {
+                          display: "none",
+                        },
+                         display: "flex",
+    alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
+    justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
+                      }}
+                    >
+                      <table
+                        className="table table-striped table-bordered"
+                        style={{
+                          minWidth: "1500px",
+                          fontSize: "12px",
+                          margin: 0,
+                          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                        }}
+                      >
+                        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                          <tr>
+                            {[
+                              "Device", "Time", "Script", "B/S", "Order Type",
+                              "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
+                            ].map((header) => (
+                              <th
+                                key={header}
                                 style={{
-                                  minWidth: "1350px",
-                                  fontSize: "12px",
-                                  margin: 0,
-                                  backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
                                   color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                                  fontWeight: 600,
                                 }}
                               >
-                                <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                                  <tr>
-                                    {["Device", "Time", "Trade ID", "Client", "Market", "Script", "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
-                                      <th key={header} style={{ fontWeight: 600 }}>
-                                        {header}
-                                      </th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {paginatedTrades.map((item, index) => (
-                                    <tr
-                                      key={item.trd_id || index}
-                                      style={{
-                                        backgroundColor:
-                                          item.trd_type === "Buy"
-                                            ? theme.palette.mode === "dark" ? "#264653" : "#e0f7fa"
-                                            : item.trd_type === "Sell"
-                                              ? theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec"
-                                              : theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
-                                      }}
-                                    >
-                                      <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                      <td>{item.trd_matchedtime}</td>
-                                      <td>#{item.trd_id}</td>
-                                      <td>{item.client_full_name}</td>
-                                      <td>{item.mrkt_name}</td>
-                                      <td>{item.scrp_name}</td>
-                                      <td>{item.trd_type}</td>
-                                      <td>{item.trd_type2}</td>
-                                      <td>{item.trd_lot}</td>
-                                      <td>{item.actual_lot_qty}</td>
-                                      <td>{item.trd_rate}</td>
-                                      <td>{item.trd_status}</td>
-                                      <td>{item.trd_time}</td>
-                                      <td>{item.trd_comm_amnt}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </Box>
+                                {header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedOrders.map((item, index) => {
+                            const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+                            let backgroundColor = "#9e9e9e"; // default
+
+                            if (market === "NSEFUT") backgroundColor = "#1976d2";
+                            else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
+                            else if (market === "MCXFUT") backgroundColor = "#8e24aa";
+                            else if (market === "NYSE") backgroundColor = "#f57c00";
+
+                            return (
+                              <tr key={item.trd_id || index}>
+                                <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                <td>{item.trd_matchedtime}</td>
+                                <td>
+                                  <Box component="span">
+                                    <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
+                                      {item.scrp_name.split(" ")[0]}
+                                    </Box>{" "}
+                                    <Box component="span" sx={{ fontSize: "10px" }}>
+                                      {item.scrp_name.split(" ").slice(1).join(" ")}
+                                    </Box>
+                                  </Box>
+
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      fontSize: "10px",
+                                      px: 1,
+                                      ml: 1,
+                                      borderRadius: "8px",
+                                      backgroundColor,
+                                      color: "#fff",
+                                      display: "inline-block",
+                                    }}
+                                  >
+                                    {item.mrkt_name}
+                                  </Box>
+                                </td>
+
+                                <td
+                                  style={{
+                                    color:
+                                      item.trd_type === "Buy"
+                                        ? theme.palette.success.main
+                                        : item.trd_type === "Sell"
+                                          ? theme.palette.error.main
+                                          : theme.palette.text.primary,
+                                    textTransform: "uppercase",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {item.trd_type}
+                                </td>
+
+                                <td>{item.trd_type2}</td>
+                                <td>
+                                  <Box component="span" sx={{ fontWeight: 700 }}>
+                                    {item.actual_lot_qty}
+                                  </Box>{" "}
+                                  <Box component="span" sx={{ color: theme.palette.text.secondary }}>
+                                    ({item.trd_lot})
+                                  </Box>
+                                </td>
+                               <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
+  {item.trd_rate}
+</td>
+
+
+                                <td>{item.trd_status}</td>
+                                <td>{item.trd_time}</td>
+                                <td>{item.trd_comm_amnt}</td>
+                                <td>#{item.trd_id}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </Box>
                           )}
 
                           {/* Pagination Controls */}
@@ -4020,83 +4091,108 @@ function PersonalDashboard() {
                     })}
                   </Box>
                 ) : (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      flexGrow: 1,
-                      height: "100%",
-                      overflow: "hidden",
-                      mx: 1,
-                      my: 1,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        overflow: "auto",
-                        border: "1px solid #ddd",
-                      }}
-                    >
-                      <Table sx={{ minWidth: 1350, fontSize: "12px" }}>
-                        <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                          <TableRow>
-                            <TableCell>Market Type</TableCell>
-                            <TableCell>Script</TableCell>
-                            <TableCell>Total Buy</TableCell>
-                            <TableCell>Buy Avg Rate</TableCell>
-                            <TableCell>Total Sell</TableCell>
-                            <TableCell>Sell Avg Rate</TableCell>
-                            <TableCell>Net Qty</TableCell>
-                            <TableCell>Last Trade Price</TableCell>
-                            <TableCell>MTM</TableCell>
-                            <TableCell>Auto Closed Date</TableCell>
-                            <TableCell>Close Btn</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {filteredPositions.map((row, index) => {
-                            const isEven = index % 2 === 0;
-                            const rowBgColor =
-                              theme.palette.mode === "dark"
-                                ? isEven
-                                  ? "#2a2a2a"
-                                  : "#1f1f1f"
-                                : isEven
-                                  ? "#f9f9f9"
-                                  : "#ffffff";
-                            return (
-                              <TableRow key={index} sx={{ backgroundColor: rowBgColor }}>
-                                <TableCell>{row.market_type_name}</TableCell>
-                                <TableCell>
-                                  <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-                                </TableCell>
-                                <TableCell>{row.total_buy}</TableCell>
-                                <TableCell>{row.buy_avg_rate}</TableCell>
-                                <TableCell>{row.total_sell}</TableCell>
-                                <TableCell>{row.sell_avg_rate}</TableCell>
-                                <TableCell>{row.net_qty}</TableCell>
-                                <TableCell>{row.last_trade_price}</TableCell>
-                                <TableCell>
-                                  <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-                                </TableCell>
-                                <TableCell>{row.trade_auto_closed_date}</TableCell>
-                                <TableCell>
-                                  <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => alert("Close Position")}
-                                  >
-                                    Close
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </Box>
-                  </Box>
+                          <Box
+  sx={{
+    overflowX: "auto",
+    overflowY: "auto",
+    maxHeight: "400px",
+    border: "1px solid #ddd",
+    borderRadius: "0px",
+    mx: 1,
+    scrollbarWidth: "none",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
+  }}
+>
+  <Table
+    stickyHeader
+    size="small"
+    sx={{
+      minWidth: 1350,
+      fontSize: "11px", // Smaller font
+      margin: 0,
+      borderCollapse: "collapse",
+      "& td, & th": {
+        padding: "4px 8px", // Reduced padding
+        whiteSpace: "nowrap", // Prevents multiline cells
+        fontSize: "13px", // Apply to both headers and body
+      },
+    }}
+  >
+    <TableHead
+      sx={{
+        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+      }}
+    >
+      <TableRow>
+        {[
+          "Market Type",
+          "Script",
+          "Total Buy",
+          "Buy Avg Rate",
+          "Total Sell",
+          "Sell Avg Rate",
+          "Net Qty",
+          "Last Trade Price",
+          "MTM",
+          "Auto Closed Date",
+          "Close Btn",
+        ].map((col) => (
+          <TableCell key={col}>{col}</TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {filteredPositions.map((row, index) => {
+        const isEven = index % 2 === 0;
+        const rowBgColor = theme.palette.mode === "dark"
+          ? isEven ? "#2a2a2a" : "#1f1f1f"
+          : isEven ? "#f9f9f9" : "#ffffff";
+
+        return (
+          <TableRow
+            key={index}
+            sx={{
+              backgroundColor: rowBgColor,
+              height: "39px", // Minimal row height
+            }}
+          >
+            <TableCell>{row.market_type_name}</TableCell>
+            <TableCell>
+              <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+            </TableCell>
+            <TableCell>{row.total_buy}</TableCell>
+            <TableCell>{row.buy_avg_rate}</TableCell>
+            <TableCell>{row.total_sell}</TableCell>
+            <TableCell>{row.sell_avg_rate}</TableCell>
+            <TableCell>{row.net_qty}</TableCell>
+            <TableCell>{row.last_trade_price}</TableCell>
+            <TableCell>
+              <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+            </TableCell>
+            <TableCell>{row.trade_auto_closed_date}</TableCell>
+            <TableCell>
+              <Button
+                style={{
+                  backgroundColor: '#d32f2f',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => alert("Close Position")}
+              >
+                Close
+              </Button>
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </TableBody>
+  </Table>
+</Box>
                 )}
               </>
             )}

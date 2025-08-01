@@ -146,6 +146,7 @@ const OrderBook = () => {
             client={client}
             master={master}
             broker={broker}
+            onApply={fetchOrders}
           />
         </Box>
       </Drawer>
@@ -172,6 +173,7 @@ const OrderBook = () => {
           client={client}
           master={master}
           broker={broker}
+          onApply={fetchOrders}
         />
       )}
 

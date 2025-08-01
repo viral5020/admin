@@ -1,9 +1,9 @@
-import React from 'react'
-import RadioFilter from './filters/RadioFilterField'
-import DateFilter from './filters/DateFilter'
-import MarketScriptNameFilter from './filters/MarketScriptNameFilter'
-import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter'
-import { Grid } from '@mui/material'
+import React from 'react';
+import RadioFilter from './filters/RadioFilterField';
+import DateFilter from './filters/DateFilter';
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
+import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
+import { Grid, Button, useTheme } from '@mui/material';
 
 const PositionFilter = ({
     ClientWiseOptions,
@@ -24,11 +24,13 @@ const PositionFilter = ({
     setClient,
     setMaster,
     setBroker,
+    onApply 
 }) => {
+    const theme = useTheme();
+
     return (
         <>
             <Grid container spacing={1} mt={1}>
-                {/* <Grid item xs={24} sm={12} md={6} lg={5} > */}
                 <RadioFilter
                     label="All Outstanding"
                     options={allOutstandingOptions}
@@ -42,7 +44,6 @@ const PositionFilter = ({
                     onChange={setClient_wise_value}
                     isLong={true}
                 />
-                {/* </Grid> */}
                 <DateFilter
                     label="Expary date"
                     value={exparyDate}
@@ -62,9 +63,29 @@ const PositionFilter = ({
                     setMaster={setMaster}
                     setBroker={setBroker}
                 />
+
+                {/* ✅ Apply Button */}
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Button
+                        fullWidth
+                        onClick={onApply}
+                        sx={{
+                            backgroundColor: theme.palette.secondary.main,
+                            color: theme.palette.secondary.contrastText,
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.secondary.dark,
+                            },
+                        }}
+                    >
+                        Apply
+                    </Button>
+                </Grid>
             </Grid>
         </>
-    )
-}
+    );
+};
 
-export default PositionFilter
+export default PositionFilter;

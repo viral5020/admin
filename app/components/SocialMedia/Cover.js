@@ -19,7 +19,7 @@ const optionsOpt = [
   'Option 3',
 ];
 
-const ITEM_HEIGHT = 48;
+const ITEM_HEIGHT = 8;
 
 function Cover(props) {
   const [anchorElOpt, setAnchorElOpt] = useState(null);
@@ -75,55 +75,55 @@ function Cover(props) {
     viewUserProfile();
   }, []);
 
-  return (
-    <div className={classes.cover} style={{ backgroundImage: `url(${coverImg})`, height: '380px', }}>
-      <div className={classes.opt}>
-        <IconButton className={classes.button} aria-label="Delete" size="large">
-          <Info />
-        </IconButton>
-        <IconButton
-          aria-label="More"
-          aria-owns={anchorElOpt ? 'long-menu' : null}
-          aria-haspopup="true"
-          className={classes.button}
-          onClick={handleClickOpt}
-          size="large">
-          <MoreVertIcon />
-        </IconButton>
-        <Menu
-          id="long-menu"
-          anchorEl={anchorElOpt}
-          open={Boolean(anchorElOpt)}
-          onClose={handleCloseOpt}
-          PaperProps={{
-            style: {
-              maxHeight: ITEM_HEIGHT * 4.5,
-              width: 200,
-            },
-          }}
-        >
-          {optionsOpt.map(option => (
-            <MenuItem key={option} selected={option === 'Edit Profile'} onClick={handleCloseOpt}>
-              {option}
-            </MenuItem>
-          ))}
-        </Menu>
-      </div>
-      <div className={classes.content}>
-        <Avatar alt={name} src={`${profileData?.profile_image}?${Date.now()}` || avatar} className={classes.avatar} style={{ width: 90, height: 90 }} />
-        <Typography variant="h6" className={classes.name} gutterBottom>
-          {profileData.user_name}
-          <VerifiedUser className={classes.verified} />
-        </Typography>
-        {/* <Typography className={classes.subheading} gutterBottom>
-          {desc}
-        </Typography> */}
-        <Button className={classes.button} size="large" variant="contained" color="secondary">
-          Add to Connection
-        </Button>
-      </div>
-    </div>
-  );
+  // return (
+  //   <div className={classes.cover} style={{ height: '60px', }}>
+  //     {/* <div className={classes.opt}>
+  //       <IconButton className={classes.button} aria-label="Delete" size="large">
+  //         <Info />
+  //       </IconButton>
+  //       <IconButton
+  //         aria-label="More"
+  //         aria-owns={anchorElOpt ? 'long-menu' : null}
+  //         aria-haspopup="true"
+  //         className={classes.button}
+  //         onClick={handleClickOpt}
+  //         size="large">
+  //         <MoreVertIcon />
+  //       </IconButton>
+  //       <Menu
+  //         id="long-menu"
+  //         anchorEl={anchorElOpt}
+  //         open={Boolean(anchorElOpt)}
+  //         onClose={handleCloseOpt}
+  //         PaperProps={{
+  //           style: {
+  //             maxHeight: ITEM_HEIGHT * 4.5,
+  //             width: 200,
+  //           },
+  //         }}
+  //       >
+  //         {optionsOpt.map(option => (
+  //           <MenuItem key={option} selected={option === 'Edit Profile'} onClick={handleCloseOpt}>
+  //             {option}
+  //           </MenuItem>
+  //         ))}
+  //       </Menu>
+  //     </div> */}
+  //     {/* <div className={classes.content}>
+  //       <Avatar alt={name} src={`${profileData?.profile_image}?${Date.now()}` || avatar} className={classes.avatar} style={{ width: 90, height: 90 }} />
+  //       <Typography variant="h6" className={classes.name} gutterBottom>
+  //         {profileData.user_name}
+  //         <VerifiedUser className={classes.verified} />
+  //       </Typography>
+  //       <Typography className={classes.subheading} gutterBottom>
+  //         {desc}
+  //       </Typography>
+  //       <Button className={classes.button} size="large" variant="contained" color="secondary">
+  //         Add to Connection
+  //       </Button>
+  //     </div> */}
+  //   </div>
+  // );
 }
 
 Cover.propTypes = {

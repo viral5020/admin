@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
-    Box, Grid, Autocomplete, TextField, MenuItem, Select, InputLabel, FormControl, useMediaQuery,
-    Tooltip,
-    FormLabel,
-    RadioGroup,
-    FormControlLabel,
-    Radio
+    Box, Grid, Autocomplete, TextField, MenuItem, Select, InputLabel, FormControl,
+    FormLabel, RadioGroup, FormControlLabel, Radio, Button
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
-import axios from 'axios';
 import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import DateFilter from './filters/DateFilter';
@@ -17,7 +12,6 @@ import RadioFilter from './filters/RadioFilterField';
 import { getInputBoxStyle } from './filters/inputBoxStyle';
 
 const statusOptions = [
-    // { label: 'All', value: 'all' },
     { label: 'Pending Order', value: 'is_pending' },
     { label: 'Executed Order', value: 'is_executed' },
 ];
@@ -26,7 +20,9 @@ const orderTypes = [
     'Buy Limit', 'Buy Stop Loss', 'Sell Limit', 'Sell Stop Loss'
 ];
 
-const OrderFilter = ({ isDarkMode, setStatus,
+const OrderFilter = ({
+    isDarkMode,
+    setStatus,
     setEnd_date,
     setStart_end,
     setOrderType,
@@ -44,16 +40,13 @@ const OrderFilter = ({ isDarkMode, setStatus,
     client,
     master,
     broker,
+    onApply // <== Optional handler passed from parent
 }) => {
-    // const theme = useTheme();
-    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const today = dayjs().format('YYYY-MM-DD');
+    const theme = useTheme();
 
     return (
         <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
             <Grid container spacing={1}>
-                {/* (1) Status Multi-select - wider */}
                 <Grid item xs={12} sm={6} md={4} lg={3.6}>
                     <RadioFilter
                         label="Status"
@@ -64,21 +57,9 @@ const OrderFilter = ({ isDarkMode, setStatus,
                     />
                 </Grid>
 
-                {/* (2) Trade After */}
-                <DateFilter
-                    label="Trade After"
-                    value={start_end}
-                    onChange={setStart_end}
-                />
+                <DateFilter label="Trade After" value={start_end} onChange={setStart_end} />
+                <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
-                {/* (3) Trade Before */}
-                <DateFilter
-                    label="Trade Before"
-                    value={end_date}
-                    onChange={setEnd_date}
-                />
-
-                {/* (4) Order Type - wider */}
                 <Grid item xs={12} sm={6} md={4} lg={3.6}>
                     <FormControl fullWidth size="small" sx={getInputBoxStyle(isDarkMode)}>
                         <InputLabel>Select Order Type</InputLabel>
@@ -87,7 +68,6 @@ const OrderFilter = ({ isDarkMode, setStatus,
                             onChange={(e) => setOrderType(e.target.value)}
                             label="Select Order Type"
                         >
-                            {/* <MenuItem value="">Select Order Type</MenuItem> */}
                             {orderTypes.map((type) => (
                                 <MenuItem key={type} value={type}>
                                     {type}
@@ -97,14 +77,13 @@ const OrderFilter = ({ isDarkMode, setStatus,
                     </FormControl>
                 </Grid>
 
-                {/* ➤ Moved Market to second row (after Order Type) */}
-
                 <MarketScriptNameFilter
                     market={market}
                     script={script}
                     setScript={setScript}
                     setMarket={setMarket}
                 />
+
                 <ClientMasterBrokerFilter
                     client={client}
                     master={master}
@@ -113,10 +92,28 @@ const OrderFilter = ({ isDarkMode, setStatus,
                     setMaster={setMaster}
                     setBroker={setBroker}
                 />
+
+                {/* ➤ Apply Button */}
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Button
+                        onClick={onApply}
+                        sx={{
+                            backgroundColor: theme.palette.secondary.main,
+                            color: theme.palette.secondary.contrastText,
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.secondary.dark,
+                            },
+                        }}
+                        fullWidth
+                    >
+                        Apply
+                    </Button>
+                </Grid>
             </Grid>
         </Box>
-
-
     );
 };
 

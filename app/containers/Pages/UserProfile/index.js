@@ -30,7 +30,7 @@ import { fetchData } from '../../SampleApps/Timeline/reducers/timelineSlice';
 function TabContainer(props) {
   const { children } = props;
   return (
-    <div style={{ paddingTop: 8 * 3 }}>
+    <div style={{ paddingTop: 4 }}>
       {children}
     </div>
   );
@@ -71,44 +71,47 @@ function UserProfile() {
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
       </Helmet>
-      <Cover
+      {/* <Cover
         coverImg={bgCover}
         avatar={dummy.user.avatar}
         name={dummy.user.name}
         desc="Consectetur adipiscing elit."
-      />
-      <AppBar position="static" className={classes.profileTab}>
-        {!mdUp && (
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            variant="fullWidth"
-            indicatorColor="primary"
-            textColor="primary"
-            centered
-          >
-            <Tab icon={<AccountCircle />} />
-            <Tab icon={<SettingsIcon />} />
-            <Tab icon={<PasswordIcon />} />
-            <Tab icon={<PhotoLibrary />} />
-          </Tabs>
-        )}
-        {!mdDown && (
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            variant="fullWidth"
-            indicatorColor="primary"
-            textColor="primary"
-            centered
-          >
-            <Tab icon={<AccountCircle />} label="BASIC" />
-            <Tab icon={<SettingsIcon />} label="SETTINGS" />
-            <Tab icon={<PasswordIcon />} label="CHANGE PASSWORD" />
-            <Tab icon={<LockIcon />} label="INVESTOR PASSWORD" />
-          </Tabs>
-        )}
-      </AppBar>
+      /> */}
+    <AppBar position="static" className={classes.profileTab}>
+  {!mdUp && (
+    <Tabs
+      value={value}
+      onChange={handleChange}
+      variant="fullWidth"
+      indicatorColor="primary"
+      textColor="primary"
+      centered
+      className={`${classes.tabMarginTop} ${classes.thinTabs}`}
+    >
+      <Tab icon={<AccountCircle />} />
+      <Tab icon={<SettingsIcon />} />
+      <Tab icon={<PasswordIcon />} />
+      <Tab icon={<PhotoLibrary />} />
+    </Tabs>
+  )}
+  {!mdDown && (
+    <Tabs
+      value={value}
+      onChange={handleChange}
+      variant="fullWidth"
+      indicatorColor="primary"
+      textColor="primary"
+      centered
+      className={`${classes.tabMarginTop} ${classes.thinTabs}`}
+    >
+      <Tab icon={<AccountCircle />} label="BASIC" />
+      <Tab icon={<SettingsIcon />} label="SETTINGS" />
+      <Tab icon={<PasswordIcon />} label="CHANGE PASSWORD" />
+      <Tab icon={<LockIcon />} label="INVESTOR PASSWORD" />
+    </Tabs>
+  )}
+</AppBar>
+
       {value === 0 && <TabContainer><About data={dataProps} /></TabContainer>}
       {value === 1 && <TabContainer><Connection /></TabContainer>}
       {value === 2 && <TabContainer><Favorites /></TabContainer>}

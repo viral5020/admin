@@ -13,6 +13,8 @@ import GeneralCard from '../CardPaper/GeneralCard';
 import PostCard from '../CardPaper/PostCard';
 import Quote from '../Quote/Quote';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const useStyles = makeStyles()((theme) => ({
   divider: {
@@ -29,10 +31,11 @@ const useStyles = makeStyles()((theme) => ({
 
 function Favorites() {
   const { classes } = useStyles();
-  const bull = <span className={classes.bullet}>•</span>;
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // State for form fields
+  // Form state
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -40,11 +43,11 @@ function Favorites() {
   });
   const [error, setError] = useState('');
 
-  // Handle text field changes
+  // Handle field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError(''); // Clear error on input change
+    setError('');
   };
 
   async function handleChnagePassword(values) {
@@ -58,33 +61,24 @@ function Favorites() {
       });
 
       const data = await response.json();
-      console.log('API Response:', data); // <-- Debug this
+      console.log('API Response:', data);
 
-      const isLoginSuccessful = data.status === 'ok';
-      console.log('isLoginSuccessful', isLoginSuccessful);
-
-      if (isLoginSuccessful) {
-        // alert('Password changed successfully!');
+      if (data.status === 'ok') {
         navigate('/app');
       } else {
-        alert('Login failed: ' + (data.message || 'Invalid credentials'));
-        // window.location.href = 'http://localhost:3000/login-v2';
+        alert('Change failed: ' + (data.message || 'Invalid credentials'));
         navigate('/login');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Change error:', error);
       alert('Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
     }
   }
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { currentPassword, newPassword, confirmPassword } = formData;
 
-    // Basic validation
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError('All fields are required.');
       return;
@@ -94,9 +88,10 @@ function Favorites() {
       return;
     }
 
-    const auth_key = sessionStorage.getItem('auth_key')
-    const login_id = sessionStorage.getItem('login_id')
-    const user_id = sessionStorage.getItem('user_id')
+    const auth_key = sessionStorage.getItem('auth_key');
+    const login_id = sessionStorage.getItem('login_id');
+    const user_id = sessionStorage.getItem('user_id');
+
     const values = {
       is_app: 1,
       auth_key,
@@ -104,39 +99,34 @@ function Favorites() {
       current_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword,
-    }
+    };
 
     handleChnagePassword(values);
 
-    // Log form data (placeholder for backend integration)
-    console.log('Password Change Form Data:', { currentPassword, newPassword });
-    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Reset form
-    setError(''); // Clear error
+    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setError('');
   };
 
   return (
-    <Grid
-      container
-      justifyContent="center"
-      direction="row"
-      spacing={3}
-    >
-      <Grid item md={12}>
-        <Typography variant="h6" component="h2" sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
-          Change Password
-        </Typography>
-        <form onSubmit={handleSubmit} className={classes.form}
+    <Grid container justifyContent="center">
+      <Grid item xs={12}>
+        <form
+          onSubmit={handleSubmit}
+          className={classes.form}
           style={{
-            background: 'rgba(255, 255, 255, 0.1)',       // very light white
-            backdropFilter: 'blur(15px)',
-            WebkitBackdropFilter: 'blur(15px)',
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            maxWidth: 700,
-            margin: '40px auto',
+            padding: isMobile ? '16px' : '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+            width: '100%',
+            maxWidth: isMobile ? '100%' : '600px',
+            margin: '16px auto',
             border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}>
+            boxSizing: 'border-box',
+          }}
+        >
           <Grid container direction="column" spacing={2}>
             <Grid item xs={12}>
               <TextField
@@ -146,14 +136,15 @@ function Favorites() {
                 type="password"
                 value={formData.currentPassword}
                 onChange={handleInputChange}
+                variant="outlined"
+                size="small"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Lock />
+                      <Lock style={{ color: '#757575' }} />
                     </InputAdornment>
                   ),
                 }}
-                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -164,14 +155,15 @@ function Favorites() {
                 type="password"
                 value={formData.newPassword}
                 onChange={handleInputChange}
+                variant="outlined"
+                size="small"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Lock />
+                      <Lock style={{ color: '#757575' }} />
                     </InputAdornment>
                   ),
                 }}
-                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -182,27 +174,38 @@ function Favorites() {
                 type="password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
+                variant="outlined"
+                size="small"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Lock />
+                      <Lock style={{ color: '#757575' }} />
                     </InputAdornment>
                   ),
                 }}
-                variant="outlined"
               />
             </Grid>
             {error && (
               <Grid item xs={12}>
-                <Typography color="error">{error}</Typography>
+                <Typography variant="caption" color="error">
+                  {error}
+                </Typography>
               </Grid>
             )}
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ textAlign: 'center', marginTop: 8 }}>
               <Button
                 type="submit"
                 variant="contained"
                 color="secondary"
+                size="medium"
                 className={classes.button}
+                style={{
+                  padding: '6px 20px',
+                  fontSize: 14,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                  textTransform: 'none',
+                }}
               >
                 Update Password
               </Button>

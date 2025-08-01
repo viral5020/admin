@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import {
-  Box,
   Grid,
   Typography,
   TextField,
   Button,
-  InputAdornment
+  InputAdornment,
+  useMediaQuery
 } from '@mui/material';
 import Lock from '@mui/icons-material/Lock';
+import { useTheme } from '@mui/material/styles';
 import useStyles from './profile-jss';
 
 const Albums = () => {
-  const classes = useStyles();
+  const { classes } = useStyles(); // Destructure correctly if using makeStyles()
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [investorData, setInvestorData] = useState({ password: '' });
   const [investorError, setInvestorError] = useState('');
@@ -27,84 +31,79 @@ const Albums = () => {
       return;
     }
     setInvestorError('');
-    // Handle password submission logic here
     console.log('Submitted investor password:', investorData.password);
+    // Submit logic here
   };
 
   return (
-    <Grid container justifyContent="center" direction="row" spacing={3}>
-      <Grid item md={12}>
-        <Typography
-          variant="h6"
-          component="h2"
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            textAlign: 'center',
-          }}
-        >
-          Investor Password
-        </Typography>
-        <form
-          onSubmit={handleInvestorSubmit}
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(15px)',
-            WebkitBackdropFilter: 'blur(15px)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            maxWidth: 700,
-            margin: '40px auto',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          <Grid container direction="column" spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                name="investorPassword"
-                label="Investor Password"
-                type="password"
-                value={investorData.password}
-                onChange={handleInvestorChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock />
-                    </InputAdornment>
-                  ),
-                }}
-                variant="outlined"
-              />
-            </Grid>
+    <form
+      onSubmit={handleInvestorSubmit}
+      style={{
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(15px)',
+        WebkitBackdropFilter: 'blur(15px)',
+        borderRadius: '12px',
+        padding: isMobile ? '16px' : '24px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+        maxWidth: isMobile ? '100%' : 700,
+        margin: '40px auto',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
+    >
+      <Grid container direction="column" spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            name="investorPassword"
+            label="Investor Password"
+            type="password"
+            value={investorData.password}
+            onChange={handleInvestorChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock style={{ color: '#757575' }} />
+                </InputAdornment>
+              ),
+            }}
+            variant="outlined"
+            size="small"
+          />
+        </Grid>
 
-            {investorError && (
-              <Grid item xs={12}>
-                <Typography color="error">{investorError}</Typography>
-              </Grid>
-            )}
-
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="secondary"
-                className={classes.button}
-              >
-                Create Password
-              </Button>
-            </Grid>
+        {investorError && (
+          <Grid item xs={12}>
+            <Typography variant="caption" color="error">
+              {investorError}
+            </Typography>
           </Grid>
-        </form>
+        )}
+
+        <Grid item xs={12} style={{ textAlign: 'center', marginTop: 8 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="secondary"
+            className={classes.button}
+            style={{
+              padding: '6px 20px',
+              fontSize: 14,
+              borderRadius: '8px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+              textTransform: 'none',
+            }}
+          >
+            Create Password
+          </Button>
+        </Grid>
       </Grid>
-    </Grid>
+    </form>
   );
 };
 
 export default Albums;
-
-
 
 // const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disable-line
 //   return <NavLink to={props.to} {...props} />; // eslint-disable-line

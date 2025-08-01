@@ -2,7 +2,7 @@ import React from 'react'
 import DateFilter from './filters/DateFilter'
 import MarketScriptNameFilter from './filters/MarketScriptNameFilter'
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter'
-import { Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme  } from '@mui/material'
 
 const EditDeleteLogsFilters = ({
     setEnd_date,
@@ -19,15 +19,15 @@ const EditDeleteLogsFilters = ({
     setMarket,
     client,
     master,
-    // broker,
     setClient,
     setMaster,
-    // setBroker,
+    onApply 
 }) => {
+    const theme = useTheme();
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
-                <Grid item xs={12} sm={6} md={3} lg={2.4} >
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
                         <FormControlLabel
                             control={
@@ -75,12 +75,31 @@ const EditDeleteLogsFilters = ({
                 <ClientMasterBrokerFilter
                     client={client}
                     master={master}
-                    // broker={broker}
                     setClient={setClient}
                     setMaster={setMaster}
-                    // setBroker={setBroker}
                     showBroker={false}
                 />
+
+                {/* Apply Button */}
+               <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      <Button
+                            fullWidth
+                            onClick={() => onApply()}
+                            sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                color: theme.palette.secondary.contrastText,
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                textTransform: 'none',
+                                '&:hover': {
+                                    backgroundColor: theme.palette.secondary.dark,
+                                },
+                            }}
+                        >
+                            Apply
+                        </Button>
+</Grid>
+
             </Grid>
         </>
     )

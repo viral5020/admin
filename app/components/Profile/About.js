@@ -320,297 +320,311 @@ function About(props) {
 
 
   return (
-    <Grid container justifyContent="center" direction="row" spacing={3}>
+    <Grid container justifyContent="center" direction="row" spacing={1}>
       <Grid item md={12}>
-        <Typography variant="h6" component="h2" sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
-          Update Profile
-        </Typography>
+        {/* <Typography variant="h6" component="h2" sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center', mt: 1 }}>
+          UPDATE PROFILE
+        </Typography> */}
 
-        <form
-          onSubmit={handleSubmit}
-          className={classes.profileList}
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',       // very light white
-            backdropFilter: 'blur(15px)',
-            WebkitBackdropFilter: 'blur(15px)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            maxWidth: 700,
-            margin: '40px auto',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}>
-          <Grid container spacing={2}>
-            {/* Profile Picture Upload */}
-            <Grid item xs={12} style={{ textAlign: 'center' }}>
-              <Avatar
-                src={profilePicture || undefined}
-                className={classes.avatar}
-                style={{ width: 80, height: 80, margin: 'auto' }}
-              >
-                {!profilePicture && <Person />}
-              </Avatar>
-              <Button
-                variant="contained"
-                component="label"
-                color="secondary"
-                className={classes.button}
-                style={{ marginTop: 8 }}
-              >
-                Upload Profile Picture
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleProfilePictureChange}
-                />
-              </Button>
-            </Grid>
+      <form
+  onSubmit={handleSubmit}
+  className={classes.profileList}
+  style={{
+    background: 'rgba(255, 255, 255, 0.08)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    borderRadius: '10px',
+    padding: '16px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+    maxWidth: 700,
+    margin: '8px auto',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+  }}
+>
+  <Grid container spacing={0}>
+    {/* Avatar Upload */}
+    <Grid item xs={12} style={{ textAlign: 'center', margin: '4px 0' }}>
+      <Avatar
+        src={profilePicture || undefined}
+        className={classes.avatar}
+        style={{ width: 64, height: 64, margin: 'auto' }}
+      >
+        {!profilePicture && <Person />}
+      </Avatar>
+      <Button
+        variant="contained"
+        component="label"
+        color="secondary"
+        className={classes.button}
+        style={{ fontSize: 12, marginTop: 4 }}
+      >
+        Upload Picture
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleProfilePictureChange}
+        />
+      </Button>
+    </Grid>
 
-            {/* Name Field */}
-            <Grid item xs={12}>
+    {/* Name Field */}
+    <Grid item xs={12} style={{ margin: '4px 0' }}>
+      <TextField
+        fullWidth
+        name="name"
+        label="Name"
+        value={formData.name}
+        onChange={handleInputChange}
+        error={!!errors.name}
+        helperText={errors.name}
+        variant="outlined"
+        size="small"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Person />
+            </InputAdornment>
+          ),
+        }}
+      />
+    </Grid>
+
+    {/* Phone Field + Verify */}
+    <Grid item xs={12} style={{ margin: '4px 0' }}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={7}>
+          <TextField
+            fullWidth
+            name="phone2FA"
+            label="Phone"
+            value={formData.phone2FA}
+            onChange={handleInputChange}
+            error={!!errors.phone2FA}
+            helperText={errors.phone2FA}
+            variant="outlined"
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LocalPhone />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={5}>
+          <Button
+            fullWidth
+            onClick={handlePhoneVerifyClick}
+            variant="contained"
+            size="small"
+            color="secondary"
+          >
+            Verify
+          </Button>
+        </Grid>
+      </Grid>
+    </Grid>
+
+    {/* OTP Input if visible */}
+    {otpSent && (
+      <Grid item xs={12} style={{ margin: '4px 0' }}>
+        <Grid container spacing={0.5} justifyContent="center">
+          {[...Array(6)].map((_, index) => (
+            <Grid item key={index}>
               <TextField
-                fullWidth
-                name="name"
-                label="Name"
-                value={formData.name}
-                onChange={handleInputChange}
-                error={!!errors.name}
-                helperText={errors.name}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person />
-                    </InputAdornment>
-                  ),
+                inputRef={(el) => (otpRefs.current[index] = el)}
+                value={otp[index] || ''}
+                onChange={(e) => handleOtpChange(e, index)}
+                onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                inputProps={{
+                  maxLength: 1,
+                  style: { textAlign: 'center', width: '36px', padding: 6 },
                 }}
                 variant="outlined"
+                size="small"
               />
             </Grid>
+          ))}
+        </Grid>
+        <Button
+          style={{ marginTop: 4 }}
+          variant="contained"
+          color="secondary"
+          size="small"
+          onClick={() => {
+            if (otp.join('') === '123456') {
+              alert('OTP verified!');
+            } else {
+              alert('Invalid OTP');
+            }
+          }}
+        >
+          Submit OTP
+        </Button>
+      </Grid>
+    )}
 
-            {/* Phone Field + Verify */}
-            <Grid item xs={12}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={8}>
-                  <TextField
-                    fullWidth
-                    name="phone2FA"
-                    label="Phone"
-                    value={formData.phone2FA}
-                    onChange={handleInputChange}
-                    error={!!errors.phone2FA}
-                    helperText={errors.phone2FA}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LocalPhone />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    fullWidth
-                    onClick={handlePhoneVerifyClick}
-                    variant="contained"
-                    color="secondary"
-                  >
-                    Verify
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
+    {/* Email Field + Verify */}
+    <Grid item xs={12} style={{ margin: '4px 0' }}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={7}>
+          <TextField
+            fullWidth
+            name="email2FA"
+            label="Email"
+            value={formData.email2FA}
+            onChange={handleInputChange}
+            error={!!errors.email2FA}
+            helperText={errors.email2FA}
+            variant="outlined"
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Email />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={5}>
+          <Button
+            fullWidth
+            onClick={handleSendEmail}
+            variant="contained"
+            color="secondary"
+            size="small"
+            disabled={isVerifying || isEmailVerified || (resendOtp && isResendOtpDisabled)}
+            startIcon={isVerifying ? <CircularProgress size={16} /> : null}
+          >
+            {isEmailVerified ? 'Verified' : isVerifying ? 'Verifying' : resendOtp ? 'Resend' : 'Verify'}
+          </Button>
+          {resendOtp && isResendOtpDisabled && (
+            <Countdown
+              date={Date.now() + 10000}
+              onComplete={() => setIsResendOtpDisabled(false)}
+              renderer={({ seconds }) => (
+                <Typography variant="caption" color="textSecondary">
+                  00:{seconds.toString().padStart(2, '0')}
+                </Typography>
+              )}
+            />
+          )}
+        </Grid>
+      </Grid>
+    </Grid>
 
-            {/* Show OTP Input Conditionally */}
-            {otpSent && (
-              <Grid item xs={12}>
-                <Grid container spacing={1}>
-                  {[...Array(6)].map((_, index) => (
-                    <Grid item key={index}>
-                      <TextField
-                        inputRef={(el) => (otpRefs.current[index] = el)}
-                        value={otp[index] || ''}
-                        onChange={(e) => handleOtpChange(e, index)}
-                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                        inputProps={{
-                          maxLength: 1,
-                          style: { textAlign: 'center', width: '40px' },
-                        }}
-                        variant="outlined"
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-
-                <Button
-                  style={{ marginTop: 8 }}
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => {
-                    if (otp.join('') === '123456') {
-                      alert('OTP verified!');
-                    } else {
-                      alert('Invalid OTP');
-                    }
-                  }}
-                >
-                  Submit OTP
-                </Button>
-              </Grid>
-            )}
-
-
-            {/* Email Field + Verify */}
-            <Grid item xs={12}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={8}>
-                  <TextField
-                    fullWidth
-                    name="email2FA"
-                    label="Email"
-                    value={formData.email2FA}
-                    onChange={handleInputChange}
-                    error={!!errors.email2FA}
-                    helperText={errors.email2FA}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Email />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    fullWidth
-                    onClick={handleSendEmail}
-                    variant="contained"
-                    color="secondary"
-                    disabled={isVerifying || isEmailVerified || (resendOtp && isResendOtpDisabled)}
-                    startIcon={isVerifying ? <CircularProgress size={20} /> : null}
-                  >
-                    {isEmailVerified ? 'Verified' : isVerifying ? 'Verifing' : resendOtp ? 'Resend OTP' : 'Verify'}
-                  </Button>
-                  {resendOtp && isResendOtpDisabled &&
-                    <div style={{ position: "relative" }}>
-                      <div style={{ position: 'absolute', right: '10px' }}>
-                        <Countdown
-                          date={Date.now() + 10000} // 30 seconds countdown
-                          onComplete={() => setIsResendOtpDisabled(false)}
-                          renderer={({ seconds }) => (
-                            <Typography variant="body2" color="textSecondary">
-                              00:{seconds.toString().padStart(2, '0')}
-                            </Typography>
-                          )}
-                        />
-                      </div>
-                    </div>}
-                </Grid>
-              </Grid>
-            </Grid>
-            {otpSentEmail && (
-              <Grid item xs={12}>
-                <Grid container spacing={1}>
-                  {[...Array(6)].map((_, index) => (
-                    <Grid item key={index}>
-                      <TextField
-                        inputRef={(el) => (otpRefs.current[index] = el)}
-                        value={otp[index] || ''}
-                        onChange={(e) => handleOtpChange(e, index)}
-                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                        inputProps={{
-                          maxLength: 1,
-                          style: { textAlign: 'center', width: '40px' },
-                        }}
-                        variant="outlined"
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-
-                <Button
-                  style={{ marginTop: 8 }}
-                  variant="contained"
-                  color="secondary"
-                  onClick={handleVerifyEmail}
-                >
-                  Submit OTP
-                </Button>
-              </Grid>
-            )}
-            {emailMessage && (
-              <Typography variant="body2" color={isEmailVerified ? 'success.main' : 'error.main'} sx={{ marginLeft: 2.5 }}>
-                {emailMessage}
-              </Typography>
-            )}
-
-            {/* Birth Date */}
-            <Grid item xs={12}>
+    {/* Email OTP */}
+    {otpSentEmail && (
+      <Grid item xs={12} style={{ margin: '4px 0' }}>
+        <Grid container spacing={0.5} justifyContent="center">
+          {[...Array(6)].map((_, index) => (
+            <Grid item key={index}>
               <TextField
-                fullWidth
-                name="birthDate"
-                label="Birth Date"
-                type="date"
-                value={formData.birthDate}
-                onChange={handleInputChange}
-                error={!!errors.birthDate}
-                helperText={errors.birthDate}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DateRange />
-                    </InputAdornment>
-                  ),
+                inputRef={(el) => (otpRefs.current[index] = el)}
+                value={otp[index] || ''}
+                onChange={(e) => handleOtpChange(e, index)}
+                onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                inputProps={{
+                  maxLength: 1,
+                  style: { textAlign: 'center', width: '36px', padding: 6 },
                 }}
                 variant="outlined"
-                InputLabelProps={{ shrink: true }}
+                size="small"
               />
             </Grid>
+          ))}
+        </Grid>
+        <Button
+          style={{ marginTop: 4 }}
+          variant="contained"
+          color="secondary"
+          size="small"
+          onClick={handleVerifyEmail}
+        >
+          Submit OTP
+        </Button>
+      </Grid>
+    )}
+    {emailMessage && (
+      <Typography
+        variant="caption"
+        color={isEmailVerified ? 'success.main' : 'error.main'}
+        sx={{ marginLeft: 2 }}
+      >
+        {emailMessage}
+      </Typography>
+    )}
 
-            {/* City */}
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                name="city"
-                label="City"
-                value={formData.city}
-                onChange={handleInputChange}
-                error={!!errors.city}
-                helperText={errors.city}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Home />
-                    </InputAdornment>
-                  ),
-                }}
-                variant="outlined"
-              />
-            </Grid>
+    {/* Birth Date */}
+    <Grid item xs={12} style={{ margin: '4px 0' }}>
+      <TextField
+        fullWidth
+        name="birthDate"
+        label="Birth Date"
+        type="date"
+        value={formData.birthDate}
+        onChange={handleInputChange}
+        error={!!errors.birthDate}
+        helperText={errors.birthDate}
+        variant="outlined"
+        size="small"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <DateRange />
+            </InputAdornment>
+          ),
+        }}
+        InputLabelProps={{ shrink: true }}
+      />
+    </Grid>
 
-            {submitError.length > 0 && (
-              <Typography variant="body2" color='error.main' sx={{ marginLeft: 2.5 }}>
-                {submitError}
-              </Typography>
-            )}
+    {/* City */}
+    <Grid item xs={12} style={{ margin: '4px 0' }}>
+      <TextField
+        fullWidth
+        name="city"
+        label="City"
+        value={formData.city}
+        onChange={handleInputChange}
+        error={!!errors.city}
+        helperText={errors.city}
+        variant="outlined"
+        size="small"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Home />
+            </InputAdornment>
+          ),
+        }}
+      />
+    </Grid>
 
-            {/* Save Button */}
-            <Grid item xs={12} style={{ textAlign: 'center' }}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="secondary"
-                className={classes.button}
-              >
-                Update Changes
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
+    {/* Error Message */}
+    {submitError.length > 0 && (
+      <Typography variant="caption" color="error.main" sx={{ marginLeft: 2 }}>
+        {submitError}
+      </Typography>
+    )}
+
+    {/* Submit Button */}
+    <Grid item xs={12} style={{ textAlign: 'center', marginTop: 8 }}>
+      <Button
+        type="submit"
+        variant="contained"
+        color="secondary"
+        size="small"
+      >
+        Update
+      </Button>
+    </Grid>
+  </Grid>
+</form>
+
       </Grid>
 
       <Grid item md={5} xs={12}>
