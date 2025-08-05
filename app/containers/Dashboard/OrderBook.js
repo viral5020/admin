@@ -497,6 +497,21 @@ const OrderBook = () => {
             >
               Next
             </Button>
+            <TextField
+                label="Go to page"
+                type="number"
+                size="small"
+                InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const page = parseInt(e.target.value, 10) - 1;
+                    if (!isNaN(page) && page >= 0 && page < totalPages) {
+                      setCurrentPage(page);
+                    }
+                  }
+                }}
+                sx={{ width: 100 }}
+              />
           </Box>
         </>
       )}

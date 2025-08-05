@@ -513,6 +513,87 @@ export const addMarketScriptAPI = async ({
 };
 
 
+export const closeAllPositions = async ({
+  password,
+  market,
+  script,
+  client,
+  master,
+  broker,
+  exparyDate,
+}) => {
+  const defaultParams = getDefaultParams();
+
+  const payload = {
+    password,
+    market_type_id: market,
+    script_id: script,
+    user_id: client,
+    master_user_id: master,
+    broker_id: broker,
+    expiry_date: exparyDate,
+    search_val: '',
+    allow_close_all: true,
+    ip_address: '',
+    user_agent: '',
+  };
+
+  try {
+    const res = await axiosInstance.post('ajaxfiles/trade_exit_all_position1', {
+      ...defaultParams,
+      ...payload,
+    });
+
+    if (res.data.success) {
+      return res.data;
+    } else {
+      throw new Error(res.data.message || 'Failed to close positions');
+    }
+  } catch (err) {
+    console.error('Error in closeAllPositions:', err.message || err);
+    throw err;
+  }
+};
+
+export const rolloverPositions = async ({
+  password,
+  market,
+  script,
+  client,
+  master,
+  broker,
+  exparyDate,
+}) => {
+  const defaultParams = getDefaultParams();
+
+  const payload = {
+    password,
+    market_type_id: market,
+    script_id: script,
+    user_id: client,
+    master_user_id: master,
+    broker_id: broker,
+    expiry_date: exparyDate,
+  };
+
+  try {
+    const res = await axiosInstance.post('ajaxfiles/trade_roll_over_all', {
+      ...defaultParams,
+      ...payload,
+    });
+
+    if (res.data.success) {
+      return res.data;
+    } else {
+      throw new Error(res.data.message || 'Failed to roll over positions');
+    }
+  } catch (err) {
+    console.error('Error in rolloverPositions:', err.message || err);
+    throw err;
+  }
+};
+
+
 // const eee = {
 //   "status": "ok",
 //   "message": "Market Added.",

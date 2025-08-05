@@ -274,37 +274,64 @@ const EditDeleteLogs = () => {
                         >
 
                             <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Log</TableCell>
-                                        <TableCell>User</TableCell>
-                                        <TableCell>Script</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        <TableCell>Lot</TableCell>
-                                        <TableCell>Qty</TableCell>
-                                        <TableCell>Rate</TableCell>
-                                        <TableCell>Added By</TableCell>
-                                        <TableCell>DateTime</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {logs.map((log, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell sx={{ fontWeight: 700, color: log.log_type === 'DEL' ? 'error.main' : 'success.main' }}>
-                                                {log.log_type}
-                                            </TableCell>
-                                            <TableCell>{log.user_full_name}</TableCell>
-                                            <TableCell>{log.script_name}</TableCell>
-                                            <TableCell>{log.trade_type}</TableCell>
-                                            <TableCell>{log.trade_lot}</TableCell>
-                                            <TableCell>{log.trade_qty}</TableCell>
-                                            <TableCell>{log.trade_rate}</TableCell>
-                                            <TableCell>{log.added_by}</TableCell>
-                                            <TableCell>{log.added_datetime}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+  <TableHead>
+    <TableRow>
+      <TableCell>Log</TableCell>
+      <TableCell>Script</TableCell>
+      <TableCell>Type</TableCell>
+      <TableCell>Qty (Lot)</TableCell>
+      <TableCell>Rate</TableCell>
+      <TableCell>Added By</TableCell>
+      <TableCell>DateTime</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    {logs.map((log, i) => {
+      const isBuy = log.log_type === 'BUY';
+      const isSell = log.log_type === 'SELL';
+      const [highlightName, ...rest] = log.script_name.split(' ');
+      const remainingScriptName = rest.join(' ');
+
+      return (
+       <TableRow key={i}>
+  <TableCell sx={{ color: 'black' }}>
+    <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
+      {log.log_type}
+    </span>
+  </TableCell>
+
+  <TableCell>
+    <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
+    {remainingScriptName && ` ${remainingScriptName}`}
+  </TableCell>
+
+ <TableCell
+  sx={{
+    color: log.trade_type === 'Buy' ? 'green' : log.trade_type === 'Sell' ? 'red' : 'inherit',
+    fontWeight: '600',
+    textTransform: 'uppercase'
+  }}
+>
+  {log.trade_type}
+</TableCell>
+
+  <TableCell>
+  <strong>{log.trade_qty}</strong> ({Number(log.trade_lot).toFixed(2)})
+</TableCell>
+
+  <TableCell>
+    <strong>{log.trade_rate}</strong>
+  </TableCell>
+
+  <TableCell>{log.added_by}</TableCell>
+  <TableCell>{log.added_datetime}</TableCell>
+</TableRow>
+
+      );
+    })}
+  </TableBody>
+</Table>
+
                         </TableContainer>
 
 
@@ -372,6 +399,21 @@ const EditDeleteLogs = () => {
                                 >
                                     Next
                                 </Button>
+                                <TextField
+                                    label="Go to page"
+                                    type="number"
+                                    size="small"
+                                    InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        const page = parseInt(e.target.value, 10) - 1;
+                                        if (!isNaN(page) && page >= 0 && page < totalPages) {
+                                          setCurrentPage(page);
+                                        }
+                                      }
+                                    }}
+                                    sx={{ width: 100 }}
+                                  />
                             </Box>
                         </Box>
                     </>)}

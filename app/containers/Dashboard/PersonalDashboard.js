@@ -8,6 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import {
   Button, Dialog, DialogTitle, DialogContent, Fade, Slide, DialogActions, Avatar, Table, TableHead, TableRow, TableCell, TableBody, CircularProgress, FormControl, InputLabel, Select, MenuItem,
   Grid, Paper, TextField, Card, CardContent, Typography, Box, Divider, useMediaQuery as useMUIQuery,
+  Chip,
 } from '@mui/material';
 
 import { Tabs, Tab } from '@mui/material';
@@ -51,6 +52,9 @@ import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
 import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
+
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const animationVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -123,6 +127,7 @@ detailedSectorData.forEach(sector => {
     0
   );
 });
+
 
 const asserts = {
   "HDFC Bank": { price: 500, pl: 4500, qty: 120 },
@@ -249,6 +254,14 @@ function PersonalDashboard() {
   const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false)
+
+  const [lot, setLot] = useState(1);
+  const [qty, setQty] = useState(1000);
+  const [orderType, setOrderType] = useState("MARKET");
+  const [price, setPrice] = useState(0);
 
   const [dashboardData, setDashboardData] = useState({
     today_rejection: '0',
@@ -624,6 +637,10 @@ function PersonalDashboard() {
   }, [positionDialogOpen]);
 
   useEffect(() => {
+    console.log("Selected Row:", selectedRow);
+  }, [selectedRow]);
+
+  useEffect(() => {
     setExpanded(false); // collapse trades on new selection
   }, [selectedRow]);
 
@@ -671,19 +688,19 @@ function PersonalDashboard() {
 
       <Grid container spacing={1}>
 
-    <Grid item xs={6} sm={6} md={3}>
-  <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-    <InfoCardHorizontal
-      title="Orders"
-      icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
-      content={[
-        `Today: ${dashboardData.today_trades}`,
-        `This Week: ${dashboardData.week_trades}`,
-      ]}
-      bgcolor="rgba(156, 39, 176, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Grid item xs={6} sm={6} md={3}>
+          <Box onClick={() => setOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+            <InfoCardHorizontal
+              title="Orders"
+              icon={<SwapHorizIcon sx={{ color: "#9c27b0", fontSize: 30 }} />}
+              content={[
+                `Today: ${dashboardData.today_trades}`,
+                `This Week: ${dashboardData.week_trades}`,
+              ]}
+              bgcolor="rgba(156, 39, 176, 0.1)"
+            />
+          </Box>
+        </Grid>
 
 
         <Dialog
@@ -698,13 +715,13 @@ function PersonalDashboard() {
           maxWidth="xl"
           disableEscapeKeyDown
           PaperProps={{
-           sx: {
-      overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
-      maxHeight: isMobile ? "100vh" : "90vh",
-      height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
-      display: "flex",
-      flexDirection: "column",
-    },
+            sx: {
+              overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
+              maxHeight: isMobile ? "100vh" : "90vh",
+              height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
+              display: "flex",
+              flexDirection: "column",
+            },
           }}
         >
           <Box sx={{ p: 0 }}>
@@ -825,7 +842,7 @@ function PersonalDashboard() {
               </Box>
             </Box>
             {loading ? (
-              <Box sx={{   height: 400, display: "flex", justifyContent: "center", mt: 1 }}>
+              <Box sx={{ height: 400, display: "flex", justifyContent: "center", mt: 1 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : orders.length > 0 ? (
@@ -980,9 +997,9 @@ function PersonalDashboard() {
                         "&::-webkit-scrollbar": {
                           display: "none",
                         },
-                         display: "flex",
-    alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
-    justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
+                        display: "flex",
+                        alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
+                        justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
                       }}
                     >
                       <table
@@ -1077,9 +1094,9 @@ function PersonalDashboard() {
                                     ({item.trd_lot})
                                   </Box>
                                 </td>
-                               <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-  {item.trd_rate}
-</td>
+                                <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                                  {item.trd_rate}
+                                </td>
 
 
                                 <td>{item.trd_status}</td>
@@ -1147,6 +1164,21 @@ function PersonalDashboard() {
                         >
                           Next
                         </Button>
+                        <TextField
+                            label="Go to page"
+                            type="number"
+                            size="small"
+                            InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const page = parseInt(e.target.value, 10) - 1;
+                                if (!isNaN(page) && page >= 0 && page < totalPages) {
+                                  setCurrentPage(page);
+                                }
+                              }
+                            }}
+                            sx={{ width: 100 }}
+                          />
                       </Box>
                     </Box>
 
@@ -1154,36 +1186,36 @@ function PersonalDashboard() {
                 )}
               </>
             ) : (
-                <Box
-      sx={{
-        height: "400px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        px: 1,
-      }}
-    >
-      <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-        No orders found.
-      </Typography>
-    </Box>
-  )}
-</Box>
-          
+              <Box
+                sx={{
+                  height: "400px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  px: 1,
+                }}
+              >
+                <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                  No orders found.
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
         </Dialog>
 
 
 
         <Grid item xs={6} sm={6} md={3}>
-  <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-    <InfoCardHorizontal
-      title="Positions"
-      icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
-      content={[`Positions: ${dashboardData.total_position}`]}
-      bgcolor="rgba(76, 175, 80, 0.1)"
-    />
-  </Box>
-</Grid>
+          <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Positions"
+              icon={<TrendingUpIcon sx={{ color: '#4caf50', fontSize: 30 }} />}
+              content={[`Positions: ${dashboardData.total_position}`]}
+              bgcolor="rgba(76, 175, 80, 0.1)"
+            />
+          </Box>
+        </Grid>
 
         <Dialog
           open={positionDialogOpen}
@@ -1194,7 +1226,7 @@ function PersonalDashboard() {
           disableEscapeKeyDown
           PaperProps={{
             sx: {
-              overflow: "hidden", // ✅ Prevent outer scrolling
+              overflow: "hidden",
               maxHeight: isMobile ? "100vh" : "90vh",
               overflowY: 'auto'
             },
@@ -1452,108 +1484,116 @@ function PersonalDashboard() {
                     })}
                   </>
                 ) : (
-                 <Box
-  sx={{
-    overflowX: "auto",
-    overflowY: "auto",
-    maxHeight: "400px",
-    border: "1px solid #ddd",
-    borderRadius: "0px",
-    mx: 1,
-    scrollbarWidth: "none",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-  }}
->
-  <Table
-    stickyHeader
-    size="small"
-    sx={{
-      minWidth: 1350,
-      fontSize: "11px", // Smaller font
-      margin: 0,
-      borderCollapse: "collapse",
-      "& td, & th": {
-        padding: "4px 8px", // Reduced padding
-        whiteSpace: "nowrap", // Prevents multiline cells
-        fontSize: "13px", // Apply to both headers and body
-      },
-    }}
-  >
-    <TableHead
-      sx={{
-        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-      }}
-    >
-      <TableRow>
-        {[
-          "Market Type",
-          "Script",
-          "Total Buy",
-          "Buy Avg Rate",
-          "Total Sell",
-          "Sell Avg Rate",
-          "Net Qty",
-          "Last Trade Price",
-          "MTM",
-          "Auto Closed Date",
-          "Close Btn",
-        ].map((col) => (
-          <TableCell key={col}>{col}</TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {filteredPositions.map((row, index) => {
-        const isEven = index % 2 === 0;
-        const rowBgColor = theme.palette.mode === "dark"
-          ? isEven ? "#2a2a2a" : "#1f1f1f"
-          : isEven ? "#f9f9f9" : "#ffffff";
+                  <Box
+                    sx={{
+                      overflowX: "auto",
+                      overflowY: "auto",
+                      maxHeight: "400px",
+                      border: "1px solid #ddd",
+                      borderRadius: "0px",
+                      mx: 1,
+                      scrollbarWidth: "none",
+                      "&::-webkit-scrollbar": {
+                        display: "none",
+                      },
+                    }}
+                  >
+                    <Table
+                      stickyHeader
+                      size="small"
+                      sx={{
+                        minWidth: 1350,
+                        fontSize: "11px", // Smaller font
+                        margin: 0,
+                        borderCollapse: "collapse",
+                        "& td, & th": {
+                          padding: "4px 8px", // Reduced padding
+                          whiteSpace: "nowrap", // Prevents multiline cells
+                          fontSize: "13px", // Apply to both headers and body
+                        },
+                      }}
+                    >
+                      <TableHead
+                        sx={{
+                          backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                        }}
+                      >
+                        <TableRow>
+                          {[
+                            "Market Type",
+                            "Script",
+                            "Total Buy",
+                            "Buy Avg Rate",
+                            "Total Sell",
+                            "Sell Avg Rate",
+                            "Net Qty",
+                            "Last Trade Price",
+                            "MTM",
+                            "Auto Closed Date",
+                            "Close Btn",
+                          ].map((col) => (
+                            <TableCell key={col}>{col}</TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {filteredPositions.map((row, index) => {
+                          const isEven = index % 2 === 0;
+                          const rowBgColor = theme.palette.mode === "dark"
+                            ? isEven ? "#2a2a2a" : "#1f1f1f"
+                            : isEven ? "#f9f9f9" : "#ffffff";
 
-        return (
-          <TableRow
-            key={index}
-            sx={{
-              backgroundColor: rowBgColor,
-              height: "39px", // Minimal row height
-            }}
-          >
-            <TableCell>{row.market_type_name}</TableCell>
-            <TableCell>
-              <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-            </TableCell>
-            <TableCell>{row.total_buy}</TableCell>
-            <TableCell>{row.buy_avg_rate}</TableCell>
-            <TableCell>{row.total_sell}</TableCell>
-            <TableCell>{row.sell_avg_rate}</TableCell>
-            <TableCell>{row.net_qty}</TableCell>
-            <TableCell>{row.last_trade_price}</TableCell>
-            <TableCell>
-              <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-            </TableCell>
-            <TableCell>{row.trade_auto_closed_date}</TableCell>
-            <TableCell>
-              <Button
-                style={{
-                  backgroundColor: '#d32f2f',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => alert("Close Position")}
-              >
-                Close
-              </Button>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  </Table>
-</Box>
+                          return (
+                            <TableRow
+                              key={index}
+                              sx={{
+                                backgroundColor: rowBgColor,
+                                height: "39px", // Minimal row height
+                              }}
+                            >
+                              <TableCell>{row.market_type_name}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+                              </TableCell>
+                              <TableCell>{row.total_buy}</TableCell>
+                              <TableCell>{row.buy_avg_rate}</TableCell>
+                              <TableCell>{row.total_sell}</TableCell>
+                              <TableCell>{row.sell_avg_rate}</TableCell>
+                              <TableCell> {row.net_qty} {row.net_qty_lot_dis}</TableCell>
+                              <TableCell>{row.last_trade_price}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+                              </TableCell>
+                              <TableCell>{row.trade_auto_closed_date}</TableCell>
+                              <TableCell>
+                                {row.net_qty !== 0 ? (
+                                  <Button
+                                    style={{
+                                      backgroundColor: '#d32f2f',
+                                      border: 'none',
+                                      color: '#fff',
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                    }}
+                                    onClick={() => {
+                                      setSelectedRow(row);
+                                      setCloseDialogOpen(true);
+                                    }}
+                                  >
+                                    Close
+                                  </Button>
+                                ) : (
+                                  <span>-</span>
+                                )}
+
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </Box>
 
                 )}
               </>
@@ -1708,7 +1748,10 @@ function PersonalDashboard() {
                               background: "linear-gradient(135deg, #8e0000, #b71c1c)",
                             },
                           }}
-                          onClick={() => alert("Close Position")}
+                           onClick={() => {
+                                                                    setSelectedRow(selectedRow);
+                                                                    setCloseDialogOpen(true);
+                                                                }}
                         >
                           Close Position
                         </Button>
@@ -1850,16 +1893,16 @@ function PersonalDashboard() {
                               );
                             })
                           ) : (
-                           <Box
-  sx={{
-    height: 400, // ✅ Fixed height
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  }}
->
-  <Typography variant="body2">No trades found</Typography>
-</Box>
+                            <Box
+                              sx={{
+                                height: 400, // ✅ Fixed height
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Typography variant="body2">No trades found</Typography>
+                            </Box>
                           )}
                         </Box>
                       </Fade>
@@ -1889,18 +1932,215 @@ function PersonalDashboard() {
           </Box>
         </Dialog>
 
-       <Grid item xs={6} sm={6} md={3}>
-  <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
-    <InfoCardHorizontal
-      title="Pending Orders"
-      icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
-      content={[
-        `Pending orders: ${dashboardData.today_pending_trades}`,
-      ]}
-      bgcolor="rgba(255, 152, 0, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs">
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+              color: "#fff",
+              px: 2,
+              py: 1,
+            }}
+          >
+            <Box>
+              <Typography
+                variant="subtitle2"
+                fontWeight={700}
+                sx={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: 150, // adjust as needed
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: selectedRow?.script_name || "N/A",
+                }}
+              />
+
+              <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
+                -396.00 (-0.71%)
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: "right" }}>
+              <Typography variant="body2">Bid: 55790.00</Typography>
+              <Typography variant="body2">Ask: 55797.60</Typography>
+            </Box>
+            {/* Uncomment below to add close icon */}
+            {/* 
+    <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
+      <CloseIcon />
+    </IconButton> 
+    */}
+          </Box>
+
+          {/* Open & Close Prices */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
+            <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
+            <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
+          </Box>
+
+          {/* Order Type Toggle */}
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
+            {["MARKET", "LIMIT", "SL"].map((label) => (
+              <Button
+                key={label}
+                variant={orderType === label ? "contained" : "outlined"}
+                onClick={() => setOrderType(label)}
+                sx={{
+                  minWidth: 60,
+                  fontWeight: 600,
+                  fontSize: "0.75rem",
+                  borderRadius: 2,
+                  backgroundColor: orderType === label ? "#2a5298" : "transparent",
+                  color: orderType === label ? "#fff" : "#2a5298",
+                  borderColor: "#2a5298",
+                  "&:hover": {
+                    backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
+                  },
+                }}
+              >
+                {label}
+              </Button>
+            ))}
+          </Box>
+
+          {/* Lot, Qty, Price Controls */}
+          <DialogContent sx={{ mt: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+              {/* Lot */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography>Lot</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
+                  <TextField
+                    value={lot.toFixed(2)}
+                    size="small"
+                    sx={{ width: 70 }}
+                    inputProps={{ style: { textAlign: "center" } }}
+                  />
+                  <IconButton onClick={() => setLot(lot + 0.01)} size="small">
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Qty */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography>Qty</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
+                  <TextField
+                    value={qty}
+                    size="small"
+                    sx={{ width: 70 }}
+                    inputProps={{ style: { textAlign: "center" } }}
+                  />
+                  <IconButton onClick={() => setQty(qty + 1)} size="small">
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Price */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography>Price</Typography>
+                <TextField
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  size="small"
+                  sx={{ width: 100, mr: 3 }}
+                  inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                />
+              </Box>
+            </Box>
+          </DialogContent>
+
+          {/* Bottom Action */}
+          <DialogActions>
+            <Button
+              fullWidth
+              onClick={async () => {
+                const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                const payload = {
+                  market_type_id: selectedRow?.market_type_id ?? 1,
+                  script_id: selectedRow?.script_id,
+                  script_expiry_id: selectedRow?.script_expiry_id,
+                  trade_type: 1,
+                  trade_rate: price,
+                  trade_qty: qty,
+                  trade_lot: lot,
+                  trade_type_x: "0",
+                  check_script_name: selectedRow?.script_name,
+                  user_id: selectedRow?.user_id || dataStored?.user_id,
+                  device_type: 0,
+                  is_app: "1",
+                  login_user_id: dataStored?.user_id,
+                  auth_key: dataStored?.auth_key,
+                };
+
+                try {
+                  const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                  });
+
+                  const data = await response.json();
+
+                  if (response.ok) {
+                    console.log("Trade placed successfully", data);
+                    setCloseDialogOpen(false);
+                  } else {
+                    console.error("Trade placement failed", data);
+                  }
+                } catch (error) {
+                  console.error("Network error:", error);
+                }
+              }}
+              variant="contained"
+              sx={{
+                backgroundColor: "#ff3d3d",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                py: 1,
+                borderRadius: 1.5,
+                "&:hover": {
+                  backgroundColor: "#d32f2f",
+                },
+              }}
+            >
+              Close Position
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+
+
+
+        <Grid item xs={6} sm={6} md={3}>
+          <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+            <InfoCardHorizontal
+              title="Pending Orders"
+              icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
+              content={[
+                `Pending orders: ${dashboardData.today_pending_trades}`,
+              ]}
+              bgcolor="rgba(255, 152, 0, 0.1)"
+            />
+          </Box>
+        </Grid>
 
         <Dialog
           open={pendingOrdersDialogOpen}
@@ -2181,93 +2421,118 @@ function PersonalDashboard() {
                     )}
                   </>
                 ) : (
-                  <Box sx={{ overflowX: "auto", maxHeight: "400px", mx: 1 }}>
-                    <table
-                      style={{
-                        minWidth: "1350px",
-                        fontSize: "12px",
-                        backgroundColor: "#fff",
-                      }}
-                    >
-                      <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                        <tr>
-                          {[
-                            "Device", "Time", "Trade ID", "Client", "Market", "Script",
-                            "B/S", "Order Type", "Lot", "Qty", "Order Price", "Status",
-                            "O. Time", "Comm Amt"
-                          ].map((header) => (
-                            <th key={header} style={{ fontWeight: 600 }}>
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pendingPaginatedOrders.map((item, index) => {
-                          let rowBgColor;
-                          if (item.trd_type === "Buy") {
-                            rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                          } else if (item.trd_type === "Sell") {
-                            rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-                          } else {
-                            rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                          }
+       <Box sx={{ overflowX: "auto", maxHeight: "400px", mx: 1 }}>
+  <table
+    style={{
+      minWidth: "1350px",
+      fontSize: "12px",
+      backgroundColor: "#fff",
+    }}
+  >
+    <thead
+      style={{
+        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+      }}
+    >
+      <tr>
+        {[
+          "Device",
+          "Time",
+          "Script",
+          "B/S",
+          "Order Type",
+          "Qty (Lot)",
+          "Order Price",
+          "Status",
+          "O. Time",
+          "Comm Amt",
+          "Trade ID",
+        ].map((header) => (
+          <th key={header} style={{ fontWeight: 600 }}>{header}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {pendingPaginatedOrders.map((item, index) => {
+        const scriptParts = item.scrp_name?.split(" ") || [];
+        const mainScript = scriptParts[0];
+        const restScript = scriptParts.slice(1).join(" ");
 
-                          return (
-                            <tr key={item.trd_id || index} style={{ backgroundColor: rowBgColor }}>
-                              <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                              <td>{item.trd_matchedtime}</td>
-                              <td>#{item.trd_id}</td>
-                              <td>{item.client_full_name}</td>
-                              <td>{item.mrkt_name}</td>
-                              <td dangerouslySetInnerHTML={{ __html: item.scrp_name }} />
-                              <td>{item.trd_type}</td>
-                              <td>{item.trd_type2}</td>
-                              <td>{item.trd_lot}</td>
-                              <td>{item.actual_lot_qty}</td>
-                              <td>{item.trd_rate}</td>
-                              <td>{item.trd_status}</td>
-                              <td>{item.trd_time}</td>
-                              <td>{item.trd_comm_amnt}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </Box>
+        const tradeType = item.trd_type?.toUpperCase();
+        const tradeColor =
+          tradeType === "BUY"
+            ? theme.palette.success.main
+            : tradeType === "SELL"
+            ? theme.palette.error.main
+            : "inherit";
+  
+
+        return (
+          <tr key={item.trd_id || index} style={{ backgroundColor: "transparent" }}>
+            <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+            <td>{item.trd_matchedtime}</td>
+            <td>
+              <span style={{ fontWeight: "bold" }}>{mainScript}</span>{" "}
+              {restScript}{" "}
+              <Chip
+                label={item.mrkt_name}
+                size="small"
+                sx={{ ml: 1, fontSize: "10px" }}
+              />
+            </td>
+            <td style={{ color: tradeColor, fontWeight: 700 }}>
+              {tradeType}
+            </td>
+            <td>{item.trd_type2}</td>
+            <td>
+              <b>{item.actual_lot_qty}</b> ({item.trd_lot})
+            </td>
+            <td style={{ fontWeight: 700, backgroundColor: "#f9f9f9" }}>
+              {item.trd_rate}
+            </td>
+            <td>{item.trd_status}</td>
+            <td>{item.trd_time}</td>
+            <td>{item.trd_comm_amnt}</td>
+            <td>#{item.trd_id}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</Box>
                 )}
               </>
             ) : (
-                     <Box
-      sx={{
-        height: "400px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        px: 1,
-      }}
-    >
-      <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-        No pending orders found.
-      </Typography>
-    </Box>
+              <Box
+                sx={{
+                  height: "400px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  px: 1,
+                }}
+              >
+                <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
+                  No pending orders found.
+                </Typography>
+              </Box>
             )}
           </Box>
         </Dialog>
 
-       <Grid item xs={6} sm={6} md={3}>
-  <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
-    <InfoCardHorizontal
-      title="Rejection Logs"
-      icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
-      content={[
-        `Today: ${dashboardData.today_rejection}`,
-        `Total: ${dashboardData.total_rejection}`,
-      ]}
-      bgcolor="rgba(206, 48, 48, 0.1)"
-    />
-  </Box>
-</Grid>
+        <Grid item xs={6} sm={6} md={3}>
+          <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+            <InfoCardHorizontal
+              title="Rejection Logs"
+              icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
+              content={[
+                `Today: ${dashboardData.today_rejection}`,
+                `Total: ${dashboardData.total_rejection}`,
+              ]}
+              bgcolor="rgba(206, 48, 48, 0.1)"
+            />
+          </Box>
+        </Grid>
         <Dialog
           open={rejectionDialogOpen}
           fullScreen={isMobile}
@@ -2280,13 +2545,13 @@ function PersonalDashboard() {
           maxWidth="xl"
           disableEscapeKeyDown
           PaperProps={{
-           sx: {
-      overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
-      maxHeight: isMobile ? "100vh" : "90vh",
-      height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
-      display: "flex",
-      flexDirection: "column",
-    },
+            sx: {
+              overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
+              maxHeight: isMobile ? "100vh" : "90vh",
+              height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
+              display: "flex",
+              flexDirection: "column",
+            },
           }}
         >
           <Box sx={{ p: 0 }}>
@@ -2404,31 +2669,31 @@ function PersonalDashboard() {
 
             {/* Content */}
             {loading ? (
-             <Box
-    sx={{
-      flex: 1,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: 400,
-    }}
-  >
-    <CircularProgress size={24} />
-  </Box>
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 400,
+                }}
+              >
+                <CircularProgress size={24} />
+              </Box>
             ) : filteredLogs.length === 0 ? (
               <Box
-    sx={{
-      flex: 1,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: 400,
-    }}
-  >
-    <Typography sx={{ fontSize: "14px", px: 1 }}>
-      No rejection logs found.
-    </Typography>
-  </Box>
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 400,
+                }}
+              >
+                <Typography sx={{ fontSize: "14px", px: 1 }}>
+                  No rejection logs found.
+                </Typography>
+              </Box>
             ) : isMobile ? (
               <>
                 {visibleMobileLogs.map((log, index) => {
@@ -2522,90 +2787,90 @@ function PersonalDashboard() {
             ) : (
               <>
                 <Box
-  sx={{
-    overflowX: "auto",
-    overflowY: "auto",
-    maxHeight: "400px",
-    border: "1px solid #ddd",
-    borderRadius: "0px",
-    mx: 1,
-    scrollbarWidth: "none",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-  }}
->
-  <table
-    className="table table-striped table-bordered"
-    style={{
-      minWidth: "1400px",
-      fontSize: "12px",
-      margin: 0,
-      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-      color: theme.palette.mode === "dark" ? "#fff" : "#000",
-    }}
-  >
-    <thead
-      style={{
-        backgroundColor:
-          theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-      }}
-    >
-      <tr>
-        {[
-          "Type",
-          "Datetime",
-          "Script",
-          "Trade Type",
-          "Qty (Lot)",
-          "Rate",
-          "Message",
-        ].map((header) => (
-          <th key={header} style={{ fontWeight: 600 }}>
-            {header}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {paginatedLogs.map((log, index) => {
-        // Split script name and date
-        const [scriptBase, ...rest] = log.script_name.split(" ");
-        const scriptSuffix = rest.join(" ");
+                  sx={{
+                    overflowX: "auto",
+                    overflowY: "auto",
+                    maxHeight: "400px",
+                    border: "1px solid #ddd",
+                    borderRadius: "0px",
+                    mx: 1,
+                    scrollbarWidth: "none",
+                    "&::-webkit-scrollbar": {
+                      display: "none",
+                    },
+                  }}
+                >
+                  <table
+                    className="table table-striped table-bordered"
+                    style={{
+                      minWidth: "1400px",
+                      fontSize: "12px",
+                      margin: 0,
+                      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    }}
+                  >
+                    <thead
+                      style={{
+                        backgroundColor:
+                          theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                      }}
+                    >
+                      <tr>
+                        {[
+                          "Type",
+                          "Datetime",
+                          "Script",
+                          "Trade Type",
+                          "Qty (Lot)",
+                          "Rate",
+                          "Message",
+                        ].map((header) => (
+                          <th key={header} style={{ fontWeight: 600 }}>
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedLogs.map((log, index) => {
+                        // Split script name and date
+                        const [scriptBase, ...rest] = log.script_name.split(" ");
+                        const scriptSuffix = rest.join(" ");
 
-        return (
-          <tr key={index}>
-            <td>{log.type}</td>
-            <td>{log.datetime}</td>
-            <td>
-              <span style={{ fontWeight: "bold" }}>{scriptBase}</span>{" "}
-              {scriptSuffix}
-            </td>
-                               <td
-  style={{
-    color:
-      log.trade_type === "Buy"
-        ? "green"
-        : log.trade_type === "Sell"
-        ? "red"
-        : undefined,
-    fontWeight: 700,
-  }}
->
-  {log.trade_type.toUpperCase()}
-</td>
-           <td>
-  <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
-  {log.trade_lot ? ` (${log.trade_lot})` : ""}
-</td>
-            <td>{log.trade_rate}</td>
-            <td>{log.log_message}</td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-</Box>
+                        return (
+                          <tr key={index}>
+                            <td>{log.type}</td>
+                            <td>{log.datetime}</td>
+                            <td>
+                              <span style={{ fontWeight: "bold" }}>{scriptBase}</span>{" "}
+                              {scriptSuffix}
+                            </td>
+                            <td
+                              style={{
+                                color:
+                                  log.trade_type === "Buy"
+                                    ? "green"
+                                    : log.trade_type === "Sell"
+                                      ? "red"
+                                      : undefined,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {log.trade_type.toUpperCase()}
+                            </td>
+                            <td>
+                              <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
+                              {log.trade_lot ? ` (${log.trade_lot})` : ""}
+                            </td>
+                            <td>{log.trade_rate}</td>
+                            <td>{log.log_message}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </Box>
 
 
                 {/* Pagination */}
@@ -2657,6 +2922,21 @@ function PersonalDashboard() {
                     >
                       Next
                     </Button>
+                    <TextField
+                        label="Go to page"
+                        type="number"
+                        size="small"
+                        InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const page = parseInt(e.target.value, 10) - 1;
+                            if (!isNaN(page) && page >= 0 && page < totalPages) {
+                              setCurrentPage(page);
+                            }
+                          }
+                        }}
+                        sx={{ width: 100 }}
+                      />
                   </Box>
                 </Box>
               </>
@@ -3730,130 +4010,130 @@ function PersonalDashboard() {
                               );
                             })
                           ) : (
-                             <Box
-                      sx={{
-                        overflowX: "auto",
-                        overflowY: "auto",
-                        Height: "400px",
-                        border: "1px solid #ddd",
-                        borderRadius: "0px",
-                        mx: 1,
-                        scrollbarWidth: "none",
-                        "&::-webkit-scrollbar": {
-                          display: "none",
-                        },
-                         display: "flex",
-    alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
-    justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
-                      }}
-                    >
-                      <table
-                        className="table table-striped table-bordered"
-                        style={{
-                          minWidth: "1500px",
-                          fontSize: "12px",
-                          margin: 0,
-                          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                        }}
-                      >
-                        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                          <tr>
-                            {[
-                              "Device", "Time", "Script", "B/S", "Order Type",
-                              "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
-                            ].map((header) => (
-                              <th
-                                key={header}
+                            <Box
+                              sx={{
+                                overflowX: "auto",
+                                overflowY: "auto",
+                                Height: "400px",
+                                border: "1px solid #ddd",
+                                borderRadius: "0px",
+                                mx: 1,
+                                scrollbarWidth: "none",
+                                "&::-webkit-scrollbar": {
+                                  display: "none",
+                                },
+                                display: "flex",
+                                alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
+                                justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
+                              }}
+                            >
+                              <table
+                                className="table table-striped table-bordered"
                                 style={{
+                                  minWidth: "1500px",
+                                  fontSize: "12px",
+                                  margin: 0,
+                                  backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
                                   color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                                  fontWeight: 600,
                                 }}
                               >
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedOrders.map((item, index) => {
-                            const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
-                            let backgroundColor = "#9e9e9e"; // default
+                                <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                                  <tr>
+                                    {[
+                                      "Device", "Time", "Script", "B/S", "Order Type",
+                                      "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
+                                    ].map((header) => (
+                                      <th
+                                        key={header}
+                                        style={{
+                                          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                                          fontWeight: 600,
+                                        }}
+                                      >
+                                        {header}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {paginatedOrders.map((item, index) => {
+                                    const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+                                    let backgroundColor = "#9e9e9e"; // default
 
-                            if (market === "NSEFUT") backgroundColor = "#1976d2";
-                            else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
-                            else if (market === "MCXFUT") backgroundColor = "#8e24aa";
-                            else if (market === "NYSE") backgroundColor = "#f57c00";
+                                    if (market === "NSEFUT") backgroundColor = "#1976d2";
+                                    else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
+                                    else if (market === "MCXFUT") backgroundColor = "#8e24aa";
+                                    else if (market === "NYSE") backgroundColor = "#f57c00";
 
-                            return (
-                              <tr key={item.trd_id || index}>
-                                <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                <td>{item.trd_matchedtime}</td>
-                                <td>
-                                  <Box component="span">
-                                    <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
-                                      {item.scrp_name.split(" ")[0]}
-                                    </Box>{" "}
-                                    <Box component="span" sx={{ fontSize: "10px" }}>
-                                      {item.scrp_name.split(" ").slice(1).join(" ")}
-                                    </Box>
-                                  </Box>
+                                    return (
+                                      <tr key={item.trd_id || index}>
+                                        <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                        <td>{item.trd_matchedtime}</td>
+                                        <td>
+                                          <Box component="span">
+                                            <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
+                                              {item.scrp_name.split(" ")[0]}
+                                            </Box>{" "}
+                                            <Box component="span" sx={{ fontSize: "10px" }}>
+                                              {item.scrp_name.split(" ").slice(1).join(" ")}
+                                            </Box>
+                                          </Box>
 
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      fontSize: "10px",
-                                      px: 1,
-                                      ml: 1,
-                                      borderRadius: "8px",
-                                      backgroundColor,
-                                      color: "#fff",
-                                      display: "inline-block",
-                                    }}
-                                  >
-                                    {item.mrkt_name}
-                                  </Box>
-                                </td>
+                                          <Box
+                                            component="span"
+                                            sx={{
+                                              fontSize: "10px",
+                                              px: 1,
+                                              ml: 1,
+                                              borderRadius: "8px",
+                                              backgroundColor,
+                                              color: "#fff",
+                                              display: "inline-block",
+                                            }}
+                                          >
+                                            {item.mrkt_name}
+                                          </Box>
+                                        </td>
 
-                                <td
-                                  style={{
-                                    color:
-                                      item.trd_type === "Buy"
-                                        ? theme.palette.success.main
-                                        : item.trd_type === "Sell"
-                                          ? theme.palette.error.main
-                                          : theme.palette.text.primary,
-                                    textTransform: "uppercase",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {item.trd_type}
-                                </td>
+                                        <td
+                                          style={{
+                                            color:
+                                              item.trd_type === "Buy"
+                                                ? theme.palette.success.main
+                                                : item.trd_type === "Sell"
+                                                  ? theme.palette.error.main
+                                                  : theme.palette.text.primary,
+                                            textTransform: "uppercase",
+                                            fontWeight: 700,
+                                          }}
+                                        >
+                                          {item.trd_type}
+                                        </td>
 
-                                <td>{item.trd_type2}</td>
-                                <td>
-                                  <Box component="span" sx={{ fontWeight: 700 }}>
-                                    {item.actual_lot_qty}
-                                  </Box>{" "}
-                                  <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                                    ({item.trd_lot})
-                                  </Box>
-                                </td>
-                               <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-  {item.trd_rate}
-</td>
+                                        <td>{item.trd_type2}</td>
+                                        <td>
+                                          <Box component="span" sx={{ fontWeight: 700 }}>
+                                            {item.actual_lot_qty}
+                                          </Box>{" "}
+                                          <Box component="span" sx={{ color: theme.palette.text.secondary }}>
+                                            ({item.trd_lot})
+                                          </Box>
+                                        </td>
+                                        <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                                          {item.trd_rate}
+                                        </td>
 
 
-                                <td>{item.trd_status}</td>
-                                <td>{item.trd_time}</td>
-                                <td>{item.trd_comm_amnt}</td>
-                                <td>#{item.trd_id}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </Box>
+                                        <td>{item.trd_status}</td>
+                                        <td>{item.trd_time}</td>
+                                        <td>{item.trd_comm_amnt}</td>
+                                        <td>#{item.trd_id}</td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </Box>
                           )}
 
                           {/* Pagination Controls */}
@@ -3910,6 +4190,21 @@ function PersonalDashboard() {
                               >
                                 Next
                               </Button>
+                              <TextField
+                                  label="Go to page"
+                                  type="number"
+                                  size="small"
+                                  InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const page = parseInt(e.target.value, 10) - 1;
+                                      if (!isNaN(page) && page >= 0 && page < totalPages) {
+                                        setCurrentPage(page);
+                                      }
+                                    }
+                                  }}
+                                  sx={{ width: 100 }}
+                                />
                             </Box>
                           </Box>
                         </>
@@ -4091,108 +4386,108 @@ function PersonalDashboard() {
                     })}
                   </Box>
                 ) : (
-                          <Box
-  sx={{
-    overflowX: "auto",
-    overflowY: "auto",
-    maxHeight: "400px",
-    border: "1px solid #ddd",
-    borderRadius: "0px",
-    mx: 1,
-    scrollbarWidth: "none",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-  }}
->
-  <Table
-    stickyHeader
-    size="small"
-    sx={{
-      minWidth: 1350,
-      fontSize: "11px", // Smaller font
-      margin: 0,
-      borderCollapse: "collapse",
-      "& td, & th": {
-        padding: "4px 8px", // Reduced padding
-        whiteSpace: "nowrap", // Prevents multiline cells
-        fontSize: "13px", // Apply to both headers and body
-      },
-    }}
-  >
-    <TableHead
-      sx={{
-        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-      }}
-    >
-      <TableRow>
-        {[
-          "Market Type",
-          "Script",
-          "Total Buy",
-          "Buy Avg Rate",
-          "Total Sell",
-          "Sell Avg Rate",
-          "Net Qty",
-          "Last Trade Price",
-          "MTM",
-          "Auto Closed Date",
-          "Close Btn",
-        ].map((col) => (
-          <TableCell key={col}>{col}</TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {filteredPositions.map((row, index) => {
-        const isEven = index % 2 === 0;
-        const rowBgColor = theme.palette.mode === "dark"
-          ? isEven ? "#2a2a2a" : "#1f1f1f"
-          : isEven ? "#f9f9f9" : "#ffffff";
+                  <Box
+                    sx={{
+                      overflowX: "auto",
+                      overflowY: "auto",
+                      maxHeight: "400px",
+                      border: "1px solid #ddd",
+                      borderRadius: "0px",
+                      mx: 1,
+                      scrollbarWidth: "none",
+                      "&::-webkit-scrollbar": {
+                        display: "none",
+                      },
+                    }}
+                  >
+                    <Table
+                      stickyHeader
+                      size="small"
+                      sx={{
+                        minWidth: 1350,
+                        fontSize: "11px", // Smaller font
+                        margin: 0,
+                        borderCollapse: "collapse",
+                        "& td, & th": {
+                          padding: "4px 8px", // Reduced padding
+                          whiteSpace: "nowrap", // Prevents multiline cells
+                          fontSize: "13px", // Apply to both headers and body
+                        },
+                      }}
+                    >
+                      <TableHead
+                        sx={{
+                          backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                        }}
+                      >
+                        <TableRow>
+                          {[
+                            "Market Type",
+                            "Script",
+                            "Total Buy",
+                            "Buy Avg Rate",
+                            "Total Sell",
+                            "Sell Avg Rate",
+                            "Net Qty",
+                            "Last Trade Price",
+                            "MTM",
+                            "Auto Closed Date",
+                            "Close Btn",
+                          ].map((col) => (
+                            <TableCell key={col}>{col}</TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {filteredPositions.map((row, index) => {
+                          const isEven = index % 2 === 0;
+                          const rowBgColor = theme.palette.mode === "dark"
+                            ? isEven ? "#2a2a2a" : "#1f1f1f"
+                            : isEven ? "#f9f9f9" : "#ffffff";
 
-        return (
-          <TableRow
-            key={index}
-            sx={{
-              backgroundColor: rowBgColor,
-              height: "39px", // Minimal row height
-            }}
-          >
-            <TableCell>{row.market_type_name}</TableCell>
-            <TableCell>
-              <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-            </TableCell>
-            <TableCell>{row.total_buy}</TableCell>
-            <TableCell>{row.buy_avg_rate}</TableCell>
-            <TableCell>{row.total_sell}</TableCell>
-            <TableCell>{row.sell_avg_rate}</TableCell>
-            <TableCell>{row.net_qty}</TableCell>
-            <TableCell>{row.last_trade_price}</TableCell>
-            <TableCell>
-              <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-            </TableCell>
-            <TableCell>{row.trade_auto_closed_date}</TableCell>
-            <TableCell>
-              <Button
-                style={{
-                  backgroundColor: '#d32f2f',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => alert("Close Position")}
-              >
-                Close
-              </Button>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  </Table>
-</Box>
+                          return (
+                            <TableRow
+                              key={index}
+                              sx={{
+                                backgroundColor: rowBgColor,
+                                height: "39px", // Minimal row height
+                              }}
+                            >
+                              <TableCell>{row.market_type_name}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
+                              </TableCell>
+                              <TableCell>{row.total_buy}</TableCell>
+                              <TableCell>{row.buy_avg_rate}</TableCell>
+                              <TableCell>{row.total_sell}</TableCell>
+                              <TableCell>{row.sell_avg_rate}</TableCell>
+                              <TableCell>{row.net_qty}</TableCell>
+                              <TableCell>{row.last_trade_price}</TableCell>
+                              <TableCell>
+                                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
+                              </TableCell>
+                              <TableCell>{row.trade_auto_closed_date}</TableCell>
+                              <TableCell>
+                                <Button
+                                  style={{
+                                    backgroundColor: '#d32f2f',
+                                    border: 'none',
+                                    color: '#fff',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => alert("Close Position")}
+                                >
+                                  Close
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </Box>
                 )}
               </>
             )}

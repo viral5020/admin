@@ -23,40 +23,47 @@ import {
     CardContent,
     Grid,
     Drawer,
+    Dialog,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from '@mui/icons-material/Close';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import { styled } from "@mui/material/styles";
+// import FilterListIcon from '@mui/icons-material/FilterList';
+// import { styled } from "@mui/material/styles";
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import InputAdornment from "@mui/material/InputAdornment";
-import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
-import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
-import RadioFilter from "./filters/RadioFilterField";
-import DateFilter from "./filters/DateFilter";
+// import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
+// import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
+// import RadioFilter from "./filters/RadioFilterField";
+// import DateFilter from "./filters/DateFilter";
 import PositionFilter from "./PositionFilter";
 import FilterBtn from "./filters/FilterBtn";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { fetchTradesDataAPI } from "./API/API";
 
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-    maxHeight: "65vh",
-    borderRadius: 12,
-    border: "1px solid #ccc",
-}));
 
-const TableHeaderCell = styled(TableCell)({
-    backgroundColor: "#F4F4F4",
-    fontWeight: "bold",
-    position: "sticky",
-    top: 0,
-    zIndex: 1,
-});
+// const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+//     maxHeight: "65vh",
+//     borderRadius: 12,
+//     border: "1px solid #ccc",
+// }));
+
+// const TableHeaderCell = styled(TableCell)({
+//     backgroundColor: "#F4F4F4",
+//     fontWeight: "bold",
+//     position: "sticky",
+//     top: 0,
+//     zIndex: 1,
+// });
 
 const OrderPage = () => {
     const theme = useTheme();
-    const isDarkMode = theme.palette.mode === 'dark';
+    // const isDarkMode = theme.palette.mode === 'dark';
     const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
 
     const [positionData, setPositionData] = useState([]);
@@ -81,6 +88,19 @@ const OrderPage = () => {
 
     const [filterDrawer, setFilterDrawer] = useState(false);
 
+    const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+    const [orderType, setOrderType] = useState("MARKET");
+    const [lot, setLot] = useState(0.01);
+    const [qty, setQty] = useState(1);
+    const [price, setPrice] = useState(0);
+
+    const totalMtm = 10500;
+    const selfMtm = 4500;
+    const downlineMtm = 3000;
+    const uplineMtm = 3000;
+    const totalQty = 120;
+
+
     const handleCardClick = (row) => {
         setSelectedRow(row);
         setDrawerOpen(true);
@@ -94,74 +114,48 @@ const OrderPage = () => {
     const fetchTradesData = async () => {
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
         if (!selectedRow) return;
-
         setLoadingTrades(true);
-        try {
-            const response = await fetch(
-                "http://128.199.126.171/~goldorg/datatables/order_book_new",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        isTodayTrade: "today",
-                        is_app: "1",
-                        login_user_id: dataStored.user_id,
-                        auth_key: dataStored.auth_key,
-                        sEcho: 1,
-                        iDisplayStart: 0,
-                        iDisplayLength: 1000000,
-                        script_id: selectedRow?.script_id,
-                        sSearch: "",
-                    }),
-                }
-            );
-
-            const result = await response.json();
-            setTradesData(result?.aaData || []);
-        } catch (err) {
-            console.error("Error fetching trades", err);
-            setTradesData([]);
-        } finally {
-            setLoadingTrades(false);
-        }
+        const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
+        setTradesData(result);
+        setLoadingTrades(false);
     };
 
-   const fetchPositions = async () => {
-    setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-        const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            sEcho: 1,
-            iDisplayStart: 0,
-            iDisplayLength: 100000,
-            sSearch: "",
+    const fetchPositions = async () => {
+        setLoading(true);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        try {
+            const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
+                is_app: "1",
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                sEcho: 1,
+                iDisplayStart: 0,
+                iDisplayLength: 100000,
+                sSearch: "",
 
-            all_outstanding: all_outstanding,
-            expiry_date: exparyDate,
-            group_by: client_wise_value,
+                all_outstanding: all_outstanding,
+                expiry_date: exparyDate,
+                group_by: client_wise_value,
 
-            market_type_id: market?.id,
-            script_id: script?.id,
-            broker_id: broker?.id,
-            master_user_id: master?.id,
-            user_id: client?.id,
-        });
+                market_type_id: market?.id,
+                script_id: script?.id,
+                broker_id: broker?.id,
+                master_user_id: master?.id,
+                user_id: client?.id,
+            });
 
-        if (response.data && response.data.aaData) {
-            setPositionData(response.data.aaData);
-        } else {
+            if (response.data && response.data.aaData) {
+                setPositionData(response.data.aaData);
+            } else {
+                setPositionData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching position data:", error);
             setPositionData([]);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error("Error fetching position data:", error);
-        setPositionData([]);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
 
@@ -169,9 +163,9 @@ const OrderPage = () => {
         fetchPositions();
     }, []);
 
-    const handleSearch = () => {
-        fetchPositions(searchText.trim());
-    };
+    // const handleSearch = () => {
+    //     fetchPositions(searchText.trim());
+    // };
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
@@ -206,27 +200,27 @@ const OrderPage = () => {
                         <Typography variant="h6">Filters</Typography>
                         <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                     </Box>
-                   <PositionFilter
-    ClientWiseOptions={ClientWiseOptions}
-    allOutstandingOptions={allOutstandingOptions}
-    setExparyDate={setExparyDate}
-    exparyDate={exparyDate}
-    setClient_wise_value={setClient_wise_value}
-    client_wise_value={client_wise_value}
-    setAll_outstanding={setAll_outstanding}
-    all_outstanding={all_outstanding}
-    market={market}
-    script={script}
-    setScript={setScript}
-    setMarket={setMarket}
-    client={client}
-    master={master}
-    broker={broker}
-    setClient={setClient}
-    setMaster={setMaster}
-    setBroker={setBroker}
-    onApply={fetchPositions} 
-/>
+                    <PositionFilter
+                        ClientWiseOptions={ClientWiseOptions}
+                        allOutstandingOptions={allOutstandingOptions}
+                        setExparyDate={setExparyDate}
+                        exparyDate={exparyDate}
+                        setClient_wise_value={setClient_wise_value}
+                        client_wise_value={client_wise_value}
+                        setAll_outstanding={setAll_outstanding}
+                        all_outstanding={all_outstanding}
+                        market={market}
+                        script={script}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                        client={client}
+                        master={master}
+                        broker={broker}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        setBroker={setBroker}
+                        onApply={fetchPositions}
+                    />
 
                 </Box>
             </Drawer>
@@ -249,8 +243,35 @@ const OrderPage = () => {
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
-                    onApply={fetchPositions} 
+                    onApply={fetchPositions}
                 />}
+
+            {/* 🔢 MTM & Quantity Summary */}
+            <Box sx={{
+                px: 2, py: 1,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 2,
+                justifyContent: "space-between",
+                borderBottom: '1px solid #eee',
+            }}>
+                <Box sx={{ fontSize: 13 }}>
+                    <strong>Total MTM:</strong> ₹{totalMtm}
+                </Box>
+                <Box sx={{ fontSize: 13 }}>
+                    <strong>Self MTM:</strong> ₹{selfMtm}
+                </Box>
+                <Box sx={{ fontSize: 13 }}>
+                    <strong>Downline MTM:</strong> ₹{downlineMtm}
+                </Box>
+                <Box sx={{ fontSize: 13 }}>
+                    <strong>Upline MTM:</strong> ₹{uplineMtm}
+                </Box>
+                <Box sx={{ fontSize: 13 }}>
+                    <strong>Total Qty:</strong> {totalQty}
+                </Box>
+            </Box>
             {/* 🔍 Search Bar */}
             <Box sx={{
                 px: 2, py: 1, display: "flex",
@@ -559,19 +580,220 @@ const OrderPage = () => {
                                                     </td>
                                                     <td style={{ padding: '8px' }}>{row.trade_auto_closed_date}</td>
                                                     <td style={{ padding: '8px' }}>
-                                                        <button
-                                                            style={{
-                                                                backgroundColor: '#d32f2f',
-                                                                border: 'none',
-                                                                color: '#fff',
-                                                                padding: '6px 12px',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                            }}
-                                                            onClick={() => alert('Close Position')}
-                                                        >
-                                                            Close
-                                                        </button>
+                                                        {row.net_qty !== 0 ? (
+                                                            <Button
+                                                                style={{
+                                                                    backgroundColor: '#d32f2f',
+                                                                    border: 'none',
+                                                                    color: '#fff',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                }}
+                                                                onClick={() => {
+                                                                    setSelectedRow(row);
+                                                                    setCloseDialogOpen(true);
+                                                                }}
+                                                            >
+                                                                Close
+                                                            </Button>
+                                                        ) : (
+                                                            <span>-</span>
+                                                        )}
+
+                                                        <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs" hideBackdrop>
+                                                            {/* Header */}
+                                                            <Box
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    justifyContent: "space-between",
+                                                                    alignItems: "center",
+                                                                    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                                                                    color: "#fff",
+                                                                    px: 2,
+                                                                    py: 1,
+                                                                }}
+                                                            >
+                                                                <Box>
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        fontWeight={700}
+                                                                        sx={{
+                                                                            whiteSpace: "nowrap",
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                            maxWidth: 150, // adjust as needed
+                                                                        }}
+                                                                        dangerouslySetInnerHTML={{
+                                                                            __html: selectedRow?.script_name || "N/A",
+                                                                        }}
+                                                                    />
+
+                                                                    <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
+                                                                        -396.00 (-0.71%)
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ textAlign: "right" }}>
+                                                                    <Typography variant="body2">Bid: 55790.00</Typography>
+                                                                    <Typography variant="body2">Ask: 55797.60</Typography>
+                                                                </Box>
+                                                                {/* Uncomment below to add close icon */}
+                                                                {/* 
+    <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
+      <CloseIcon />
+    </IconButton> 
+    */}
+                                                            </Box>
+
+                                                            {/* Open & Close Prices */}
+                                                            <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
+                                                                <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
+                                                                <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
+                                                            </Box>
+
+                                                            {/* Order Type Toggle */}
+                                                            <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
+                                                                {["MARKET", "LIMIT", "SL"].map((label) => (
+                                                                    <Button
+                                                                        key={label}
+                                                                        variant={orderType === label ? "contained" : "outlined"}
+                                                                        onClick={() => setOrderType(label)}
+                                                                        sx={{
+                                                                            minWidth: 60,
+                                                                            fontWeight: 600,
+                                                                            fontSize: "0.75rem",
+                                                                            borderRadius: 2,
+                                                                            backgroundColor: orderType === label ? "#2a5298" : "transparent",
+                                                                            color: orderType === label ? "#fff" : "#2a5298",
+                                                                            borderColor: "#2a5298",
+                                                                            "&:hover": {
+                                                                                backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        {label}
+                                                                    </Button>
+                                                                ))}
+                                                            </Box>
+
+                                                            {/* Lot, Qty, Price Controls */}
+                                                            <DialogContent sx={{ mt: 2 }}>
+                                                                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+                                                                    {/* Lot */}
+                                                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                        <Typography>Lot</Typography>
+                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                                            <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
+                                                                                <RemoveIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                            <TextField
+                                                                                value={lot.toFixed(2)}
+                                                                                size="small"
+                                                                                sx={{ width: 70 }}
+                                                                                inputProps={{ style: { textAlign: "center" } }}
+                                                                            />
+                                                                            <IconButton onClick={() => setLot(lot + 0.01)} size="small">
+                                                                                <AddIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                        </Box>
+                                                                    </Box>
+
+                                                                    {/* Qty */}
+                                                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                        <Typography>Qty</Typography>
+                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                                            <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
+                                                                                <RemoveIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                            <TextField
+                                                                                value={qty}
+                                                                                size="small"
+                                                                                sx={{ width: 70 }}
+                                                                                inputProps={{ style: { textAlign: "center" } }}
+                                                                            />
+                                                                            <IconButton onClick={() => setQty(qty + 1)} size="small">
+                                                                                <AddIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                        </Box>
+                                                                    </Box>
+
+                                                                    {/* Price */}
+                                                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                        <Typography>Price</Typography>
+                                                                        <TextField
+                                                                            type="number"
+                                                                            value={price}
+                                                                            onChange={(e) => setPrice(Number(e.target.value))}
+                                                                            size="small"
+                                                                            sx={{ width: 100, mr: 3 }}
+                                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                        />
+                                                                    </Box>
+                                                                </Box>
+                                                            </DialogContent>
+
+                                                            {/* Bottom Action */}
+                                                            <DialogActions>
+                                                                <Button
+                                                                    fullWidth
+                                                                    onClick={async () => {
+                                                                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                                                                        const payload = {
+                                                                            market_type_id: selectedRow?.market_type_id ?? 1,
+                                                                            script_id: selectedRow?.script_id,
+                                                                            script_expiry_id: selectedRow?.script_expiry_id,
+                                                                            trade_type: 1,
+                                                                            trade_rate: price,
+                                                                            trade_qty: qty,
+                                                                            trade_lot: lot,
+                                                                            trade_type_x: "0",
+                                                                            check_script_name: selectedRow?.script_name,
+                                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                                            device_type: 0,
+                                                                            is_app: "1",
+                                                                            login_user_id: dataStored?.user_id,
+                                                                            auth_key: dataStored?.auth_key,
+                                                                        };
+
+                                                                        try {
+                                                                            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
+                                                                                method: "POST",
+                                                                                headers: {
+                                                                                    "Content-Type": "application/json",
+                                                                                },
+                                                                                body: JSON.stringify(payload),
+                                                                            });
+
+                                                                            const data = await response.json();
+
+                                                                            if (response.ok) {
+                                                                                console.log("Trade placed successfully", data);
+                                                                                setCloseDialogOpen(false);
+                                                                            } else {
+                                                                                console.error("Trade placement failed", data);
+                                                                            }
+                                                                        } catch (error) {
+                                                                            console.error("Network error:", error);
+                                                                        }
+                                                                    }}
+                                                                    variant="contained"
+                                                                    sx={{
+                                                                        backgroundColor: "#ff3d3d",
+                                                                        color: "#fff",
+                                                                        fontWeight: 700,
+                                                                        fontSize: "0.9rem",
+                                                                        py: 1,
+                                                                        borderRadius: 1.5,
+                                                                        "&:hover": {
+                                                                            backgroundColor: "#d32f2f",
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    Close Position
+                                                                </Button>
+                                                            </DialogActions>
+                                                        </Dialog>
                                                     </td>
                                                 </tr>
                                             );
@@ -735,10 +957,207 @@ const OrderPage = () => {
                                                 background: "linear-gradient(135deg, #8e0000, #b71c1c)",
                                             },
                                         }}
-                                        onClick={() => alert("Close Position")}
+                                        onClick={() => {
+                                            setSelectedRow(selectedRow);
+                                            setCloseDialogOpen(true);
+                                        }}
                                     >
                                         Close Position
                                     </Button>
+
+                                    <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs" hideBackdrop>
+                                        {/* Header */}
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                                                color: "#fff",
+                                                px: 2,
+                                                py: 1,
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    fontWeight={700}
+                                                    sx={{
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: 150, // adjust as needed
+                                                    }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: selectedRow?.script_name || "N/A",
+                                                    }}
+                                                />
+
+                                                <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
+                                                    -396.00 (-0.71%)
+                                                </Typography>
+                                            </Box>
+                                            <Box sx={{ textAlign: "right" }}>
+                                                <Typography variant="body2">Bid: 55790.00</Typography>
+                                                <Typography variant="body2">Ask: 55797.60</Typography>
+                                            </Box>
+                                            {/* Uncomment below to add close icon */}
+                                            {/* 
+    <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
+      <CloseIcon />
+    </IconButton> 
+    */}
+                                        </Box>
+
+                                        {/* Open & Close Prices */}
+                                        <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
+                                            <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
+                                            <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
+                                        </Box>
+
+                                        {/* Order Type Toggle */}
+                                        <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
+                                            {["MARKET", "LIMIT", "SL"].map((label) => (
+                                                <Button
+                                                    key={label}
+                                                    variant={orderType === label ? "contained" : "outlined"}
+                                                    onClick={() => setOrderType(label)}
+                                                    sx={{
+                                                        minWidth: 60,
+                                                        fontWeight: 600,
+                                                        fontSize: "0.75rem",
+                                                        borderRadius: 2,
+                                                        backgroundColor: orderType === label ? "#2a5298" : "transparent",
+                                                        color: orderType === label ? "#fff" : "#2a5298",
+                                                        borderColor: "#2a5298",
+                                                        "&:hover": {
+                                                            backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
+                                                        },
+                                                    }}
+                                                >
+                                                    {label}
+                                                </Button>
+                                            ))}
+                                        </Box>
+
+                                        {/* Lot, Qty, Price Controls */}
+                                        <DialogContent sx={{ mt: 2 }}>
+                                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+                                                {/* Lot */}
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <Typography>Lot</Typography>
+                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                        <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
+                                                            <RemoveIcon fontSize="small" />
+                                                        </IconButton>
+                                                        <TextField
+                                                            value={lot.toFixed(2)}
+                                                            size="small"
+                                                            sx={{ width: 70 }}
+                                                            inputProps={{ style: { textAlign: "center" } }}
+                                                        />
+                                                        <IconButton onClick={() => setLot(lot + 0.01)} size="small">
+                                                            <AddIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Box>
+
+                                                {/* Qty */}
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <Typography>Qty</Typography>
+                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                        <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
+                                                            <RemoveIcon fontSize="small" />
+                                                        </IconButton>
+                                                        <TextField
+                                                            value={qty}
+                                                            size="small"
+                                                            sx={{ width: 70 }}
+                                                            inputProps={{ style: { textAlign: "center" } }}
+                                                        />
+                                                        <IconButton onClick={() => setQty(qty + 1)} size="small">
+                                                            <AddIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Box>
+
+                                                {/* Price */}
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <Typography>Price</Typography>
+                                                    <TextField
+                                                        type="number"
+                                                        value={price}
+                                                        onChange={(e) => setPrice(Number(e.target.value))}
+                                                        size="small"
+                                                        sx={{ width: 100, mr: 3 }}
+                                                        inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                    />
+                                                </Box>
+                                            </Box>
+                                        </DialogContent>
+
+                                        {/* Bottom Action */}
+                                        <DialogActions>
+                                            <Button
+                                                fullWidth
+                                                onClick={async () => {
+                                                    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                                                    const payload = {
+                                                        market_type_id: selectedRow?.market_type_id ?? 1,
+                                                        script_id: selectedRow?.script_id,
+                                                        script_expiry_id: selectedRow?.script_expiry_id,
+                                                        trade_type: 1,
+                                                        trade_rate: price,
+                                                        trade_qty: qty,
+                                                        trade_lot: lot,
+                                                        trade_type_x: "0",
+                                                        check_script_name: selectedRow?.script_name,
+                                                        user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                        device_type: 0,
+                                                        is_app: "1",
+                                                        login_user_id: dataStored?.user_id,
+                                                        auth_key: dataStored?.auth_key,
+                                                    };
+
+                                                    try {
+                                                        const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
+                                                            method: "POST",
+                                                            headers: {
+                                                                "Content-Type": "application/json",
+                                                            },
+                                                            body: JSON.stringify(payload),
+                                                        });
+
+                                                        const data = await response.json();
+
+                                                        if (response.ok) {
+                                                            console.log("Trade placed successfully", data);
+                                                            setCloseDialogOpen(false);
+                                                        } else {
+                                                            console.error("Trade placement failed", data);
+                                                        }
+                                                    } catch (error) {
+                                                        console.error("Network error:", error);
+                                                    }
+                                                }}
+                                                variant="contained"
+                                                sx={{
+                                                    backgroundColor: "#ff3d3d",
+                                                    color: "#fff",
+                                                    fontWeight: 700,
+                                                    fontSize: "0.9rem",
+                                                    py: 1,
+                                                    borderRadius: 1.5,
+                                                    "&:hover": {
+                                                        backgroundColor: "#d32f2f",
+                                                    },
+                                                }}
+                                            >
+                                                Close Position
+                                            </Button>
+                                        </DialogActions>
+                                    </Dialog>
                                 </Box>
                             </Box>
 
@@ -902,6 +1321,7 @@ const OrderPage = () => {
                 </>
             )}
         </Box>
+
     );
 };
 
