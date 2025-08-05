@@ -66,12 +66,12 @@ const OrderBook = () => {
       end_date: end_date,
       start_end: start_end, //2025-07-30
       market_type_id: market?.id,
-      script_id: script?.id,
+      script_id: JSON.stringify(script?.map(val => val.id)),
       broker_id: broker?.id,
       master_user_id: master?.id,
       user_id: client?.id,
-      is_pending: status === 'is_pending',
-      is_executed: status === ' is_executed',
+      is_pending: status === 'is_pending' || '',
+      is_executed: status === 'is_executed' || '',
       trade_type: orderType,
     };
 

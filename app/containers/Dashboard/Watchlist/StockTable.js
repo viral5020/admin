@@ -16,7 +16,7 @@ import PapperBlock from '../../../components/PapperBlock/PapperBlock';
 import EnhancedTableToolbar from '../../../components/Tables/tableParts/TableToolbar';
 import EnhancedTableHead from '../../../components/Tables/tableParts/TableHeader';
 import useStyles from '../../../components/Tables/tableStyle-jss';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 import { lighten, darken, alpha } from '@mui/material/styles';
@@ -98,36 +98,58 @@ const columnData = [
     disablePadding: false,
     label: 'Low'
   },
-  {
-    id: 'qty',
-    numeric: true,
-    disablePadding: false,
-    label: 'Qty'
-  },
-  {
-    id: 'maxOrder',
-    numeric: true,
-    disablePadding: false,
-    label: 'Max Or.'
-  },
-  {
-    id: 'position',
-    numeric: false,
-    disablePadding: false,
-    label: 'Position'
-  },
-  {
-    id: 'lastChangedAt',
-    numeric: false,
-    disablePadding: false,
-    label: 'Last Changed At'
-  }
+  // {
+  //   id: 'qty',
+  //   numeric: true,
+  //   disablePadding: false,
+  //   label: 'Qty'
+  // },
+  // {
+  //   id: 'maxOrder',
+  //   numeric: true,
+  //   disablePadding: false,
+  //   label: 'Max Or.'
+  // },
+  // {
+  //   id: 'position',
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: 'Position'
+  // },
+  // {
+  //   id: 'lastChangedAt',
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: 'Last Changed At'
+  // }
 ];
 
+// padding: 0.45rem;
+// margin - right: 8px;
+// width: 1.7rem;
+
+const logoCss = {
+  width: '1.8rem',
+  height: '1.8rem',
+  borderRadius: '10%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 600,
+  fontSize: '1rem',
+  // position: 'absolute',
+  // top: row2Top,
+  left: '4px',
+  display: 'inline-block',
+  p: '0.45rem',
+  mr: '8px',
+  // width: '1.7rem',
+}
 
 function StockTable({ searchText, setIsStockOpen, watchList }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
+  const isDarkMode = theme.palette.mode === 'dark';
   // const [openDialog, setOpenDialog] = useState(false);
   // const [selectedAction, setSelectedAction] = useState('');
 
@@ -143,6 +165,11 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
       setShowShadow(scrollLeft > 0);
     }
   };
+
+
+  useEffect(() => {
+    console.log('watchList', watchList);
+  }, [])
 
   useEffect(() => {
     const wrapper = tableWrapperRef.current;
@@ -173,6 +200,8 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     // minWidth: isMobile ? '90px' : '100px',
     overflow: 'visible',
     px: 1,
+    // filter: 'blur(8px)',
+    // '- webkit - filter': 'blur(8px)',
   }
 
   const firstColumnHeaderStyle = {
@@ -195,14 +224,22 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     return 'rgba(158, 158, 158)';             // neutral gray
   };
 
-  const getCondition = (val, showIcon, showVal) => {
+  const geFisrtColBgColor = (idx) => {
+    if (isDarkMode) {
+      return idx % 2 ? theme.palette.grey[900] : '#333';
+    } else {
+      return idx % 2 ? theme.palette.grey[100] : '#fff';
+    }
+  };
+
+  const getCondition = (val, showIcon, showVal, changeVal) => {
     const theme = useTheme();
     return (
       <Box
         component="span"
         sx={{
-          color: val > 0 ? theme.palette.success.main : val < 0 ? theme.palette.error.main : theme.palette.text.secondary,
-          backgroundColor: val > 0 ? 'rgba(76, 175, 80, 0.08)' : val < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
+          color: changeVal > 0 ? theme.palette.success.main : changeVal < 0 ? theme.palette.error.main : theme.palette.text.secondary,
+          backgroundColor: changeVal > 0 ? 'rgba(76, 175, 80, 0.08)' : changeVal < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
           borderRadius: 0.5,
           borderRadius: 1,
           px: 0.6,
@@ -223,12 +260,13 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           ) : (
             <TrendingFlat fontSize="inherit" sx={{ mr: 0.5 }} />
           ))}
-        {showVal ? val + '%' : ''}
+        {showVal ? val + '%' : val}
       </Box>
     )
   };
 
-  const renderCell = (dataArray, keyArray) => keyArray.map((itemCell, index) => {
+
+  const renderCell = (dataArray, keyArray, idx) => keyArray.map((itemCell, index) => {
     const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
     // const rowBgColor = getCellBgColor(rowVal);
     // const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
@@ -243,17 +281,29 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
             key={dataArray.id + index.toString()}
             sx={{
               ...firstColumnStyle,
-              backgroundColor: rowBgColorFirstCol,
+              // backgroundColor: rowBgColorFirstCol,
+              backgroundColor: geFisrtColBgColor(idx),
+              opacity: 1,
               // backgroundColor: val > 0 ? 'rgba(76, 175, 80, 0.08)' : val < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
             }}
           // sortDirection={'desc'}
           >
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="body1" sx={{ fontWeight: 500 }} fontWeight={500} noWrap>
-                {getCondition(dataArray['priceChange'], true, false)}
+              <Box sx={{
+                ...logoCss,
+                backgroundColor: isDarkMode ? '#777' : '#ccc',
+                color: isDarkMode ? '#fff' : '#000'
+              }}
+              >
+                {dataArray.scriptName[0]}
+              </Box>
+
+              <Typography variant="body1" sx={{ fontWeight: 500, display: 'inline' }} noWrap>
+                {/* {getCondition(dataArray['priceChange'], true, false)} */}
                 {dataArray.scriptName}
               </Typography>
-              <hr style={{ margin: 0, padding: 0, color: getCellBgColorFisrtCol(rowVal) }} />
+              {/* <Divider sx={{ height: '2px', bgcolor: rowVal > 0 ? 'green' : rowVal < 0 ? 'red' : 'gray' }} /> */}
+              {/* <hr style={{ margin: 0, padding: 0, color: getCellBgColorFisrtCol(rowVal) }} /> */}
             </Box>
             <Box
               sx={{
@@ -272,21 +322,22 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
       );
     }
 
-    if (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') {
-      return (
-        <TableCell
-          padding="normal"
-          align={itemCell.numeric ? 'right' : 'left'}
-          key={dataArray.id + index.toString()}
-          sx={{
-            ...tableCellStyle,
-            backgroundColor: rowBgColor,
-          }}>
-          {/* {getCondition(dataArray[itemCell.id], false, true)} */}
-          {dataArray[itemCell.id]}
-        </TableCell>
-      );
-    }
+    // if (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') {
+    //   return (
+    //     <TableCell
+    //       padding="normal"
+    //       align={itemCell.numeric ? 'right' : 'left'}
+    //       key={dataArray.id + index.toString()}
+    //       sx={{
+    //         ...tableCellStyle,
+    //         backgroundColor: rowBgColor,
+    //         // color: dataArray.priceChange > 0 ? 'red' : dataArray.priceChange < 0 ? 'green' : 'grey',
+    //       }}>
+    //       {getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)}
+    //       {/* {dataArray[itemCell.id]} */}
+    //     </TableCell>
+    //   );
+    // }
 
     return (
       <TableCell
@@ -296,8 +347,11 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
         sx={{
           ...tableCellStyle,
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
+          fontWeight: itemCell.id === 'ltp' ? 700 : null,
         }}>
-        {dataArray[itemCell.id]}
+        {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)
+          : itemCell.id === 'priceChange' ? getCondition(dataArray[itemCell.id], false, true, dataArray.priceChange)
+            : dataArray[itemCell.id]}
       </TableCell>
     );
   });
@@ -381,7 +435,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my: 0 }}>
             <TableHeader columnData={columnData} />
             <TableBody>
-              {watchList.map(stock => {
+              {watchList?.map((stock, idx) => {
                 if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                   return false;
                 }
@@ -392,7 +446,7 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => setIsStockOpen(stock)}
                   >
-                    {renderCell(stock, columnData)}
+                    {renderCell(stock, columnData, idx)}
                   </TableRow>
                 );
               })}
