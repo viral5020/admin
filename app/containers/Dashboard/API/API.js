@@ -594,6 +594,17 @@ export const rolloverPositions = async ({
 };
 
 
+export const getWatchListDataAPI = async () => {
+  try {
+    const response = await axiosInstance.post('ajaxfiles/market_watch_list1', { ...getDefaultParams() });
+    return response.data;
+  } catch (error) {
+    console.error('Error in getting watchlist data:', error);
+    throw error;
+  }
+}
+
+
 // const eee = {
 //   "status": "ok",
 //   "message": "Market Added.",

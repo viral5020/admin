@@ -81,6 +81,12 @@ const OrderPage = () => {
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
+    const [totals, setTotals] = useState({
+        upline_grand: 0,
+        downline_grand: 0,
+        self_grand: 0,
+        total_qty: 0,
+    });
 
     const [all_outstanding, setAll_outstanding] = useState('');
     const [client_wise_value, setClient_wise_value] = useState('');
@@ -93,13 +99,6 @@ const OrderPage = () => {
     const [lot, setLot] = useState(0.01);
     const [qty, setQty] = useState(1);
     const [price, setPrice] = useState(0);
-
-    const totalMtm = 10500;
-    const selfMtm = 4500;
-    const downlineMtm = 3000;
-    const uplineMtm = 3000;
-    const totalQty = 120;
-
 
     const handleCardClick = (row) => {
         setSelectedRow(row);
@@ -142,16 +141,37 @@ const OrderPage = () => {
                 broker_id: broker?.id,
                 master_user_id: master?.id,
                 user_id: client?.id,
+
             });
 
             if (response.data && response.data.aaData) {
                 setPositionData(response.data.aaData);
+
+                setTotals({
+                    upline_grand: response.data.upline_grand ?? 0,
+                    downline_grand: response.data.downline_grand ?? 0,
+                    self_grand: response.data.self_grand ?? 0,
+                    total_qty: response.data.total_qty ?? 0,
+                });
             } else {
                 setPositionData([]);
+                setTotals({
+                    upline_grand: 0,
+                    downline_grand: 0,
+                    self_grand: 0,
+                    total_qty: 0,
+                });
             }
+
         } catch (error) {
             console.error("Error fetching position data:", error);
             setPositionData([]);
+            setTotals({
+                upline_grand: 0,
+                downline_grand: 0,
+                self_grand: 0,
+                total_qty: 0,
+            });
         } finally {
             setLoading(false);
         }
@@ -162,10 +182,6 @@ const OrderPage = () => {
     useEffect(() => {
         fetchPositions();
     }, []);
-
-    // const handleSearch = () => {
-    //     fetchPositions(searchText.trim());
-    // };
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
@@ -257,21 +273,25 @@ const OrderPage = () => {
                 borderBottom: '1px solid #eee',
             }}>
                 <Box sx={{ fontSize: 13 }}>
-                    <strong>Total MTM:</strong> ₹{totalMtm}
+                    Total MTM: ₹
+                    <strong>{((totals.self_grand ?? 0) + (totals.downline_grand ?? 0) + (totals.upline_grand ?? 0)).toLocaleString("en-IN")}</strong>
                 </Box>
                 <Box sx={{ fontSize: 13 }}>
-                    <strong>Self MTM:</strong> ₹{selfMtm}
+                    Self MTM: ₹<strong>{(totals.self_grand ?? 0).toLocaleString("en-IN")}</strong>
                 </Box>
                 <Box sx={{ fontSize: 13 }}>
-                    <strong>Downline MTM:</strong> ₹{downlineMtm}
+                    <strong>Downline MTM:</strong> ₹{(totals.downline_grand ?? 0).toLocaleString("en-IN")}
                 </Box>
                 <Box sx={{ fontSize: 13 }}>
-                    <strong>Upline MTM:</strong> ₹{uplineMtm}
+                    <strong>Upline MTM:</strong> ₹{(totals.upline_grand ?? 0).toLocaleString("en-IN")}
                 </Box>
                 <Box sx={{ fontSize: 13 }}>
-                    <strong>Total Qty:</strong> {totalQty}
+                    <strong>Total Qty:</strong> {(totals.total_qty ?? 0).toLocaleString("en-IN")}
                 </Box>
+
             </Box>
+
+
             {/* 🔍 Search Bar */}
             <Box sx={{
                 px: 2, py: 1, display: "flex",
