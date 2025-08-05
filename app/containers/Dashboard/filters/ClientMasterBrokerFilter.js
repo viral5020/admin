@@ -27,6 +27,8 @@ const ClientMasterBrokerFilter = ({
 
     const [inputBoxStyle, setInputBoxStyle] = useState({});
 
+    const data = sessionStorage.getItem("data");
+
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
         try {

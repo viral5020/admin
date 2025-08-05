@@ -41,6 +41,10 @@ const OrderBook = () => {
   const [master, setMaster] = useState({});
   const [broker, setBroker] = useState({});
 
+  const rawData = sessionStorage.getItem("data");
+  const parsedData = JSON.parse(rawData);
+  const userType = parseInt(parsedData.user_type, 10);
+
   const ordersPerPage = 10;
 
   useEffect(() => {
@@ -66,7 +70,7 @@ const OrderBook = () => {
       end_date: end_date,
       start_end: start_end, //2025-07-30
       market_type_id: market?.id,
-      script_id: JSON.stringify(script?.map(val => val.id)),
+      script_id: script.length > 0 ? JSON.stringify(script?.map(val => val.id)) : '',
       broker_id: broker?.id,
       master_user_id: master?.id,
       user_id: client?.id,
@@ -147,6 +151,7 @@ const OrderBook = () => {
             master={master}
             broker={broker}
             onApply={fetchOrders}
+            userType={userType}
           />
         </Box>
       </Drawer>
@@ -356,22 +361,40 @@ const OrderBook = () => {
               }}
             >
               <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                <tr>
-                  {[
-                    "Device", "Time", "Script", "B/S", "Order Type",
-                    "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
-                  ].map((header) => (
-                    <th
-                      key={header}
-                      style={{
-                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
+              <tr>
+  {[
+    "Device",
+    "Time",
+    ...(userType !== 1 ? ["Client"] : []),
+    "Script",
+    "B/S",
+    "Order Type",
+    "Qty (Lot)",
+    "Order Price",
+    "Status",
+    "O. Time",
+    "Comm Amt",
+     ...( [3, 4, 5].includes(userType) ? ["IP Address"] : [] ),
+    ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
+    ...(userType !== 2 ? ["Action"] : [])
+  ].map((header) => (
+    <th
+      key={header}
+      style={{
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        fontWeight: 600,
+        padding: '8px 12px',
+        textAlign: 'left',
+        whiteSpace: 'nowrap',
+        borderBottom: '1px solid #ccc',
+        backgroundColor: theme.palette.background.paper,
+      }}
+    >
+      {header}
+    </th>
+  ))}
+</tr>
+
               </thead>
               <tbody>
                 {orders.map((item, index) => {
@@ -393,6 +416,7 @@ const OrderBook = () => {
                     <tr key={item.trd_id || index} >
                       <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
                       <td>{item.trd_matchedtime}</td>
+                      {userType !== 1 && <td>{item.client_full_name}</td>}
                       <td>
                         <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Box component="span">
@@ -447,7 +471,39 @@ const OrderBook = () => {
                       <td>{item.trd_status}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_comm_amnt}</td>
-                      <td>#{item.trd_id}</td>
+                     {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
+                      {[3, 4, 5].includes(userType) && <td>{}</td>}
+                      {userType !== 2 && (
+        <td>
+          <button
+            style={{
+              marginRight: '8px',
+              padding: '4px 8px',
+              backgroundColor: '#1976d2',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+            onClick={() => handleModify(item)}
+          >
+            Modify
+          </button>
+          <button
+            style={{
+              padding: '4px 8px',
+              backgroundColor: '#d32f2f',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+            onClick={() => handleCancel(item)}
+          >
+            Cancel
+          </button>
+        </td>
+      )}
                     </tr>
                   );
                 })}
@@ -498,20 +554,20 @@ const OrderBook = () => {
               Next
             </Button>
             <TextField
-                label="Go to page"
-                type="number"
-                size="small"
-                InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const page = parseInt(e.target.value, 10) - 1;
-                    if (!isNaN(page) && page >= 0 && page < totalPages) {
-                      setCurrentPage(page);
-                    }
+              label="Go to page"
+              type="number"
+              size="small"
+              InputProps={{ inputProps: { min: 1, max: totalPages } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const page = parseInt(e.target.value, 10) - 1;
+                  if (!isNaN(page) && page >= 0 && page < totalPages) {
+                    setCurrentPage(page);
                   }
-                }}
-                sx={{ width: 100 }}
-              />
+                }
+              }}
+              sx={{ width: 100 }}
+            />
           </Box>
         </>
       )}
