@@ -70,13 +70,13 @@ const menu = [
 
 
 const rawData = JSON.parse(sessionStorage.getItem("data"));
-const userType = parseInt(rawData.user_type, 10);
+const userType = parseInt(rawData?.user_type, 10);
 
 const notificationData = JSON.parse(sessionStorage.getItem("notification"));
-const isStock = notificationData.isStock;
-console.log('menu  isStock', isStock)
-const isForex = notificationData.isForex;
-console.log('menu  isForex', isForex)
+const isStock = notificationData?.isStock;
+console.log("isStock", isStock);
+const isForex = notificationData?.isForex;
+console.log("isForex", isForex);
 
 if (isStock) {
   menu.push({

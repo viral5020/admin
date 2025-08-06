@@ -603,6 +603,7 @@ export const rolloverPositions = async ({
 };
 
 export const checkLoginAPI = async () => {
+  console.log("checkLoginAPI..............")
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...getDefaultParams() });
     console.log('response.data', response.data);
@@ -614,6 +615,7 @@ export const checkLoginAPI = async () => {
 };
 
 export const fetchNotificationAPI = async () => {
+  console.log("fetchNotificationAPI.........");
   try {
     const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...getDefaultParams() });
     console.log('response.data', response.data);
@@ -625,19 +627,6 @@ export const fetchNotificationAPI = async () => {
 };
 
 export const getWatchListDataAPI = async () => {
-  await fetchNotificationAPI();  // chatgpt : this work
-
-  const isAuthorized = await checkLoginAPI();  // chatgpt : give cors error
-  console.log('isAuthorized', isAuthorized); // isAuthorized undefined
-  if (!isAuthorized) {
-    console.log("Session expired. Please loginAAAAAAAAAAAAAA");
-    alert("Session expired. Please login.");
-    window.location.href = '/login';
-    return;
-  } else {
-    console.log("Pass.......");
-  }
-
   try {
     const response = await axiosInstance.post('ajaxfiles/market_watch_list1', { ...getDefaultParams() });
     return response.data;

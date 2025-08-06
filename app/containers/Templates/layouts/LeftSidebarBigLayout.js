@@ -30,6 +30,7 @@ function LeftSidebarBigLayout(props) {
     handleOpenGuide,
   } = props;
 
+
   return (
     <Fragment>
       <Header
@@ -71,7 +72,7 @@ function LeftSidebarBigLayout(props) {
           >
             <div className={!pageLoaded ? classes.hideApp : ''}>
               {/* Application content will load here */}
-              { children }
+              {children}
             </div>
           </Fade>
         </section>

@@ -23,6 +23,8 @@ import brand from 'dan-api/dummy/brand';
 import logo from 'dan-images/logo.svg';
 import useStyles from './user-jss';
 import { ContentDivider } from '../Divider';
+// import { fetchNotificationAPI } from 'app/containers/Dashboard/API/API';
+import { fetchNotificationAPI } from '../../containers/Dashboard/API/API';
 
 // validation functions
 /// validation functions
@@ -59,6 +61,7 @@ function LoginFormV2() {
           },
           body: JSON.stringify(values),
         });
+        await fetchNotificationAPI();
 
         const data = await response.json();
         console.log('API Response:', data); // <-- Debug this
