@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Drawer, Box, Typography, Grid, RadioGroup, FormControlLabel,
     Radio, TextField, MenuItem, Button, Divider,
@@ -21,13 +21,14 @@ const TabPanel = ({ children, value, index }) => {
 };
 
 const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
-    const [tradeType, setTradeType] = React.useState('BUY');
-    const [market, setMarket] = React.useState(marketOptions[0]);
-    const [lot, setLot] = React.useState('');
-    const [qty, setQty] = React.useState('');
-    const [price, setPrice] = React.useState('');
+    const [tradeType, setTradeType] = useState('BUY');
+    const [market, setMarket] = useState(marketOptions[0]);
+    const [lot, setLot] = useState('');
+    const [qty, setQty] = useState('');
+    const [price, setPrice] = useState('');
+    const [isAllRequired, setIsAllRequired] = useState();
 
-    const [tabIndex, setTabIndex] = React.useState(0);
+    const [tabIndex, setTabIndex] = useState(0);
 
     const handleChange = (_, newValue) => {
         setTabIndex(newValue);
@@ -37,6 +38,27 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
 
 
     const Icon = true ? ArrowDropUpIcon : ArrowDropDownIcon;
+
+    function isValuesValidate() {
+        if (market === '' || lot === '' || qty === '' || price === '') {
+            setIsAllRequired(true);
+            return false;
+        } else {
+            setIsAllRequired(false);
+            return true;
+        }
+    }
+
+    async function handleSubmit() {
+        if (!isValuesValidate()) return;
+        try {
+            console.log('isBuy', isBuy);
+            console.log('{market,lot,qty,price}', { market, lot, qty, price })
+            // const response = await apiFunc({market,lot,qty,price})
+        } catch (error) {
+            console.log('error', error)
+        }
+    }
 
     return (
         <Drawer
@@ -65,7 +87,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                 >
                     <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
                         <Avatar
-                            alt={stockData.scriptName}
+                            alt={stockData?.scriptName}
                             src="/path-to-your-logo.png"
                             variant="square"
                             sx={{ width: 35, height: 35, mr: 1, flexShrink: 0, borderRadius: 1 }}
@@ -75,7 +97,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             fontWeight={700}
                             // dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
                             sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                        >{stockData.scriptName || 'SCRIPT NAME'}</Typography>
+                        >{stockData?.scriptName || 'SCRIPT NAME'}</Typography>
                     </Box>
                     <IconButton size="large" onClick={onClose}>
                         <ArrowDropDownIcon />
@@ -83,22 +105,22 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                 </Box>
                 {/* Script Title */}
                 {/* <Typography variant="h6" align="center" gutterBottom>
-                    {stockData.scriptName || 'SCRIPT NAME'}
+                    {stockData?.scriptName || 'SCRIPT NAME'}
                 </Typography> */}
 
                 {/* Bid / Ask / LTP */}
                 {/* <Grid container spacing={0} justifyContent="space-between">
                     <Grid item xs={4}>
                         <Typography variant="subtitle2">Bid</Typography>
-                        <Typography color="success.main" fontWeight="bold">{stockData.bid}</Typography>
+                        <Typography color="success.main" fontWeight="bold">{stockData?.bid}</Typography>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="subtitle2">Ask</Typography>
-                        <Typography color="error.main" fontWeight="bold">{stockData.ask}</Typography>
+                        <Typography color="error.main" fontWeight="bold">{stockData?.ask}</Typography>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="subtitle2">LTP</Typography>
-                        <Typography fontWeight="bold">{stockData.ltp}</Typography>
+                        <Typography fontWeight="bold">{stockData?.ltp}</Typography>
                     </Grid>
                 </Grid> */}
 
@@ -106,29 +128,29 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                 {/* <Grid container spacing={0} mt={1}>
                     <Grid item xs={6}>
                         <Typography variant="subtitle2">Change</Typography>
-                        <Typography color={stockData.change >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData.change}
+                        <Typography color={stockData?.change >= 0 ? 'success.main' : 'error.main'}>
+                            {stockData?.change}
                         </Typography>
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="subtitle2">Change %</Typography>
-                        <Typography color={stockData.changePercent >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData.changePercent}%
+                        <Typography color={stockData?.changePercent >= 0 ? 'success.main' : 'error.main'}>
+                            {stockData?.changePercent}%
                         </Typography>
                     </Grid>
                 </Grid> */}
                 {/* <Grid container spacing={0} justifyContent="space-between">
                     <Grid item xs={2.5}>
                         <Typography variant="subtitle2">Bid</Typography>
-                        <Typography color="success.main" fontWeight="bold">{stockData.bid}</Typography>
+                        <Typography color="success.main" fontWeight="bold">{stockData?.bid}</Typography>
                     </Grid>
                     <Grid item xs={2.5}>
                         <Typography variant="subtitle2">Ask</Typography>
-                        <Typography color="error.main" fontWeight="bold">{stockData.ask}</Typography>
+                        <Typography color="error.main" fontWeight="bold">{stockData?.ask}</Typography>
                     </Grid>
                     <Grid item xs={2.5}>
                         <Typography variant="subtitle2">LTP</Typography>
-                        <Typography fontWeight="bold">{stockData.ltp}</Typography>
+                        <Typography fontWeight="bold">{stockData?.ltp}</Typography>
                     </Grid>
 
                 </Grid> */}
@@ -138,7 +160,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                         <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>Bid</Typography> {/* this should bottom */}
                             <Typography variant="h6" >
-                                {stockData.bid}
+                                {stockData?.bidRate}
                             </Typography>
                         </Box>
                     </Grid>
@@ -147,7 +169,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                         <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>Ask</Typography>
                             <Typography variant="h6" >
-                                {stockData.ask}
+                                {stockData?.askRate}
                             </Typography>
                         </Box>
                     </Grid>
@@ -156,7 +178,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                         <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>LTP</Typography>
                             <Typography variant="h6">
-                                {stockData.ltp}
+                                {stockData?.ltp}
                             </Typography>
                         </Box>
                     </Grid>
@@ -167,31 +189,31 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                 <Grid container spacing={1} mt={1}>
                     <Grid item xs={2}>
                         <Typography variant="subtitle2">Change</Typography>
-                        <Typography color={stockData.change >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData.change}
+                        <Typography color={stockData?.change >= 0 ? 'success.main' : 'error.main'}>
+                            {stockData?.priceChange}
                         </Typography>
                     </Grid>
                     <Grid item xs={2} mr={5}>
                         <Typography variant="subtitle2">Change %</Typography>
-                        <Typography color={stockData.changePercent >= 0 ? 'success.main' : 'error.main'}>
-                            <Icon />{stockData.changePercent}%
+                        <Typography color={stockData?.changePercent >= 0 ? 'success.main' : 'error.main'}>
+                            <Icon />{stockData?.priceChangePercent}%
                         </Typography>
                     </Grid>
                     <Grid item xs={1.7}>
                         <Typography variant="subtitle2">Open</Typography>
-                        <Typography>{stockData.open}</Typography>
+                        <Typography>{stockData?.open}</Typography>
                     </Grid>
                     <Grid item xs={1.7}>
                         <Typography variant="subtitle2">Close</Typography>
-                        <Typography>{stockData.close}</Typography>
+                        <Typography>{stockData?.close}</Typography>
                     </Grid>
                     <Grid item xs={1.7}>
                         <Typography variant="subtitle2">High</Typography>
-                        <Typography>{stockData.high}</Typography>
+                        <Typography>{stockData?.high}</Typography>
                     </Grid>
                     <Grid item xs={1.7}>
                         <Typography variant="subtitle2">Low</Typography>
-                        <Typography>{stockData.low}</Typography>
+                        <Typography>{stockData?.low}</Typography>
                     </Grid>
                 </Grid>
 
@@ -213,8 +235,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                                 color: isBuy ? 'green' : 'gray',
                                 // color: 'red',
                                 fontWeight: 600,
-                                border: isBuy ? '2px solid green' : '1px solid #ccc',
-                                borderBottom: isBuy ? 'none' : '2px solid red',
+                                border: isBuy ? '3px solid green' : '1px solid #ccc',
+                                borderBottom: isBuy ? 'none' : '3px solid red',
                                 borderTopLeftRadius: 8,
                                 borderTopRightRadius: 8,
                                 // borderBottomRightRadius: 8,
@@ -233,8 +255,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             sx={{
                                 color: !isBuy ? 'red' : 'gray',
                                 fontWeight: 600,
-                                border: !isBuy ? '2px solid red' : '1px solid #ccc',
-                                borderBottom: !isBuy ? 'none' : '2px solid green',
+                                border: !isBuy ? '3px solid red' : '1px solid #ccc',
+                                borderBottom: !isBuy ? 'none' : '3px solid green',
                                 borderTopLeftRadius: 8,
                                 borderTopRightRadius: 8,
                                 // borderBottomRightRadius: 8,
@@ -253,26 +275,19 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             label=""
                             sx={{
                                 width: '100%',
-                                // color: !isBuy ? 'red' : 'gray',
-                                // fontWeight: 600,
-                                // border: !isBuy ? '2px solid red' : '1px solid #ccc',
-                                borderBottom: !isBuy ? '2px solid red' : '2px solid green',
-                                // borderTopLeftRadius: 8,
-                                // borderTopRightRadius: 8,
-                                // borderBottomRightRadius: 8,
-                                // borderBottomLeftRadius: 8,
-                                // backgroundColor: !isBuy ? '#ffebee' : 'transparent',
+                                borderBottom: !isBuy ? '3px solid red' : '3px solid green',
                                 minWidth: 100,
-                                // mx: 1,
                             }}
+                            disabled
                         />
                     </Tabs>
 
                     {/* Content Box */}
                     <Box
                         sx={{
-                            border: `2px solid ${isBuy ? 'green' : 'red'}`,
+                            border: `3px solid ${isBuy ? 'green' : 'red'}`,
                             borderTop: 'none',
+                            borderBottomWidth: '4px',
                             // borderBottomLeftRadius: 8,
                             // borderBottomRightRadius: 8,
                             p: 2,
@@ -288,6 +303,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             margin="dense"
                             value={market}
                             onChange={(e) => setMarket(e.target.value)}
+                            required
                         >
                             {marketOptions.map(opt => (
                                 <MenuItem key={opt} value={opt}>
@@ -306,6 +322,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                                     onChange={(e) => setLot(e.target.value)}
                                     fullWidth
                                     size="small"
+                                    required
                                 />
                             </Grid>
                             <Grid item xs={4}>
@@ -316,6 +333,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                                     onChange={(e) => setQty(e.target.value)}
                                     fullWidth
                                     size="small"
+                                    required
                                 />
                             </Grid>
                             <Grid item xs={4}>
@@ -326,20 +344,27 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                                     onChange={(e) => setPrice(e.target.value)}
                                     fullWidth
                                     size="small"
+                                    required
                                 />
                             </Grid>
                         </Grid>
 
                         {/* Submit / Cancel */}
-                        <Grid container spacing={3} mt={1}>
+                        <Grid container spacing={3} mt={1} sx={{ position: 'relative' }}>
+                            {isAllRequired && <Typography sx={{
+                                color: 'red',
+                                position: 'absolute',
+                                left: '30px',
+                                top: '-3px',
+                                fontWeight: 600,
+                                fontSize: '0.94rem'
+                            }}>* All Fields Required.</Typography>}
                             <Grid item xs={6}>
                                 <Button
                                     variant="contained"
                                     fullWidth
                                     color={isBuy ? 'success' : 'error'}
-                                    onClick={() => {
-                                        // Handle Submit
-                                    }}
+                                    onClick={() => handleSubmit()}
                                 // sx={{
                                 //     borderBottomLeftRadius: 0,
                                 //     borderBottomRightRadius: 0,

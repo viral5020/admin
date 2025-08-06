@@ -163,7 +163,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
   const [showShadow, setShowShadow] = useState(false);
   const tableWrapperRef = useRef(null);
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [buySellPopup, setBuySellPopup] = useState(null);
 
   const handleScroll = () => {
     if (tableWrapperRef.current) {
@@ -363,7 +363,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
           fontWeight: itemCell.id === 'ltp' ? 700 : null,
         }}
-        onClick={() => (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') && setIsPopupOpen(true)}
+        onClick={() => (itemCell.id === 'askRate' || itemCell.id === 'bidRate') && setBuySellPopup(dataArray)}
       >
         {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)
           : itemCell.id === 'priceChange' ? getCondition(dataArray[itemCell.id], false, true, dataArray.priceChange)
@@ -373,8 +373,8 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
   });
 
   useEffect(() => {
-    console.log('isPopupOpen', isPopupOpen)
-  }, [isPopupOpen])
+    console.log('buySellPopup', buySellPopup)
+  }, [buySellPopup])
 
   const TableHeader = ({ columnData }) => {
     return (
@@ -576,23 +576,44 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
         </Box>
       </div>
       <Toaster limit={3} />
-      <BottomTradePopup
-        open={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        stockData={{
-          scriptName: 'GOLD',
-          bid: 55800,
-          ask: 55820,
-          ltp: 55810,
-          change: +12,
-          changePercent: +0.21,
-          open: 55700,
-          close: 55690,
-          high: 55900,
-          low: 55550,
-        }}
-      />
 
+      <BottomTradePopup
+        open={Boolean(buySellPopup)}
+        onClose={() => setBuySellPopup(null)}
+        stockData={buySellPopup}
+      // stockData={{
+      //   scriptName: 'GOLD',
+      //   bid: 55800,
+      //   ask: 55820,
+      //   ltp: 55810,
+      //   change: +12,
+      //   changePercent: +0.21,
+      //   open: 55700,
+      //   close: 55690,
+      //   high: 55900,
+      //   low: 55550,
+      // }}
+      />
+      {/* 
+askRate: 262881.38
+bidRate: 258268.55
+close: 284955.85
+exchange: "GLOBAL FUTURES"
+high: 293072.3
+id: "7895546"
+isFavorite: false
+lastChangedAt: "2025-08-06 06:49:32"
+low: 275928.51
+ltp: 273541.22
+maxOrder: 3750
+open: 287058.61
+position: "Buy"
+priceChange: -50.86
+priceChangePercent: -2.07
+qty: 0
+scriptName: "NASDAQ 19 SEP 2025"
+time: 1754462972072
+*/}
     </Paper>
   );
 }
