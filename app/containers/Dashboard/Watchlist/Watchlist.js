@@ -375,7 +375,7 @@ function generateDummyWatchlistData(scripts = []) {
     const qty = parseInt(item.quantity, 10) || 0;
 
     return {
-      id: `${index + 1}`,
+      id: item.market_watch_id,
       scriptName,
       exchange: item.market_type_name || 'NSE',
       open: getRandomPrice(280000, 290000),
@@ -392,7 +392,7 @@ function generateDummyWatchlistData(scripts = []) {
       maxOrder,
       position: Math.random() > 0.5 ? 'Buy' : 'Sell',
       isFavorite: item.favourite === '1',
-      lastChangedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      lastChangedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
     };
   });
 }
@@ -501,7 +501,8 @@ function Watchlist() {
                   : <StockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
-                    watchList={dummyData}
+                    setDummyData={setDummyData}
+                    dummyData={dummyData}
                   />}
               </AccordionDetails>
             </Accordion>

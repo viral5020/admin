@@ -512,6 +512,15 @@ export const addMarketScriptAPI = async ({
   }
 };
 
+export async function getIP() {
+  try {
+    const res = await axios.get("https://api64.ipify.org?format=json");
+    console.log('res.data.ip', res.data.ip);
+    return res.data.ip;
+  } catch (error) {
+    console.error("Failed to get IP address:", error);
+  }
+};
 
 export const closeAllPositions = async ({
   password,
@@ -534,7 +543,7 @@ export const closeAllPositions = async ({
     expiry_date: exparyDate,
     search_val: '',
     allow_close_all: true,
-    ip_address: '',
+    ip_address: await getIP(),
     user_agent: '',
   };
 

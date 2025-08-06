@@ -286,7 +286,7 @@ const MobileStockTable = ({
     return (
         <>
             <SwipeableList type={ListType.IOS}>
-                {dummyData.map((stock, idx) => {
+                {dummyData?.map((stock, idx) => {
                     const isUp = stock.priceChange > 0;
                     const color = isDarkMode
                         ? isUp ? '#26a69a' : '#ef6d61'

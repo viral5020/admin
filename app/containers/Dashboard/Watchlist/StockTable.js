@@ -16,11 +16,15 @@ import PapperBlock from '../../../components/PapperBlock/PapperBlock';
 import EnhancedTableToolbar from '../../../components/Tables/tableParts/TableToolbar';
 import EnhancedTableHead from '../../../components/Tables/tableParts/TableHeader';
 import useStyles from '../../../components/Tables/tableStyle-jss';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel, Divider } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Chip, TableSortLabel, Divider, IconButton } from '@mui/material';
+import RemoveCircleSharpIcon from '@mui/icons-material/RemoveCircleSharp';
+import { Star, StarBorder, Delete } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 import { lighten, darken, alpha } from '@mui/material/styles';
 import { maxWidth } from '@mui/system';
+import toast, { Toaster } from 'react-hot-toast';
+import BottomTradePopup from './BottomTradePopup';
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
@@ -146,7 +150,7 @@ const logoCss = {
   // width: '1.7rem',
 }
 
-function StockTable({ searchText, setIsStockOpen, watchList }) {
+function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   const isDarkMode = theme.palette.mode === 'dark';
@@ -159,6 +163,8 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
   const [showShadow, setShowShadow] = useState(false);
   const tableWrapperRef = useRef(null);
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
   const handleScroll = () => {
     if (tableWrapperRef.current) {
       const scrollLeft = tableWrapperRef.current.scrollLeft;
@@ -166,10 +172,6 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     }
   };
 
-
-  useEffect(() => {
-    console.log('watchList', watchList);
-  }, [])
 
   useEffect(() => {
     const wrapper = tableWrapperRef.current;
@@ -208,6 +210,17 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
     ...firstColumnStyle,
     color: "white",
     background: '#1976d2',
+  }
+
+  const toastBoxCss = {
+    display: 'flex',
+    alignItems: 'center',
+    px: 2.5,
+    py: 1.5,
+    boxShadow: 3,
+    // minWidth: '80vw',
+    justifyContent: 'space-between',
+    borderRadius: '10px',
   }
 
   const { classes, cx } = useStyles();
@@ -284,7 +297,6 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
               // backgroundColor: rowBgColorFirstCol,
               backgroundColor: geFisrtColBgColor(idx),
               opacity: 1,
-              // backgroundColor: val > 0 ? 'rgba(76, 175, 80, 0.08)' : val < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
             }}
           // sortDirection={'desc'}
           >
@@ -299,11 +311,24 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
               </Box>
 
               <Typography variant="body1" sx={{ fontWeight: 500, display: 'inline' }} noWrap>
-                {/* {getCondition(dataArray['priceChange'], true, false)} */}
                 {dataArray.scriptName}
               </Typography>
-              {/* <Divider sx={{ height: '2px', bgcolor: rowVal > 0 ? 'green' : rowVal < 0 ? 'red' : 'gray' }} /> */}
-              {/* <hr style={{ margin: 0, padding: 0, color: getCellBgColorFisrtCol(rowVal) }} /> */}
+              <Chip
+                label={dataArray.qty}
+                color="primary"
+                variant="outlined"
+                size="small"
+                sx={{
+                  fontWeight: '600',
+                  ml: '6px',
+                  padding: '0px',
+                  height: 18,
+                  fontSize: '0.7rem',
+                  // minWidth: 'unset',
+                  lineHeight: 1,
+                  borderWidth: 2,
+                }}
+              />
             </Box>
             <Box
               sx={{
@@ -313,7 +338,13 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
                 right: '-36px',
                 width: '36px',
                 pointerEvents: 'none',
-                background: showShadow ? 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
+                background: showShadow
+                  ? isDarkMode
+                    ? 'linear-gradient(to right, rgba(255,255,255,0.2), transparent)'
+                    : 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)'
+                  : isDarkMode
+                    ? 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)'
+                    : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
                 zIndex: 10,
               }}
             />
@@ -321,23 +352,6 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
         </>
       );
     }
-
-    // if (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') {
-    //   return (
-    //     <TableCell
-    //       padding="normal"
-    //       align={itemCell.numeric ? 'right' : 'left'}
-    //       key={dataArray.id + index.toString()}
-    //       sx={{
-    //         ...tableCellStyle,
-    //         backgroundColor: rowBgColor,
-    //         // color: dataArray.priceChange > 0 ? 'red' : dataArray.priceChange < 0 ? 'green' : 'grey',
-    //       }}>
-    //       {getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)}
-    //       {/* {dataArray[itemCell.id]} */}
-    //     </TableCell>
-    //   );
-    // }
 
     return (
       <TableCell
@@ -348,13 +362,19 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           ...tableCellStyle,
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
           fontWeight: itemCell.id === 'ltp' ? 700 : null,
-        }}>
+        }}
+        onClick={() => (itemCell.id === 'priceChangePercent' || itemCell.id === 'priceChange') && setIsPopupOpen(true)}
+      >
         {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)
           : itemCell.id === 'priceChange' ? getCondition(dataArray[itemCell.id], false, true, dataArray.priceChange)
             : dataArray[itemCell.id]}
       </TableCell>
     );
   });
+
+  useEffect(() => {
+    console.log('isPopupOpen', isPopupOpen)
+  }, [isPopupOpen])
 
   const TableHeader = ({ columnData }) => {
     return (
@@ -397,16 +417,98 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
                       zIndex: 10,
                     }}
                   />
+                  <Chip
+                    label='Quantity'
+                    variant="outlined"
+                    // size="small"
+                    sx={{
+                      color: "#fff",
+                      ml: '6px',
+                      padding: '0px',    // shorthand for px
+                      height: 18,          // smaller chip height
+                      fontSize: '0.7rem',
+                      // minWidth: 'unset',
+                      lineHeight: 1,
+                    }}
+                  />
                 </>
               )}
               {/* </TableSortLabel> */}
             </TableCell>
           ))}
+          <TableCell></TableCell>
+          <TableCell></TableCell>
         </TableRow>
       </TableHead >
     );
   };
 
+  function showToast(msg, onUndo, isStarRemoved) {
+    let didUndo = false;
+
+    const toastId = toast.custom((t) => (
+      <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
+        {isStarRemoved === 'removed'
+          ? <StarBorder sx={{ color: 'gray', mr: 0.8 }} />
+          : isStarRemoved === 'added'
+            ? <Star sx={{ color: 'gold', mr: 0.8 }} />
+            : isStarRemoved === 'delete'
+              ? <RemoveCircleSharpIcon sx={{ color: 'error.main', mr: 0.8 }} />
+              : ''}
+
+        <Typography sx={{ fontSize: '0.9rem' }}>
+          {/* {scriptName} Removed */}
+          {msg}
+        </Typography>
+        {onUndo && <Button
+          size="small"
+          sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0, backgroundColor: '#90caf933' }}
+          onClick={() => {
+            didUndo = true;
+            onUndo();
+            toast.dismiss(t.id);
+          }}
+        >
+          Undo
+        </Button>}
+      </Box>
+    ), {
+      id: Date.now(), // optional: prevent duplicate toasts
+      duration: 30000,
+      position: 'top-right',
+    });
+  };
+
+  function handleRemove(stock, idx) {
+    if (stock.qty > 0) {
+      showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
+    } else {
+      function onUndo() {
+        setDummyData(prev => [
+          ...prev.slice(0, idx),
+          stock,
+          ...prev.slice(idx)
+        ]);
+      }
+      setDummyData(prevData => prevData.filter(data => data.id !== stock.id));
+      showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
+    }
+  }
+
+  function handleStar(stockData) {
+    if (stockData.isFavorite) {
+      showToast(`${stockData.scriptName} removed from favorites.`, false, 'removed');
+    } else {
+      showToast(`${stockData.scriptName} added in favorites.`, false, 'added');
+    }
+    setDummyData(prevData =>
+      prevData.map(stock =>
+        stock.id === stockData.id
+          ? { ...stock, isFavorite: !stock.isFavorite }
+          : stock
+      )
+    );
+  }
 
   return (
     <Paper sx={{ margimTop: '0px' }}>
@@ -435,18 +537,37 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           <Table className={cx(classes.table, classes.stripped, classes.hover)} sx={{ my: 0 }}>
             <TableHeader columnData={columnData} />
             <TableBody>
-              {watchList?.map((stock, idx) => {
+              {dummyData?.map((stock, idx) => {
                 if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                   return false;
                 }
                 return (
                   <TableRow
                     tabIndex={-1}
-                    key={stock.id}
+                    // key={stock.id}
+                    key={idx}
                     sx={{ cursor: 'pointer' }}
-                    onClick={() => setIsStockOpen(stock)}
+                  // onClick={() => setIsStockOpen(stock)}
                   >
                     {renderCell(stock, columnData, idx)}
+
+                    {/* Star Icon */}
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star'}>
+                      <IconButton onClick={() => handleStar(stock)} sx={{ pl: 2 }}>
+                        {stock.isFavorite ? (
+                          <Star sx={{ color: 'gold' }} />
+                        ) : (
+                          <StarBorder sx={{ color: 'gray' }} />
+                        )}
+                      </IconButton>
+                    </TableCell>
+
+                    {/* Delete Icon */}
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete'}>
+                      <IconButton onClick={() => handleRemove(stock, idx)} sx={{ pl: 1.5 }}>
+                        <Delete sx={{ color: 'error.main' }} />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -454,6 +575,24 @@ function StockTable({ searchText, setIsStockOpen, watchList }) {
           </Table>
         </Box>
       </div>
+      <Toaster limit={3} />
+      <BottomTradePopup
+        open={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        stockData={{
+          scriptName: 'GOLD',
+          bid: 55800,
+          ask: 55820,
+          ltp: 55810,
+          change: +12,
+          changePercent: +0.21,
+          open: 55700,
+          close: 55690,
+          high: 55900,
+          low: 55550,
+        }}
+      />
+
     </Paper>
   );
 }

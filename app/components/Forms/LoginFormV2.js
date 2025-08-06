@@ -46,8 +46,8 @@ function LoginFormV2() {
 
   const formik = useFormik({
     initialValues: {
-      username: '',
-      password: '',
+      username: '949391',
+      password: 'Abcd1234',
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -136,10 +136,10 @@ function LoginFormV2() {
                 name="username"
                 label="User Name"
                 variant="standard"
-                value={formik.values.email}
+                value={formik.values.username}
                 onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
+                error={formik.touched.username && Boolean(formik.errors.username)}
+                helperText={formik.touched.username && formik.errors.username}
                 className={classes.field}
               />
             </FormControl>
@@ -174,7 +174,7 @@ function LoginFormV2() {
             </FormControl>
           </div>
           <div className={classes.optArea}>
-            <FormControlLabel className={classes.label} control={<Checkbox name="checkbox" />} label="Remember" />
+            {/* <FormControlLabel className={classes.label} control={<Checkbox name="checkbox" />} label="Remember" /> */}
             {/* <Button size="small" component={LinkBtn} to="/reset-password" className={classes.buttonLink}>Forgot Password</Button> */}
           </div>
           <div className={classes.btnArea}>

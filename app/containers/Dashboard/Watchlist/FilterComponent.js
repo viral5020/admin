@@ -155,22 +155,25 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
     useEffect(() => {
         if (dataObj) {
             const segments = dataObj.market_type;
-            const defaultSegment = segments.length > 0 ? segments[0] : { market_type_name: '' };
+            const defaultSegment = segments?.length > 0 ? segments[0] : { market_type_name: '' };
 
-            const scripts =
-                dataObj.script_list[defaultSegment.market_type_id]?.map(s => s) || [];
+            const marketTypeId = defaultSegment?.market_type_id;
+            const scripts = marketTypeId && dataObj?.script_list?.[marketTypeId]
+                ? dataObj.script_list[marketTypeId].map(s => s)
+                : [];
 
-            const defaultScript = scripts.length > 0 ? scripts[0] : { script_name: '' };
+            const defaultScript = scripts?.length > 0 ? scripts[0] : { script_name: '' };
+
             const scriptId = defaultScript?.script_id;
+            const expiries = scriptId && dataObj?.script_expiry_list?.[scriptId]
+                ? dataObj.script_expiry_list[scriptId].map(e => e)
+                : [];
 
-            const expiries =
-                dataObj.script_expiry_list[scriptId]?.map(e => e) || [];
+            const defaultExpiry = expiries?.length > 0 ? expiries[0] : { expiry_date: '' };
 
-            const defaultExpiry = expiries.length > 0 ? expiries[0] : { expiry_date: '' };
-
-            setSegmentOptions(segments.length > 0 ? segments : [{ market_type_name: 'Not Found' }]);
-            setScriptOptions(scripts.length > 0 ? scripts : [{ script_name: 'Not Found' }]);
-            setExpiryOptions(expiries.length > 0 ? expiries : [{ expiry_date: 'Not Found' }]);
+            setSegmentOptions(segments?.length > 0 ? segments : [{ market_type_name: 'Not Found' }]);
+            setScriptOptions(scripts?.length > 0 ? scripts : [{ script_name: 'Not Found' }]);
+            setExpiryOptions(expiries?.length > 0 ? expiries : [{ expiry_date: 'Not Found' }]);
 
             setSegment(defaultSegment);
             setScript(defaultScript);
@@ -180,8 +183,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
 
     useEffect(() => {
         if (segment && segment.market_type_name !== 'Not Found') {
-            const scripts =
-                dataObj.script_list[segment.market_type_id]?.map(s => s) || [];
+            const marketTypeId = segment?.market_type_id;
+            const scripts = marketTypeId && dataObj?.script_list?.[marketTypeId]
+                ? dataObj.script_list[marketTypeId].map(s => s)
+                : [];
+
             setScriptOptions(scripts.length > 0 ? scripts : [{ script_name: 'Not Found' }]);
             setScript(scripts.length > 0 ? scripts[0] : { script_name: '' });
         }
@@ -190,8 +196,10 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
     useEffect(() => {
         if (script && script.script_name !== 'Not Found') {
             const scriptId = script.script_id;
-            const expiries =
-                dataObj.script_expiry_list[scriptId]?.map(e => e) || [];
+            const expiries = scriptId && dataObj?.script_expiry_list?.[scriptId]
+                ? dataObj.script_expiry_list[scriptId].map(e => e)
+                : [];
+
             setExpiryOptions(expiries.length > 0 ? expiries : [{ expiry_date: 'Not Found' }]);
             setExpiry(expiries.length > 0 ? expiries[0] : { expiry_date: '' });
         }
