@@ -88,6 +88,10 @@ const OrderPage = () => {
         total_qty: 0,
     });
 
+    const rawData = sessionStorage.getItem("data");
+    const parsedData = JSON.parse(rawData);
+    const userType = parseInt(parsedData.user_type, 10);
+
     const [all_outstanding, setAll_outstanding] = useState('');
     const [client_wise_value, setClient_wise_value] = useState('');
     const [exparyDate, setExparyDate] = useState('');
@@ -236,6 +240,7 @@ const OrderPage = () => {
                         setMaster={setMaster}
                         setBroker={setBroker}
                         onApply={fetchPositions}
+                        userType={userType}
                     />
 
                 </Box>
@@ -276,15 +281,23 @@ const OrderPage = () => {
                     Total MTM: ₹
                     <strong>{((totals.self_grand ?? 0) + (totals.downline_grand ?? 0) + (totals.upline_grand ?? 0)).toLocaleString("en-IN")}</strong>
                 </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    Self MTM: ₹<strong>{(totals.self_grand ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    <strong>Downline MTM:</strong> ₹{(totals.downline_grand ?? 0).toLocaleString("en-IN")}
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    <strong>Upline MTM:</strong> ₹{(totals.upline_grand ?? 0).toLocaleString("en-IN")}
-                </Box>
+                {![1, 2].includes(userType) && (
+                    <Box sx={{ fontSize: 13 }}>
+                        Self MTM: ₹<strong>{(totals.self_grand ?? 0).toLocaleString("en-IN")}</strong>
+                    </Box>
+                )}
+                {![1, 2].includes(userType) && (
+                    <Box sx={{ fontSize: 13 }}>
+                        <strong>Downline MTM:</strong> ₹{(totals.downline_grand ?? 0).toLocaleString("en-IN")}
+                    </Box>
+                )}
+
+                {[3, 4].includes(userType) && (
+                    <Box sx={{ fontSize: 13 }}>
+                        <strong>Upline MTM:</strong> ₹{(totals.upline_grand ?? 0).toLocaleString("en-IN")}
+                    </Box>
+                )}
+
                 <Box sx={{ fontSize: 13 }}>
                     <strong>Total Qty:</strong> {(totals.total_qty ?? 0).toLocaleString("en-IN")}
                 </Box>
