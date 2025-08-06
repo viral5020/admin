@@ -602,18 +602,6 @@ export const rolloverPositions = async ({
   }
 };
 
-export const checkLoginAPI = async () => {
-  console.log("checkLoginAPI..............")
-  try {
-    const response = await axiosInstance.post("/ajaxfiles/check_login", { ...getDefaultParams() });
-    console.log('response.data', response.data);
-    return response.data.status === 'ok';
-  } catch (error) {
-    console.error("Error in checkLogin:", error);
-    throw error;  // ✅ throw if you want upstream to catch it
-  }
-};
-
 function isChanged(apiData) {
   const data = sessionStorage.getItem('notification');
   console.log('JSON.stringify(apiData) == data', JSON.stringify(apiData) == data)
@@ -623,20 +611,35 @@ function isChanged(apiData) {
     return;
   } else {
     window.location.href !== "http://localhost:3000/login" ? window.location.reload() : null;
-    // console.log(' window.location.href', window.location.href);
   }
 }
 
+export const checkLoginAPI = async () => {
+  console.log("checkLoginAPI..............")
+  const defaultParams = getDefaultParams();
+  if (!(defaultParams.auth_key || defaultParams.login_user_id)) return;
+  try {
+    const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
+    console.log('response.data', response.data);
+    return response.data.status === 'ok';
+  } catch (error) {
+    console.error("Error in checkLogin:", error);
+    throw error;
+  }
+};
+
 export const fetchNotificationAPI = async () => {
+  const defaultParams = getDefaultParams();
+  if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;
   console.log("fetchNotificationAPI.........");
   try {
-    const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...getDefaultParams() });
+    const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...defaultParams });
     console.log('response.data', response.data);
     isChanged(response.data);
     sessionStorage.setItem('notification', JSON.stringify(response.data));
   } catch (error) {
     console.error("Error in checkLogin:", error);
-    throw error;  // ✅ throw if you want upstream to catch it
+    throw error;
   }
 };
 

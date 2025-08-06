@@ -55,6 +55,12 @@ const menu = [
     icon: 'close-circle-outline'
   },
   {
+    key: 'New Page',
+    name: 'New Page',
+    link: '/app/dashboard/new-page',
+    icon: 'close-circle-outline'
+  },
+  {
     key: 'login2',
     name: 'Login',
     link: '/login',

@@ -1,36 +1,21 @@
-// import { Navigate, Outlet } from 'react-router-dom';
-// import React from 'react';
-
-
-// const ProtectedRoute = ({ children }) => {
-//   const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
-
-//   if (!isLoggedIn) {
-//     alert('Please, login first.');
-//     return <Navigate to="/login" replace />;
-//   }
-
-//   return <Outlet />;
-// };
-
-// export default ProtectedRoute;
-
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
 
 
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
+  const location = useLocation(); // track path changes
 
+  console.log('ProtectedRoute entered');
   async function isProtected() {
+    console.log("ProtectedRoute  function run");
     if (!isLoggedIn) {
       alert('Please, login first.');
       return <Navigate to="/login" replace />;
     }
 
     await fetchNotificationAPI();  // chatgpt : this work
-
     const isAuthorized = await checkLoginAPI();  // chatgpt : give cors error
     // console.log('isAuthorized', isAuthorized); // isAuthorized undefined
     // if (!isAuthorized) {
@@ -44,8 +29,8 @@ const ProtectedRoute = ({ children }) => {
   }
 
   useEffect(() => {
-    isProtected();
-  }, [])
+    isProtected();  // chagpt : does this run on every time when path
+  }, [location.pathname])
 
   return <Outlet />;
 };

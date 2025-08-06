@@ -63,6 +63,10 @@ export const RejectionLogs = loadable(() =>
   import('./Dashboard/RejectionLogs'), {
   fallback: <Loading />,
 });
+export const NewPage = loadable(() =>
+  import('./Dashboard/NewPage'), {
+  fallback: <Loading />,
+});
 export const OrderBook = loadable(() =>
   import('./Dashboard/OrderBook'), {
   fallback: <Loading />,

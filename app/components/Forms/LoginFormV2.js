@@ -71,7 +71,7 @@ function LoginFormV2() {
         if (isLoginSuccessful) {
           sessionStorage.setItem('data', JSON.stringify(data));
           // setTimeout(() => navigate('/app'), 400)
-          setTimeout(() => window.location.href = '/app', 10000);
+          setTimeout(() => window.location.href = '/app', 1000);
         } else {
           alert('Login failed: ' + (data.message || 'Invalid credentials'));
         }
