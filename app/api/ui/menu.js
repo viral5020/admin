@@ -72,26 +72,36 @@ const menu = [
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData.user_type, 10);
 
+const notificationData = JSON.parse(sessionStorage.getItem("notification"));
+const isStock = notificationData.isStock;
+console.log('menu  isStock', isStock)
+const isForex = notificationData.isForex;
+console.log('menu  isForex', isForex)
+
+if (isStock) {
+  menu.push({
+    key: 'Treding',
+    name: 'Treding',
+    // link: '/app/dashboard/Banned-scripts',
+    icon: 'ban-outline'
+  })
+} else if (isForex) {
+  menu.push({
+    key: 'Forex comex',
+    name: 'Forex comex',
+    // link: '/app/dashboard/Banned-scripts',
+    icon: 'ban-outline'
+  })
+}
+
+
 if (userType === 1) {
-  // if (true) {
   menu.push({
     key: 'Banned Scripts',
     name: 'Banned Scripts',
     link: '/app/dashboard/Banned-scripts',
     icon: 'ban-outline'
   })
-  menu.push({
-    key: 'Banned Scripts',
-    name: 'Banned Scripts',
-    link: '/app/dashboard/Banned-scripts',
-    icon: 'ban-outline'
-  })
-  // menu.push({
-  //   key: 'Banned Scripts',
-  //   name: 'Banned Scripts',
-  //   link: '/app/dashboard/Banned-scripts',
-  //   icon: 'ban-outline'
-  // })
 }
 
 module.exports = menu;
