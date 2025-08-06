@@ -199,7 +199,11 @@ function UserMenu(props) {
           </ListItemIcon>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose} component={Link} to="http://localhost:3000/login">
+        <MenuItem onClick={() => {
+          handleClose();
+          sessionStorage.removeItem('data');
+          sessionStorage.removeItem('notification');
+        }} component={Link} to="http://localhost:3000/login">
           <ListItemIcon>
             <ExitToApp />
           </ListItemIcon>

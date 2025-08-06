@@ -7,8 +7,8 @@ function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   return {
     is_app: "1",
-    login_user_id: dataStored.user_id,
-    auth_key: dataStored.auth_key,
+    login_user_id: dataStored?.user_id,
+    auth_key: dataStored?.auth_key,
   }
 }
 
@@ -614,11 +614,25 @@ export const checkLoginAPI = async () => {
   }
 };
 
+function isChanged(apiData) {
+  const data = sessionStorage.getItem('notification');
+  console.log('JSON.stringify(apiData) == data', JSON.stringify(apiData) == data)
+  console.log('data', data)
+  console.log('aaaa', JSON.stringify(apiData))
+  if (JSON.stringify(apiData) == data) {
+    return;
+  } else {
+    window.location.href !== "http://localhost:3000/login" ? window.location.reload() : null;
+    // console.log(' window.location.href', window.location.href);
+  }
+}
+
 export const fetchNotificationAPI = async () => {
   console.log("fetchNotificationAPI.........");
   try {
     const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...getDefaultParams() });
     console.log('response.data', response.data);
+    isChanged(response.data);
     sessionStorage.setItem('notification', JSON.stringify(response.data));
   } catch (error) {
     console.error("Error in checkLogin:", error);

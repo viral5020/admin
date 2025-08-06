@@ -1,3 +1,4 @@
+console.log("Menu.js enteredddddddddddddddd")
 const menu = [
   {
     key: 'Dashboard',
@@ -73,6 +74,7 @@ const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
 const notificationData = JSON.parse(sessionStorage.getItem("notification"));
+console.log('### notificationData', notificationData);
 const isStock = notificationData?.isStock;
 console.log("isStock", isStock);
 const isForex = notificationData?.isForex;
@@ -85,7 +87,8 @@ if (isStock) {
     // link: '/app/dashboard/Banned-scripts',
     icon: 'ban-outline'
   })
-} else if (isForex) {
+}
+if (isForex) {
   menu.push({
     key: 'Forex comex',
     name: 'Forex comex',
