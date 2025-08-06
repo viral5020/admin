@@ -640,11 +640,9 @@ const OrderPage = () => {
                                             <Box
                                                 sx={{
                                                     position: "fixed",
-                                                    bottom: '0px',
-                                                    left: '19%',
-                                                    transform: 'translateX(-50%)',
+                                                    bottom: 0,
+                                                    left: 220,
                                                     width: "calc(100% - 420px)",
-                                                    minWidth: '600px',
                                                     bgcolor: "background.paper",
                                                     borderTopLeftRadius: 16,
                                                     borderTopRightRadius: 16,
