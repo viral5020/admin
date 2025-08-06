@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import RadioFilter from './filters/RadioFilterField';
 import DateFilter from './filters/DateFilter';
 import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
@@ -30,6 +30,15 @@ const PositionFilter = ({
     onApply 
 }) => {
     const theme = useTheme();
+
+     const [userType, setUserType] = useState(null);
+    
+     useEffect(() => {
+        const rawData = JSON.parse(sessionStorage.getItem("data"));
+        const userTypeValue = parseInt(rawData.user_type, 10);
+        setUserType(userTypeValue);
+    }, []);
+    
 
 const [openDialog, setOpenDialog] = useState(false);
 const [password, setPassword] = useState('');
@@ -118,13 +127,16 @@ const handleConfirmClose = async () => {
                     setMarket={setMarket}
                 />
                 <ClientMasterBrokerFilter
-                    client={client}
-                    master={master}
-                    broker={broker}
-                    setClient={setClient}
-                    setMaster={setMaster}
-                    setBroker={setBroker}
-                />
+                  client={userType !== 1 ? client : null}
+                  master={userType !== 1 ? master : null}
+                  broker={userType !== 1 && userType !== 2 ? broker : null}
+                  setClient={setClient}
+                  setMaster={setMaster}
+                  setBroker={setBroker}
+                  showClient={userType !== 1}
+                  showMaster={userType !== 1}
+                  showBroker={userType !== 1 && userType !== 2}
+              />
 
                <Grid item xs={12} sm={4} md={2.4}>
     <Button
@@ -147,54 +159,58 @@ const handleConfirmClose = async () => {
   </Grid>
 
   {/* ✅ Rollover Button */}
+{userType !== 2 && (
   <Grid item xs={12} sm={4} md={2.4}>
-  <Button
-    fullWidth
-    onClick={() => setOpenRolloverDialog(true)}  // Open dialog here
-    sx={{
-      backgroundColor: theme.palette.info.main,
-      color: theme.palette.info.contrastText,
-      padding: '6px 10px',
-      borderRadius: '4px',
-      textTransform: 'none',
-      fontSize: '0.875rem',
-      '&:hover': {
-        backgroundColor: theme.palette.info.dark,
-      },
-    }}
-  >
-    Rollover
-  </Button>
-  <Dialog open={openRolloverDialog} onClose={() => setOpenRolloverDialog(false)}>
-  <DialogTitle>Rollover Positions</DialogTitle>
-  <DialogContent>
-    <DialogContentText>
-      Are you sure you want to roll over all positions? Please enter your password to confirm.
-    </DialogContentText>
-    <TextField
-      autoFocus
-      margin="dense"
-      label="Password"
-      type="password"
+    <Button
       fullWidth
-      variant="outlined"
-      value={rolloverPassword}
-      onChange={(e) => setRolloverPassword(e.target.value)}
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenRolloverDialog(false)} color="primary">
-      Cancel
+      onClick={() => setOpenRolloverDialog(true)}
+      sx={{
+        backgroundColor: theme.palette.info.main,
+        color: theme.palette.info.contrastText,
+        padding: '6px 10px',
+        borderRadius: '4px',
+        textTransform: 'none',
+        fontSize: '0.875rem',
+        '&:hover': {
+          backgroundColor: theme.palette.info.dark,
+        },
+      }}
+    >
+      Rollover
     </Button>
-    <Button onClick={handleConfirmRollover} color="info" variant="contained">
-      Confirm
-    </Button>
-  </DialogActions>
-</Dialog>
-</Grid>
+
+    <Dialog open={openRolloverDialog} onClose={() => setOpenRolloverDialog(false)}>
+      <DialogTitle>Rollover Positions</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Are you sure you want to roll over all positions? Please enter your password to confirm.
+        </DialogContentText>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Password"
+          type="password"
+          fullWidth
+          variant="outlined"
+          value={rolloverPassword}
+          onChange={(e) => setRolloverPassword(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpenRolloverDialog(false)} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={handleConfirmRollover} color="info" variant="contained">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </Grid>
+)}
 
 
   {/* ✅ Close All Positions Button */}
+ {userType !== 2 && (
   <Grid item xs={12} sm={4} md={2.4}>
     <Button
       fullWidth
@@ -214,7 +230,6 @@ const handleConfirmClose = async () => {
       Close All Positions
     </Button>
 
-    {/* Dialog remains the same */}
     <Dialog open={openDialog} onClose={handleCloseDialog}>
       <DialogTitle>Close All Positions</DialogTitle>
       <DialogContent>
@@ -243,6 +258,7 @@ const handleConfirmClose = async () => {
       </DialogActions>
     </Dialog>
   </Grid>
+)}
             </Grid>
         </>
     );

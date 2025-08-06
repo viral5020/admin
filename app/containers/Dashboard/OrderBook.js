@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, IconButton, FormControl, InputLabel,
   Select, MenuItem, TextField, CircularProgress,
-  Card, CardContent, Button, useTheme, useMediaQuery, Drawer
+  Card, CardContent, Button, useTheme, useMediaQuery, Drawer,
+  Dialog,
+  DialogTitle
 } from '@mui/material';
 
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -12,6 +14,9 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import OrderFilter from './OrderFilter';
 import FilterBtn from './filters/FilterBtn';
+import { DialogContent } from '@mui/material';
+import { DialogActions } from '@mui/material';
+import { deleteTrade, updateTrade } from './API/API';
 
 const OrderBook = () => {
   const theme = useTheme();
@@ -33,6 +38,33 @@ const OrderBook = () => {
   const [totalRecords, setTotalRecords] = useState();
   const [isFilterChange, setIsFilterChange] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelItem, setCancelItem] = useState(null);
+  const [password, setPassword] = useState('');
+
+  const handleCancel = async (itemToCancel, enteredPassword = '') => {
+  try {
+    const payload = {
+      trade_id: itemToCancel.trade_id,
+      password: enteredPassword,
+      device_type: 0,
+    };
+
+    console.log('Sending cancel payload:', payload);
+
+    const response = await deleteTrade(payload);
+
+    if (response.success) {
+      alert('Trade cancelled successfully');
+      // TODO: refresh data or update UI as needed
+    } else {
+      alert(response.message || 'Failed to cancel trade');
+    }
+  } catch (error) {
+    alert('An error occurred while cancelling the trade.');
+  }
+};
 
 
   const [market, setMarket] = useState({});
@@ -103,6 +135,58 @@ const OrderBook = () => {
     }
   };
 
+
+  const [open, setOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [lot, setLot] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState('');
+
+  const handleModify = (item) => {
+    setSelectedItem(item);
+    setLot(item.trd_lot);
+    setQuantity(item.trd_qty);
+    setPrice(item.trd_rate);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+ const handleSave = async () => {
+  if (!item?.trade_id) {
+    alert('Trade ID is missing.');
+    return;
+  }
+
+  try {
+    const payload = {
+      trade_id: item.trade_id,
+      trade_rate: price,
+      trade_lot: lot,
+      trade_qty: quantity,
+      device_type: 0,
+    };
+
+    console.log('Sending payload:', payload);
+
+    const response = await updateTrade(payload);
+
+    if (response.success) {
+      alert('Trade updated successfully.');
+      handleClose(); // Close the dialog
+      // Optionally refresh data or state here
+    } else {
+      alert(response.message || 'Failed to update trade.');
+    }
+  } catch (error) {
+    console.error('Error updating trade:', error);
+    alert('Something went wrong while updating the trade.');
+  }
+};
+
+
   useEffect(() => {
     setIsFilterChange(true);
     setCurrentPage(0);
@@ -119,6 +203,8 @@ const OrderBook = () => {
   useEffect(() => {
     fetchOrders(filterType, searchText);
   }, []);
+
+    const needsPassword = userType === 4 && deletePopup;
 
   return (
     <Box sx={{ p: 0, mt: 2 }}>
@@ -353,7 +439,7 @@ const OrderBook = () => {
             <table
               className="table table-striped table-bordered"
               style={{
-                minWidth: "1500px",
+                minWidth: "1650px",
                 fontSize: "12px",
                 margin: 0,
                 backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
@@ -361,39 +447,39 @@ const OrderBook = () => {
               }}
             >
               <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-              <tr>
-  {[
-    "Device",
-    "Time",
-    ...(userType !== 1 ? ["Client"] : []),
-    "Script",
-    "B/S",
-    "Order Type",
-    "Qty (Lot)",
-    "Order Price",
-    "Status",
-    "O. Time",
-    "Comm Amt",
-     ...( [3, 4, 5].includes(userType) ? ["IP Address"] : [] ),
-    ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
-    ...(userType !== 2 ? ["Action"] : [])
-  ].map((header) => (
-    <th
-      key={header}
-      style={{
-        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-        fontWeight: 600,
-        padding: '8px 12px',
-        textAlign: 'left',
-        whiteSpace: 'nowrap',
-        borderBottom: '1px solid #ccc',
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
-      {header}
-    </th>
-  ))}
-</tr>
+                <tr>
+                  {[
+                    "Device",
+                    "Time",
+                    ...(userType !== 1 ? ["Client"] : []),
+                    "Script",
+                    "B/S",
+                    "Order Type",
+                    "Qty (Lot)",
+                    "Order Price",
+                    "Status",
+                    "O. Time",
+                    "Comm Amt",
+                    ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
+                    ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
+                    ...(userType !== 2 ? ["Action"] : [])
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      style={{
+                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                        fontWeight: 600,
+                        padding: '8px 12px',
+                        textAlign: 'left',
+                        whiteSpace: 'nowrap',
+                        borderBottom: '1px solid #ccc',
+                        backgroundColor: theme.palette.background.paper,
+                      }}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
 
               </thead>
               <tbody>
@@ -459,7 +545,7 @@ const OrderBook = () => {
                       <td>{item.trd_type2}</td>
                       <td>
                         <Box component="span" sx={{ fontWeight: 700 }}>
-                          {item.actual_lot_qty}
+                          {item.trd_qty}
                         </Box>{" "}
                         <Box component="span" sx={{ color: theme.palette.text.secondary }}>
                           ({item.trd_lot})
@@ -471,44 +557,146 @@ const OrderBook = () => {
                       <td>{item.trd_status}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_comm_amnt}</td>
-                     {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
-                      {[3, 4, 5].includes(userType) && <td>{}</td>}
+                      {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
+                      {[3, 4, 5].includes(userType) && <td>{item.trade_ip_address}</td>}
                       {userType !== 2 && (
-        <td>
-          <button
-            style={{
-              marginRight: '8px',
-              padding: '4px 8px',
-              backgroundColor: '#1976d2',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-            onClick={() => handleModify(item)}
-          >
-            Modify
-          </button>
-          <button
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#d32f2f',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-            onClick={() => handleCancel(item)}
-          >
-            Cancel
-          </button>
-        </td>
-      )}
+                        <td>
+                          <button
+                            style={{
+                              marginRight: '8px',
+                              padding: '4px 8px',
+                              backgroundColor: '#1976d2',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => handleModify(item)}
+                          >
+                            Modify
+                          </button>
+
+     <button
+        style={{
+          padding: '4px 8px',
+          backgroundColor: '#d32f2f',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+        }}
+        onClick={() => {
+          setCancelItem(item);
+          setCancelDialogOpen(true); // Always show confirmation
+        }}
+      >
+        Cancel
+      </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+
+            <Dialog open={open} onClose={handleClose} sx={{ '& .MuiDialog-paper': { width: '500px', maxWidth: '90%' } }}>
+              <DialogTitle>Modify Order</DialogTitle>
+              <DialogContent>
+                {selectedItem && (
+                  <>
+                    <Typography variant="subtitle1">
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: `Client Name: <strong>${selectedItem.client_full_name}</strong>`,
+                        }}
+                      />
+                    </Typography>
+
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                      Script Name: <strong>{selectedItem.scrp_name}</strong>
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <TextField
+                        label="Lot"
+                        value={lot}
+                        onChange={(e) => setLot(e.target.value)}
+                        fullWidth
+                        type="number"
+                      />
+                      <TextField
+                        label="Quantity"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        fullWidth
+                        type="number"
+                      />
+                      <TextField
+                        label="Price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        fullWidth
+                        type="number"
+                      />
+                    </Box>
+                  </>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleSave} color="primary" variant="contained">
+                  Save
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+     {/* Confirmation Dialog for ALL users */}
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to cancel this order?
+          </Typography>
+
+          {/* Show password input only for userType === 4 and deletePopup === true */}
+          {needsPassword && (
+            <TextField
+              label="Enter Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+            />
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)} color="primary">
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              if (needsPassword && !password) {
+                alert('Please enter your password.');
+                return;
+              }
+
+              handleCancel(cancelItem, password);
+              setCancelDialogOpen(false);
+              setPassword('');
+            }}
+            color="error"
+            variant="contained"
+          >
+            Yes, Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
           </Box>
 
 

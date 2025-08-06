@@ -613,6 +613,39 @@ export const getWatchListDataAPI = async () => {
   }
 }
 
+export const updateTrade = async ({ trade_id, trade_rate, trade_lot, trade_qty, device_type = 0 }) => {
+  try {
+    const response = await axiosInstance.post('ajaxfiles/trade_edit', {
+      trade_id,
+      trade_rate,
+      trade_lot,
+      trade_qty,
+      device_type,
+      ...getDefaultParams(), // Optional: add auth tokens, etc., if required
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error in updating trade:', error);
+    throw error;
+  }
+};
+
+export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) => {
+  try {
+    const response = await axiosInstance.post('ajaxfiles/trade_delete', {
+      trade_id,
+      password,
+      device_type,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting trade:', error);
+    throw error;
+  }
+};
+
 
 // const eee = {
 //   "status": "ok",
