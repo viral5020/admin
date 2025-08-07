@@ -6,10 +6,10 @@ import axios from 'axios';
 import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 
-const MarketScriptNameFilter = ({ script, setScript, setMarket, market }) => {
+const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultMarketOptions }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [marketOptions, setMarketOptions] = useState([]);
+  const [marketOptions, setMarketOptions] = useState(defaultMarketOptions ?? []);
   const [scriptOptions, setScriptOptions] = useState([]);
 
   const [isScriptNameDisable, setIsScriptNameDisable] = useState(true)
@@ -71,7 +71,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market }) => {
 
     switch (type) {
       case 'market':
-        fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions);
+        !defaultMarketOptions ? fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions) : null;
         break;
       case 'script':
         fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: market.id }, setScriptOptions);
