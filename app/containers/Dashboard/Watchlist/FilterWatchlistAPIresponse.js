@@ -15899,3 +15899,68 @@ const strikes = {
     ],
     "type": "CE"
 }
+
+const aaa = {
+    "status": "ok",
+    "is_unmatched": false,
+    "message": "Placed Successfully",
+    "data": [],
+    "nse_margin": "18,065,533 / 20,000,000",
+    "mcx_margin": "79,614,010 / 100,000,000",
+    "nseopt_margin": "50,000 / 50,000",
+    "nseeqt_margin": "0 / 0",
+    "global_margin": "20,000,000 / 20,000,000",
+    "forex_margin": "0 / 0",
+    "comex_margin": "0 / 0",
+    "cricket_margin": "0 / 0",
+    "product_name": "SILVER 05SEP2025",
+    "trade_type": "Buy",
+    "quantity": 6,
+    "trade_qty": 30,
+    "trade_rate": 113320,
+    "script_name": "SILVER 05SEP2025",
+    "is_bulk_trading": false,
+    "bData": {},
+    "concerned": [
+        "37946",
+        "1",
+        "0",
+        "0",
+        "0"
+    ],
+    "trade": {
+        "device": 0,
+        "datetime": "18:41:14",
+        "client_name": "DEMO DEV 3 (949391) </br>/ Demo master nnn",
+        "market_type_id": 1,
+        "script_name": "SILVER 05SEP2025",
+        "trade_type": "Market Buy",
+        "trade_type2": "Buy",
+        "trade_lot": "1.00",
+        "trade_qty": "30",
+        "trade_rate": "113,320.00",
+        "trade_id": 31531929,
+        "product": "SILVER-I",
+        "user_id": "41297",
+        "trade_qty1": 30,
+        "trade_rate1": 113320,
+        "concerned_users": [
+            1,
+            41297,
+            37946
+        ],
+        "alert_percentage": 90,
+        "user_auto_square_up": 0,
+        "apply_square_up_limit": 0,
+        "is_alert": 1,
+        "market_type": "MCXFUT",
+        "trade_rate_2": "113,320.00 (113,320.00)",
+        "trade_ip": "196-180-91-219.static.youbroadband.in",
+        "trade_type3": "Executed",
+        "trade_type4": "Market Buy",
+        "trade_time": "2025-08-06 18:41:14",
+        "trade_matchedtime": "2025-08-06 18:41:14",
+        "net_rate": "113,320.00",
+        "isForex": 0
+    }
+}

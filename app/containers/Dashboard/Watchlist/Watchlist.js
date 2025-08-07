@@ -375,6 +375,7 @@ function generateDummyWatchlistData(scripts = []) {
     const qty = parseInt(item.quantity, 10) || 0;
 
     return {
+      ...item,
       id: item.market_watch_id,
       scriptName,
       exchange: item.market_type_name || 'NSE',
@@ -413,9 +414,9 @@ function Watchlist() {
 
   const sections = [
     { title: 'Nifty 50 Stocks', key: 'nifty' },
-    { title: 'Banking Sector', key: 'banking' },
-    { title: 'Commodities Market', key: 'commodities' },
-    { title: 'Currency Derivatives', key: 'currency' }
+    // { title: 'Banking Sector', key: 'banking' },
+    // { title: 'Commodities Market', key: 'commodities' },
+    // { title: 'Currency Derivatives', key: 'currency' }
   ];
 
   // Manage expanded state for all sections

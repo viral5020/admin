@@ -2,18 +2,18 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
 
-
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
   const location = useLocation(); // track path changes
 
+  if (!isLoggedIn) {
+    alert('Please, login first.');
+    return <Navigate to="/login" replace />;
+  }
+
   console.log('ProtectedRoute entered');
   async function isProtected() {
     console.log("ProtectedRoute  function run");
-    if (!isLoggedIn) {
-      alert('Please, login first.');
-      return <Navigate to="/login" replace />;
-    }
 
     await fetchNotificationAPI();  // chatgpt : this work
     const isAuthorized = await checkLoginAPI();  // chatgpt : give cors error

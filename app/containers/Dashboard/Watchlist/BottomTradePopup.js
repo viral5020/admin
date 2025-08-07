@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Drawer, Box, Typography, Grid, RadioGroup, FormControlLabel,
     Radio, TextField, MenuItem, Button, Divider,
@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { tradePlaceAPI } from '../API/API';
 
 const marketOptions = ['NSE', 'BSE', 'MCX'];
 
@@ -20,6 +21,10 @@ const TabPanel = ({ children, value, index }) => {
     );
 };
 
+function getTabIndex(val) {
+    return val === 'bid' ? 0 : 1;
+}
+
 const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
     const [tradeType, setTradeType] = useState('BUY');
     const [market, setMarket] = useState(marketOptions[0]);
@@ -28,14 +33,18 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
     const [price, setPrice] = useState('');
     const [isAllRequired, setIsAllRequired] = useState();
 
-    const [tabIndex, setTabIndex] = useState(0);
+    const [tabIndex, setTabIndex] = useState(getTabIndex(stockData?.field));
 
     const handleChange = (_, newValue) => {
         setTabIndex(newValue);
     };
 
-    const isBuy = tabIndex === 0;
+    useEffect(() => {
+        console.log('&&& stockData', stockData);
+        setTabIndex(getTabIndex(stockData?.field));
+    }, [stockData])
 
+    const isBuy = tabIndex === 0;
 
     const Icon = true ? ArrowDropUpIcon : ArrowDropDownIcon;
 
@@ -54,6 +63,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
         try {
             console.log('isBuy', isBuy);
             console.log('{market,lot,qty,price}', { market, lot, qty, price })
+            const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex });
             // const response = await apiFunc({market,lot,qty,price})
         } catch (error) {
             console.log('error', error)
@@ -193,25 +203,25 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             {stockData?.priceChange}
                         </Typography>
                     </Grid>
-                    <Grid item xs={2} mr={5}>
+                    <Grid item xs={2.2}>
                         <Typography variant="subtitle2">Change %</Typography>
                         <Typography color={stockData?.changePercent >= 0 ? 'success.main' : 'error.main'}>
                             <Icon />{stockData?.priceChangePercent}%
                         </Typography>
                     </Grid>
-                    <Grid item xs={1.7}>
+                    <Grid item xs={1.9}>
                         <Typography variant="subtitle2">Open</Typography>
                         <Typography>{stockData?.open}</Typography>
                     </Grid>
-                    <Grid item xs={1.7}>
+                    <Grid item xs={1.9}>
                         <Typography variant="subtitle2">Close</Typography>
                         <Typography>{stockData?.close}</Typography>
                     </Grid>
-                    <Grid item xs={1.7}>
+                    <Grid item xs={1.9}>
                         <Typography variant="subtitle2">High</Typography>
                         <Typography>{stockData?.high}</Typography>
                     </Grid>
-                    <Grid item xs={1.7}>
+                    <Grid item xs={1.9}>
                         <Typography variant="subtitle2">Low</Typography>
                         <Typography>{stockData?.low}</Typography>
                     </Grid>
@@ -277,8 +287,11 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                                 width: '100%',
                                 borderBottom: !isBuy ? '3px solid red' : '3px solid green',
                                 minWidth: 100,
+                                '&.Mui-disabled': {
+                                    opacity: 1,
+                                },
                             }}
-                            disabled
+                            disabled // this should not reduct opacity of tab
                         />
                     </Tabs>
 
@@ -287,7 +300,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                         sx={{
                             border: `3px solid ${isBuy ? 'green' : 'red'}`,
                             borderTop: 'none',
-                            borderBottomWidth: '4px',
+                            // borderBottomWidth: '4px',
                             // borderBottomLeftRadius: 8,
                             // borderBottomRightRadius: 8,
                             p: 2,

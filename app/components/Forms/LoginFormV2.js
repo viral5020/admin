@@ -48,7 +48,7 @@ function LoginFormV2() {
 
   const formik = useFormik({
     initialValues: {
-      username: '949391',
+      username: '',
       password: 'Abcd1234',
     },
     validationSchema,
