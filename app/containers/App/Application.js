@@ -43,9 +43,11 @@ import {
   BlockedScripts,
   MaxQTYDetails,
   RejectionLogs,
-  NewPage
+  Forex_order
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
+import Forex_position from '../Dashboard/Forex_position';
+import Summary_report from '../Dashboard/Summary_report';
 // import Watchlist from '../Dashboard/Watchlist';
 // import StockDetailMobile from '../Dashboard/StockDetailMobile';
 
@@ -67,7 +69,9 @@ function Application(props) {
           <Route path="dashboard/banned-scripts" element={<BlockedScripts />} />
           <Route path="dashboard/max-qty-details" element={<MaxQTYDetails />} />
           <Route path="dashboard/rejection-logs" element={<RejectionLogs />} />
-          <Route path="dashboard/new-page" element={<NewPage />} />
+          <Route path="dashboard/forex-order" element={<Forex_order />} />
+           <Route path="dashboard/forex-position" element={<Forex_position />} />
+            <Route path="dashboard/summary-report" element={<Summary_report />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

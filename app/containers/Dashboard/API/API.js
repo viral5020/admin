@@ -107,6 +107,27 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
   }
 };
 
+export const fetchforexOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+  const formData = {
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10000,
+    sSearch: searchValue,
+    is_app: 1,
+    login_user_id: userId,
+    auth_key: authKey,
+    isTodayTrade: type === "today" ? "today" : "",
+  };
+
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
+    return data.aaData || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
+};
+
 
 export const fetchPendingOrdersAPI = async (userId, authKey) => {
   try {// &&&&
@@ -682,6 +703,101 @@ export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) 
     return response.data;
   } catch (error) {
     console.error('Error deleting trade:', error);
+    throw error;
+  }
+};
+
+
+export const getForexOrders = async (userId, authKey) => {
+  try {
+    const response = await axiosInstance.post("datatables/position_book_list_forex", {
+      is_app: "1",
+      login_user_id: userId,
+      auth_key: authKey,
+      sEcho: 1,
+      iDisplayStart: 0,
+      iDisplayLength: 1000000,
+      sSearch: "",
+    });
+
+    if (response.data && response.data.aaData) {
+      return response.data.aaData;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching position data:", error);
+    return [];
+  }
+};
+
+export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
+  if (!scriptId) return [];
+
+  const formData = {
+    isTodayTrade: "today",
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey,
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10,
+    script_id: scriptId,
+    sSearch: "",
+  };
+
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
+    return data?.aaData || [];
+  } catch (error) {
+    console.error("Failed to fetch trades:", error);
+    return [];
+  }
+};
+
+
+export const fetchSummaryReportAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return [];
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/summary_report", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+
+export const tradePlaceAPI = async (dataObj) => {
+  console.log('dataObj', dataObj);
+  const payload = {
+    market_type_id: "1",
+    script_id: dataObj.id,
+    script_expiry_id: dataObj.script_expiry_id,
+    trade_type,
+    trade_rate: dataObj.price,
+    trade_qty: dataObj.qty,
+    trade_lot: dataObj.lot,
+    trade_type_x: tradeType,
+    check_script_name: dataObj.script_name,
+    user_id: sessionStorage.getItem('user_id'), // or pass as `params.user_id`
+    device_type: 0,
+    // ...params, // override default values
+  };
+
+  try {
+    // const response = await axiosInstance.post('/ajaxfiles/trade_place', payload);
+    // console.log('Trade response:', response.data);
+    // return response.data;
+  } catch (error) {
+    console.error('Error in tradePlaceAPI:', error);
     throw error;
   }
 };

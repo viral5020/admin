@@ -63,8 +63,8 @@ export const RejectionLogs = loadable(() =>
   import('./Dashboard/RejectionLogs'), {
   fallback: <Loading />,
 });
-export const NewPage = loadable(() =>
-  import('./Dashboard/NewPage'), {
+export const Forex_order = loadable(() =>
+  import('./Dashboard/Forex_order'), {
   fallback: <Loading />,
 });
 export const OrderBook = loadable(() =>
