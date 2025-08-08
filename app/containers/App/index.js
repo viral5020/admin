@@ -15,6 +15,7 @@ import {
   ComingSoon, Maintenance,
   NotFoundDedicated
 } from '../pageListAsync';
+import SocketApp from '../Dashboard/Socket/SocketApp';
 
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 
@@ -25,7 +26,11 @@ function App(props) {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-
+          <Route path="app/*" element={
+              <SocketApp>
+                <Application history={history} />
+              </SocketApp>
+            } />
           <Route path="app/*" element={<Application history={history} />} />
           <Route element={<Outer />}>
             {/* <Route path="login" element={<Login />} /> */}

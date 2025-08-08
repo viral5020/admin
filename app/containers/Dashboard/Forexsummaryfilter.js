@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Grid, TextField, MenuItem, Select, InputLabel, FormControl, Button
+  Box, Grid, Button
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import DateFilter from './filters/DateFilter';
-import { getInputBoxStyle } from './filters/inputBoxStyle';
-import ForexComexScriptFilter from './forexorderfilter'; 
-
-// Example Valan ID options (replace with real values or props as needed)
-const valanIdOptions = [
-  { label: 'Valan ID 1', value: 'valan_1' },
-  { label: 'Valan ID 2', value: 'valan_2' },
-  { label: 'Valan ID 3', value: 'valan_3' },
-];
+import ForexComexScriptFilter from './forexorderfilter';
+import ValanFilter from './ValanFilter';
 
 const Forexsummaryfilter = ({
   isDarkMode,
@@ -47,31 +40,17 @@ const Forexsummaryfilter = ({
   return (
     <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
       <Grid container spacing={1}>
-        {/* Removed Status RadioFilter */}
-
         <DateFilter label="Trade After" value={start_end} onChange={setStart_end} />
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
-        {/* Removed Order Type Dropdown */}
+        {/* ✅ Use the new ValanFilter component */}
+        <ValanFilter
+          valanId={valanId}
+          setValanId={setValanId}
+          isDarkMode={isDarkMode}
+        />
 
-        {/* Added Valan ID Dropdown */}
-        <Grid item xs={12} sm={6} md={4} lg={3.6}>
-          <FormControl fullWidth size="small" sx={getInputBoxStyle(isDarkMode)}>
-            <InputLabel>Valan ID</InputLabel>
-            <Select
-              value={valanId}
-              onChange={(e) => setValanId(e.target.value)}
-              label="Valan ID"
-            >
-              {valanIdOptions.map((valan) => (
-                <MenuItem key={valan.value} value={valan.value}>
-                  {valan.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-
+        {/* Market & Script Filter */}
         <ForexComexScriptFilter
           selectedMarket={market}
           setSelectedMarket={setMarket}
@@ -79,6 +58,7 @@ const Forexsummaryfilter = ({
           setSelectedScripts={setScript}
         />
 
+        {/* Client, Master, Broker Filters */}
         <ClientMasterBrokerFilter
           client={userType !== 1 ? client : null}
           master={userType !== 1 ? master : null}
@@ -91,6 +71,7 @@ const Forexsummaryfilter = ({
           showBroker={userType !== 1 && userType !== 2}
         />
 
+        {/* Apply Button */}
         <Grid item xs={12} sm={6} md={3} lg={2.4}>
           <Button
             onClick={onApply}
