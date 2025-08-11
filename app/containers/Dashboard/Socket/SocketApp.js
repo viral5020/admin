@@ -1,9 +1,8 @@
 import React, { useEffect, Component, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import socketIOClient from "socket.io-client";
-//import Application from 'app/containers/App/Application';
-import Application from '../../../../app/containers/App/Application';
 import SocketContext from "./SocketContext";
+import Application from '/app/containers/App/Application';
 
 const WEBURL = 'https://webcaresol.org:4003';
 const WEBURLSports = 'https://webcaresol.org:4002';
@@ -11,7 +10,8 @@ const WEBURLSports = 'https://webcaresol.org:4002';
 let socket = undefined;
 let socketSports = undefined;
 
-const SocketApp = ({children}) => {
+const SocketApp = (props) => {
+     const { history, children } = props;
     // const socket = socketIOClient(WEBURL);
     const dispatch = useDispatch();
     const [ isSocketConnected, changeSocketFlag ] = useState(false);
@@ -47,7 +47,7 @@ const SocketApp = ({children}) => {
             socket.off("connect", connectFuntion);
         };
     }, []);
-
+console.log("socket=",socket);
     const connectFuntion = () => {
         console.log("conncted")
     }
@@ -89,16 +89,16 @@ const SocketApp = ({children}) => {
         socket,
         socketSports,
     }
-
+console.log("isSocketConnected=",isSocketConnected);
     return (
         <div>
             {
-                isSocketConnected ? (
+                isSocketConnected && socket?.connected ? (
                     <SocketContext.Provider value={sockets}>
-                        <Application />
+                        <Application history={history}/>
                     </SocketContext.Provider>
                 ) : (
-                    <Application shouldTimeoutSet={false} />
+                    <Application history={history}/>
                 )
             }
         </div>

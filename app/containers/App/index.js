@@ -27,8 +27,8 @@ function App(props) {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="app/*" element={
-              <SocketApp>
-                <Application history={history} />
+              <SocketApp history={history}>
+                {/* <Application history={history} /> */}
               </SocketApp>
             } />
           <Route path="app/*" element={<Application history={history} />} />
