@@ -15,12 +15,13 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
                 size="small"
                 startIcon={
                     icon === 'add'
-                        ? <AddIcon sx={{ position: 'relative', left: '4px', fontSize: '30px !important' }} />
+                        ? <AddIcon sx={{ position: 'relative', left: '4px', fontSize: '20px !important' }} />
                         : <FilterListIcon sx={{ position: 'relative', left: '4px' }} />
                 }
                 onClick={() => setFilterOpen(true)}
                 sx={{
-                    p: 0,
+                    p: '9px',
+                    height: '100%',
                     backgroundColor: isDarkMode ? '#263238' : '#fff',
                     borderColor: isDarkMode ? '#90a4ae' : '#607d8b',
                     color: isDarkMode ? '#cfd8dc' : '#607d8b',
@@ -44,3 +45,6 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
 }
 
 export default FilterBtn
+
+//        application.js   <Route path="dashboard/forex-watchlist" element={<Watchlist />} />
+// import Forex_position, Summary_report,

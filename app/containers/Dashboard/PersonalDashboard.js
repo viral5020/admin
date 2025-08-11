@@ -1165,20 +1165,20 @@ function PersonalDashboard() {
                           Next
                         </Button>
                         <TextField
-                            label="Go to page"
-                            type="number"
-                            size="small"
-                            InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                const page = parseInt(e.target.value, 10) - 1;
-                                if (!isNaN(page) && page >= 0 && page < totalPages) {
-                                  setCurrentPage(page);
-                                }
+                          label="Go to page"
+                          type="number"
+                          size="small"
+                          InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const page = parseInt(e.target.value, 10) - 1;
+                              if (!isNaN(page) && page >= 0 && page < totalPages) {
+                                setCurrentPage(page);
                               }
-                            }}
-                            sx={{ width: 100 }}
-                          />
+                            }
+                          }}
+                          sx={{ width: 100 }}
+                        />
                       </Box>
                     </Box>
 
@@ -1748,10 +1748,10 @@ function PersonalDashboard() {
                               background: "linear-gradient(135deg, #8e0000, #b71c1c)",
                             },
                           }}
-                           onClick={() => {
-                                                                    setSelectedRow(selectedRow);
-                                                                    setCloseDialogOpen(true);
-                                                                }}
+                          onClick={() => {
+                            setSelectedRow(selectedRow);
+                            setCloseDialogOpen(true);
+                          }}
                         >
                           Close Position
                         </Button>
@@ -2421,85 +2421,85 @@ function PersonalDashboard() {
                     )}
                   </>
                 ) : (
-       <Box sx={{ overflowX: "auto", maxHeight: "400px", mx: 1 }}>
-  <table
-    style={{
-      minWidth: "1350px",
-      fontSize: "12px",
-      backgroundColor: "#fff",
-    }}
-  >
-    <thead
-      style={{
-        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-      }}
-    >
-      <tr>
-        {[
-          "Device",
-          "Time",
-          "Script",
-          "B/S",
-          "Order Type",
-          "Qty (Lot)",
-          "Order Price",
-          "Status",
-          "O. Time",
-          "Comm Amt",
-          "Trade ID",
-        ].map((header) => (
-          <th key={header} style={{ fontWeight: 600 }}>{header}</th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {pendingPaginatedOrders.map((item, index) => {
-        const scriptParts = item.scrp_name?.split(" ") || [];
-        const mainScript = scriptParts[0];
-        const restScript = scriptParts.slice(1).join(" ");
+                  <Box sx={{ overflowX: "auto", maxHeight: "400px", mx: 1 }}>
+                    <table
+                      style={{
+                        minWidth: "1350px",
+                        fontSize: "12px",
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <thead
+                        style={{
+                          backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                        }}
+                      >
+                        <tr>
+                          {[
+                            "Device",
+                            "Time",
+                            "Script",
+                            "B/S",
+                            "Order Type",
+                            "Qty (Lot)",
+                            "Order Price",
+                            "Status",
+                            "O. Time",
+                            "Comm Amt",
+                            "Trade ID",
+                          ].map((header) => (
+                            <th key={header} style={{ fontWeight: 600 }}>{header}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pendingPaginatedOrders.map((item, index) => {
+                          const scriptParts = item.scrp_name?.split(" ") || [];
+                          const mainScript = scriptParts[0];
+                          const restScript = scriptParts.slice(1).join(" ");
 
-        const tradeType = item.trd_type?.toUpperCase();
-        const tradeColor =
-          tradeType === "BUY"
-            ? theme.palette.success.main
-            : tradeType === "SELL"
-            ? theme.palette.error.main
-            : "inherit";
-  
+                          const tradeType = item.trd_type?.toUpperCase();
+                          const tradeColor =
+                            tradeType === "BUY"
+                              ? theme.palette.success.main
+                              : tradeType === "SELL"
+                                ? theme.palette.error.main
+                                : "inherit";
 
-        return (
-          <tr key={item.trd_id || index} style={{ backgroundColor: "transparent" }}>
-            <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-            <td>{item.trd_matchedtime}</td>
-            <td>
-              <span style={{ fontWeight: "bold" }}>{mainScript}</span>{" "}
-              {restScript}{" "}
-              <Chip
-                label={item.mrkt_name}
-                size="small"
-                sx={{ ml: 1, fontSize: "10px" }}
-              />
-            </td>
-            <td style={{ color: tradeColor, fontWeight: 700 }}>
-              {tradeType}
-            </td>
-            <td>{item.trd_type2}</td>
-            <td>
-              <b>{item.actual_lot_qty}</b> ({item.trd_lot})
-            </td>
-            <td style={{ fontWeight: 700, backgroundColor: "#f9f9f9" }}>
-              {item.trd_rate}
-            </td>
-            <td>{item.trd_status}</td>
-            <td>{item.trd_time}</td>
-            <td>{item.trd_comm_amnt}</td>
-            <td>#{item.trd_id}</td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-</Box>
+
+                          return (
+                            <tr key={item.trd_id || index} style={{ backgroundColor: "transparent" }}>
+                              <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                              <td>{item.trd_matchedtime}</td>
+                              <td>
+                                <span style={{ fontWeight: "bold" }}>{mainScript}</span>{" "}
+                                {restScript}{" "}
+                                <Chip
+                                  label={item.mrkt_name}
+                                  size="small"
+                                  sx={{ ml: 1, fontSize: "10px" }}
+                                />
+                              </td>
+                              <td style={{ color: tradeColor, fontWeight: 700 }}>
+                                {tradeType}
+                              </td>
+                              <td>{item.trd_type2}</td>
+                              <td>
+                                <b>{item.actual_lot_qty}</b> ({item.trd_lot})
+                              </td>
+                              <td style={{ fontWeight: 700, backgroundColor: "#f9f9f9" }}>
+                                {item.trd_rate}
+                              </td>
+                              <td>{item.trd_status}</td>
+                              <td>{item.trd_time}</td>
+                              <td>{item.trd_comm_amnt}</td>
+                              <td>#{item.trd_id}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </Box>
                 )}
               </>
             ) : (
@@ -2923,20 +2923,20 @@ function PersonalDashboard() {
                       Next
                     </Button>
                     <TextField
-                        label="Go to page"
-                        type="number"
-                        size="small"
-                        InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            const page = parseInt(e.target.value, 10) - 1;
-                            if (!isNaN(page) && page >= 0 && page < totalPages) {
-                              setCurrentPage(page);
-                            }
+                      label="Go to page"
+                      type="number"
+                      size="small"
+                      InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const page = parseInt(e.target.value, 10) - 1;
+                          if (!isNaN(page) && page >= 0 && page < totalPages) {
+                            setCurrentPage(page);
                           }
-                        }}
-                        sx={{ width: 100 }}
-                      />
+                        }
+                      }}
+                      sx={{ width: 100 }}
+                    />
                   </Box>
                 </Box>
               </>
@@ -3578,7 +3578,6 @@ function PersonalDashboard() {
           </Paper>
         </Grid>
 
-        {console.log("ZZZZZZZZZZ")}
         {/*--------------------- LAST 3 CARDS ---------------------*/}
         <Grid item xs={12}>
           <Grid container spacing={0.5}>
@@ -4191,20 +4190,20 @@ function PersonalDashboard() {
                                 Next
                               </Button>
                               <TextField
-                                  label="Go to page"
-                                  type="number"
-                                  size="small"
-                                  InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      const page = parseInt(e.target.value, 10) - 1;
-                                      if (!isNaN(page) && page >= 0 && page < totalPages) {
-                                        setCurrentPage(page);
-                                      }
+                                label="Go to page"
+                                type="number"
+                                size="small"
+                                InputProps={{ inputProps: { min: 1, max: totalPages } }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const page = parseInt(e.target.value, 10) - 1;
+                                    if (!isNaN(page) && page >= 0 && page < totalPages) {
+                                      setCurrentPage(page);
                                     }
-                                  }}
-                                  sx={{ width: 100 }}
-                                />
+                                  }
+                                }}
+                                sx={{ width: 100 }}
+                              />
                             </Box>
                           </Box>
                         </>

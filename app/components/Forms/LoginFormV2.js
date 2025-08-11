@@ -49,7 +49,7 @@ function LoginFormV2() {
   const formik = useFormik({
     initialValues: {
       username: '',
-      password: 'Abcd1234',
+      password: 'ABCD1234',
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -61,7 +61,7 @@ function LoginFormV2() {
           },
           body: JSON.stringify(values),
         });
-        await fetchNotificationAPI();
+        // await fetchNotificationAPI();
 
         const data = await response.json();
         console.log('API Response:', data); // <-- Debug this

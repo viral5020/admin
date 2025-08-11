@@ -98,13 +98,13 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
           options={marketOptions}
           getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
           value={market || null}
-          inputValue={market?.text || ''}
-          onInputChange={(e, val, reason) => {
+          inputValue={market?.text || ''}//** */
+          onInputChange={(e, val, reason) => {  //** */
             (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
             handleFetch(val, 'market');
           }}
           onChange={(e, val) => setMarket(val)}
-          onBlur={() => {  // on focus out, if inputvalue don't match with any options then setMarket(null)
+          onBlur={() => {  //** */ on focus out, if inputvalue don't match with any options then setMarket(null)
             const matched = marketOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text);
             (!matched) && setMarket(null);  // clear if unmatched
             // handleFetch('', 'market');

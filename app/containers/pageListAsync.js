@@ -67,6 +67,14 @@ export const Forex_order = loadable(() =>
   import('./Dashboard/Forex_order'), {
   fallback: <Loading />,
 });
+export const Forex_position = loadable(() =>
+  import('./Dashboard/Forex_position'), {
+  fallback: <Loading />,
+});
+export const Summary_report = loadable(() =>
+  import('./Dashboard/Summary_report'), {
+  fallback: <Loading />,
+});
 export const OrderBook = loadable(() =>
   import('./Dashboard/OrderBook'), {
   fallback: <Loading />,

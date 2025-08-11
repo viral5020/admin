@@ -47,7 +47,7 @@ const rrr = {
   "trade_type_x": "0", // buy sell
   "check_script_name": "SILVER-I",
   "device_type": 0,
-  "user_id": "41297"  // backed fix
+  "user_id": "41297"
 }
 
 const getUserInfo = async () => {
@@ -55,7 +55,12 @@ const getUserInfo = async () => {
     // Get IP Address
     const ipRes = await axios.get("https://api.ipify.org?format=json");
     const ip_address = ipRes.data.ip;
+
+    // Get User Agent
     const user_agent = navigator.userAgent;
+
+    // console.log("IP Address:", ip_address);
+    // console.log("User Agent:", user_agent);
 
     return { ip_address, user_agent };
   } catch (err) {

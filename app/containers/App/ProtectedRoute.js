@@ -11,21 +11,21 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  console.log('ProtectedRoute entered');
+  // console.log('ProtectedRoute entered');
   async function isProtected() {
-    console.log("ProtectedRoute  function run");
+    // console.log("ProtectedRoute  function run");
 
     await fetchNotificationAPI();  // chatgpt : this work
     const isAuthorized = await checkLoginAPI();  // chatgpt : give cors error
     // console.log('isAuthorized', isAuthorized); // isAuthorized undefined
-    // if (!isAuthorized) {
-    //   console.log("Session expired. Please loginAAAAAAAAAAAAAA");
-    //   alert("Session expired. Please login.");
-    //   window.location.href = '/login';
-    //   return;
-    // } else {
-    //   console.log("Pass.......");
-    // }
+    if (!isAuthorized) {
+      console.log("Session expired. Please login.");
+      alert("Session expired. Please login.");
+      window.location.href = '/login';
+      return;
+    } else {
+      // console.log("Pass.......");
+    }
   }
 
   useEffect(() => {

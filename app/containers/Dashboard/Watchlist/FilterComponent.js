@@ -13,9 +13,10 @@ import axios from 'dan-vendor/axios';
 import FilterBtn from '../filters/FilterBtn';
 import { apiData } from './FilterWatchlistAPIresponse';
 import AutoCompleteFilter from './AutoCompleteFilter';
-import { addMarketScriptAPI, fetchStrikeDataAPI } from '../API/API';
+import { addMarketScriptAPI, fetchStrikeDataAPI, getMarketWatchFilterAPI, getMarketWiseScriptForexAPI, getScriptWiseExpiryForexAPI } from '../API/API';
 import { constant } from './constant';
 import { Toaster, toast } from 'react-hot-toast';
+import { functionsIn } from 'lodash';
 
 const dummyOptions = {
     Equity: {
@@ -113,8 +114,13 @@ function changeFormat(arr) {
     return result;
 }
 
+const forexSegmentOption = [
+    { market_type_name: "FOREX", market_type_id: "6", selected: false },
+    { market_type_name: "COMEX", market_type_id: "7", selected: false }
+]
 
-const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) => {
+
+const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isForex }) => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [dataObj, setDataObj] = useState(false);
 
@@ -132,29 +138,49 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
     const [strikeOptions, setStrikeOptions] = useState([]);
 
     async function getFilterData() {
-        // setDataObj(apiData);
-        const dataStored = JSON.parse(sessionStorage.getItem('data'));
         try {
-            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter2", {
-                is_app: 1,
-                login_user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
-            })
-            console.log(response.data.scripts);
-            // const data = changeFormat(response.data.scripts);
-            setDataObj(response.data);
+            const data = await getMarketWatchFilterAPI();
+            setDataObj(data);
         } catch (error) {
             console.log('## getFilterData error', error);
         }
     }
 
+    async function getMarketWiseScriptForex() {
+        try {
+            const data = await getMarketWiseScriptForexAPI(segment.market_type_id);
+            return data?.data;
+        } catch (error) {
+            console.log('## getMarketWiseScriptForex error', error);
+        }
+    }
+
+    async function getScriptWiseExpiryForex() {
+        try {
+            const data = await getScriptWiseExpiryForexAPI(segment.market_type_id, script.script_id);
+            return data?.data;
+        } catch (error) {
+            console.log('## getMarketWiseScriptForex error', error);
+        }
+    }
+
     useEffect(() => {
-        getFilterData();
-    }, [])
+        if (isForex !== undefined && isForex !== null) {
+            // console.log('#filtercomp isForex', isForex);
+            if (!isForex) {
+                // console.log("if (!isForex) {");
+                getFilterData();
+            } else {
+                // console.log("} else {");
+                setSegment(forexSegmentOption[0]);
+            }
+        }
+    }, [isForex])
+
 
     useEffect(() => {
         if (dataObj) {
-            const segments = dataObj.market_type;
+            const segments = dataObj?.market_type;
             const defaultSegment = segments?.length > 0 ? segments[0] : { market_type_name: '' };
 
             const marketTypeId = defaultSegment?.market_type_id;
@@ -182,27 +208,41 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
     }, [dataObj]);
 
     useEffect(() => {
-        if (segment && segment.market_type_name !== 'Not Found') {
-            const marketTypeId = segment?.market_type_id;
-            const scripts = marketTypeId && dataObj?.script_list?.[marketTypeId]
-                ? dataObj.script_list[marketTypeId].map(s => s)
-                : [];
-
-            setScriptOptions(scripts.length > 0 ? scripts : [{ script_name: 'Not Found' }]);
-            setScript(scripts.length > 0 ? scripts[0] : { script_name: '' });
-        }
+        (async function () {
+            if (segment && segment.market_type_name !== 'Not Found') {
+                let scripts;
+                if (segment.market_type_id == 6 || segment.market_type_id == 7) {
+                    scripts = await getMarketWiseScriptForex();
+                } else {
+                    const marketTypeId = segment?.market_type_id;
+                    scripts = marketTypeId && dataObj?.script_list?.[marketTypeId]
+                        ? dataObj.script_list[marketTypeId].map(s => s)
+                        : [];
+                }
+                // console.log('scripts', scripts);
+                setScriptOptions(scripts.length > 0 ? scripts : [{ script_name: 'Not Found' }]);
+                setScript(scripts.length > 0 ? scripts[0] : { script_name: '' });
+            }
+        })();
     }, [segment]);
 
     useEffect(() => {
-        if (script && script.script_name !== 'Not Found') {
-            const scriptId = script.script_id;
-            const expiries = scriptId && dataObj?.script_expiry_list?.[scriptId]
-                ? dataObj.script_expiry_list[scriptId].map(e => e)
-                : [];
+        (async function () {
+            if (script && script.script_name !== 'Not Found' && segment.market_type_id != 6) {
+                let expiries;
+                if (segment.market_type_id == 7) {
+                    expiries = await getScriptWiseExpiryForex();
+                } else {
+                    const scriptId = script.script_id;
+                    expiries = scriptId && dataObj?.script_expiry_list?.[scriptId]
+                        ? dataObj.script_expiry_list[scriptId].map(e => e)
+                        : [];
+                }
 
-            setExpiryOptions(expiries.length > 0 ? expiries : [{ expiry_date: 'Not Found' }]);
-            setExpiry(expiries.length > 0 ? expiries[0] : { expiry_date: '' });
-        }
+                setExpiryOptions(expiries.length > 0 ? expiries : [{ expiry_date: 'Not Found' }]);
+                setExpiry(expiries.length > 0 ? expiries[0] : { expiry_date: '' });
+            }
+        })();
     }, [script]);
 
     useEffect(() => {
@@ -212,64 +252,6 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
     useEffect(() => {
         setStrike('');
     }, [type])
-
-    const renderFilterFields = () => {
-        const baseFields = [
-            {
-                label: 'Segment',
-                value: segment,
-                onChange: setSegment,
-                options: segmentOptions,
-                getOptionLabel: (opt) => opt?.market_type_name || '',
-                isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id
-            },
-            {
-                label: 'Script',
-                value: script,
-                onChange: setScript,
-                options: scriptOptions,
-                getOptionLabel: (opt) => opt?.script_name || '',
-                isOptionEqualToValue: (opt, val) => opt?.script_id === val?.script_id
-            },
-            {
-                label: 'Expiry',
-                value: expiry,
-                onChange: setExpiry,
-                options: expiryOptions,
-                getOptionLabel: (opt) => opt?.expiry_date || '',
-                isOptionEqualToValue: (opt, val) => opt?.script_expiry_id === val?.script_expiry_id
-            }
-        ];
-
-        const additionalFields = [
-            {
-                label: 'Type',
-                value: type,
-                onChange: setType,
-                options: ['CE', 'PE'],
-                getOptionLabel: (opt) => opt,
-                disabled: segment?.market_type_id != constant || !expiry,
-                hidden: segment?.market_type_id != constant,
-            },
-            {
-                label: 'Strike',
-                value: strike,
-                onChange: setStrike,
-                options: strikeOptions,
-                getOptionLabel: (opt) => opt?.rate || '',
-                isOptionEqualToValue: (opt, val) => opt?.rate_id === val?.rate_id,
-                disabled: segment?.market_type_id != constant || !type,
-                hidden: segment?.market_type_id != constant,
-            },
-        ];
-
-        return (
-            <AutoCompleteFilter
-                isDarkMode={false}
-                configs={[...baseFields, ...additionalFields]}
-            />
-        );
-    };
 
     useEffect(() => {
         const index = expiryOptions.findIndex((opt) => opt?.script_expiry_id === expiry?.script_expiry_id);
@@ -295,6 +277,65 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
         fetchStrikeData();
     }, [type, expiry, script]);
 
+    const renderFilterFields = () => {
+        const baseFields = [
+            {
+                label: 'Segment',
+                value: segment,
+                onChange: setSegment,
+                options: isForex ? forexSegmentOption : segmentOptions,  // FOREX 2 OPTIONS : ID 6 FOREX 2 PARAMETER, ID 7 COMEX SHOW EXPIRY 4 PARAMETER
+                getOptionLabel: (opt) => opt?.market_type_name || '',
+                isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id
+            },
+            {
+                label: 'Script',
+                value: script,
+                onChange: setScript,
+                options: scriptOptions,
+                getOptionLabel: (opt) => opt?.script_name || '',
+                isOptionEqualToValue: (opt, val) => opt?.script_id === val?.script_id
+            },
+            {
+                label: 'Expiry',
+                value: expiry,
+                onChange: setExpiry,
+                options: expiryOptions,
+                getOptionLabel: (opt) => opt?.expiry_date || '',
+                isOptionEqualToValue: (opt, val) => opt?.script_expiry_id === val?.script_expiry_id,
+                hidden: isForex && segment?.market_type_id == 6,
+            }
+        ];
+
+        const additionalFields = [
+            {
+                label: 'Type',
+                value: type,
+                onChange: setType,
+                options: ['CE', 'PE'],
+                getOptionLabel: (opt) => opt,
+                disabled: segment?.market_type_id != constant || !expiry,
+                hidden: segment?.market_type_id != constant || isForex,
+            },
+            {
+                label: 'Strike',
+                value: strike,
+                onChange: setStrike,
+                options: strikeOptions,
+                getOptionLabel: (opt) => opt?.rate || '',
+                isOptionEqualToValue: (opt, val) => opt?.rate_id === val?.rate_id,
+                disabled: segment?.market_type_id != constant || !type,
+                hidden: segment?.market_type_id != constant || isForex,
+            },
+        ];
+
+        return (
+            <AutoCompleteFilter
+                isDarkMode={false}
+                configs={[...baseFields, ...additionalFields]}
+            />
+        );
+    };
+
     const handleReset = () => {
         //     setSegment('');
         //     setScript('');
@@ -315,24 +356,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode }) =>
         }
     };
 
-    function showWarning() {
-        toast((t) => (
-            <span>
-                Custom and <b>bold</b>
-                <button onClick={() => toast.dismiss(t.id)}>
-                    Dismiss
-                </button>
-            </span>
-        ));
-    }
-
     async function handleAdd() {
-        // console.log('expiry ', expiry);
-        // console.log('expiry.script_expiry_id', expiry.script_expiry_id);
-        // console.log('strike', strike);
-        // console.log('!strike', !strike);
-        // console.log('type', type);
-        // console.log('!type', !type);
         if (!expiry.script_expiry_id) {
             toast(() => <span>⚠️ Please select <b>Expiry</b> first</span>)
             return;

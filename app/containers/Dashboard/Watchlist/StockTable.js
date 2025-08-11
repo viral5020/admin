@@ -246,7 +246,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
   };
 
   const getCondition = (val, showIcon, showVal, changeVal) => {
-    const theme = useTheme();
     return (
       <Box
         component="span"
@@ -547,15 +546,15 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
                 return (
                   <TableRow
                     tabIndex={-1}
-                    // key={stock.id}
-                    key={idx}
+                    key={stock.id}
+                    // key={idx}
                     sx={{ cursor: 'pointer' }}
                   // onClick={() => setIsStockOpen(stock)}
                   >
                     {renderCell(stock, columnData, idx)}
 
                     {/* Star Icon */}
-                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star'}>
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star' + stock.id}>
                       <IconButton onClick={() => handleStar(stock)} sx={{ pl: 2 }}>
                         {stock.isFavorite ? (
                           <Star sx={{ color: 'gold' }} />
@@ -566,7 +565,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
                     </TableCell>
 
                     {/* Delete Icon */}
-                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete'}>
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete' + stock.id}>
                       <IconButton onClick={() => handleRemove(stock, idx)} sx={{ pl: 1.5 }}>
                         <Delete sx={{ color: 'error.main' }} />
                       </IconButton>
@@ -584,6 +583,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
         open={Boolean(buySellPopup)}
         onClose={() => setBuySellPopup(null)}
         stockData={buySellPopup}
+        showToast={showToast}
       />
     </Paper>
   );

@@ -44,27 +44,27 @@ const OrderBook = () => {
   const [password, setPassword] = useState('');
 
   const handleCancel = async (itemToCancel, enteredPassword = '') => {
-  try {
-    const payload = {
-      trade_id: itemToCancel.trade_id,
-      password: enteredPassword,
-      device_type: 0,
-    };
+    try {
+      const payload = {
+        trade_id: itemToCancel.trade_id,
+        password: enteredPassword,
+        device_type: 0,
+      };
 
-    console.log('Sending cancel payload:', payload);
+      console.log('Sending cancel payload:', payload);
 
-    const response = await deleteTrade(payload);
+      const response = await deleteTrade(payload);
 
-    if (response.success) {
-      alert('Trade cancelled successfully');
-      // TODO: refresh data or update UI as needed
-    } else {
-      alert(response.message || 'Failed to cancel trade');
+      if (response.success) {
+        alert('Trade cancelled successfully');
+        // TODO: refresh data or update UI as needed
+      } else {
+        alert(response.message || 'Failed to cancel trade');
+      }
+    } catch (error) {
+      alert('An error occurred while cancelling the trade.');
     }
-  } catch (error) {
-    alert('An error occurred while cancelling the trade.');
-  }
-};
+  };
 
 
   const [market, setMarket] = useState({});
@@ -102,7 +102,7 @@ const OrderBook = () => {
       end_date: end_date,
       start_end: start_end, //2025-07-30
       market_type_id: market?.id,
-      script_id: script.length > 0 ? JSON.stringify(script?.map(val => val.id)) : '',
+      script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
       broker_id: broker?.id,
       master_user_id: master?.id,
       user_id: client?.id,
@@ -110,6 +110,24 @@ const OrderBook = () => {
       is_executed: status === 'is_executed' || '',
       trade_type: orderType,
     };
+
+    const aa = {
+      "sEcho": 1,
+      "iDisplayStart": 0,
+      "iDisplayLength": 10,
+      "sSearch": "",
+      "is_app": 1,
+      "login_user_id": "37946",
+      "auth_key": "G3wumP6UET",
+      "isTodayTrade": "",
+      "end_date": "",
+      "start_end": "",
+      "market_type_id": "1",
+      "script_id": "[2,146,154]",
+      "is_pending": "",
+      "is_executed": "",
+      "trade_type": ""
+    }
 
     try {
       const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
@@ -154,37 +172,37 @@ const OrderBook = () => {
     setOpen(false);
   };
 
- const handleSave = async () => {
-  if (!item?.trade_id) {
-    alert('Trade ID is missing.');
-    return;
-  }
-
-  try {
-    const payload = {
-      trade_id: item.trade_id,
-      trade_rate: price,
-      trade_lot: lot,
-      trade_qty: quantity,
-      device_type: 0,
-    };
-
-    console.log('Sending payload:', payload);
-
-    const response = await updateTrade(payload);
-
-    if (response.success) {
-      alert('Trade updated successfully.');
-      handleClose(); // Close the dialog
-      // Optionally refresh data or state here
-    } else {
-      alert(response.message || 'Failed to update trade.');
+  const handleSave = async () => {
+    if (!item?.trade_id) {
+      alert('Trade ID is missing.');
+      return;
     }
-  } catch (error) {
-    console.error('Error updating trade:', error);
-    alert('Something went wrong while updating the trade.');
-  }
-};
+
+    try {
+      const payload = {
+        trade_id: item.trade_id,
+        trade_rate: price,
+        trade_lot: lot,
+        trade_qty: quantity,
+        device_type: 0,
+      };
+
+      console.log('Sending payload:', payload);
+
+      const response = await updateTrade(payload);
+
+      if (response.success) {
+        alert('Trade updated successfully.');
+        handleClose(); // Close the dialog
+        // Optionally refresh data or state here
+      } else {
+        alert(response.message || 'Failed to update trade.');
+      }
+    } catch (error) {
+      console.error('Error updating trade:', error);
+      alert('Something went wrong while updating the trade.');
+    }
+  };
 
 
   useEffect(() => {
@@ -204,7 +222,7 @@ const OrderBook = () => {
     fetchOrders(filterType, searchText);
   }, []);
 
-    const needsPassword = userType === 4 && deletePopup;
+  const needsPassword = userType === 4 && deletePopup;
 
   return (
     <Box sx={{ p: 0, mt: 2 }}>
@@ -576,22 +594,22 @@ const OrderBook = () => {
                             Modify
                           </button>
 
-     <button
-        style={{
-          padding: '4px 8px',
-          backgroundColor: '#d32f2f',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-        onClick={() => {
-          setCancelItem(item);
-          setCancelDialogOpen(true); // Always show confirmation
-        }}
-      >
-        Cancel
-      </button>
+                          <button
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#d32f2f',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setCancelItem(item);
+                              setCancelDialogOpen(true); // Always show confirmation
+                            }}
+                          >
+                            Cancel
+                          </button>
                         </td>
                       )}
                     </tr>
@@ -653,48 +671,48 @@ const OrderBook = () => {
               </DialogActions>
             </Dialog>
 
-     {/* Confirmation Dialog for ALL users */}
-      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
-        <DialogTitle>Confirm Cancellation</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 2 }}>
-            Are you sure you want to cancel this order?
-          </Typography>
+            {/* Confirmation Dialog for ALL users */}
+            <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+              <DialogTitle>Confirm Cancellation</DialogTitle>
+              <DialogContent>
+                <Typography sx={{ mb: 2 }}>
+                  Are you sure you want to cancel this order?
+                </Typography>
 
-          {/* Show password input only for userType === 4 and deletePopup === true */}
-          {needsPassword && (
-            <TextField
-              label="Enter Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-            />
-          )}
-        </DialogContent>
+                {/* Show password input only for userType === 4 and deletePopup === true */}
+                {needsPassword && (
+                  <TextField
+                    label="Enter Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    fullWidth
+                  />
+                )}
+              </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setCancelDialogOpen(false)} color="primary">
-            No
-          </Button>
-          <Button
-            onClick={() => {
-              if (needsPassword && !password) {
-                alert('Please enter your password.');
-                return;
-              }
+              <DialogActions>
+                <Button onClick={() => setCancelDialogOpen(false)} color="primary">
+                  No
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (needsPassword && !password) {
+                      alert('Please enter your password.');
+                      return;
+                    }
 
-              handleCancel(cancelItem, password);
-              setCancelDialogOpen(false);
-              setPassword('');
-            }}
-            color="error"
-            variant="contained"
-          >
-            Yes, Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
+                    handleCancel(cancelItem, password);
+                    setCancelDialogOpen(false);
+                    setPassword('');
+                  }}
+                  color="error"
+                  variant="contained"
+                >
+                  Yes, Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
 
 
           </Box>

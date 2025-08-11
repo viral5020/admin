@@ -28,11 +28,12 @@ import ApexCharts from '../Apexcharts';
 import { useTheme } from '@mui/material/styles';
 import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from './MobileStockTable';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import BackToTop from '../BackToTop';
-import { getWatchListDataAPI } from '../API/API';
+import { getForexWatchListDataAPI, getWatchListDataAPI } from '../API/API';
 import { TableBody, TableHead } from 'mui-datatables';
 import useStylesCx from '../../../components/Tables/tableStyle-jss';
+import { useIsFirstRender } from '@uidotdev/usehooks';
 
 
 const generateCandleData = () => {
@@ -403,6 +404,10 @@ function Watchlist() {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
+  const isFirstRender = useIsFirstRender();
+
+  const location = useLocation();
+  const [isForex, setIsForex] = useState();
 
   const title = brand.name + ' - Cryptocurrency Dashboard';
   const description = brand.desc;
@@ -433,11 +438,11 @@ function Watchlist() {
 
   async function getWatchListData() {
     try {
-      const data = await getWatchListDataAPI();
+      const data = isForex ? await getForexWatchListDataAPI() : await getWatchListDataAPI();
 
-      console.log('data', data);
-      const dd = generateDummyWatchlistData(data.scripts)
-      console.log('dd', dd);
+      // console.log('data', data);
+      const dd = generateDummyWatchlistData(data.scripts);
+      // console.log('dd', dd);
       setDummyData(dd);
     } catch (error) {
       console.log('error', error);
@@ -445,8 +450,16 @@ function Watchlist() {
   }
 
   useEffect(() => {
-    getWatchListData();
-  }, [])
+    const path = location.pathname;
+    const lastPart = path.split("/").pop();
+    // console.log('lastPart', lastPart);
+    lastPart === 'forex-watchlist' ? setIsForex(true) : setIsForex(false);
+  }, [location.pathname])
+
+  useEffect(() => {
+    // console.log('isForex', isForex);
+    !isFirstRender ? getWatchListData() : null;
+  }, [isForex])
 
 
   return (
@@ -460,7 +473,7 @@ function Watchlist() {
         <meta property="twitter:description" content={description} />
       </Helmet>
       {/* <MarketPlaceWIdget /> */}
-      <FilterComponent searchText={searchText} setSearchText={setSearchText} isDarkMode={isDarkMode} isMobile={isMobile} />
+      <FilterComponent searchText={searchText} setSearchText={setSearchText} isDarkMode={isDarkMode} isMobile={isMobile} isForex={isForex} />
       {/* <StockTable /> */}
       <Box>
         {sections.map((section, index) => (
