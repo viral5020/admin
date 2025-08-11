@@ -775,6 +775,17 @@ export const getForexWatchListDataAPI = async () => {
   }
 }
 
+export const addPosition = async (payload) => {
+  try {
+    const defaultParams = await getDefaultParams();
+    // const response = await axiosInstance.post('ajaxfiles/setting/set_user_type_qty_single', { ...defaultParams, ...payload });
+    return response.data;
+  } catch (error) {
+    console.error('Error in Add Postion data:', error);
+    throw error;
+  }
+}
+
 export const updateTrade = async ({ trade_id, trade_rate, trade_lot, trade_qty, device_type = 0 }) => {
   try {
     const defaultParams = await getDefaultParams();

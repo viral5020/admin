@@ -126,7 +126,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
 
     // my below code works exactly, don't change its logic
     const [segment, setSegment] = useState('');
-    const [script, setScript] = useState('');
+    const [script, setScript] = useState([]);
     const [expiry, setExpiry] = useState('');
     const [type, setType] = useState('');
     const [strike, setStrike] = useState('');
@@ -373,7 +373,8 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
         try {
             const response = await addMarketScriptAPI({
                 market_type_id: segment.market_type_id,
-                script_id: script.script_id,
+                // script_id: script.script_id,
+                script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
                 script_expiry_id: expiry.script_expiry_id,
                 expiryTerm: expiryTerm,
                 type: segment.market_type_id == constant ? type : null,

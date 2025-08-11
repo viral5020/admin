@@ -1,4 +1,4 @@
-import React, { useContext,useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -141,7 +141,7 @@ const OrderPage = () => {
     const fetchPositions = async () => {
         setLoading(true);
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        console.log("script=",script?.id);
+        console.log("script=", script?.id);
         try {
             const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
                 is_app: "1",
@@ -157,7 +157,8 @@ const OrderPage = () => {
                 group_by: client_wise_value,
 
                 market_type_id: market?.id,
-                script_id: script?.id,
+                // script_id: script?.id,
+                script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
                 broker_id: broker?.id,
                 master_user_id: master?.id,
                 user_id: client?.id,
@@ -167,25 +168,25 @@ const OrderPage = () => {
             if (response.data && response.data.aaData) {
                 setPositionData(response.data.aaData);
 
-                 let array = response.data.aaData;
-      let array1 = array;
-      array = array1.reduce(function (a, e, i) {
-        if (parseInt(e['net_qty']) != 0)
-          a.push(e['check_script_name']);
-        return a;
-      }, []);
-      let flat1 = array;
-      flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
-      setfFlat(flat1)
+                let array = response.data.aaData;
+                let array1 = array;
+                array = array1.reduce(function (a, e, i) {
+                    if (parseInt(e['net_qty']) != 0)
+                        a.push(e['check_script_name']);
+                    return a;
+                }, []);
+                let flat1 = array;
+                flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
+                setfFlat(flat1)
 
-    //    console.log("flat12=",flat1);
-    //    console.log("user=",dataStored.user_id);
-    //    console.log("socket 12333=",socket);
-      socket.emit('positionReport', {
-        userId: dataStored.user_id,
-        scripts: flat1,
-      });
-      
+                //    console.log("flat12=",flat1);
+                //    console.log("user=",dataStored.user_id);
+                //    console.log("socket 12333=",socket);
+                socket.emit('positionReport', {
+                    userId: dataStored.user_id,
+                    scripts: flat1,
+                });
+
                 setTotals({
                     upline_grand: response.data.upline_grand ?? 0,
                     downline_grand: response.data.downline_grand ?? 0,
@@ -230,263 +231,263 @@ const OrderPage = () => {
         return () => clearTimeout(delayDebounce);
     }, [searchText]);
 
-     useEffect(() => {
+    useEffect(() => {
         initSocketEvents();
-      }, [positionData]);
-      
-      const initSocketEvents = async () => {
+    }, [positionData]);
+
+    const initSocketEvents = async () => {
         console.log("initSocketEvents=");
         socket.emit('connected1', {
-          'ty': 1
+            'ty': 1
         });
         socket.on('connectionSuccess', function (args) {
-    
-          let flat_new = flat.filter((v, i, a) => a.indexOf(v) === i);
-          console.log("flat_new=",flat_new);
-          setfFlat(flat_new)
-          socket.emit('connectMarketWatch', {
-            scripts: flat_new
-          });
+
+            let flat_new = flat.filter((v, i, a) => a.indexOf(v) === i);
+            console.log("flat_new=", flat_new);
+            setfFlat(flat_new)
+            socket.emit('connectMarketWatch', {
+                scripts: flat_new
+            });
         });
         socket.on('reconnecting', function () { })
         socket.on('reconnect', function () { })
         socket.on('marketWatch', function (args) {
-            console.log("args=",args);
-           if (args && args.data) {
-    
-            if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
-              args.data.InstrumentIdentifier = "NIFTY 50-I";
-              args.data.Exchange = "GLOBAL FUTURES";
+            console.log("args=", args);
+            if (args && args.data) {
+
+                if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
+                    args.data.InstrumentIdentifier = "NIFTY 50-I";
+                    args.data.Exchange = "GLOBAL FUTURES";
+                }
+
+                var newArray = data.reduce(function (a, e, i) {
+
+
+                    if (e[0] === args.data.InstrumentIdentifier && parseInt(e[8]) != 0)
+                        a.push(i);
+                    return a;
+                }, []);
+
+                var iz = 0;
+                let liveRatesConst = {};
+                while (newArray[iz] >= 0) {
+                    let updatedData = [...data];
+
+                    if ((args.data.BuyPrice > 0 && args.data.SellPrice > 0) || args.data.LastTradePrice > 0) {
+                        if (args.data.BuyPrice == 0 || !args.data.BuyPrice) {
+                            args.data.BuyPrice = args.data.LastTradePrice;
+                        }
+                        if (args.data.SellPrice == 0 || !args.data.SellPrice) {
+                            args.data.SellPrice = args.data.LastTradePrice;
+                        }
+
+                        if (liveRates[args.data.InstrumentIdentifier]) {
+                            liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
+                            liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+
+                            startTransition(() => {
+                                setliveRates(liveRates);
+                            });
+                        } else {
+
+                            liveRates[args.data.InstrumentIdentifier] = {};
+                            liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
+                            liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+                            startTransition(() => {
+                                setliveRates(liveRates);
+                            });
+                        }
+                        if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) > 0) {
+
+                            var x = Number(args.data.BuyPrice).toFixed(2);
+                            var x = formatNumberWithCommas(x, 2);
+
+                            if (userType != 1) {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
+                            }
+
+                            var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
+                            var x1 = (parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7])) - (parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5])) + (parseFloat(x2) * parseFloat(args.data.BuyPrice));
+                            if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                var flag_1 = 1;
+                                var x1_1 = 0;
+                                if (parseInt(userType) != 1) {
+                                    flag_1 = -1;
+                                    x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                } else {
+                                    flag_1 = 1;
+                                    x1_1 = x1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(userType) != 1) {
+                                    flag_2 = -1;
+                                }
+                                x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
+                                updatedData[newArray[iz]][18] = x1_2;
+                                x1_2 = Number(x1_2).toFixed(2);
+                                x1_2 = formatNumberWithCommas(x1_2, 2);
+                                $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
+                                    flag_3 = -1;
+                                    x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
+                                    updatedData[newArray[iz]][19] = x1_3;
+                                    x1_3 = Number(x1_3).toFixed(2);
+                                    x1_3 = formatNumberWithCommas(x1_3, 2);
+                                    $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
+                                var x1_3 = x1;
+                                updatedData[newArray[iz]][20] = x1_3;
+                                x1_3 = Number(x1_3).toFixed(2);
+                                x1_3 = formatNumberWithCommas(x1_3, 2);
+                                $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+                            }
+                            if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
+                                setClosetradeData(prvValue => ({
+                                    ...prvValue,
+                                    trade_rate: args.data.BuyPrice,
+                                }))
+                                SetdataTrade(args.data);
+                            }
+                        } else if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) < 0) {
+                            var x = Number(args.data.SellPrice).toFixed(2);
+                            var x = formatNumberWithCommas(x, 2);
+                            if (userType != 1) {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
+                            }
+
+                            var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
+                            var x1 = parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7]) - parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5]) - parseFloat(x2) * parseFloat(args.data.SellPrice);
+                            var flag_1 = 1;
+                            var x1_1 = 0;
+                            if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                if (parseInt(userType) != 1) {
+                                    flag_1 = -1;
+                                    x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                } else {
+                                    flag_1 = 1;
+                                    x1_1 = x1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(userType) != 1) {
+                                    flag_2 = -1;
+                                }
+                                x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
+                                updatedData[newArray[iz]][18] = x1_2;
+                                x1_2 = Number(x1_2).toFixed(2);
+                                x1_2 = formatNumberWithCommas(x1_2, 2);
+                                $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
+                                    flag_3 = -1;
+                                    x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
+                                    updatedData[newArray[iz]][19] = x1_3;
+                                    x1_3 = Number(x1_3).toFixed(2);
+                                    x1_3 = formatNumberWithCommas(x1_3, 2);
+                                    $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
+                                var x1_3 = x1;
+                                updatedData[newArray[iz]][20] = x1_3;
+                                x1_3 = Number(x1_3).toFixed(2);
+                                x1_3 = formatNumberWithCommas(x1_3, 2);
+                                $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+                            }
+                            if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
+
+                                setClosetradeData(prvValue => ({
+                                    ...prvValue,
+                                    trade_rate: args.data.SellPrice,
+                                }))
+                                SetdataTrade(args.data);
+                            }
+                        } else { }
+                    }
+                    iz++;
+                    if (iz == newArray.length) {
+                        var myArray1 = updatedData.map(function (town) {
+                            return town[17];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var myArray2 = updatedData.map(function (town) {
+                            return town[18];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var myArray3 = updatedData.map(function (town) {
+                            return town[19];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var flag_total = 1;
+                        if (userType != 1) {
+                            flag_total = -1
+                        }
+                        var net = selectedVariable.limit1 + myArray1;
+
+                        var myArray4 = (parseFloat(myArray1) + parseFloat(myArray2) + parseFloat(myArray3)) * flag_total;
+                        myArray4 = Number(myArray4).toFixed(2);
+                        myArray4 = formatNumberWithCommas(myArray4, 2);
+                        myArray1 = Number(myArray1).toFixed(2);
+                        myArray1 = formatNumberWithCommas(myArray1, 2);
+                        myArray2 = Number(myArray2).toFixed(2);
+                        myArray2 = formatNumberWithCommas(myArray2, 2);
+                        myArray3 = Number(myArray3).toFixed(2);
+                        myArray3 = formatNumberWithCommas(myArray3, 2);
+                        net = Number(net).toFixed(2);
+                        net = formatNumberWithCommas(net, 2);
+
+                        setSelectedVariable(prvValue => ({
+                            ...prvValue,
+                            totalMTM: myArray4,
+                            downlineMTM: myArray3,
+                            uplineMTM: myArray2,
+                            selfMTM: myArray1,
+                            net: net,
+                        }))
+
+                    }
+                }
             }
-    
-            var newArray = data.reduce(function (a, e, i) {
-    
-    
-              if (e[0] === args.data.InstrumentIdentifier && parseInt(e[8]) != 0)
-                a.push(i);
-              return a;
-            }, []);
-    
-            var iz = 0;
-            let liveRatesConst = {};
-            while (newArray[iz] >= 0) {
-              let updatedData = [...data];
-    
-              if ((args.data.BuyPrice > 0 && args.data.SellPrice > 0) || args.data.LastTradePrice > 0) {
-                if (args.data.BuyPrice == 0 || !args.data.BuyPrice) {
-                  args.data.BuyPrice = args.data.LastTradePrice;
-                }
-                if (args.data.SellPrice == 0 || !args.data.SellPrice) {
-                  args.data.SellPrice = args.data.LastTradePrice;
-                }
-    
-                if (liveRates[args.data.InstrumentIdentifier]) {
-                  liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
-                  liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
-    
-                  startTransition(() => {
-                    setliveRates(liveRates);
-                  });
-                } else {
-    
-                  liveRates[args.data.InstrumentIdentifier] = {};
-                  liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
-                  liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
-                  startTransition(() => {
-                    setliveRates(liveRates);
-                  });
-                }
-                if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) > 0) {
-    
-                  var x = Number(args.data.BuyPrice).toFixed(2);
-                  var x = formatNumberWithCommas(x, 2);
-    
-                  if (userType != 1) {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
-                  } else {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
-                  }
-    
-                  var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
-                  var x1 = (parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7])) - (parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5])) + (parseFloat(x2) * parseFloat(args.data.BuyPrice));
-                  if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
-                    var flag_1 = 1;
-                    var x1_1 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_1 = -1;
-                      x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-    
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    } else {
-                      flag_1 = 1;
-                      x1_1 = x1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
-                    var flag_2 = 1;
-                    var x1_2 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_2 = -1;
-                    }
-                    x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
-                    updatedData[newArray[iz]][18] = x1_2;
-                    x1_2 = Number(x1_2).toFixed(2);
-                    x1_2 = formatNumberWithCommas(x1_2, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
-                    var flag_3 = 1;
-                    var x1_3 = 0;
-                    if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
-                      flag_3 = -1;
-                      x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
-                      updatedData[newArray[iz]][19] = x1_3;
-                      x1_3 = Number(x1_3).toFixed(2);
-                      x1_3 = formatNumberWithCommas(x1_3, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
-                    var x1_3 = x1;
-                    updatedData[newArray[iz]][20] = x1_3;
-                    x1_3 = Number(x1_3).toFixed(2);
-                    x1_3 = formatNumberWithCommas(x1_3, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
-                  }
-                  if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
-                     setClosetradeData(prvValue => ({
-                       ...prvValue,
-                       trade_rate: args.data.BuyPrice,
-                     }))
-                    SetdataTrade(args.data);
-                  }
-                } else if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) < 0) {
-                  var x = Number(args.data.SellPrice).toFixed(2);
-                  var x = formatNumberWithCommas(x, 2);
-                  if (userType != 1) {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
-                  } else {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
-                  }
-    
-                  var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
-                  var x1 = parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7]) - parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5]) - parseFloat(x2) * parseFloat(args.data.SellPrice);
-                  var flag_1 = 1;
-                  var x1_1 = 0;
-                  if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
-                    if (parseInt(userType) != 1) {
-                      flag_1 = -1;
-                      x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    } else {
-                      flag_1 = 1;
-                      x1_1 = x1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
-                    var flag_2 = 1;
-                    var x1_2 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_2 = -1;
-                    }
-                    x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
-                    updatedData[newArray[iz]][18] = x1_2;
-                    x1_2 = Number(x1_2).toFixed(2);
-                    x1_2 = formatNumberWithCommas(x1_2, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
-                    var flag_3 = 1;
-                    var x1_3 = 0;
-                    if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
-                      flag_3 = -1;
-                      x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
-                      updatedData[newArray[iz]][19] = x1_3;
-                      x1_3 = Number(x1_3).toFixed(2);
-                      x1_3 = formatNumberWithCommas(x1_3, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
-                    var x1_3 = x1;
-                    updatedData[newArray[iz]][20] = x1_3;
-                    x1_3 = Number(x1_3).toFixed(2);
-                    x1_3 = formatNumberWithCommas(x1_3, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
-                  }
-                  if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
-    
-                    setClosetradeData(prvValue => ({
-                      ...prvValue,
-                      trade_rate: args.data.SellPrice,
-                    }))
-                    SetdataTrade(args.data);
-                  }
-                } else { }
-              }
-              iz++;
-              if (iz == newArray.length) {
-                var myArray1 = updatedData.map(function (town) {
-                  return town[17];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var myArray2 = updatedData.map(function (town) {
-                  return town[18];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var myArray3 = updatedData.map(function (town) {
-                  return town[19];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var flag_total = 1;
-                if (userType != 1) {
-                  flag_total = -1
-                }
-                var net = selectedVariable.limit1 + myArray1;
-    
-                var myArray4 = (parseFloat(myArray1) + parseFloat(myArray2) + parseFloat(myArray3)) * flag_total;
-                myArray4 = Number(myArray4).toFixed(2);
-                myArray4 = formatNumberWithCommas(myArray4, 2);
-                myArray1 = Number(myArray1).toFixed(2);
-                myArray1 = formatNumberWithCommas(myArray1, 2);
-                myArray2 = Number(myArray2).toFixed(2);
-                myArray2 = formatNumberWithCommas(myArray2, 2);
-                myArray3 = Number(myArray3).toFixed(2);
-                myArray3 = formatNumberWithCommas(myArray3, 2);
-                net = Number(net).toFixed(2);
-                net = formatNumberWithCommas(net, 2);
-    
-                setSelectedVariable(prvValue => ({
-                  ...prvValue,
-                  totalMTM: myArray4,
-                  downlineMTM: myArray3,
-                  uplineMTM: myArray2,
-                  selfMTM: myArray1,
-                  net: net,
-                }))
-              
-              }
-            }
-          } 
         });
-      }
+    }
 
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
