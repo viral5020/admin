@@ -1,108 +1,118 @@
-import React, { useEffect, Component, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import socketIOClient from "socket.io-client";
 import SocketContext from "./SocketContext";
 import Application from '/app/containers/App/Application';
 
-const WEBURL = 'https://webcaresol.org:4003';
+const WEBURL = 'https://liveapiprovider.com:3003';
 const WEBURLSports = 'https://webcaresol.org:4002';
 
-let socket = undefined;
-let socketSports = undefined;
+let socket;
+let socketSports;
 
-const SocketApp = (props) => {
-     const { history, children } = props;
-    // const socket = socketIOClient(WEBURL);
+const SocketApp = ({ history }) => {
+    console.log("I AM CALLED");
     const dispatch = useDispatch();
-    const [ isSocketConnected, changeSocketFlag ] = useState(false);
+    const [isSocketConnected, setSocketConnected] = useState(false);
+
+    // Prevent double initialization in Strict Mode
+    const hasConnected = useRef(false);
 
     useEffect(() => {
-        socket = socketIOClient(WEBURL, {
-            transports: ['websocket'],
-            // reconnection: true,
-        });
-        changeSocketFlag(true);
+        if (hasConnected.current) return;
+        hasConnected.current = true;
 
-        socket.on('Error', errorDisplay);
-        socket.on("invalidSession", invalidSessionFun);
-        socket.on("disconnect", disconnectFunction);
-        socket.on("connect", connectFuntion);
         
-        socketSports = socketIOClient(WEBURLSports, {
-            transports: ['websocket'],
-            // reconnection: true,
+        console.log("I AM CALLED 3");
+
+        // --- Main Socket ---
+        socket = socketIOClient(WEBURL, { transports: ['websocket'],reconnection:true });
+        setSocketConnected(true);
+
+        socket.on('Error' , () => {
+            console.log("I am CALLED 4");
         });
-        changeSocketFlag(true);
+        socket.on("invalidSession", () => {
+            console.log("I am CALLED 5");
+        });
+        socket.on("connect", () => {
+            console.log("I am CALLED 2");
+        });
+        socket.on("disconnect", () => {
+            console.log("I am CALLED 6");
+        });
+
+        // --- Sports Socket ---
+        socketSports = socketIOClient(WEBURLSports, { transports: ['websocket'],reconnection:true });
+        setSocketConnected(true);
 
         socketSports.on('Error', errorDisplay);
         socketSports.on("invalidSession", invalidSessionFun);
-        socketSports.on("disconnect", disconnectFunction);
-        socketSports.on("connect", connectFuntion);
+        socketSports.on("disconnect", disconnectFunctionS);
+        socketSports.on("connect", connectFunctionS);
 
-        //clean up while unmount
-        return function cleanup () {
-            socket.off('Error', errorDisplay);
-            socket.off("invalidSession", invalidSessionFun);
-            socket.off("disconnect", disconnectFunction);
-            socket.off("connect", connectFuntion);
+        socket.emit("addMarketWatch", {
+            "product" : "NIFTY-I"
+        });
+
+
+        // Cleanup sockets when unmounting
+        return () => {
+            console.log("Cleaning up sockets...");
+            if (socket) {
+                socket.off('Error', errorDisplay);
+                socket.off("invalidSession", invalidSessionFun);
+                socket.off("disconnect", disconnectFunction);
+                socket.off("connect");
+                socket.disconnect();
+            }
+            if (socketSports) {
+                socketSports.off('Error', errorDisplay);
+                socketSports.off("invalidSession", invalidSessionFun);
+                socketSports.off("disconnect", disconnectFunctionS);
+                socketSports.off("connect", connectFunctionS);
+                socketSports.disconnect();
+            }
         };
     }, []);
-console.log("socket=",socket);
-    const connectFuntion = () => {
-        console.log("conncted")
-    }
+
+    const connectFunctionS = () => {
+        console.log("connected to sports socket");
+    };
+
+    const connectFunction = () => {
+        console.log("connected to socket");
+    };
+
+    const disconnectFunctionS = () => {
+        console.log("disconnected sport");
+    };
 
     const disconnectFunction = () => {
-        // window.location.reload();
-        console.log("diconncted")
-    }
+        console.log("disconnected");
+    };
 
     const errorDisplay = (data) => {
-        console.log("!!!!!!!!!data prinetd here", data);
-        // notification["error"]({
-        //     message: 'Error',
-        //     description: data && data.message ? data.message : "Something went wrong",
-        // });
+        console.log("!!!!!!!!! data printed here", data);
     };
 
     const invalidSessionFun = async (data) => {
-        console.log("!!!!!!!!!!!!!!!!!!!Invalid Session");
-        // await dispatch({
-        //     type: 'USER_LOGOUT'
-        // });
-        // dispatch({
-        //     type: 'SET_LOGIN_FLAG',
-        //     flag: false
-        // });
-        // let url = /login;
-        // var link = document.createElement("a");
-        // link.setAttribute("href", url);
-        // document.body.appendChild(link);
-        // link.click();
-        // notification["error"]({
-        //     message: 'UnAuthorize',
-        //     description: "Please Login Again",
-        // });
+        console.log("!!!!!!!!!!!!!!!!!!! Invalid Session");
     };
 
-    const sockets = {
-        socket,
-        socketSports,
-    }
-console.log("isSocketConnected=",isSocketConnected);
+    const sockets = { socket, socketSports };
+
     return (
         <div>
-            {
-                isSocketConnected && socket?.connected ? (
-                    <SocketContext.Provider value={sockets}>
-                        <Application history={history}/>
-                    </SocketContext.Provider>
-                ) : (
-                    <Application history={history}/>
-                )
-            }
+            {isSocketConnected ? (
+                <SocketContext.Provider value={sockets}>
+                    <Application history={history} />
+                </SocketContext.Provider>
+            ) : (
+                <div>Socket not connected</div>
+            )}
         </div>
     );
-}
+};
 
 export default SocketApp;

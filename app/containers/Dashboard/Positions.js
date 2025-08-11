@@ -178,16 +178,14 @@ const OrderPage = () => {
       flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
       setfFlat(flat1)
 
-       console.log("flat1=",flat1);
-       console.log("user=",dataStored.user_id);
-       console.log("socket=",socket);
+    //    console.log("flat12=",flat1);
+    //    console.log("user=",dataStored.user_id);
+    //    console.log("socket 12333=",socket);
       socket.emit('positionReport', {
         userId: dataStored.user_id,
         scripts: flat1,
       });
       
-      
-
                 setTotals({
                     upline_grand: response.data.upline_grand ?? 0,
                     downline_grand: response.data.downline_grand ?? 0,
@@ -254,7 +252,7 @@ const OrderPage = () => {
         socket.on('reconnect', function () { })
         socket.on('marketWatch', function (args) {
             console.log("args=",args);
-          /* if (args && args.data) {
+           if (args && args.data) {
     
             if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
               args.data.InstrumentIdentifier = "NIFTY 50-I";
@@ -486,7 +484,7 @@ const OrderPage = () => {
               
               }
             }
-          } */
+          } 
         });
       }
 

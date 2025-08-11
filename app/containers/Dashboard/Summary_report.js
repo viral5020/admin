@@ -233,18 +233,94 @@ const Summary_report = () => {
   />
 </div>
 
-      {/* 🧾 Table */}
-      <table
-        className="table table-striped table-bordered"
-        style={{
-          minWidth: "1650px",
-          fontSize: "12px",
-          margin: 0,
-          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap",
-        }}
-      >
+{isMobile ? (
+  // 📱 Card layout for mobile
+  <Grid container spacing={1}>
+    {paginatedData.length === 0 ? (
+      <Grid item xs={12}>
+        <Typography align="center" sx={{ py: 2 }}>No Data Found</Typography>
+      </Grid>
+    ) : (
+      paginatedData.map((row) => {
+        return (
+          <Grid item xs={12} key={row.user_id}>
+            <Card
+              sx={{
+                borderLeft: `4px solid ${Number(row.self_m2m) >= 0 ? "#1976d2" : "#d32f2f"}`,
+                boxShadow: 2
+              }}
+            >
+              <CardContent sx={{ p: 1.5 }}>
+                {/* Top line */}
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {row.user_name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    #{row.user_code}
+                  </Typography>
+                </Box>
+
+                {/* Second line */}
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  Ledger: ₹{row.ledger_amt?.toLocaleString()}
+                </Typography>
+
+                {/* M2M data */}
+                <Box display="flex" justifyContent="space-between" mt={1}>
+                  <Typography variant="body2">Net MTM: {row.netm2m}</Typography>
+                  <Typography variant="body2">Total MTM: {row.totalm2m}</Typography>
+                </Box>
+
+                {/* PDF icons */}
+                <Box display="flex" gap={1} mt={1}>
+                  {row.mcx_pdf && (
+                    <IconButton size="small" onClick={() => openPdf(row.mcx_pdf)}>
+                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                    </IconButton>
+                  )}
+                  {row.nse_pdf && (
+                    <IconButton size="small" onClick={() => openPdf(row.nse_pdf)}>
+                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                    </IconButton>
+                  )}
+                  {row.net_pdf && (
+                    <IconButton size="small" onClick={() => openPdf(row.net_pdf)}>
+                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                    </IconButton>
+                  )}
+                </Box>
+
+                {/* Ledger button */}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  sx={{ mt: 1 }}
+                  onClick={() => handleOpenLedger(row)}
+                >
+                  Ledger Details
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+        );
+      })
+    )}
+  </Grid>
+) : (
+
+        <table
+          className="table table-striped table-bordered"
+          style={{
+            minWidth: "1650px",
+            fontSize: "12px",
+            margin: 0,
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            whiteSpace: "nowrap",
+          }}
+        >
         <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
           <tr>
             {[
@@ -381,6 +457,7 @@ const Summary_report = () => {
           )}
         </tbody>
       </table>
+      )}
 
       {/* 📘 Ledger Dialog - Card View */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
