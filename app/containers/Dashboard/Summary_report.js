@@ -141,7 +141,20 @@ const Summary_report = () => {
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage);
 
-  if (loading) return <div style={{ padding: 16, textAlign: "center" }}>Loading...</div>;
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh"
+        }}
+      >
+        <CircularProgress size={40} />
+      </Box>
+    );
+  }
 
   return (
     <div style={{ overflowX: "auto", padding: 16 }}>
@@ -182,7 +195,7 @@ const Summary_report = () => {
                 valanId={valanId}
                 setValanId={setValanId}
               />
-              <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Apply</Button>
+              {/* <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Apply</Button> */}
             </Box>
           </Drawer>
         </>
@@ -212,102 +225,181 @@ const Summary_report = () => {
       )}
 
       {/* Search */}
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-  {isMobile && (
-    <IconButton onClick={() => setDrawerOpen(true)} color="primary" sx={{ mr: 1 }}>
-      <FilterListIcon />
-    </IconButton>
-  )}
-  <input
-    type="text"
-    placeholder="Search..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    style={{
-      flex: 1,
-      padding: "6px 10px",
-      fontSize: "12px",
-      border: "1px solid #ccc",
-      borderRadius: "4px"
-    }}
-  />
-</div>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+        {isMobile && (
+          <IconButton onClick={() => setDrawerOpen(true)} color="primary" sx={{ mr: 1 }}>
+            <FilterListIcon />
+          </IconButton>
+        )}
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "6px 10px",
+            fontSize: "12px",
+            border: "1px solid #ccc",
+            borderRadius: "4px"
+          }}
+        />
+      </div>
 
-{isMobile ? (
-  // 📱 Card layout for mobile
-  <Grid container spacing={1}>
-    {paginatedData.length === 0 ? (
-      <Grid item xs={12}>
-        <Typography align="center" sx={{ py: 2 }}>No Data Found</Typography>
-      </Grid>
-    ) : (
-      paginatedData.map((row) => {
-        return (
-          <Grid item xs={12} key={row.user_id}>
-            <Card
-              sx={{
-                borderLeft: `4px solid ${Number(row.self_m2m) >= 0 ? "#1976d2" : "#d32f2f"}`,
-                boxShadow: 2
-              }}
-            >
-              <CardContent sx={{ p: 1.5 }}>
-                {/* Top line */}
-                <Box display="flex" justifyContent="space-between">
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    {row.user_name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    #{row.user_code}
-                  </Typography>
-                </Box>
-
-                {/* Second line */}
-                <Typography variant="body2" sx={{ mt: 0.5 }}>
-                  Ledger: ₹{row.ledger_amt?.toLocaleString()}
-                </Typography>
-
-                {/* M2M data */}
-                <Box display="flex" justifyContent="space-between" mt={1}>
-                  <Typography variant="body2">Net MTM: {row.netm2m}</Typography>
-                  <Typography variant="body2">Total MTM: {row.totalm2m}</Typography>
-                </Box>
-
-                {/* PDF icons */}
-                <Box display="flex" gap={1} mt={1}>
-                  {row.mcx_pdf && (
-                    <IconButton size="small" onClick={() => openPdf(row.mcx_pdf)}>
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-                  {row.nse_pdf && (
-                    <IconButton size="small" onClick={() => openPdf(row.nse_pdf)}>
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-                  {row.net_pdf && (
-                    <IconButton size="small" onClick={() => openPdf(row.net_pdf)}>
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-                </Box>
-
-                {/* Ledger button */}
-                <Button
-                  size="small"
-                  variant="outlined"
-                  sx={{ mt: 1 }}
-                  onClick={() => handleOpenLedger(row)}
+      {isMobile ? (
+        <Grid container spacing={0.5}>
+          {paginatedData.length === 0 ? (
+            <Grid item xs={12}>
+              <Typography align="center" sx={{ py: 1 }}>No Data Found</Typography>
+            </Grid>
+          ) : (
+            paginatedData.map((row) => (
+              <Grid item xs={12} key={row.user_id}>
+                <Card
+                  sx={{
+                    borderLeft: `4px solid ${Number(row.self_m2m) >= 0 ? "#1976d2" : "#d32f2f"}`,
+                    boxShadow: 1
+                  }}
                 >
-                  Ledger Details
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        );
-      })
-    )}
-  </Grid>
-) : (
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    {/* Top row: Name & Code */}
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {row.user_name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        #{row.user_code}
+                      </Typography>
+                    </Box>
+
+                    {/* Ledger amt */}
+                    <Typography variant="body2">
+                      Ledger: ₹{row.ledger_amt?.toLocaleString()}
+                    </Typography>
+
+                    {/* MTM Row */}
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography variant="body2">Net MTM: {row.netm2m}</Typography>
+                      <Typography variant="body2">Total MTM: {row.totalm2m}</Typography>
+                    </Box>
+
+                    {/* PDF + Ledger button in one row */}
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
+                      <Box display="flex" gap={0.5}>
+                        {/* MCX */}
+                        {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                              if (!dataStored) {
+                                alert("Session expired. Please log in again.");
+                                return;
+                              }
+                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                              const authKey = dataStored.auth_key;
+                              const loginUserId = dataStored.user_id;
+                              const filePath = row.mcx_pdf;
+                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                              const url = new URL(fullUrl);
+                              url.searchParams.set('is', '1');
+                              url.searchParams.set('k', authKey);
+                              url.searchParams.set('lui', loginUserId);
+                              window.open(url.toString(), '_blank');
+                            }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
+                              MCX
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* NSE */}
+                        {row.nse_pdf && row.nse_pdf.trim() !== '' && (
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                              if (!dataStored) {
+                                alert("Session expired. Please log in again.");
+                                return;
+                              }
+                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                              const authKey = dataStored.auth_key;
+                              const loginUserId = dataStored.user_id;
+                              const filePath = row.nse_pdf;
+                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                              const url = new URL(fullUrl);
+                              url.searchParams.set('is', '1');
+                              url.searchParams.set('k', authKey);
+                              url.searchParams.set('lui', loginUserId);
+                              window.open(url.toString(), '_blank');
+                            }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
+                              NSE
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* NET */}
+                        {row.net_pdf && row.net_pdf.trim() !== '' && (
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                              if (!dataStored) {
+                                alert("Session expired. Please log in again.");
+                                return;
+                              }
+                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                              const authKey = dataStored.auth_key;
+                              const loginUserId = dataStored.user_id;
+                              const filePath = row.net_pdf;
+                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                              const url = new URL(fullUrl);
+                              url.searchParams.set('is', '1');
+                              url.searchParams.set('k', authKey);
+                              url.searchParams.set('lui', loginUserId);
+                              window.open(url.toString(), '_blank');
+                            }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
+                              NET
+                            </Typography>
+                          </Box>
+                        )}
+
+
+                      </Box>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ p: 0.5, minWidth: 'auto' }}
+                        onClick={() => handleOpenLedger(row)}
+                      >
+                        Show Ledger
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          )}
+        </Grid>
+      ) : (
 
         <table
           className="table table-striped table-bordered"
@@ -321,142 +413,142 @@ const Summary_report = () => {
             whiteSpace: "nowrap",
           }}
         >
-        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-          <tr>
-            {[
-              "Serial No", "Name", "Code", "Ledger", "Ledger Amount",
-              "MCX PDF", "NSE PDF", "Net MTM", "Total MTM",
-              "Downline MTM", "Upline MTM", "Self MTM", "Net Position PDF"
-            ].map((header) => (
-              <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>{header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.length === 0 ? (
+          <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
             <tr>
-              <td colSpan="13" style={{ padding: 16, textAlign: "center" }}>No Data Found</td>
+              {[
+                "Serial No", "Name", "Code", "Ledger", "Ledger Amount",
+                "All", "Outstanding", "Net MTM", "Total MTM",
+                "Downline MTM", "Upline MTM", "Self MTM", "Net Position"
+              ].map((header) => (
+                <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>{header}</th>
+              ))}
             </tr>
-          ) : (
-            paginatedData.map((row) => (
-              <tr key={row.user_id}>
-                <td>{row.index}</td>
-                <td>{row.user_name}</td>
-                <td>{row.user_code}</td>
-                <td>
-                  <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
-                </td>
-                <td>{row.ledger_amt?.toLocaleString()}</td>
-                <td>
-                  {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                        if (!dataStored) {
-                          alert("Session expired. Please log in again.");
-                          return;
-                        }
-
-                        const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                        const authKey = dataStored.auth_key;
-                        const loginUserId = dataStored.user_id;
-
-                        const filePath = row.mcx_pdf;
-
-                        const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                        const url = new URL(fullUrl);
-
-                        url.searchParams.set('is', '1');
-                        url.searchParams.set('k', authKey);
-                        url.searchParams.set('lui', loginUserId);
-
-                        window.open(url.toString(), '_blank');
-                      }}
-                      sx={{ p: 0.3 }}
-                    >
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-
-                </td>
-
-                <td>
-                  {row.nse_pdf && row.nse_pdf.trim() !== '' && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                        if (!dataStored) {
-                          alert("Session expired. Please log in again.");
-                          return;
-                        }
-
-                        const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                        const authKey = dataStored.auth_key;
-                        const loginUserId = dataStored.user_id;
-
-                        const filePath = row.nse_pdf;
-
-                        const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                        const url = new URL(fullUrl);
-
-                        url.searchParams.set('is', '1');
-                        url.searchParams.set('k', authKey);
-                        url.searchParams.set('lui', loginUserId);
-
-                        window.open(url.toString(), '_blank');
-                      }}
-                      sx={{ p: 0.3 }}
-                    >
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-
-                </td>
-                <td>{row.netm2m}</td>
-                <td>{row.totalm2m}</td>
-                <td>{row.downline_amount}</td>
-                <td>{row.upline_amount}</td>
-                <td>{row.self_m2m}</td>
-                <td>
-                  {row.net_pdf && row.net_pdf.trim() !== '' && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                        if (!dataStored) {
-                          alert("Session expired. Please log in again.");
-                          return;
-                        }
-
-                        const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                        const authKey = dataStored.auth_key;
-                        const loginUserId = dataStored.user_id;
-
-                        const filePath = row.net_pdf;
-
-                        const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                        const url = new URL(fullUrl);
-
-                        url.searchParams.set('is', '1');
-                        url.searchParams.set('k', authKey);
-                        url.searchParams.set('lui', loginUserId);
-
-                        window.open(url.toString(), '_blank');
-                      }}
-                      sx={{ p: 0.3 }}
-                    >
-                      <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                    </IconButton>
-                  )}
-
-                </td>
+          </thead>
+          <tbody>
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan="13" style={{ padding: 16, textAlign: "center" }}>No Data Found</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              paginatedData.map((row) => (
+                <tr key={row.user_id}>
+                  <td>{row.index}</td>
+                  <td>{row.user_name}</td>
+                  <td>{row.user_code}</td>
+                  <td>
+                    <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
+                  </td>
+                  <td>{row.ledger_amt?.toLocaleString()}</td>
+                  <td>
+                    {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                          if (!dataStored) {
+                            alert("Session expired. Please log in again.");
+                            return;
+                          }
+
+                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                          const authKey = dataStored.auth_key;
+                          const loginUserId = dataStored.user_id;
+
+                          const filePath = row.mcx_pdf;
+
+                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                          const url = new URL(fullUrl);
+
+                          url.searchParams.set('is', '1');
+                          url.searchParams.set('k', authKey);
+                          url.searchParams.set('lui', loginUserId);
+
+                          window.open(url.toString(), '_blank');
+                        }}
+                        sx={{ p: 0.3 }}
+                      >
+                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                      </IconButton>
+                    )}
+
+                  </td>
+
+                  <td>
+                    {row.nse_pdf && row.nse_pdf.trim() !== '' && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                          if (!dataStored) {
+                            alert("Session expired. Please log in again.");
+                            return;
+                          }
+
+                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                          const authKey = dataStored.auth_key;
+                          const loginUserId = dataStored.user_id;
+
+                          const filePath = row.nse_pdf;
+
+                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                          const url = new URL(fullUrl);
+
+                          url.searchParams.set('is', '1');
+                          url.searchParams.set('k', authKey);
+                          url.searchParams.set('lui', loginUserId);
+
+                          window.open(url.toString(), '_blank');
+                        }}
+                        sx={{ p: 0.3 }}
+                      >
+                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                      </IconButton>
+                    )}
+
+                  </td>
+                  <td>{row.netm2m}</td>
+                  <td>{row.totalm2m}</td>
+                  <td>{row.downline_amount}</td>
+                  <td>{row.upline_amount}</td>
+                  <td>{row.self_m2m}</td>
+                  <td>
+                    {row.net_pdf && row.net_pdf.trim() !== '' && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                          if (!dataStored) {
+                            alert("Session expired. Please log in again.");
+                            return;
+                          }
+
+                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                          const authKey = dataStored.auth_key;
+                          const loginUserId = dataStored.user_id;
+
+                          const filePath = row.net_pdf;
+
+                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                          const url = new URL(fullUrl);
+
+                          url.searchParams.set('is', '1');
+                          url.searchParams.set('k', authKey);
+                          url.searchParams.set('lui', loginUserId);
+
+                          window.open(url.toString(), '_blank');
+                        }}
+                        sx={{ p: 0.3 }}
+                      >
+                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
+                      </IconButton>
+                    )}
+
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       )}
 
       {/* 📘 Ledger Dialog - Card View */}

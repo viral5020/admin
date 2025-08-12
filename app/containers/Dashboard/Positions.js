@@ -1,4 +1,4 @@
-import React, { useContext,useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, startTransition, useRef } from "react";
 import {
     Box,
     Typography,
@@ -72,6 +72,7 @@ const OrderPage = () => {
 
     const { socket, socketSports } = useContext(SocketContext);
     const [positionData, setPositionData] = useState([]);
+    const [data, setPositionDataNew] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
     // const [filter, setFilter] = useState("today");
@@ -81,6 +82,7 @@ const OrderPage = () => {
     const [expanded, setExpanded] = useState(false);
     const [tradesData, setTradesData] = useState([]);
     const [loadingTrades, setLoadingTrades] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState("");
 
     const [market, setMarket] = useState('');
     const [script, setScript] = useState([]);
@@ -92,6 +94,25 @@ const OrderPage = () => {
         downline_grand: 0,
         self_grand: 0,
         total_qty: 0,
+        totalMTM: 0,
+        net: 0,
+        limit: 0,
+        limit1: 0,
+    });
+
+    const [closetradeData, setClosetradeData] = useState({
+        market_type_id: "",
+        script_id: "",
+        script_expiry_id: "",
+        trade_type: "",
+        trade_rate: 0,
+        trade_qty: "",
+        trade_lot: "",
+        trade_type_x: "",
+        check_script_name: "",
+        user_id: "",
+        trade_id: "",
+        device_type: 0,
     });
 
     const [all_outstanding, setAll_outstanding] = useState('');
@@ -105,8 +126,22 @@ const OrderPage = () => {
     const [lot, setLot] = useState(0.01);
     const [qty, setQty] = useState(1);
     const [price, setPrice] = useState(0);
+    const [dataStored, setDataStored] = useState(() => {
+        return JSON.parse(sessionStorage.getItem("data")) || [];
+    });
+
+    const [dataTrade, setdataTrade] = useState(undefined);
+    const [liveRates, setliveRates] = useState({});
+    const selectedOrderSet = useRef();
+    const selectTradeTypeSet = useRef("0");
+    const currentData = liveRates[selectedOrder];
 
     const [flat, setfFlat] = useState([]);
+    const [QuotationLot, setQuotationLot] = useState(0);
+    const formatNumberWithCommas = (number, decimalPlaces) => {
+        const fixedNumber = Number(number).toFixed(decimalPlaces);
+        return fixedNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
 
     const handleCardClick = (row) => {
         setSelectedRow(row);
@@ -130,7 +165,6 @@ const OrderPage = () => {
     };
 
     const fetchTradesData = async () => {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
         if (!selectedRow) return;
         setLoadingTrades(true);
         const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
@@ -138,10 +172,11 @@ const OrderPage = () => {
         setLoadingTrades(false);
     };
 
+
+
     const fetchPositions = async () => {
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        console.log("script=",script?.id);
+        console.log("script=", script?.id);
         try {
             const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
                 is_app: "1",
@@ -166,51 +201,58 @@ const OrderPage = () => {
 
             if (response.data && response.data.aaData) {
                 setPositionData(response.data.aaData);
+                setPositionDataNew(response.data.dataList);
 
-                 let array = response.data.aaData;
-      let array1 = array;
-      array = array1.reduce(function (a, e, i) {
-        if (parseInt(e['net_qty']) != 0)
-          a.push(e['check_script_name']);
-        return a;
-      }, []);
-      let flat1 = array;
-      flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
-      setfFlat(flat1)
+                let array = response.data.aaData;
+                let array1 = array;
+                array = array1.reduce(function (a, e, i) {
+                    if (parseInt(e['net_qty']) != 0)
+                        a.push(e['check_script_name']);
+                    return a;
+                }, []);
+                let flat1 = array;
+                flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
+                setfFlat(flat1)
 
-    //    console.log("flat12=",flat1);
-    //    console.log("user=",dataStored.user_id);
-    //    console.log("socket 12333=",socket);
-      socket.emit('positionReport', {
-        userId: dataStored.user_id,
-        scripts: flat1,
-      });
-      
-                setTotals({
-                    upline_grand: response.data.upline_grand ?? 0,
-                    downline_grand: response.data.downline_grand ?? 0,
-                    self_grand: response.data.self_grand ?? 0,
-                    total_qty: response.data.total_qty ?? 0,
+
+                socket.emit('positionReport', {
+                    userId: dataStored.user_id,
+                    scripts: flat1,
                 });
+                if (dataStored.user_type != 1) {
+                    setTotals(prv => ({
+                        ...prv,
+                        upline_grand: response.data.upline_grand ?? 0,
+                        downline_grand: response.data.downline_grand ?? 0,
+                        self_grand: response.data.self_grand ?? 0,
+                        total_qty: response.data.total_qty ?? 0,
+                        totalMTM: response.data.total_qty ?? 0,
+                        limit1: 0,
+
+                    }));
+                } else {
+                    setTotals(prv => ({
+                        ...prv,
+                        upline_grand: response.data.upline_grand ?? 0,
+                        downline_grand: response.data.downline_grand ?? 0,
+                        self_grand: response.data.self_grand ?? 0,
+                        total_qty: response.data.total_qty ?? 0,
+                        totalMTM: response.data.total_qty ?? 0,
+                        limit: response.data.limit ?? 0,
+                        net: response.data.self_grand + response.data.limit ?? 0,
+                        limit1: response.data.limit ?? 0,
+
+                    }));
+                }
             } else {
                 setPositionData([]);
-                setTotals({
-                    upline_grand: 0,
-                    downline_grand: 0,
-                    self_grand: 0,
-                    total_qty: 0,
-                });
+
             }
 
         } catch (error) {
             console.error("Error fetching position data:", error);
             setPositionData([]);
-            setTotals({
-                upline_grand: 0,
-                downline_grand: 0,
-                self_grand: 0,
-                total_qty: 0,
-            });
+
         } finally {
             setLoading(false);
         }
@@ -219,6 +261,7 @@ const OrderPage = () => {
 
 
     useEffect(() => {
+
         fetchPositions();
     }, []);
 
@@ -230,263 +273,276 @@ const OrderPage = () => {
         return () => clearTimeout(delayDebounce);
     }, [searchText]);
 
-     useEffect(() => {
+    useEffect(() => {
         initSocketEvents();
-      }, [positionData]);
-      
-      const initSocketEvents = async () => {
+    }, [positionData]);
+
+    const initSocketEvents = async () => {
         console.log("initSocketEvents=");
         socket.emit('connected1', {
-          'ty': 1
+            'ty': 1
         });
         socket.on('connectionSuccess', function (args) {
-    
-          let flat_new = flat.filter((v, i, a) => a.indexOf(v) === i);
-          console.log("flat_new=",flat_new);
-          setfFlat(flat_new)
-          socket.emit('connectMarketWatch', {
-            scripts: flat_new
-          });
+
+            let flat_new = flat.filter((v, i, a) => a.indexOf(v) === i);
+            console.log("flat_new=", flat_new);
+            setfFlat(flat_new)
+            socket.emit('connectMarketWatch', {
+                scripts: flat_new
+            });
         });
         socket.on('reconnecting', function () { })
         socket.on('reconnect', function () { })
         socket.on('marketWatch', function (args) {
-            console.log("args=",args);
-           if (args && args.data) {
-    
-            if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
-              args.data.InstrumentIdentifier = "NIFTY 50-I";
-              args.data.Exchange = "GLOBAL FUTURES";
+            console.log("args=", args);
+            if (args && args.data) {
+
+                if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
+                    args.data.InstrumentIdentifier = "NIFTY 50-I";
+                    args.data.Exchange = "GLOBAL FUTURES";
+                }
+
+                var newArray = data.reduce(function (a, e, i) {
+
+
+                    if (e[0] === args.data.InstrumentIdentifier && parseInt(e[8]) != 0)
+                        a.push(i);
+                    return a;
+                }, []);
+
+                var iz = 0;
+                let liveRatesConst = {};
+                while (newArray[iz] >= 0) {
+                    let updatedData = [...data];
+
+                    if ((args.data.BuyPrice > 0 && args.data.SellPrice > 0) || args.data.LastTradePrice > 0) {
+                        if (args.data.BuyPrice == 0 || !args.data.BuyPrice) {
+                            args.data.BuyPrice = args.data.LastTradePrice;
+                        }
+                        if (args.data.SellPrice == 0 || !args.data.SellPrice) {
+                            args.data.SellPrice = args.data.LastTradePrice;
+                        }
+
+                        if (liveRates[args.data.InstrumentIdentifier]) {
+                            liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
+                            liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+                            liveRates[args.data.InstrumentIdentifier].PriceChange = args.data.PriceChange;
+                            liveRates[args.data.InstrumentIdentifier].PriceChangePercentage = args.data.PriceChangePercentage;
+                            liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
+                            liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
+                            liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+
+                            startTransition(() => {
+                                setliveRates(liveRates);
+                            });
+                        } else {
+
+                            liveRates[args.data.InstrumentIdentifier] = {};
+                            liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
+                            liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+                            liveRates[args.data.InstrumentIdentifier].PriceChange = args.data.PriceChange;
+                            liveRates[args.data.InstrumentIdentifier].PriceChangePercentage = args.data.PriceChangePercentage;
+                            liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
+                            liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
+                            liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+                            startTransition(() => {
+                                setliveRates(liveRates);
+                            });
+                        }
+                        if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) > 0) {
+
+                            var x = Number(args.data.BuyPrice).toFixed(2);
+                            var x = formatNumberWithCommas(x, 2);
+
+                            if (dataStored.user_type != 1) {
+                                $($($("." + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("." + updatedData[newArray[iz]][13])).children()[7]).html(x);
+                            }
+
+                            var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
+                            var x1 = (parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7])) - (parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5])) + (parseFloat(x2) * parseFloat(args.data.BuyPrice));
+                            if ($("." + updatedData[newArray[iz]][13] + "_self") && $("." + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                var flag_1 = 1;
+                                var x1_1 = 0;
+                                if (parseInt(dataStored.user_type) != 1) {
+                                    flag_1 = -1;
+                                    x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+
+                                    $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                } else {
+                                    flag_1 = 1;
+                                    x1_1 = x1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_upline") && $("." + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(dataStored.user_type) != 1) {
+                                    flag_2 = -1;
+                                }
+                                x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
+                                updatedData[newArray[iz]][18] = x1_2;
+                                x1_2 = Number(x1_2).toFixed(2);
+                                x1_2 = formatNumberWithCommas(x1_2, 2);
+                                $("." + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_downline") && $("." + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(dataStored.user_type) != 1 && updatedData[newArray[iz]][16] > 0) {
+                                    flag_3 = -1;
+                                    x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
+                                    updatedData[newArray[iz]][19] = x1_3;
+                                    x1_3 = Number(x1_3).toFixed(2);
+                                    x1_3 = formatNumberWithCommas(x1_3, 2);
+                                    $("." + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_user") && $("." + updatedData[newArray[iz]][13] + "_user")[0]) {
+                                var x1_3 = x1;
+                                updatedData[newArray[iz]][20] = x1_3;
+                                x1_3 = Number(x1_3).toFixed(2);
+                                x1_3 = formatNumberWithCommas(x1_3, 2);
+                                $("." + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+                            }
+                            if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
+                                setClosetradeData(prvValue => ({
+                                    ...prvValue,
+                                    trade_rate: args.data.BuyPrice,
+                                }))
+                                SetdataTrade(args.data);
+                            }
+                        } else if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) < 0) {
+                            var x = Number(args.data.SellPrice).toFixed(2);
+                            var x = formatNumberWithCommas(x, 2);
+                            if (dataStored.user_type != 1) {
+                                $($($("." + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("." + updatedData[newArray[iz]][13])).children()[7]).html(x);
+                            }
+
+                            var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
+                            var x1 = parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7]) - parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5]) - parseFloat(x2) * parseFloat(args.data.SellPrice);
+                            var flag_1 = 1;
+                            var x1_1 = 0;
+                            if ($("." + updatedData[newArray[iz]][13] + "_self") && $("." + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                if (parseInt(dataStored.user_type) != 1) {
+                                    flag_1 = -1;
+                                    x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                } else {
+                                    flag_1 = 1;
+                                    x1_1 = x1;
+                                    updatedData[newArray[iz]][17] = x1_1;
+                                    x1_1 = Number(x1_1).toFixed(2);
+                                    x1_1 = formatNumberWithCommas(x1_1, 2);
+                                    $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_upline") && $("." + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(dataStored.user_type) != 1) {
+                                    flag_2 = -1;
+                                }
+                                x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
+                                updatedData[newArray[iz]][18] = x1_2;
+                                x1_2 = Number(x1_2).toFixed(2);
+                                x1_2 = formatNumberWithCommas(x1_2, 2);
+                                $("." + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_downline") && $("." + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(dataStored.user_type) != 1 && updatedData[newArray[iz]][16] > 0) {
+                                    flag_3 = -1;
+                                    x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
+                                    updatedData[newArray[iz]][19] = x1_3;
+                                    x1_3 = Number(x1_3).toFixed(2);
+                                    x1_3 = formatNumberWithCommas(x1_3, 2);
+                                    $("." + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("." + updatedData[newArray[iz]][13] + "_user") && $("." + updatedData[newArray[iz]][13] + "_user")[0]) {
+                                var x1_3 = x1;
+                                updatedData[newArray[iz]][20] = x1_3;
+                                x1_3 = Number(x1_3).toFixed(2);
+                                x1_3 = formatNumberWithCommas(x1_3, 2);
+                                $("." + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+                            }
+                            if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
+
+                                setClosetradeData(prvValue => ({
+                                    ...prvValue,
+                                    trade_rate: args.data.SellPrice,
+                                }))
+                                SetdataTrade(args.data);
+                            }
+                        } else { }
+                    }
+                    iz++;
+                    if (iz == newArray.length) {
+                        var myArray1 = updatedData.map(function (town) {
+                            return town[17];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var myArray2 = updatedData.map(function (town) {
+                            return town[18];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var myArray3 = updatedData.map(function (town) {
+                            return town[19];
+                        }).reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var flag_total = 1;
+                        if (dataStored.user_type != 1) {
+                            flag_total = -1
+                        }
+                        var net = totals.limit1 + myArray1;
+
+                        var myArray4 = (parseFloat(myArray1) + parseFloat(myArray2) + parseFloat(myArray3)) * flag_total;
+                        myArray4 = Number(myArray4).toFixed(2);
+                        myArray4 = formatNumberWithCommas(myArray4, 2);
+                        myArray1 = Number(myArray1).toFixed(2);
+                        myArray1 = formatNumberWithCommas(myArray1, 2);
+                        myArray2 = Number(myArray2).toFixed(2);
+                        myArray2 = formatNumberWithCommas(myArray2, 2);
+                        myArray3 = Number(myArray3).toFixed(2);
+                        myArray3 = formatNumberWithCommas(myArray3, 2);
+                        net = Number(net).toFixed(2);
+                        net = formatNumberWithCommas(net, 2);
+
+
+
+                        setTotals(prv => ({
+                            ...prv,
+                            upline_grand: myArray2,
+                            downline_grand: myArray3,
+                            self_grand: myArray1,
+                            totalMTM: myArray4,
+                            net: net,
+
+                        }));
+
+                    }
+                }
             }
-    
-            var newArray = data.reduce(function (a, e, i) {
-    
-    
-              if (e[0] === args.data.InstrumentIdentifier && parseInt(e[8]) != 0)
-                a.push(i);
-              return a;
-            }, []);
-    
-            var iz = 0;
-            let liveRatesConst = {};
-            while (newArray[iz] >= 0) {
-              let updatedData = [...data];
-    
-              if ((args.data.BuyPrice > 0 && args.data.SellPrice > 0) || args.data.LastTradePrice > 0) {
-                if (args.data.BuyPrice == 0 || !args.data.BuyPrice) {
-                  args.data.BuyPrice = args.data.LastTradePrice;
-                }
-                if (args.data.SellPrice == 0 || !args.data.SellPrice) {
-                  args.data.SellPrice = args.data.LastTradePrice;
-                }
-    
-                if (liveRates[args.data.InstrumentIdentifier]) {
-                  liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
-                  liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
-    
-                  startTransition(() => {
-                    setliveRates(liveRates);
-                  });
-                } else {
-    
-                  liveRates[args.data.InstrumentIdentifier] = {};
-                  liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
-                  liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
-                  startTransition(() => {
-                    setliveRates(liveRates);
-                  });
-                }
-                if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) > 0) {
-    
-                  var x = Number(args.data.BuyPrice).toFixed(2);
-                  var x = formatNumberWithCommas(x, 2);
-    
-                  if (userType != 1) {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
-                  } else {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
-                  }
-    
-                  var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
-                  var x1 = (parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7])) - (parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5])) + (parseFloat(x2) * parseFloat(args.data.BuyPrice));
-                  if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
-                    var flag_1 = 1;
-                    var x1_1 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_1 = -1;
-                      x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-    
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    } else {
-                      flag_1 = 1;
-                      x1_1 = x1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
-                    var flag_2 = 1;
-                    var x1_2 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_2 = -1;
-                    }
-                    x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
-                    updatedData[newArray[iz]][18] = x1_2;
-                    x1_2 = Number(x1_2).toFixed(2);
-                    x1_2 = formatNumberWithCommas(x1_2, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
-                    var flag_3 = 1;
-                    var x1_3 = 0;
-                    if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
-                      flag_3 = -1;
-                      x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
-                      updatedData[newArray[iz]][19] = x1_3;
-                      x1_3 = Number(x1_3).toFixed(2);
-                      x1_3 = formatNumberWithCommas(x1_3, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
-                    var x1_3 = x1;
-                    updatedData[newArray[iz]][20] = x1_3;
-                    x1_3 = Number(x1_3).toFixed(2);
-                    x1_3 = formatNumberWithCommas(x1_3, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
-                  }
-                  if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
-                     setClosetradeData(prvValue => ({
-                       ...prvValue,
-                       trade_rate: args.data.BuyPrice,
-                     }))
-                    SetdataTrade(args.data);
-                  }
-                } else if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) < 0) {
-                  var x = Number(args.data.SellPrice).toFixed(2);
-                  var x = formatNumberWithCommas(x, 2);
-                  if (userType != 1) {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
-                  } else {
-                    $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
-                  }
-    
-                  var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
-                  var x1 = parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7]) - parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5]) - parseFloat(x2) * parseFloat(args.data.SellPrice);
-                  var flag_1 = 1;
-                  var x1_1 = 0;
-                  if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
-                    if (parseInt(userType) != 1) {
-                      flag_1 = -1;
-                      x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    } else {
-                      flag_1 = 1;
-                      x1_1 = x1;
-                      updatedData[newArray[iz]][17] = x1_1;
-                      x1_1 = Number(x1_1).toFixed(2);
-                      x1_1 = formatNumberWithCommas(x1_1, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
-                    var flag_2 = 1;
-                    var x1_2 = 0;
-                    if (parseInt(userType) != 1) {
-                      flag_2 = -1;
-                    }
-                    x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
-                    updatedData[newArray[iz]][18] = x1_2;
-                    x1_2 = Number(x1_2).toFixed(2);
-                    x1_2 = formatNumberWithCommas(x1_2, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
-                    var flag_3 = 1;
-                    var x1_3 = 0;
-                    if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
-                      flag_3 = -1;
-                      x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
-                      updatedData[newArray[iz]][19] = x1_3;
-                      x1_3 = Number(x1_3).toFixed(2);
-                      x1_3 = formatNumberWithCommas(x1_3, 2);
-                      $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
-                    }
-                  }
-                  if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
-                    var x1_3 = x1;
-                    updatedData[newArray[iz]][20] = x1_3;
-                    x1_3 = Number(x1_3).toFixed(2);
-                    x1_3 = formatNumberWithCommas(x1_3, 2);
-                    $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
-                  }
-                  if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
-    
-                    setClosetradeData(prvValue => ({
-                      ...prvValue,
-                      trade_rate: args.data.SellPrice,
-                    }))
-                    SetdataTrade(args.data);
-                  }
-                } else { }
-              }
-              iz++;
-              if (iz == newArray.length) {
-                var myArray1 = updatedData.map(function (town) {
-                  return town[17];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var myArray2 = updatedData.map(function (town) {
-                  return town[18];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var myArray3 = updatedData.map(function (town) {
-                  return town[19];
-                }).reduce(function (a, b) {
-                  return a + b;
-                }, 0);
-                var flag_total = 1;
-                if (userType != 1) {
-                  flag_total = -1
-                }
-                var net = selectedVariable.limit1 + myArray1;
-    
-                var myArray4 = (parseFloat(myArray1) + parseFloat(myArray2) + parseFloat(myArray3)) * flag_total;
-                myArray4 = Number(myArray4).toFixed(2);
-                myArray4 = formatNumberWithCommas(myArray4, 2);
-                myArray1 = Number(myArray1).toFixed(2);
-                myArray1 = formatNumberWithCommas(myArray1, 2);
-                myArray2 = Number(myArray2).toFixed(2);
-                myArray2 = formatNumberWithCommas(myArray2, 2);
-                myArray3 = Number(myArray3).toFixed(2);
-                myArray3 = formatNumberWithCommas(myArray3, 2);
-                net = Number(net).toFixed(2);
-                net = formatNumberWithCommas(net, 2);
-    
-                setSelectedVariable(prvValue => ({
-                  ...prvValue,
-                  totalMTM: myArray4,
-                  downlineMTM: myArray3,
-                  uplineMTM: myArray2,
-                  selfMTM: myArray1,
-                  net: net,
-                }))
-              
-              }
-            }
-          } 
         });
-      }
+    }
 
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
@@ -502,6 +558,131 @@ const OrderPage = () => {
         { label: ' Scritp name', value: 't.scritp_name' },
         { label: 'User Name', value: 'u.user_full_name' }
     ]
+
+    const openClose = (data) => {
+        if (data) {
+            let selectTradeQtySize = Math.abs(parseInt(data['net_qty']));
+
+            let selectTradePrice = 0;
+            let buyRadio = 0;
+            if (liveRates && liveRates[data['check_script_name']]) {
+                if (parseInt(data['net_qty']) < 0) {
+                    buyRadio = 0;
+                    selectTradePrice = liveRates[data['check_script_name']].SellPrice;
+                } else {
+                    buyRadio = 1;
+                    selectTradePrice = liveRates[data['check_script_name']].BuyPrice;
+                }
+            }
+            let selectMarketTrade = data['market_type_name'] == 'NSECDS' ? 9 : data['market_type_name'] == 'NSEFUT' ? 2 : data['market_type_name'] == 'NSEOPT' ? 5 : data['market_type_name'] == 'GLOBAL FUTURES' ? 4 : data['market_type_name'] == 'NSEEQT' ? 8 : data['market_type_name'] == 'MCXFUT' ? 1 : data['market_type_name'] == 'GLOBAL STOCKS' ? 11 : 1;
+            let QuotationLot = parseInt(data['script_lot_qty']);
+            setQuotationLot(QuotationLot);
+            let selectTradeLotSize = selectTradeQtySize / QuotationLot;
+            let selectedOrdern = data['check_script_name'];
+
+            startTransition(() => {
+                setSelectedOrder(selectedOrdern);
+
+            });
+            selectedOrderSet.current = selectedOrdern;
+            let scriptNameTrade = selectedOrdern;
+            let selectScriptTrade = data['script_id'];
+            let selectExpiryTrade = data['script_expiry_id'];
+            let selectTradeId = "";
+            var str = data['client_script_id'].split("-");
+            let positionUserId = str[str.length - 2];
+
+            setClosetradeData(prvValue => ({
+                ...prvValue,
+                market_type_id: selectMarketTrade,
+                script_id: selectScriptTrade,
+                script_expiry_id: selectExpiryTrade,
+                trade_type: buyRadio,
+                trade_rate: selectTradePrice,
+                trade_qty: selectTradeQtySize,
+                trade_lot: selectTradeLotSize,
+                trade_type_x: selectTradeTypeSet.current,
+                check_script_name: scriptNameTrade,
+                user_id: positionUserId,
+                trade_id: selectTradeId,
+                device_type: 0,
+            }))
+            setSelectedRow(data);
+            setCloseDialogOpen(true);
+        }
+    }
+    const setTradeType = (element) => {
+        console.log(element);
+        startTransition(() => {
+            setOrderType(element);
+            selectTradeTypeSet.current = element;
+            setClosetradeData(prvValue => ({
+                ...prvValue,
+                trade_type_x: element,
+
+            }))
+        });
+
+        if (element == 0) {
+            if (closetradeData.trade_type == 0) {
+                if (dataTrade) {
+                    startTransition(() => {
+                        setClosetradeData(prvValue => ({
+                            ...prvValue,
+                            trade_rate: dataTrade.SellPrice,
+
+                        }))
+                    });
+                }
+
+            } else {
+                if (dataTrade) {
+                    startTransition(() => {
+                        setClosetradeData(prvValue => ({
+                            ...prvValue,
+                            trade_rate: dataTrade.BuyPrice,
+
+                        }))
+                    });
+                }
+            }
+        }
+    }
+    const lotChange = async (e) => {
+        if (QuotationLot && e.target.value) {
+            setClosetradeData(prvValue => ({
+                ...prvValue,
+                trade_qty: QuotationLot * e.target.value,
+            }))
+        }
+        setClosetradeData(prvValue => ({
+            ...prvValue,
+            trade_lot: e.target.value,
+        }))
+
+    }
+    const qtyChange = async (e) => {
+        if (closetradeData.market_type_id != "1" && closetradeData.market_type_id != "5") {
+            if (e.target.value && QuotationLot) {
+                setClosetradeData(prvValue => ({
+                    ...prvValue,
+                    trade_lot: e.target.value / QuotationLot,
+                }))
+            }
+            setClosetradeData(prvValue => ({
+                ...prvValue,
+                trade_qty: e.target.value,
+            }))
+        }
+    }
+    const priceChange = async (e) => {
+        setClosetradeData(prvValue => ({
+            ...prvValue,
+            trade_rate: e.target.value,
+        }))
+
+    }
+
 
     return (
         <Box sx={{ p: 0, position: "relative" }}>
@@ -570,7 +751,7 @@ const OrderPage = () => {
             }}>
                 <Box sx={{ fontSize: 13 }}>
                     Total MTM: ₹
-                    <strong>{((totals.self_grand ?? 0) + (totals.downline_grand ?? 0) + (totals.upline_grand ?? 0)).toLocaleString("en-IN")}</strong>
+                    <strong>{(totals.totalMTM ?? 0).toLocaleString("en-IN")}</strong>
                 </Box>
                 <Box sx={{ fontSize: 13 }}>
                     Self MTM: ₹<strong>{(totals.self_grand ?? 0).toLocaleString("en-IN")}</strong>
@@ -719,7 +900,7 @@ const OrderPage = () => {
                                                                 whiteSpace: "nowrap",
                                                             }}
                                                         >
-                                                            {row.total_buy} X {row.buy_avg_rate}
+                                                            {row.net_qty}
                                                         </Typography>
                                                     </Box>
                                                     {datePart && (
@@ -733,18 +914,21 @@ const OrderPage = () => {
                                             </Box>
                                             <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                                    {row.last_trade_price}
+                                                    {row.net_qty > 0 ? liveRates[row.check_script_name]?.BuyPrice : liveRates[row.check_script_name]?.SellPrice}
                                                 </Typography>
                                                 <Typography
                                                     variant="caption"
                                                     sx={{
-                                                        color: row.change_value < 0
+                                                        color: liveRates[row.check_script_name]?.PriceChange < 0
                                                             ? (theme) => theme.palette.error.main
                                                             : (theme) => theme.palette.success.main,
                                                     }}
                                                 >
-                                                    {row.change_value} ({row.change_perc}%)
+                                                   {liveRates && liveRates[row.check_script_name]?.PriceChange
+                                                    ? liveRates[row.check_script_name]?.PriceChange.toFixed(2)
+                                                    : "--"}{" "} ({liveRates[row.check_script_name]?.PriceChangePercentage?.toFixed(2) ?? "--"}%)
                                                 </Typography>
+                                               
                                             </Box>
                                         </Box>
 
@@ -904,7 +1088,7 @@ const OrderPage = () => {
                                                     }}>
                                                         {row.net_qty}
                                                     </td>
-                                                    <td style={{ padding: "8px" }}>{row.last_trade_price}</td>
+                                                    <td style={{ padding: "8px" }}>{row.net_qty > 0 ? liveRates[row.check_script_name]?.BuyPrice : liveRates[row.check_script_name]?.SellPrice}</td>
                                                     <td style={{ padding: "8px" }}>
                                                         <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
                                                     </td>
@@ -922,13 +1106,14 @@ const OrderPage = () => {
                                                                 }}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    setSelectedRow(row);
-                                                                    setCloseDialogOpen(true);
-                                                                    setSelectedRow(row);
-                                                                    setLot(row?.lot_size ?? 0.01);
-                                                                    setQty(row?.net_qty ?? 1);
-                                                                    setPrice(row?.price ?? 0);
-                                                                    setCloseDialogOpen(true);
+                                                                    openClose(row);
+                                                                    // setSelectedRow(row);
+                                                                    // setCloseDialogOpen(true);
+                                                                    // setSelectedRow(row);
+                                                                    // setLot(row?.lot_size ?? 0.01);
+                                                                    // setQty(row?.net_qty ?? 1);
+                                                                    // setPrice(row?.price ?? 0);
+                                                                    // setCloseDialogOpen(true);
                                                                 }}
                                                             >
                                                                 Close
@@ -976,14 +1161,30 @@ const OrderPage = () => {
                                                 }}
                                             />
 
-                                            <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
-                                                -396.00 (-0.71%)
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: currentData?.PriceChange >= 0 ? "green" : "red"
+                                                }}
+                                            >
+                                                {currentData?.PriceChange?.toFixed(2) ?? "--"}{" "}
+                                                ({currentData?.PriceChangePercentage?.toFixed(2) ?? "--"}%)
                                             </Typography>
+
                                         </Box>
                                         <Box sx={{ textAlign: "right" }}>
-                                            <Typography variant="body2">Bid: 55790.00</Typography>
-                                            <Typography variant="body2">Ask: 55797.60</Typography>
+                                            <Typography variant="body2">
+                                                Bid: {liveRates && liveRates[selectedOrder]?.BuyPrice
+                                                    ? liveRates[selectedOrder].BuyPrice.toFixed(2)
+                                                    : "--"}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                Ask: {liveRates && liveRates[selectedOrder]?.SellPrice
+                                                    ? liveRates[selectedOrder].SellPrice.toFixed(2)
+                                                    : "--"}
+                                            </Typography>
                                         </Box>
+
                                         {/* Uncomment below to add close icon */}
                                         {/* 
     <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
@@ -994,9 +1195,14 @@ const OrderPage = () => {
 
                                     {/* Open & Close Prices */}
                                     <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
-                                        <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
-                                        <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Open: {currentData?.Open?.toFixed(2) ?? "--"}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Close: {currentData?.Close?.toFixed(2) ?? "--"}
+                                        </Typography>
                                     </Box>
+
 
                                     {/* Order Type Toggle */}
                                     <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
@@ -1004,7 +1210,7 @@ const OrderPage = () => {
                                             <Button
                                                 key={label}
                                                 variant={orderType === label ? "contained" : "outlined"}
-                                                onClick={() => setOrderType(label)}
+                                                onClick={() => setTradeType(label)}
                                                 sx={{
                                                     minWidth: 60,
                                                     fontWeight: 600,
@@ -1032,16 +1238,18 @@ const OrderPage = () => {
                                                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                         <Typography>Lot</Typography>
                                                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                            <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
+                                                            <IconButton onClick={() => setLot(Math.max(0, closetradeData.trade_lot - 1))} size="small">
                                                                 <RemoveIcon fontSize="small" />
                                                             </IconButton>
                                                             <TextField
-                                                                value={lot}
+                                                                value={closetradeData.trade_lot}
+                                                                autoFocus
+                                                                onChange={lotChange}
                                                                 size="small"
                                                                 sx={{ width: 70 }}
                                                                 inputProps={{ style: { textAlign: "center" } }}
                                                             />
-                                                            <IconButton onClick={() => setLot(lot + 0.01)} size="small">
+                                                            <IconButton onClick={() => setLot(closetradeData.trade_lot + 1)} size="small">
                                                                 <AddIcon fontSize="small" />
                                                             </IconButton>
                                                         </Box>
@@ -1051,20 +1259,19 @@ const OrderPage = () => {
                                                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                         <Typography>Qty</Typography>
                                                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                            <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
+                                                            <IconButton onClick={() => setQty(Math.max(1, closetradeData.trade_qty - 1))} size="small">
                                                                 <RemoveIcon fontSize="small" />
                                                             </IconButton>
                                                             <TextField
-                                                                value={qty}
+                                                                value={closetradeData.trade_qty}
+                                                                onChange={qtyChange}
                                                                 size="small"
+                                                                disabled={closetradeData.market_type_id == "1" || closetradeData.market_type_id == "5" ? true : false}
                                                                 sx={{ width: 70 }}
                                                                 inputProps={{ style: { textAlign: "center" } }}
-                                                                onChange={(e) => {
-                                                                    const value = parseInt(e.target.value, 10);
-                                                                    setQty(isNaN(value) ? 1 : value);
-                                                                }}
+
                                                             />
-                                                            <IconButton onClick={() => setQty(qty + 1)} size="small">
+                                                            <IconButton onClick={() => setQty(closetradeData.trade_qty + 1)} size="small">
                                                                 <AddIcon fontSize="small" />
                                                             </IconButton>
                                                         </Box>
@@ -1073,15 +1280,32 @@ const OrderPage = () => {
                                                     {/* Price */}
                                                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                         <Typography>Price</Typography>
-                                                        <TextField
-                                                            type="number"
-                                                            value={price}
-                                                            onChange={(e) => setPrice(Number(e.target.value))}
-                                                            size="small"
-                                                            sx={{ width: 100, mr: 3 }}
-                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
-                                                            disabled={orderType === "MARKET"} // Disable if MARKET
-                                                        />
+                                                        {
+                                                            ((closetradeData.trade_type == "1" && closetradeData.trade_type_x == "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x == "0")) && (
+                                                                <TextField
+                                                                    type="number"
+                                                                    value={closetradeData.trade_rate}
+                                                                    onChange={(e) => setPrice(Number(e.target.value))}
+                                                                    size="small"
+                                                                    sx={{ width: 100, mr: 3 }}
+                                                                    inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                    disabled={orderType === "MARKET"} // Disable if MARKET
+                                                                />
+                                                            )
+                                                        }
+                                                        {
+                                                            ((closetradeData.trade_type == "1" && closetradeData.trade_type_x != "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x != "0")) && (
+                                                                <TextField
+                                                                    type="number"
+                                                                    value={closetradeData.trade_rate}
+                                                                    onChange={priceChange}
+                                                                    size="small"
+                                                                    sx={{ width: 100, mr: 3 }}
+                                                                    inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                />
+                                                            )
+                                                        }
+
                                                     </Box>
                                                 </>
                                             )}
@@ -1094,7 +1318,6 @@ const OrderPage = () => {
                                             <Button
                                                 fullWidth
                                                 onClick={async () => {
-                                                    const dataStored = JSON.parse(sessionStorage.getItem("data"));
                                                     const payload = {
                                                         market_type_id: selectedRow?.market_type_id ?? 1,
                                                         script_id: selectedRow?.script_id,
@@ -1152,7 +1375,7 @@ const OrderPage = () => {
                                             <Button
                                                 fullWidth
                                                 onClick={async () => {
-                                                    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
                                                     const payload = {
                                                         market_type_id: selectedRow?.market_type_id ?? 1,
                                                         script_id: selectedRow?.script_id,
@@ -1316,7 +1539,7 @@ const OrderPage = () => {
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">LTP</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
+                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty > 0 ? liveRates[selectedRow?.check_script_name]?.BuyPrice : liveRates[selectedRow?.check_script_name]?.SellPrice}</Typography>
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">MTM</Typography>
@@ -1356,31 +1579,38 @@ const OrderPage = () => {
                                                             {expanded ? "Hide Trades" : "View Trades"}
                                                         </Button>
 
-                                                        <Button
-                                                            fullWidth
-                                                            sx={{
-                                                                background: "linear-gradient(135deg, #b71c1c, #c62828)",
-                                                                color: "#fff",
-                                                                borderRadius: "6px",
-                                                                fontWeight: 600,
-                                                                textTransform: "uppercase",
-                                                                boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
-                                                                transition: "all 0.3s ease",
-                                                                "&:hover": {
-                                                                    transform: "scale(1.03)",
-                                                                    boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
-                                                                    background: "linear-gradient(135deg, #8e0000, #b71c1c)",
-                                                                },
-                                                            }}
-                                                            onClick={() => {
-                                                                setSelectedRow(selectedRow);
-                                                                setCloseDialogOpen(true);
-                                                            }}
-                                                        >
-                                                            Close Position
-                                                        </Button>
+                                                       {selectedRow.net_qty !== 0 && (
+  <Button
+    fullWidth
+    sx={{
+      background: "linear-gradient(135deg, #b71c1c, #c62828)",
+      color: "#fff",
+      borderRadius: "6px",
+      fontWeight: 600,
+      textTransform: "uppercase",
+      boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        transform: "scale(1.03)",
+        boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
+        background: "linear-gradient(135deg, #8e0000, #b71c1c)",
+      },
+    }}
+    onClick={() => {
+      openClose(selectedRow);
+    }}
+  >
+    Close Position
+  </Button>
+)}
 
-                                                        <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs" hideBackdrop>
+
+                                                        <Dialog
+                                                            open={closeDialogOpen}
+                                                            onClose={() => setCloseDialogOpen(false)}
+                                                            fullWidth
+                                                            maxWidth="xs"
+                                                        >
                                                             {/* Header */}
                                                             <Box
                                                                 sx={{
@@ -1407,15 +1637,30 @@ const OrderPage = () => {
                                                                             __html: selectedRow?.script_name || "N/A",
                                                                         }}
                                                                     />
-
-                                                                    <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
-                                                                        -396.00 (-0.71%)
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            color: currentData?.PriceChange >= 0 ? "green" : "red"
+                                                                        }}
+                                                                    >
+                                                                        {currentData?.PriceChange?.toFixed(2) ?? "--"}{" "}
+                                                                        ({currentData?.PriceChangePercentage?.toFixed(2) ?? "--"}%)
                                                                     </Typography>
+
                                                                 </Box>
                                                                 <Box sx={{ textAlign: "right" }}>
-                                                                    <Typography variant="body2">Bid: 55790.00</Typography>
-                                                                    <Typography variant="body2">Ask: 55797.60</Typography>
+                                                                    <Typography variant="body2">
+                                                                        Bid: {liveRates && liveRates[selectedOrder]?.BuyPrice
+                                                                            ? liveRates[selectedOrder].BuyPrice.toFixed(2)
+                                                                            : "--"}
+                                                                    </Typography>
+                                                                    <Typography variant="body2">
+                                                                        Ask: {liveRates && liveRates[selectedOrder]?.SellPrice
+                                                                            ? liveRates[selectedOrder].SellPrice.toFixed(2)
+                                                                            : "--"}
+                                                                    </Typography>
                                                                 </Box>
+
                                                                 {/* Uncomment below to add close icon */}
                                                                 {/* 
     <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
@@ -1426,9 +1671,14 @@ const OrderPage = () => {
 
                                                             {/* Open & Close Prices */}
                                                             <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
-                                                                <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
-                                                                <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    Open: {currentData?.Open?.toFixed(2) ?? "--"}
+                                                                </Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    Close: {currentData?.Close?.toFixed(2) ?? "--"}
+                                                                </Typography>
                                                             </Box>
+
 
                                                             {/* Order Type Toggle */}
                                                             <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
@@ -1436,7 +1686,7 @@ const OrderPage = () => {
                                                                     <Button
                                                                         key={label}
                                                                         variant={orderType === label ? "contained" : "outlined"}
-                                                                        onClick={() => setOrderType(label)}
+                                                                        onClick={() => setTradeType(label)}
                                                                         sx={{
                                                                             minWidth: 60,
                                                                             fontWeight: 600,
@@ -1458,23 +1708,24 @@ const OrderPage = () => {
                                                             {/* Lot, Qty, Price Controls */}
                                                             <DialogContent sx={{ mt: 2 }}>
                                                                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-
                                                                     {closeDialogOpen && selectedRow && (
                                                                         <>
                                                                             {/* Lot */}
                                                                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                                                 <Typography>Lot</Typography>
                                                                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                                                    <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
+                                                                                    <IconButton onClick={() => setLot(Math.max(0, closetradeData.trade_lot - 1))} size="small">
                                                                                         <RemoveIcon fontSize="small" />
                                                                                     </IconButton>
                                                                                     <TextField
-                                                                                        value={lot}
+                                                                                        value={closetradeData.trade_lot}
+                                                                                        autoFocus
+                                                                                        onChange={lotChange}
                                                                                         size="small"
                                                                                         sx={{ width: 70 }}
                                                                                         inputProps={{ style: { textAlign: "center" } }}
                                                                                     />
-                                                                                    <IconButton onClick={() => setLot(lot + 0.01)} size="small">
+                                                                                    <IconButton onClick={() => setLot(closetradeData.trade_lot + 1)} size="small">
                                                                                         <AddIcon fontSize="small" />
                                                                                     </IconButton>
                                                                                 </Box>
@@ -1484,20 +1735,19 @@ const OrderPage = () => {
                                                                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                                                 <Typography>Qty</Typography>
                                                                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                                                    <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
+                                                                                    <IconButton onClick={() => setQty(Math.max(1, closetradeData.trade_qty - 1))} size="small">
                                                                                         <RemoveIcon fontSize="small" />
                                                                                     </IconButton>
                                                                                     <TextField
-                                                                                        value={qty}
+                                                                                        value={closetradeData.trade_qty}
+                                                                                        onChange={qtyChange}
                                                                                         size="small"
+                                                                                        disabled={closetradeData.market_type_id == "1" || closetradeData.market_type_id == "5" ? true : false}
                                                                                         sx={{ width: 70 }}
                                                                                         inputProps={{ style: { textAlign: "center" } }}
-                                                                                        onChange={(e) => {
-                                                                                            const value = parseInt(e.target.value, 10);
-                                                                                            setQty(isNaN(value) ? 1 : value);
-                                                                                        }}
+
                                                                                     />
-                                                                                    <IconButton onClick={() => setQty(qty + 1)} size="small">
+                                                                                    <IconButton onClick={() => setQty(closetradeData.trade_qty + 1)} size="small">
                                                                                         <AddIcon fontSize="small" />
                                                                                     </IconButton>
                                                                                 </Box>
@@ -1506,15 +1756,32 @@ const OrderPage = () => {
                                                                             {/* Price */}
                                                                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                                                 <Typography>Price</Typography>
-                                                                                <TextField
-                                                                                    type="number"
-                                                                                    value={price}
-                                                                                    onChange={(e) => setPrice(Number(e.target.value))}
-                                                                                    size="small"
-                                                                                    sx={{ width: 100, mr: 3 }}
-                                                                                    inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
-                                                                                    disabled={orderType === "MARKET"} // Disable if MARKET
-                                                                                />
+                                                                                {
+                                                                                    ((closetradeData.trade_type == "1" && closetradeData.trade_type_x == "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x == "0")) && (
+                                                                                        <TextField
+                                                                                            type="number"
+                                                                                            value={closetradeData.trade_rate}
+                                                                                            onChange={(e) => setPrice(Number(e.target.value))}
+                                                                                            size="small"
+                                                                                            sx={{ width: 100, mr: 3 }}
+                                                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                                            disabled={orderType === "MARKET"} // Disable if MARKET
+                                                                                        />
+                                                                                    )
+                                                                                }
+                                                                                {
+                                                                                    ((closetradeData.trade_type == "1" && closetradeData.trade_type_x != "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x != "0")) && (
+                                                                                        <TextField
+                                                                                            type="number"
+                                                                                            value={closetradeData.trade_rate}
+                                                                                            onChange={priceChange}
+                                                                                            size="small"
+                                                                                            sx={{ width: 100, mr: 3 }}
+                                                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                                        />
+                                                                                    )
+                                                                                }
+
                                                                             </Box>
                                                                         </>
                                                                     )}
@@ -1527,7 +1794,6 @@ const OrderPage = () => {
                                                                     <Button
                                                                         fullWidth
                                                                         onClick={async () => {
-                                                                            const dataStored = JSON.parse(sessionStorage.getItem("data"));
                                                                             const payload = {
                                                                                 market_type_id: selectedRow?.market_type_id ?? 1,
                                                                                 script_id: selectedRow?.script_id,
@@ -1585,7 +1851,7 @@ const OrderPage = () => {
                                                                     <Button
                                                                         fullWidth
                                                                         onClick={async () => {
-                                                                            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
                                                                             const payload = {
                                                                                 market_type_id: selectedRow?.market_type_id ?? 1,
                                                                                 script_id: selectedRow?.script_id,
@@ -1918,10 +2184,10 @@ const OrderPage = () => {
                                         <Typography variant="caption">Net Qty</Typography>
                                         <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
                                     </Box>
-                                    <Box sx={{ flex: "1 1 22%" }}>
-                                        <Typography variant="caption">LTP</Typography>
-                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
-                                    </Box>
+                                   <Box sx={{ flex: "1 1 22%" }}>
+                                                            <Typography variant="caption">LTP</Typography>
+                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty > 0 ? liveRates[selectedRow?.check_script_name]?.BuyPrice : liveRates[selectedRow?.check_script_name]?.SellPrice}</Typography>
+                                                        </Box>
                                     <Box sx={{ flex: "1 1 22%" }}>
                                         <Typography variant="caption">MTM</Typography>
                                         <Typography
@@ -1960,299 +2226,351 @@ const OrderPage = () => {
                                         {expanded ? "Hide Trades" : "View Trades"}
                                     </Button>
 
-                                    <Button
-                                        fullWidth
-                                        sx={{
-                                            background: "linear-gradient(135deg, #b71c1c, #c62828)",
-                                            color: "#fff",
-                                            borderRadius: "6px",
-                                            fontWeight: 600,
-                                            textTransform: "uppercase",
-                                            boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
-                                            transition: "all 0.3s ease",
-                                            "&:hover": {
-                                                transform: "scale(1.03)",
-                                                boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
-                                                background: "linear-gradient(135deg, #8e0000, #b71c1c)",
-                                            },
-                                        }}
-                                        onClick={() => {
-                                            setSelectedRow(selectedRow);
-                                            setCloseDialogOpen(true);
-                                        }}
-                                    >
-                                        Close Position
-                                    </Button>
+                                     {selectedRow.net_qty !== 0 && (
+  <Button
+    fullWidth
+    sx={{
+      background: "linear-gradient(135deg, #b71c1c, #c62828)",
+      color: "#fff",
+      borderRadius: "6px",
+      fontWeight: 600,
+      textTransform: "uppercase",
+      boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        transform: "scale(1.03)",
+        boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
+        background: "linear-gradient(135deg, #8e0000, #b71c1c)",
+      },
+    }}
+    onClick={() => {
+    openClose(selectedRow);
+    }}
+  >
+    Close Position
+  </Button>
+)}
 
-                                    <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs" hideBackdrop>
-                                        {/* Header */}
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-                                                color: "#fff",
-                                                px: 2,
-                                                py: 1,
-                                            }}
-                                        >
-                                            <Box>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    fontWeight={700}
-                                                    sx={{
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        maxWidth: 150, // adjust as needed
-                                                    }}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: selectedRow?.script_name || "N/A",
-                                                    }}
-                                                />
 
-                                                <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
-                                                    -396.00 (-0.71%)
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ textAlign: "right" }}>
-                                                <Typography variant="body2">Bid: 55790.00</Typography>
-                                                <Typography variant="body2">Ask: 55797.60</Typography>
-                                            </Box>
-                                            {/* Uncomment below to add close icon */}
-                                            {/* 
+                                   <Dialog
+                                                            open={closeDialogOpen}
+                                                            onClose={() => setCloseDialogOpen(false)}
+                                                            fullWidth
+                                                            maxWidth="xs"
+                                                        >
+                                                            {/* Header */}
+                                                            <Box
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    justifyContent: "space-between",
+                                                                    alignItems: "center",
+                                                                    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                                                                    color: "#fff",
+                                                                    px: 2,
+                                                                    py: 1,
+                                                                }}
+                                                            >
+                                                                <Box>
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        fontWeight={700}
+                                                                        sx={{
+                                                                            whiteSpace: "nowrap",
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                            maxWidth: 150, // adjust as needed
+                                                                        }}
+                                                                        dangerouslySetInnerHTML={{
+                                                                            __html: selectedRow?.script_name || "N/A",
+                                                                        }}
+                                                                    />
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            color: currentData?.PriceChange >= 0 ? "green" : "red"
+                                                                        }}
+                                                                    >
+                                                                        {currentData?.PriceChange?.toFixed(2) ?? "--"}{" "}
+                                                                        ({currentData?.PriceChangePercentage?.toFixed(2) ?? "--"}%)
+                                                                    </Typography>
+
+                                                                </Box>
+                                                                <Box sx={{ textAlign: "right" }}>
+                                                                    <Typography variant="body2">
+                                                                        Bid: {liveRates && liveRates[selectedOrder]?.BuyPrice
+                                                                            ? liveRates[selectedOrder].BuyPrice.toFixed(2)
+                                                                            : "--"}
+                                                                    </Typography>
+                                                                    <Typography variant="body2">
+                                                                        Ask: {liveRates && liveRates[selectedOrder]?.SellPrice
+                                                                            ? liveRates[selectedOrder].SellPrice.toFixed(2)
+                                                                            : "--"}
+                                                                    </Typography>
+                                                                </Box>
+
+                                                                {/* Uncomment below to add close icon */}
+                                                                {/* 
     <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
       <CloseIcon />
     </IconButton> 
     */}
-                                        </Box>
+                                                            </Box>
 
-                                        {/* Open & Close Prices */}
-                                        <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
-                                            <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
-                                            <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
-                                        </Box>
+                                                            {/* Open & Close Prices */}
+                                                            <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    Open: {currentData?.Open?.toFixed(2) ?? "--"}
+                                                                </Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    Close: {currentData?.Close?.toFixed(2) ?? "--"}
+                                                                </Typography>
+                                                            </Box>
 
-                                        {/* Order Type Toggle */}
-                                        <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
-                                            {["MARKET", "LIMIT", "SL"].map((label) => (
-                                                <Button
-                                                    key={label}
-                                                    variant={orderType === label ? "contained" : "outlined"}
-                                                    onClick={() => setOrderType(label)}
-                                                    sx={{
-                                                        minWidth: 60,
-                                                        fontWeight: 600,
-                                                        fontSize: "0.75rem",
-                                                        borderRadius: 2,
-                                                        backgroundColor: orderType === label ? "#2a5298" : "transparent",
-                                                        color: orderType === label ? "#fff" : "#2a5298",
-                                                        borderColor: "#2a5298",
-                                                        "&:hover": {
-                                                            backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
-                                                        },
-                                                    }}
-                                                >
-                                                    {label}
-                                                </Button>
-                                            ))}
-                                        </Box>
 
-                                        {/* Lot, Qty, Price Controls */}
-                                        <DialogContent sx={{ mt: 2 }}>
-                                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                                            {/* Order Type Toggle */}
+                                                            <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
+                                                                {["MARKET", "LIMIT", "SL"].map((label) => (
+                                                                    <Button
+                                                                        key={label}
+                                                                        variant={orderType === label ? "contained" : "outlined"}
+                                                                        onClick={() => setTradeType(label)}
+                                                                        sx={{
+                                                                            minWidth: 60,
+                                                                            fontWeight: 600,
+                                                                            fontSize: "0.75rem",
+                                                                            borderRadius: 2,
+                                                                            backgroundColor: orderType === label ? "#2a5298" : "transparent",
+                                                                            color: orderType === label ? "#fff" : "#2a5298",
+                                                                            borderColor: "#2a5298",
+                                                                            "&:hover": {
+                                                                                backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        {label}
+                                                                    </Button>
+                                                                ))}
+                                                            </Box>
 
-                                                {/* Lot */}
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <Typography>Lot</Typography>
-                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                        <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
-                                                            <RemoveIcon fontSize="small" />
-                                                        </IconButton>
-                                                        <TextField
-                                                            value={lot.toFixed(2)}
-                                                            size="small"
-                                                            sx={{ width: 70 }}
-                                                            inputProps={{ style: { textAlign: "center" } }}
-                                                        />
-                                                        <IconButton onClick={() => setLot(lot + 0.01)} size="small">
-                                                            <AddIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Box>
-                                                </Box>
+                                                            {/* Lot, Qty, Price Controls */}
+                                                            <DialogContent sx={{ mt: 2 }}>
+                                                                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                                                    {closeDialogOpen && selectedRow && (
+                                                                        <>
+                                                                            {/* Lot */}
+                                                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                                <Typography>Lot</Typography>
+                                                                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                                                    <IconButton onClick={() => setLot(Math.max(0, closetradeData.trade_lot - 1))} size="small">
+                                                                                        <RemoveIcon fontSize="small" />
+                                                                                    </IconButton>
+                                                                                    <TextField
+                                                                                        value={closetradeData.trade_lot}
+                                                                                        autoFocus
+                                                                                        onChange={lotChange}
+                                                                                        size="small"
+                                                                                        sx={{ width: 70 }}
+                                                                                        inputProps={{ style: { textAlign: "center" } }}
+                                                                                    />
+                                                                                    <IconButton onClick={() => setLot(closetradeData.trade_lot + 1)} size="small">
+                                                                                        <AddIcon fontSize="small" />
+                                                                                    </IconButton>
+                                                                                </Box>
+                                                                            </Box>
 
-                                                {/* Qty */}
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <Typography>Qty</Typography>
-                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                        <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
-                                                            <RemoveIcon fontSize="small" />
-                                                        </IconButton>
-                                                        <TextField
-                                                            value={qty}
-                                                            size="small"
-                                                            sx={{ width: 70 }}
-                                                            inputProps={{ style: { textAlign: "center" } }}
-                                                        />
-                                                        <IconButton onClick={() => setQty(qty + 1)} size="small">
-                                                            <AddIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Box>
-                                                </Box>
+                                                                            {/* Qty */}
+                                                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                                <Typography>Qty</Typography>
+                                                                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                                                    <IconButton onClick={() => setQty(Math.max(1, closetradeData.trade_qty - 1))} size="small">
+                                                                                        <RemoveIcon fontSize="small" />
+                                                                                    </IconButton>
+                                                                                    <TextField
+                                                                                        value={closetradeData.trade_qty}
+                                                                                        onChange={qtyChange}
+                                                                                        size="small"
+                                                                                        disabled={closetradeData.market_type_id == "1" || closetradeData.market_type_id == "5" ? true : false}
+                                                                                        sx={{ width: 70 }}
+                                                                                        inputProps={{ style: { textAlign: "center" } }}
 
-                                                {/* Price */}
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <Typography>Price</Typography>
-                                                    <TextField
-                                                        type="number"
-                                                        value={price}
-                                                        onChange={(e) => setPrice(Number(e.target.value))}
-                                                        size="small"
-                                                        sx={{ width: 100, mr: 3 }}
-                                                        inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
-                                                    />
-                                                </Box>
-                                            </Box>
-                                        </DialogContent>
+                                                                                    />
+                                                                                    <IconButton onClick={() => setQty(closetradeData.trade_qty + 1)} size="small">
+                                                                                        <AddIcon fontSize="small" />
+                                                                                    </IconButton>
+                                                                                </Box>
+                                                                            </Box>
 
-                                        {/* Bottom Action */}
-                                        <DialogActions>
-                                            {selectedRow?.net_qty > 0 ? (
-                                                <Button
-                                                    fullWidth
-                                                    onClick={async () => {
-                                                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                                                        const payload = {
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
+                                                                            {/* Price */}
+                                                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                                <Typography>Price</Typography>
+                                                                                {
+                                                                                    ((closetradeData.trade_type == "1" && closetradeData.trade_type_x == "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x == "0")) && (
+                                                                                        <TextField
+                                                                                            type="number"
+                                                                                            value={closetradeData.trade_rate}
+                                                                                            onChange={(e) => setPrice(Number(e.target.value))}
+                                                                                            size="small"
+                                                                                            sx={{ width: 100, mr: 3 }}
+                                                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                                            disabled={orderType === "MARKET"} // Disable if MARKET
+                                                                                        />
+                                                                                    )
+                                                                                }
+                                                                                {
+                                                                                    ((closetradeData.trade_type == "1" && closetradeData.trade_type_x != "0") || (closetradeData.trade_type == "0" && closetradeData.trade_type_x != "0")) && (
+                                                                                        <TextField
+                                                                                            type="number"
+                                                                                            value={closetradeData.trade_rate}
+                                                                                            onChange={priceChange}
+                                                                                            size="small"
+                                                                                            sx={{ width: 100, mr: 3 }}
+                                                                                            inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
+                                                                                        />
+                                                                                    )
+                                                                                }
 
-                                                        try {
-                                                            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                method: "POST",
-                                                                headers: {
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                                body: JSON.stringify(payload),
-                                                            });
+                                                                            </Box>
+                                                                        </>
+                                                                    )}
+                                                                </Box>
+                                                            </DialogContent>
 
-                                                            const data = await response.json();
+                                                            {/* Bottom Action */}
+                                                            <DialogActions>
+                                                                {selectedRow?.net_qty > 0 ? (
+                                                                    <Button
+                                                                        fullWidth
+                                                                        onClick={async () => {
+                                                                            const payload = {
+                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
+                                                                                script_id: selectedRow?.script_id,
+                                                                                script_expiry_id: selectedRow?.script_expiry_id,
+                                                                                trade_type: tradeTypeMap[orderType],
+                                                                                trade_rate: price,
+                                                                                trade_qty: qty,
+                                                                                trade_lot: lot,
+                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                                                check_script_name: selectedRow?.script_name,
+                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                                                device_type: 0,
+                                                                                is_app: "1",
+                                                                                login_user_id: dataStored?.user_id,
+                                                                                auth_key: dataStored?.auth_key,
+                                                                            };
 
-                                                            if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
-                                                                setCloseDialogOpen(false);
-                                                            } else {
-                                                                console.error("Trade placement failed", data);
-                                                            }
-                                                        } catch (error) {
-                                                            console.error("Network error:", error);
-                                                        }
-                                                    }}
-                                                    variant="contained"
-                                                    sx={{
-                                                        backgroundColor: "#ff3d3d", // Red for Sell
-                                                        color: "#fff",
-                                                        fontWeight: 700,
-                                                        fontSize: "0.9rem",
-                                                        py: 1,
-                                                        borderRadius: 1.5,
-                                                        "&:hover": {
-                                                            backgroundColor: "#d32f2f",
-                                                        },
-                                                    }}
-                                                >
-                                                    Sell
-                                                </Button>
-                                            ) : selectedRow?.net_qty < 0 ? (
-                                                <Button
-                                                    fullWidth
-                                                    onClick={async () => {
-                                                        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                                                        const payload = {
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
+                                                                            try {
+                                                                                const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
+                                                                                    method: "POST",
+                                                                                    headers: {
+                                                                                        "Content-Type": "application/json",
+                                                                                    },
+                                                                                    body: JSON.stringify(payload),
+                                                                                });
 
-                                                        try {
-                                                            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                method: "POST",
-                                                                headers: {
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                                body: JSON.stringify(payload),
-                                                            });
+                                                                                const data = await response.json();
 
-                                                            const data = await response.json();
+                                                                                if (response.ok) {
+                                                                                    console.log("Trade placed successfully", data);
+                                                                                    setCloseDialogOpen(false);
+                                                                                } else {
+                                                                                    console.error("Trade placement failed", data);
+                                                                                }
+                                                                            } catch (error) {
+                                                                                console.error("Network error:", error);
+                                                                            }
+                                                                        }}
+                                                                        variant="contained"
+                                                                        sx={{
+                                                                            backgroundColor: "#ff3d3d", // Red for Sell
+                                                                            color: "#fff",
+                                                                            fontWeight: 700,
+                                                                            fontSize: "0.9rem",
+                                                                            py: 1,
+                                                                            borderRadius: 1.5,
+                                                                            "&:hover": {
+                                                                                backgroundColor: "#d32f2f",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        Sell
+                                                                    </Button>
+                                                                ) : selectedRow?.net_qty < 0 ? (
+                                                                    <Button
+                                                                        fullWidth
+                                                                        onClick={async () => {
 
-                                                            if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
-                                                                setCloseDialogOpen(false);
-                                                            } else {
-                                                                console.error("Trade placement failed", data);
-                                                            }
-                                                        } catch (error) {
-                                                            console.error("Network error:", error);
-                                                        }
-                                                    }}
-                                                    variant="contained"
-                                                    sx={{
-                                                        backgroundColor: "#4caf50", // Green for Buy
-                                                        color: "#fff",
-                                                        fontWeight: 700,
-                                                        fontSize: "0.9rem",
-                                                        py: 1,
-                                                        borderRadius: 1.5,
-                                                        "&:hover": {
-                                                            backgroundColor: "#388e3c",
-                                                        },
-                                                    }}
-                                                >
-                                                    Buy
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    fullWidth
-                                                    disabled
-                                                    variant="contained"
-                                                    sx={{
-                                                        backgroundColor: "#9e9e9e",
-                                                        color: "#fff",
-                                                        fontWeight: 700,
-                                                        fontSize: "0.9rem",
-                                                        py: 1,
-                                                        borderRadius: 1.5,
-                                                    }}
-                                                >
-                                                    No Position
-                                                </Button>
-                                            )}
-                                        </DialogActions>
-                                    </Dialog>
+                                                                            const payload = {
+                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
+                                                                                script_id: selectedRow?.script_id,
+                                                                                script_expiry_id: selectedRow?.script_expiry_id,
+                                                                                trade_type: tradeTypeMap[orderType],
+                                                                                trade_rate: price,
+                                                                                trade_qty: qty,
+                                                                                trade_lot: lot,
+                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                                                check_script_name: selectedRow?.script_name,
+                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                                                device_type: 0,
+                                                                                is_app: "1",
+                                                                                login_user_id: dataStored?.user_id,
+                                                                                auth_key: dataStored?.auth_key,
+                                                                            };
+
+                                                                            try {
+                                                                                const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
+                                                                                    method: "POST",
+                                                                                    headers: {
+                                                                                        "Content-Type": "application/json",
+                                                                                    },
+                                                                                    body: JSON.stringify(payload),
+                                                                                });
+
+                                                                                const data = await response.json();
+
+                                                                                if (response.ok) {
+                                                                                    console.log("Trade placed successfully", data);
+                                                                                    setCloseDialogOpen(false);
+                                                                                } else {
+                                                                                    console.error("Trade placement failed", data);
+                                                                                }
+                                                                            } catch (error) {
+                                                                                console.error("Network error:", error);
+                                                                            }
+                                                                        }}
+                                                                        variant="contained"
+                                                                        sx={{
+                                                                            backgroundColor: "#4caf50", // Green for Buy
+                                                                            color: "#fff",
+                                                                            fontWeight: 700,
+                                                                            fontSize: "0.9rem",
+                                                                            py: 1,
+                                                                            borderRadius: 1.5,
+                                                                            "&:hover": {
+                                                                                backgroundColor: "#388e3c",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        Buy
+                                                                    </Button>
+                                                                ) : (
+                                                                    <Button
+                                                                        fullWidth
+                                                                        disabled
+                                                                        variant="contained"
+                                                                        sx={{
+                                                                            backgroundColor: "#9e9e9e",
+                                                                            color: "#fff",
+                                                                            fontWeight: 700,
+                                                                            fontSize: "0.9rem",
+                                                                            py: 1,
+                                                                            borderRadius: 1.5,
+                                                                        }}
+                                                                    >
+                                                                        No Position
+                                                                    </Button>
+                                                                )}
+                                                            </DialogActions>
+                                                        </Dialog>
                                 </Box>
                             </Box>
 
