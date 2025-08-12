@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useContext, useState, useEffect, startTransition, useRef } from "react";
+=======
+import React, { useContext, useState, useEffect } from "react";
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
 import {
     Box,
     Typography,
@@ -176,6 +180,10 @@ const OrderPage = () => {
 
     const fetchPositions = async () => {
         setLoading(true);
+<<<<<<< HEAD
+=======
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
         console.log("script=", script?.id);
         try {
             const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
@@ -192,7 +200,8 @@ const OrderPage = () => {
                 group_by: client_wise_value,
 
                 market_type_id: market?.id,
-                script_id: script?.id,
+                // script_id: script?.id,
+                script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
                 broker_id: broker?.id,
                 master_user_id: master?.id,
                 user_id: client?.id,
@@ -213,11 +222,28 @@ const OrderPage = () => {
                 let flat1 = array;
                 flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
                 setfFlat(flat1)
+<<<<<<< HEAD
 
 
                 socket.emit('positionReport', {
                     userId: dataStored.user_id,
                     scripts: flat1,
+=======
+
+                //    console.log("flat12=",flat1);
+                //    console.log("user=",dataStored.user_id);
+                //    console.log("socket 12333=",socket);
+                socket.emit('positionReport', {
+                    userId: dataStored.user_id,
+                    scripts: flat1,
+                });
+
+                setTotals({
+                    upline_grand: response.data.upline_grand ?? 0,
+                    downline_grand: response.data.downline_grand ?? 0,
+                    self_grand: response.data.self_grand ?? 0,
+                    total_qty: response.data.total_qty ?? 0,
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                 });
                 if (dataStored.user_type != 1) {
                     setTotals(prv => ({
@@ -326,11 +352,14 @@ const OrderPage = () => {
                         if (liveRates[args.data.InstrumentIdentifier]) {
                             liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
                             liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+<<<<<<< HEAD
                             liveRates[args.data.InstrumentIdentifier].PriceChange = args.data.PriceChange;
                             liveRates[args.data.InstrumentIdentifier].PriceChangePercentage = args.data.PriceChangePercentage;
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+=======
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
 
                             startTransition(() => {
                                 setliveRates(liveRates);
@@ -340,11 +369,14 @@ const OrderPage = () => {
                             liveRates[args.data.InstrumentIdentifier] = {};
                             liveRates[args.data.InstrumentIdentifier].BuyPrice = args.data.BuyPrice;
                             liveRates[args.data.InstrumentIdentifier].SellPrice = args.data.SellPrice;
+<<<<<<< HEAD
                             liveRates[args.data.InstrumentIdentifier].PriceChange = args.data.PriceChange;
                             liveRates[args.data.InstrumentIdentifier].PriceChangePercentage = args.data.PriceChangePercentage;
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+=======
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                             startTransition(() => {
                                 setliveRates(liveRates);
                             });
@@ -354,31 +386,50 @@ const OrderPage = () => {
                             var x = Number(args.data.BuyPrice).toFixed(2);
                             var x = formatNumberWithCommas(x, 2);
 
+<<<<<<< HEAD
                             if (dataStored.user_type != 1) {
                                 $($($("." + updatedData[newArray[iz]][13])).children()[8]).html(x);
                             } else {
                                 $($($("." + updatedData[newArray[iz]][13])).children()[7]).html(x);
+=======
+                            if (userType != 1) {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                             }
 
                             var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
                             var x1 = (parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7])) - (parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5])) + (parseFloat(x2) * parseFloat(args.data.BuyPrice));
+<<<<<<< HEAD
                             if ($("." + updatedData[newArray[iz]][13] + "_self") && $("." + updatedData[newArray[iz]][13] + "_self")[0]) {
                                 var flag_1 = 1;
                                 var x1_1 = 0;
                                 if (parseInt(dataStored.user_type) != 1) {
+=======
+                            if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                var flag_1 = 1;
+                                var x1_1 = 0;
+                                if (parseInt(userType) != 1) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_1 = -1;
                                     x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
                                     updatedData[newArray[iz]][17] = x1_1;
                                     x1_1 = Number(x1_1).toFixed(2);
                                     x1_1 = formatNumberWithCommas(x1_1, 2);
 
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                 } else {
                                     flag_1 = 1;
                                     x1_1 = x1;
                                     updatedData[newArray[iz]][17] = x1_1;
                                     x1_1 = Number(x1_1).toFixed(2);
                                     x1_1 = formatNumberWithCommas(x1_1, 2);
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
                                 }
                             }
@@ -386,32 +437,61 @@ const OrderPage = () => {
                                 var flag_2 = 1;
                                 var x1_2 = 0;
                                 if (parseInt(dataStored.user_type) != 1) {
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(userType) != 1) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_2 = -1;
                                 }
                                 x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
                                 updatedData[newArray[iz]][18] = x1_2;
                                 x1_2 = Number(x1_2).toFixed(2);
                                 x1_2 = formatNumberWithCommas(x1_2, 2);
+<<<<<<< HEAD
                                 $("." + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
                             }
                             if ($("." + updatedData[newArray[iz]][13] + "_downline") && $("." + updatedData[newArray[iz]][13] + "_downline")[0]) {
                                 var flag_3 = 1;
                                 var x1_3 = 0;
                                 if (parseInt(dataStored.user_type) != 1 && updatedData[newArray[iz]][16] > 0) {
+=======
+                                $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_3 = -1;
                                     x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
                                     updatedData[newArray[iz]][19] = x1_3;
                                     x1_3 = Number(x1_3).toFixed(2);
                                     x1_3 = formatNumberWithCommas(x1_3, 2);
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
                                 }
                             }
                             if ($("." + updatedData[newArray[iz]][13] + "_user") && $("." + updatedData[newArray[iz]][13] + "_user")[0]) {
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                 var x1_3 = x1;
                                 updatedData[newArray[iz]][20] = x1_3;
                                 x1_3 = Number(x1_3).toFixed(2);
                                 x1_3 = formatNumberWithCommas(x1_3, 2);
+<<<<<<< HEAD
                                 $("." + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+=======
+                                $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                             }
                             if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
                                 setClosetradeData(prvValue => ({
@@ -423,30 +503,47 @@ const OrderPage = () => {
                         } else if (parseInt(updatedData[newArray[iz]][8]) && parseInt(updatedData[newArray[iz]][8]) < 0) {
                             var x = Number(args.data.SellPrice).toFixed(2);
                             var x = formatNumberWithCommas(x, 2);
+<<<<<<< HEAD
                             if (dataStored.user_type != 1) {
                                 $($($("." + updatedData[newArray[iz]][13])).children()[8]).html(x);
                             } else {
                                 $($($("." + updatedData[newArray[iz]][13])).children()[7]).html(x);
+=======
+                            if (userType != 1) {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[8]).html(x);
+                            } else {
+                                $($($("#" + updatedData[newArray[iz]][13])).children()[7]).html(x);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                             }
 
                             var x2 = Math.abs(parseInt(updatedData[newArray[iz]][8]));
                             var x1 = parseFloat(updatedData[newArray[iz]][6]) * parseFloat(updatedData[newArray[iz]][7]) - parseFloat(updatedData[newArray[iz]][4]) * parseFloat(updatedData[newArray[iz]][5]) - parseFloat(x2) * parseFloat(args.data.SellPrice);
                             var flag_1 = 1;
                             var x1_1 = 0;
+<<<<<<< HEAD
                             if ($("." + updatedData[newArray[iz]][13] + "_self") && $("." + updatedData[newArray[iz]][13] + "_self")[0]) {
                                 if (parseInt(dataStored.user_type) != 1) {
+=======
+                            if ($("#" + updatedData[newArray[iz]][13] + "_self") && $("#" + updatedData[newArray[iz]][13] + "_self")[0]) {
+                                if (parseInt(userType) != 1) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_1 = -1;
                                     x1_1 = x1 * updatedData[newArray[iz]][14] / 100 * flag_1;
                                     updatedData[newArray[iz]][17] = x1_1;
                                     x1_1 = Number(x1_1).toFixed(2);
                                     x1_1 = formatNumberWithCommas(x1_1, 2);
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                 } else {
                                     flag_1 = 1;
                                     x1_1 = x1;
                                     updatedData[newArray[iz]][17] = x1_1;
                                     x1_1 = Number(x1_1).toFixed(2);
                                     x1_1 = formatNumberWithCommas(x1_1, 2);
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_self").html(x1_1);
                                 }
                             }
@@ -454,32 +551,61 @@ const OrderPage = () => {
                                 var flag_2 = 1;
                                 var x1_2 = 0;
                                 if (parseInt(dataStored.user_type) != 1) {
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_self").html(x1_1);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_upline") && $("#" + updatedData[newArray[iz]][13] + "_upline")[0]) {
+                                var flag_2 = 1;
+                                var x1_2 = 0;
+                                if (parseInt(userType) != 1) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_2 = -1;
                                 }
                                 x1_2 = x1 * updatedData[newArray[iz]][15] / 100 * flag_2;
                                 updatedData[newArray[iz]][18] = x1_2;
                                 x1_2 = Number(x1_2).toFixed(2);
                                 x1_2 = formatNumberWithCommas(x1_2, 2);
+<<<<<<< HEAD
                                 $("." + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
                             }
                             if ($("." + updatedData[newArray[iz]][13] + "_downline") && $("." + updatedData[newArray[iz]][13] + "_downline")[0]) {
                                 var flag_3 = 1;
                                 var x1_3 = 0;
                                 if (parseInt(dataStored.user_type) != 1 && updatedData[newArray[iz]][16] > 0) {
+=======
+                                $("#" + updatedData[newArray[iz]][13] + "_upline").html(x1_2);
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_downline") && $("#" + updatedData[newArray[iz]][13] + "_downline")[0]) {
+                                var flag_3 = 1;
+                                var x1_3 = 0;
+                                if (parseInt(userType) != 1 && updatedData[newArray[iz]][16] > 0) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                     flag_3 = -1;
                                     x1_3 = x1 * updatedData[newArray[iz]][16] / 100 * flag_3;
                                     updatedData[newArray[iz]][19] = x1_3;
                                     x1_3 = Number(x1_3).toFixed(2);
                                     x1_3 = formatNumberWithCommas(x1_3, 2);
+<<<<<<< HEAD
                                     $("." + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
                                 }
                             }
                             if ($("." + updatedData[newArray[iz]][13] + "_user") && $("." + updatedData[newArray[iz]][13] + "_user")[0]) {
+=======
+                                    $("#" + updatedData[newArray[iz]][13] + "_downline").html(x1_3);
+                                }
+                            }
+                            if ($("#" + updatedData[newArray[iz]][13] + "_user") && $("#" + updatedData[newArray[iz]][13] + "_user")[0]) {
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                                 var x1_3 = x1;
                                 updatedData[newArray[iz]][20] = x1_3;
                                 x1_3 = Number(x1_3).toFixed(2);
                                 x1_3 = formatNumberWithCommas(x1_3, 2);
+<<<<<<< HEAD
                                 $("." + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+=======
+                                $("#" + updatedData[newArray[iz]][13] + "_user").html(x1_3);
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
                             }
                             if (selectedOrderSet.current == args.data.InstrumentIdentifier && parseInt(selectTradeTypeSet.current) == 0) {
 
@@ -509,10 +635,17 @@ const OrderPage = () => {
                             return a + b;
                         }, 0);
                         var flag_total = 1;
+<<<<<<< HEAD
                         if (dataStored.user_type != 1) {
                             flag_total = -1
                         }
                         var net = totals.limit1 + myArray1;
+=======
+                        if (userType != 1) {
+                            flag_total = -1
+                        }
+                        var net = selectedVariable.limit1 + myArray1;
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
 
                         var myArray4 = (parseFloat(myArray1) + parseFloat(myArray2) + parseFloat(myArray3)) * flag_total;
                         myArray4 = Number(myArray4).toFixed(2);
@@ -526,6 +659,7 @@ const OrderPage = () => {
                         net = Number(net).toFixed(2);
                         net = formatNumberWithCommas(net, 2);
 
+<<<<<<< HEAD
 
 
                         setTotals(prv => ({
@@ -537,6 +671,16 @@ const OrderPage = () => {
                             net: net,
 
                         }));
+=======
+                        setSelectedVariable(prvValue => ({
+                            ...prvValue,
+                            totalMTM: myArray4,
+                            downlineMTM: myArray3,
+                            uplineMTM: myArray2,
+                            selfMTM: myArray1,
+                            net: net,
+                        }))
+>>>>>>> 0dfb6257d933fd76e84b2c9f9013197faebe626a
 
                     }
                 }

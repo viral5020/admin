@@ -77,7 +77,8 @@ const EditDeleteLogs = () => {
                     sSearch: search,
 
                     market_type_id: market?.id,
-                    script_id: script?.id,
+                    // script_id: script?.id,
+                    script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
                     // broker_id: broker?.id,
                     master_user_id: master?.id,
                     user_id: client?.id,

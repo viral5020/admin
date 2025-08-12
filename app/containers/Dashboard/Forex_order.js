@@ -10,6 +10,21 @@ import {
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
+  LeadingActions
+} from 'react-swipeable-list';
+import 'react-swipeable-list/dist/styles.css';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeIcon from '@mui/icons-material/Mode';
+import CancelIcon from '@mui/icons-material/Cancel';
+
+
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ForexComexScriptFilter from './forexorderfilter';
@@ -188,6 +203,79 @@ const Forex_order = () => {
 
   const needsPassword = userType === 4 && deletePopup;
 
+
+  const renderActions = (item, idx, isQty) => ({
+    // leading: (
+    //     <LeadingActions>
+    //         <SwipeAction
+    //             // destructive={true}
+    //             onClick={() => handleStar(item, isFavorite)}
+    //         >
+    //             <ThemeProvider theme={theme}>
+    //                 <Button
+    //                     variant="contained"
+    //                     color="star"
+    //                     sx={{
+    //                         backgroundColor: isDarkMode ? '#eca52e' : '#ffb63c',
+    //                         height: '100%',
+    //                         borderRadius: 0,
+    //                         minWidth: '80px',
+    //                         fontSize: '0.85rem',
+    //                         color: '#fff',
+    //                     }}
+    //                 >
+    //                     {/* Star */}
+    //                     {isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
+    //                 </Button>
+    //             </ThemeProvider>
+    //         </SwipeAction >
+    //     </LeadingActions >
+    // ),
+    trailing: (
+      <TrailingActions>
+        <SwipeAction
+          // destructive={isQty ? false : true}  
+          destructive={false}
+          onClick={() => handleModify(item)}  // chatgpt: is it ok ?
+        >
+          <button
+            style={{
+              marginRight: '4px',
+              padding: '4px 8px',
+              backgroundColor: '#1976d2',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            <ModeIcon />
+          </button>
+        </SwipeAction>
+
+        <SwipeAction
+          onClick={() => {
+            setCancelItem(item);
+            setCancelDialogOpen(true); // Always show confirmation
+          }}>
+          <button
+            style={{
+              padding: '4px 8px',
+              backgroundColor: '#d32f2f',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            <CancelIcon />
+          </button>
+        </SwipeAction>
+      </TrailingActions >
+    )
+  });
+
+
   return (
     <Box sx={{ p: 0, mt: 2 }}>
 
@@ -294,106 +382,114 @@ const Forex_order = () => {
         <Typography sx={{ px: 1, mt: 2 }}>No orders found.</Typography>
       ) : isMobile ? (
         <>
-          {orders.map((item, index) => {
-            const [mainName, subName] = item.scrp_name.split(" ", 2);
-            const cleanRate = item.trd_rate?.split("(")[0].trim();
-            const isBuy = item.trd_type === "Buy";
-            const isSell = item.trd_type === "Sell";
+          <SwipeableList type={ListType.IOS}>
+            {orders.map((item, index) => {
+              const [mainName, subName] = item.scrp_name.split(" ", 2);
+              const cleanRate = item.trd_rate?.split("(")[0].trim();
+              const isBuy = item.trd_type === "Buy";
+              const isSell = item.trd_type === "Sell";
 
-            const borderGradient = isBuy
-              ? "linear-gradient(to right, #2196f3, #21cbf3)"
-              : isSell
-                ? "linear-gradient(to right, #f44336, #ff7961)"
-                : "#ccc";
+              const borderGradient = isBuy
+                ? "linear-gradient(to right, #2196f3, #21cbf3)"
+                : isSell
+                  ? "linear-gradient(to right, #f44336, #ff7961)"
+                  : "#ccc";
 
-            const boxShadowColor = isBuy
-              ? "rgba(33, 150, 243, 0.3)"
-              : isSell
-                ? "rgba(244, 67, 54, 0.3)"
-                : "rgba(0,0,0,0.1)";
+              const boxShadowColor = isBuy
+                ? "rgba(33, 150, 243, 0.3)"
+                : isSell
+                  ? "rgba(244, 67, 54, 0.3)"
+                  : "rgba(0,0,0,0.1)";
 
-            return (
-              <Card
-                key={item.trd_id || index}
-                sx={{
-                  mb: 1,
-                  mx: 1,
-                  borderRadius: 2,
-                  border: "1px solid transparent",
-                  backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
-                  backgroundOrigin: "border-box",
-                  backgroundClip: "content-box, border-box",
-                  boxShadow: `0 4px 12px ${boxShadowColor}`,
-                  "&:hover": {
-                    transform: "scale(1.02)",
-                    boxShadow: `0 8px 20px ${boxShadowColor}`,
-                  },
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                }}
-              >
-                <CardContent
-                  sx={{
-                    p: 0.5,
-                    "&:last-child": { pb: 0.5 },
-                  }}
+              const { trailing } = renderActions(item);
+
+              return (
+                <SwipeableListItem
+                  key={item.trd_id || index}
+                  trailingActions={trailing}
                 >
-                  {/* Row 1 */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
-                      {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
-                    </Typography>
-                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>ID: #{item.trd_id}</Typography>
-                  </Box>
+                  <Card
+                    key={item.trd_id || index}
+                    sx={{
+                      mb: 1,
+                      mx: 1,
+                      borderRadius: 2,
+                      border: "1px solid transparent",
+                      backgroundImage: `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
+                      backgroundOrigin: "border-box",
+                      backgroundClip: "content-box, border-box",
+                      boxShadow: `0 4px 12px ${boxShadowColor}`,
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                        boxShadow: `0 8px 20px ${boxShadowColor}`,
+                      },
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      width: "100%",
+                    }}
+                  >
+                    <CardContent
+                      sx={{
+                        p: 0.5,
+                        "&:last-child": { pb: 0.5 },
+                      }}
+                    >
+                      {/* Row 1 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
+                          {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
+                        </Typography>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>ID: #{item.trd_id}</Typography>
+                      </Box>
 
-                  {/* Row 2 */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                      {/* Row 2 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
 
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        sx={{
-                          ml: 0.5,
-                          fontSize: "1rem",
-                        }}
-                      >
-                        {isBuy ? "📈" : isSell ? "📉" : ""}
-                      </Typography>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{
+                              ml: 0.5,
+                              fontSize: "1rem",
+                            }}
+                          >
+                            {isBuy ? "📈" : isSell ? "📉" : ""}
+                          </Typography>
 
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 700,
-                          color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
-                          ml: 0.5,
-                          m: 0,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {item.trd_type}
-                        <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
-                      </Typography>
-                    </Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 700,
+                              color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
+                              ml: 0.5,
+                              m: 0,
+                              lineHeight: 1,
+                            }}
+                          >
+                            {item.trd_type}
+                            <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
+                          </Typography>
+                        </Box>
 
-                    <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
-                      ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
-                    </Typography>
-                  </Box>
+                        <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
+                          ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
+                        </Typography>
+                      </Box>
 
-                  {/* Row 3 */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>{item.trd_time}</Typography>
-                    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-                      Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-
-
-            );
-          })}
+                      {/* Row 3 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>{item.trd_time}</Typography>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+                          Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </SwipeableListItem>
+              );
+            })}
+          </SwipeableList>
 
           {orders.length < totalRecords && (
             loading ? (
@@ -586,104 +682,6 @@ const Forex_order = () => {
                 })}
               </tbody>
             </table>
-
-            <Dialog open={open} onClose={handleClose} sx={{ '& .MuiDialog-paper': { width: '500px', maxWidth: '90%' } }}>
-              <DialogTitle>Modify Order</DialogTitle>
-              <DialogContent>
-                {selectedItem && (
-                  <>
-                    <Typography variant="subtitle1">
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: `Client Name: <strong>${selectedItem.client_full_name}</strong>`,
-                        }}
-                      />
-                    </Typography>
-
-                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                      Script Name: <strong>{selectedItem.scrp_name}</strong>
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <TextField
-                        label="Lot"
-                        value={lot}
-                        onChange={(e) => setLot(e.target.value)}
-                        fullWidth
-                        type="number"
-                      />
-                      <TextField
-                        label="Quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        fullWidth
-                        type="number"
-                      />
-                      <TextField
-                        label="Price"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        fullWidth
-                        type="number"
-                      />
-                    </Box>
-                  </>
-                )}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} color="primary" variant="contained">
-                  Save
-                </Button>
-              </DialogActions>
-            </Dialog>
-
-            {/* Confirmation Dialog for ALL users */}
-            <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
-              <DialogTitle>Confirm Cancellation</DialogTitle>
-              <DialogContent>
-                <Typography sx={{ mb: 2 }}>
-                  Are you sure you want to cancel this order?
-                </Typography>
-
-                {/* Show password input only for userType === 4 and deletePopup === true */}
-                {needsPassword && (
-                  <TextField
-                    label="Enter Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                  />
-                )}
-              </DialogContent>
-
-              <DialogActions>
-                <Button onClick={() => setCancelDialogOpen(false)} color="primary">
-                  No
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (needsPassword && !password) {
-                      alert('Please enter your password.');
-                      return;
-                    }
-
-                    handleCancel(cancelItem, password);
-                    setCancelDialogOpen(false);
-                    setPassword('');
-                  }}
-                  color="error"
-                  variant="contained"
-                >
-                  Yes, Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
-
-
           </Box>
 
 
@@ -746,6 +744,102 @@ const Forex_order = () => {
           </Box>
         </>
       )}
+
+      <Dialog open={open} onClose={handleClose} sx={{ '& .MuiDialog-paper': { width: '500px', maxWidth: '90%' } }}>
+        <DialogTitle>Modify Order</DialogTitle>
+        <DialogContent>
+          {selectedItem && (
+            <>
+              <Typography variant="subtitle1">
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: `Client Name: <strong>${selectedItem.client_full_name}</strong>`,
+                  }}
+                />
+              </Typography>
+
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Script Name: <strong>{selectedItem.scrp_name}</strong>
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Lot"
+                  value={lot}
+                  onChange={(e) => setLot(e.target.value)}
+                  fullWidth
+                  type="number"
+                />
+                <TextField
+                  label="Quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  fullWidth
+                  type="number"
+                />
+                <TextField
+                  label="Price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary" variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog for ALL users */}
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to cancel this order?
+          </Typography>
+
+          {/* Show password input only for userType === 4 and deletePopup === true */}
+          {needsPassword && (
+            <TextField
+              label="Enter Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+            />
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)} color="primary">
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              if (needsPassword && !password) {
+                alert('Please enter your password.');
+                return;
+              }
+
+              handleCancel(cancelItem, password);
+              setCancelDialogOpen(false);
+              setPassword('');
+            }}
+            color="error"
+            variant="contained"
+          >
+            Yes, Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
