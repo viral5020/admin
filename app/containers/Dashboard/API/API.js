@@ -1,7 +1,9 @@
 import axios from "axios";
 import { fetchClient } from "./fetchconfig";
 import axiosInstance from "./axiosconfig";
-import { constant } from "../Watchlist/constant";
+
+import { constant, forex_market_type_id } from "../Watchlist/constant";
+
 
 async function getDefaultParams() {
   const { ip_address, user_agent } = await getUserInfo();
@@ -551,49 +553,7 @@ export const fetchStrikeDataAPI = async ({ expiry, script, index = 0, term = 'CE
   return response.data?.data || [];
 };
 
-export const addMarketScriptAPI = async ({
-  market_type_id,
-  script_id,
-  script_expiry_id,
-  expiryTerm,
-  type,
-  strickObj
-}) => {
-  const defaultParams = await getDefaultParams();
-  let payload;
-  if (String(market_type_id) === constant) {
-    payload = {
-      market_type_id,
-      script_id,
-      script_expiry_id: `${script_expiry_id}-${expiryTerm}`,
-      script_expiry_type: strickObj.check_script_name,
-      script_expiry_orginal_formate: `${strickObj.rate} ${type}`
-    }
-  } else {
-    let str = 'I'.repeat(expiryTerm + 1);  // 'I'.repeat(n) returns a string with 'I' repeated (expiryTerm + 1) times.
-    console.log('expiryTerm', expiryTerm)
-    console.log('str', str);
-    payload = {
-      market_type_id,
-      script_id,
-      script_expiry_id: script_expiry_id,
-      script_expiry_type: str,
-    }
-  }
 
-  try {
-    const res = await axiosInstance.post('ajaxfiles/add_market_watch', { ...defaultParams, ...payload });
-
-    if (res.data.status === 'ok') {
-      return res.data || {};
-    } else {
-      throw new Error(res.data.message || 'Unknown error occurred');
-    }
-  } catch (err) {
-    console.error('Error in addMarketScript:', err.message || err);
-    throw err;
-  }
-};
 
 export const closeAllPositions = async ({
   password,
@@ -632,6 +592,47 @@ export const closeAllPositions = async ({
     }
   } catch (err) {
     console.error('Error in closeAllPositions:', err.message || err);
+    throw err;
+  }
+};
+
+export const forexcloseAllPositions = async ({
+  password,
+  market,
+  script,
+  client,
+  master,
+  broker,
+  exparyDate,
+}) => {
+  const defaultParams = await getDefaultParams();
+
+  const payload = {
+    password,
+    market_type_id: market,
+    script_id: script,
+    user_id: client,
+    master_user_id: master,
+    broker_id: broker,
+    expiry_date: exparyDate,
+    search_val: '',
+    allow_close_all: true,
+    ...defaultParams
+  };
+
+  try {
+    const res = await axiosInstance.post('ajaxfiles/trade_exit_all_position1_forex', {
+      ...defaultParams,
+      ...payload,
+    });
+
+    if (res.data.success) {
+      return res.data;
+    } else {
+      throw new Error(res.data.message || 'Failed to close positions');
+    }
+  } catch (err) {
+    console.error('Error in forexcloseAllPositions:', err.message || err);
     throw err;
   }
 };
@@ -887,6 +888,113 @@ export const fetchSummaryReportAPI = async (userId, authKey) => {
   }
 };
 
+export const fetchMarginManagementListAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return [];
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/margin_management_list", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch margin management list:", error);
+    return [];
+  }
+};
+
+export const fetchUserlistingAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return [];
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey,
+     sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10000000,
+    sSearch: "",
+  };
+
+  try {
+    const { data } = await axiosInstance.post("datatables/user_list_key", formData);
+    console.log("sedef=" , data);
+    
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch  list:", error);
+    return [];
+  }
+};
+
+export const fetchforexMarginManagementListAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return [];
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/margin_management_forex_list", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch margin management list:", error);
+    return [];
+  }
+};
+
+export const fetchforexSummaryReportAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return [];
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/summary_report_forex", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+export const fetchLedgerDetailsAPI = async (userId) => {
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  
+  const payload = {
+    is_app: '1',
+    login_user_id: dataStored?.user_id,
+    auth_key: dataStored?.auth_key,
+    user_id: userId,
+  };
+
+  try {
+    const response = await axios.post(
+      'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
+      payload
+    );
+
+    if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
+      // Filter out "Opening Balance" if needed
+      const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
+      return filtered; // return the filtered data
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.error('Error fetching ledger details:', err);
+    return [];
+  }
+};
+
 
 export const tradePlaceAPI = async (dataObj) => {
   console.log('dataObj', dataObj);
@@ -916,3 +1024,80 @@ export const tradePlaceAPI = async (dataObj) => {
     throw error;
   }
 };
+
+
+
+
+export const addMarketScriptAPI = async ({
+  market_type_id,
+  script_id,
+  script_expiry_id,
+  expiryTerm,
+  type,
+  strickObj,
+  // isForex = false
+}) => {
+  const defaultParams = await getDefaultParams();
+  let payload;
+  if (String(market_type_id) === constant) {
+    payload = {
+      market_type_id,
+      script_id,
+      script_expiry_id: `${script_expiry_id}-${expiryTerm}`,
+      script_expiry_type: strickObj.check_script_name,
+      script_expiry_orginal_formate: `${strickObj.rate} ${type}`
+    }
+  } else if (market_type_id == forex_market_type_id) {
+    payload = {
+      market_type_id,
+      script_id,
+    }
+  } else {
+    let str = 'I'.repeat(expiryTerm + 1);  // 'I'.repeat(n) returns a string with 'I' repeated (expiryTerm + 1) times.
+    console.log('expiryTerm', expiryTerm)
+    console.log('str', str);
+    payload = {
+      market_type_id,
+      script_id,
+      script_expiry_id: script_expiry_id,
+      script_expiry_type: str,
+    }
+  }
+
+  try {
+    const res =
+      market_type_id == forex_market_type_id
+        ? await axiosInstance.post('ajaxfiles/add_market_watch_forex', { ...defaultParams, ...payload })
+        : await axiosInstance.post('ajaxfiles/add_market_watch', { ...defaultParams, ...payload });
+
+    if (res.data.status === 'ok') {
+      return res.data || {};
+    } else {
+      throw new Error(res.data.message || 'Unknown error occurred');
+    }
+  } catch (err) {
+    console.error('Error in addMarketScript:', err.message || err);
+    throw err;
+  }
+};
+
+export async function removeMarketWatchAPI(market_watch_id) {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post('ajaxfiles/remove_market_watch', { ...defaultParams, market_watch_id })
+    console.log('response.data', response.data);
+  } catch (err) {
+    console.log('err', err);
+  }
+}
+
+export async function favouriteActionAPI(market_watch_id, action_type) {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post('ajaxfiles/favourite_upde', { ...defaultParams, market_watch_id, action_type })
+    console.log('response.data', response.data);
+    return response.data;
+  } catch (err) {
+    console.log('err', err);
+  }
+}

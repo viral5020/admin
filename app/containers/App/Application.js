@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { PropTypes } from 'prop-types';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeWrapper';
 import Dashboard from '../Templates/Dashboard';
 import {
@@ -48,7 +48,17 @@ import {
   Forex_position
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
+import Forexsummary from '../Dashboard/Forexsummary';
+import Marginmanagement from '../Dashboard/Marginmanagement';
+import Forexmarginmanagement from '../Dashboard/Forexmarginmanagement';
+import BannedBlockedScript from '../Dashboard/BannedBlockedScript';
+import Userlisting from '../Dashboard/Userlisting';
+const rawData = JSON.parse(sessionStorage.getItem("data"));
+const userType = parseInt(rawData?.user_type, 10);
 
+const notificationData = JSON.parse(sessionStorage.getItem("notification"));
+const isStock = notificationData?.isStock;
+const isForex = notificationData?.isForex;
 function Application(props) {
   const { history } = props;
   const changeMode = useContext(ThemeContext);
@@ -59,18 +69,26 @@ function Application(props) {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
           <Route path="/ledger" element={<Ledger />} />
-          <Route path="dashboard/watchlist" element={<Watchlist />} />
-          <Route path="dashboard/stock-details" element={<StockDetailMobile />} />
+          <Route
+            path="dashboard/watchlist"
+            element={isStock ? <Watchlist /> : <Navigate to="/app" />}
+          />
+          {/* <Route path="dashboard/stock-details" element={<StockDetailMobile />} /> */}
           <Route path="dashboard/edit-Delete-Logs" element={<EditDeleteLogs />} />
-          <Route path="dashboard/order-Book" element={<OrderBook />} />
-          <Route path="dashboard/positions" element={<Positions />} />
+          <Route path="dashboard/order-Book" element={isStock ? <OrderBook /> : <Navigate to="/app" />} />
+          <Route path="dashboard/positions" element={isStock ?<Positions /> : <Navigate to="/app" />} />
           <Route path="dashboard/banned-scripts" element={<BlockedScripts />} />
-          <Route path="dashboard/max-qty-details" element={<MaxQTYDetails />} />
+          <Route path="dashboard/max-qty-details" element={userType !== 2 && userType !== 4 && userType !== 5 && isStock ?<MaxQTYDetails />: <Navigate to="/app" />} />
           <Route path="dashboard/rejection-logs" element={<RejectionLogs />} />
-          <Route path="dashboard/forex-order" element={<Forex_order />} />
-          <Route path="dashboard/forex-position" element={<Forex_position />} />
-          <Route path="dashboard/summary-report" element={<Summary_report />} />
-          <Route path="dashboard/forex-watchlist" element={<Watchlist />} />
+          <Route path="dashboard/forex-order" element={isForex ?<Forex_order />: <Navigate to="/app" />} />
+          <Route path="dashboard/forex-position" element={isForex ?<Forex_position />: <Navigate to="/app" />} />
+          <Route path="dashboard/summary-report" element={userType !== 1  && isStock ?<Summary_report />: <Navigate to="/app" />} />
+          <Route path="dashboard/forex-watchlist" element={isForex ?<Watchlist />: <Navigate to="/app" />} />
+          <Route path="dashboard/forex-Summaryreport" element={userType !== 1 && isForex ?<Forexsummary />: <Navigate to="/app" />} />
+          <Route path="dashboard/Margin-management" element={userType !== 1 && userType !== 2 && isStock ?<Marginmanagement />: <Navigate to="/app" />} />
+          <Route path="dashboard/forex-Margin-management" element={userType !== 1 && userType !== 2 && isForex ?<Forexmarginmanagement />: <Navigate to="/app" />} />
+          <Route path="dashboard/Banned-Blocked-Scripts" element={userType !== 2 && isStock ? <BannedBlockedScript />: <Navigate to="/app" />} />
+          <Route path="dashboard/User-listing" element={<Userlisting />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

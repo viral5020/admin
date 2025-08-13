@@ -124,10 +124,10 @@ if (isStock) {
 
       ...(userType !== 2
         ? [{
-          key: 'Banned Scripts',
-          name: 'Banned Scripts',
-          link: '/app/dashboard/Banned-scripts',
-          icon: 'ban-outline'
+           key: 'editDeleteLogs',
+  name: 'Banned/Blocked script',
+  link: '/app/dashboard/Banned-Blocked-Scripts',
+  icon: 'create-outline'
         }]
         : []),
 
@@ -144,7 +144,7 @@ if (isStock) {
         ? [{
           key: 'Max QTY details',
           name: 'margin managemnet',
-          // link: '/app/dashboard/max-qty-details',
+          link: '/app/dashboard/Margin-management',
           icon: 'reader-outline'
         }]
         : []),
@@ -227,7 +227,7 @@ if (isForex) {
         ? [{
           key: 'Max QTY details',
           name: 'margin managemnet',
-          // link: '/app/dashboard/max-qty-details',
+          link: '/app/dashboard/forex-Margin-management',
           icon: 'reader-outline'
         }]
         : []),
@@ -236,7 +236,7 @@ if (isForex) {
         ? [{
           key: 'Max QTY details',
           name: 'summary report',
-          // link: '/app/dashboard/max-qty-details',
+          link: '/app/dashboard/forex-Summaryreport',
           icon: 'reader-outline'
         }]
         : []),
@@ -244,6 +244,67 @@ if (isForex) {
     ]
   });
 }
+
+if (userType !== 1) {
+  menu.push({
+    key: 'user',
+    name: 'User',
+    icon: 'ion-ios-swap-outline',
+    child: [
+      {
+        key: 'user_listing',
+        name: 'User Listing',
+        link: '/app/dashboard/User-listing',
+        icon: 'list-outline'
+      },
+      
+      ...(userType !== 2  && userType !== 1
+        ? [{
+        key: 'master_listing',
+        name: 'Master Listing',
+        // link: '/app/dashboard/forex-order',
+        icon: 'receipt-outline'
+       }]
+        : []),
+
+      ...(userType !== 2  && userType !== 1
+        ? [{
+        key: 'forexpositions',
+        name: 'Broker_Listing',
+        // link: '/app/dashboard/forex-position',
+        icon: 'cube-outline'
+       }]
+        : []),
+
+      ...(userType !== 2  && userType !== 1
+        ? [{
+          key: 'add_account',
+          name: 'Add Account',
+          // link: '/app/dashboard/positions',
+          icon: 'cube-outline'
+        }]
+        : []),
+      ...(userType === 4 
+        ? [{
+          key: 'employee_listing',
+          name: 'Employe Listing',
+          // link: '/app/dashboard/positions',
+          icon: 'cube-outline'
+        }]
+        : []),
+
+      ...(userType === 4 
+        ? [{
+          key: 'add_employee',
+          name: 'Add Employee',
+          // link: '/app/dashboard/forex-Margin-management',
+          icon: 'reader-outline'
+        }]
+        : []),
+    ]
+  });
+}
+
 
 menu.push({
   key: 'ledger',
@@ -257,6 +318,20 @@ menu.push({
   name: 'Edit Delete',
   link: '/app/dashboard/edit-Delete-Logs',
   icon: 'create-outline'
+});
+
+// userType !== 2 && menu.push({
+//   key: 'editDeleteLogs',
+//   name: 'Banned/Blocked script',
+//   link: '/app/dashboard/Banned-Blocked-Scripts',
+//   icon: 'create-outline'
+// });
+
+userType !== 2 && menu.push({
+  key: 'Banned Scripts',
+  name: 'Banned Scripts',
+  link: '/app/dashboard/Banned-scripts',
+  icon: 'ban-outline'
 });
 
 menu.push({

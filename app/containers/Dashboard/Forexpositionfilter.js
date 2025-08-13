@@ -6,7 +6,7 @@ import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import { Button, useTheme,  Grid, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions,
     TextField } from '@mui/material';
-import { closeAllPositions, rolloverPositions } from './API/API';
+import { closeAllPositions, forexcloseAllPositions, rolloverPositions } from './API/API';
 import ForexComexScriptFilter from './forexorderfilter'; 
 
 const ForexpositionFilter = ({
@@ -79,7 +79,7 @@ const handleConfirmRollover = async () => {
 
 const handleConfirmClose = async () => {
   try {
-    const result = await closeAllPositions({
+    const result = await forexcloseAllPositions({
       password,
       market,
       script,

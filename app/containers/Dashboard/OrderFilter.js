@@ -102,24 +102,87 @@ const OrderFilter = ({
                   showBroker={userType !== 1 && userType !== 2}
               />
 
-        <Grid item xs={12} sm={6} md={3} lg={2.4}>
-          <Button
-            onClick={onApply}
-            sx={{
-              backgroundColor: theme.palette.secondary.main,
-              color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
-              borderRadius: '4px',
-              textTransform: 'none',
-              '&:hover': {
-                backgroundColor: theme.palette.secondary.dark,
-              },
-            }}
-            fullWidth
-          >
-            Apply
-          </Button>
-        </Grid>
+      <Grid 
+  item 
+  xs={12} sm={6} md={3} lg={2.4} 
+  sx={{ display: 'flex', gap: 1 }}
+>
+  {/* Apply Button */}
+  <Button
+    onClick={onApply}
+    sx={{
+      backgroundColor: theme.palette.secondary.main,
+      color: theme.palette.secondary.contrastText,
+      padding: '6px 12px',
+      borderRadius: '4px',
+      textTransform: 'none',
+      flex: 1,
+      '&:hover': { backgroundColor: theme.palette.secondary.dark },
+    }}
+  >
+    Apply
+  </Button>
+
+  {/* Trade Export Button */}
+  <Button
+    onClick={async () => {
+      try {
+        const rawData = JSON.parse(sessionStorage.getItem("data"));
+        const payload = {
+          is_app: "1",
+          login_user_id: rawData.user_id,
+          auth_key: rawData.auth_key,
+          status,
+          start_end,
+          end_date,
+          orderType,
+          market,
+          script,
+          client,
+          master,
+          broker,
+        };
+
+        console.log("⬇ Export Payload:", payload);
+
+        const response = await fetch(
+          "http://128.199.126.171/~goldorg/ajaxfiles/download_csv_trade_book",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) throw new Error("Export failed");
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "trade_book.csv"; // Adjust filename if needed
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("❌ Trade export failed:", error);
+      }
+    }}
+    sx={{
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      padding: '6px 12px',
+      borderRadius: '4px',
+      textTransform: 'none',
+      flex: 1,
+      '&:hover': { backgroundColor: theme.palette.primary.dark },
+    }}
+  >
+    Trade Export
+  </Button>
+</Grid>
+
       </Grid>
     </Box>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchSummaryReportAPI } from "./API/API";
+import { fetchforexSummaryReportAPI, fetchSummaryReportAPI } from "./API/API";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -22,8 +22,6 @@ import {
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import Forexsummaryfilter from "./Forexsummaryfilter";
-import Summaryreportfilter from "./summaryreportfilter";
-import LedgerDetailsDialog from "./Ledgerdialog";
 
 const Summary_report = () => {
   const theme = useTheme();
@@ -69,7 +67,7 @@ const Summary_report = () => {
 
       if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
         const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
-        setLedgerDetails(response.data.data);
+        setLedgerDetails(filtered);
       } else {
         setLedgerDetails([]);
       }
@@ -93,12 +91,12 @@ const Summary_report = () => {
     setLedgerDetails([]);
   };
 
-  const fetchSummaryReportData = async () => {
+  const fetchforexSummaryReportData = async () => {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     if (!dataStored?.user_id || !dataStored?.auth_key) return;
 
     setLoading(true);
-    const result = await fetchSummaryReportAPI(dataStored.user_id, dataStored.auth_key);
+    const result = await fetchforexSummaryReportAPI(dataStored.user_id, dataStored.auth_key);
 
     const formattedData = Object.entries(result).map(([key, value], index) => ({
       ...value,
@@ -112,7 +110,7 @@ const Summary_report = () => {
   };
 
   useEffect(() => {
-    fetchSummaryReportData();
+    fetchforexSummaryReportData();
   }, []);
 
   useEffect(() => {
@@ -178,7 +176,7 @@ const Summary_report = () => {
           >
             <Box sx={{ width: 300, p: 2 }}>
               <Typography variant="h6" gutterBottom>Filters</Typography>
-              <Summaryreportfilter
+              <Forexsummaryfilter
                 isDarkMode={theme.palette.mode === "dark"}
                 start_end={start_end}
                 setStart_end={setStart_end}
@@ -203,7 +201,7 @@ const Summary_report = () => {
         </>
       ) : (
         <Box sx={{ mb: 2 }}>
-          <Summaryreportfilter
+          <Forexsummaryfilter
             isDarkMode={theme.palette.mode === "dark"}
             start_end={start_end}
             setStart_end={setStart_end}
@@ -418,7 +416,7 @@ const Summary_report = () => {
           <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
             <tr>
               {[
-                "Serial No", "Name", "Code", "Ledger", "Ledger Amount",
+                "Serial No", "Name", "Code", "Ledger", 
                 "All", "Outstanding", "Net MTM", "Total MTM",
                 "Downline MTM", "Upline MTM", "Self MTM", "Net Position"
               ].map((header) => (
@@ -440,7 +438,7 @@ const Summary_report = () => {
                   <td>
                     <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
                   </td>
-                  <td>{row.ledger_amt?.toLocaleString()}</td>
+                  
                   <td>
                     {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
                       <IconButton
@@ -508,12 +506,12 @@ const Summary_report = () => {
                     )}
 
                   </td>
-                  <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
-                  <td>
+                      <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
+                      <td>
                     {row.net_pdf && row.net_pdf.trim() !== '' && (
                       <IconButton
                         size="small"
@@ -554,12 +552,138 @@ const Summary_report = () => {
       )}
 
       {/* 📘 Ledger Dialog - Card View */}
-      <LedgerDetailsDialog
-  open={open}
-  onClose={handleClose}
-  ledgerDetails={ledgerDetails}
-  loading={loadingLedger}
-/>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>Ledger Details</DialogTitle>
+        <DialogContent dividers sx={{ p: 0.5 }}>
+          {/* {selectedRow && (
+      <>
+        <Typography variant="body2">
+          <strong>User Name:</strong> {selectedRow.user_name}
+        </Typography>
+        <Typography variant="body2">
+          <strong>User Code:</strong> {selectedRow.user_code}
+        </Typography>
+      </>
+    )} */}
+
+          {loadingLedger ? (
+            <Box sx={{ textAlign: "center", my: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : ledgerDetails.length > 0 ? (
+            <Grid container spacing={0.5}>
+              {ledgerDetails.map((entry, idx) => {
+                const isBuy = Number(entry.credit) > 0;
+                const borderColor = isBuy ? "#1976d2" : "#d32f2f";
+
+                return (
+                  <Grid item xs={12} md={6} key={idx}>
+                    <Box
+                      sx={{
+                        border: `2px solid ${borderColor}`,
+                        borderRadius: "8px",
+                        p: 1,
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0,
+                      }}
+                    >
+                      {/* Top: Name (left) and Date (right) */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {entry.valan_name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "#999" }}>
+                          {entry.date}
+                        </Typography>
+                      </Box>
+
+                      {/* Bottom Row: Values + PDF */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mt: 0.5,
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {entry.debit !== "-" ? `₹${Number(entry.debit).toLocaleString()}` : "-"}
+                        </Typography>
+                        <Typography variant="body2">
+                          {entry.credit !== "-" ? `₹${Number(entry.credit).toLocaleString()}` : "-"}
+                        </Typography>
+                        <Typography variant="body2">
+                          ₹{Number(entry.balance).toLocaleString()}
+                        </Typography>
+                        {entry.download && entry.download.trim() !== '' ? (
+                          <a
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+
+                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                              if (!dataStored) {
+                                alert("Session expired. Please log in again.");
+                                return;
+                              }
+
+                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                              const authKey = dataStored.auth_key;
+                              const loginUserId = dataStored.user_id;
+
+                              const filePath = entry.download;
+                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                              const url = new URL(fullUrl);
+
+                              url.searchParams.set('is', '1');
+                              url.searchParams.set('k', authKey);
+                              url.searchParams.set('lui', loginUserId);
+
+                              window.open(url.toString(), '_blank');
+                            }}
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#1976d2",
+                              fontWeight: 500,
+                              textDecoration: "none",
+                            }}
+                          >
+                            PDF
+                          </a>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: "0.75rem" }}
+                          >
+                            No PDF
+                          </Typography>
+                        )}
+
+                      </Box>
+                    </Box>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No ledger data found.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
 
       {/* 🔽 Pagination */}
