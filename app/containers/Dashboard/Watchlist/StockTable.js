@@ -25,6 +25,9 @@ import { lighten, darken, alpha } from '@mui/material/styles';
 import { maxWidth } from '@mui/system';
 import toast, { Toaster } from 'react-hot-toast';
 import BottomTradePopup from './BottomTradePopup';
+import { roundToTwoIN } from '../helpers/utilFunc';
+import { toastTime } from './constant';
+import { favouriteActionAPI, removeMarketWatchAPI } from '../API/API';
 
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
@@ -44,61 +47,61 @@ const generateCandleData = (name) => {
 const columnData = [
   {
     id: 'scriptName',
-    numeric: false,
+    // numeric: false,
     disablePadding: true,
     label: 'Script Name'
   },
   {
     id: 'bidRate',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Bid Rate'
   },
   {
     id: 'askRate',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Ask Rate'
   },
   {
     id: 'ltp',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'LTP'
   },
   {
     id: 'priceChangePercent',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Change (%)'
   },
   {
     id: 'priceChange',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Change'
   },
   {
     id: 'open',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Open'
   },
   {
     id: 'close',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Close'
   },
   {
     id: 'high',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'High'
   },
   {
     id: 'low',
-    numeric: true,
+    // numeric: true,
     disablePadding: false,
     label: 'Low'
   },
@@ -150,12 +153,10 @@ const logoCss = {
   // width: '1.7rem',
 }
 
-function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
+function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handleBidAskClick, showToast, handleStar, setRemoveMarket }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   const isDarkMode = theme.palette.mode === 'dark';
-  // const [openDialog, setOpenDialog] = useState(false);
-  // const [selectedAction, setSelectedAction] = useState('');
 
   const [selectedScript, setSelectedScript] = useState('');
   const [hoveredRow, setHoveredRow] = useState('');
@@ -163,7 +164,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
   const [showShadow, setShowShadow] = useState(false);
   const tableWrapperRef = useRef(null);
 
-  const [buySellPopup, setBuySellPopup] = useState(null);
 
   const handleScroll = () => {
     if (tableWrapperRef.current) {
@@ -171,7 +171,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
       setShowShadow(scrollLeft > 0);
     }
   };
-
 
   useEffect(() => {
     const wrapper = tableWrapperRef.current;
@@ -212,17 +211,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
     background: '#1976d2',
   }
 
-  const toastBoxCss = {
-    display: 'flex',
-    alignItems: 'center',
-    px: 2.5,
-    py: 1.5,
-    boxShadow: 3,
-    // minWidth: '80vw',
-    justifyContent: 'space-between',
-    borderRadius: '10px',
-  }
-
   const { classes, cx } = useStyles();
 
   const getCellBgColor = (val) => {
@@ -245,7 +233,8 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
     }
   };
 
-  const getCondition = (val, showIcon, showVal, changeVal) => {
+  const getCondition = (val, showIcon, showPR, changeVal) => {
+    const roundedVal = roundToTwoIN(val);
     return (
       <Box
         component="span"
@@ -272,38 +261,34 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
           ) : (
             <TrendingFlat fontSize="inherit" sx={{ mr: 0.5 }} />
           ))}
-        {showVal ? val + '%' : val}
+        {showPR ? roundedVal + '%' : roundedVal}
       </Box>
     )
   };
 
-  function handleBidAskClick(dataArray, columnName) {
-    if (columnName === 'bidRate') {
-      setBuySellPopup({ ...dataArray, field: 'bid' });
-    } else if (columnName === 'askRate') {
-      setBuySellPopup({ ...dataArray, field: 'ask' });
-    }
-  }
-
   const renderCell = (dataArray, keyArray, idx) => keyArray.map((itemCell, index) => {
-    const rowVal = dataArray.priceChangePercent; // ✅ main field to decide color
+    const rowVal = dataArray?.priceChangePercent; // ✅ main field to decide color
     // const rowBgColor = getCellBgColor(rowVal);
     // const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
     const rowBgColor = 'inherit';
     const rowBgColorFirstCol = 'inherit';
+    // console.log('WWWWW dataArray', dataArray);
 
     if (itemCell.id === 'scriptName') {
       const val = dataArray[itemCell.id];
+      // console.log('!!! dataArray[itemCell.id]', dataArray[itemCell.id]);
       return (
         <>
           <TableCell
-            key={dataArray.id + index.toString()}
+            key={dataArray?.id + index.toString()}
             sx={{
               ...firstColumnStyle,
               // backgroundColor: rowBgColorFirstCol,
               backgroundColor: geFisrtColBgColor(idx),
               opacity: 1,
+              cursor: 'pointer',
             }}
+            onClick={() => setIsStockOpen(dataArray)}
           // sortDirection={'desc'}
           >
             <Box sx={{ position: 'relative' }}>
@@ -313,14 +298,14 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
                 color: isDarkMode ? '#fff' : '#000'
               }}
               >
-                {dataArray.scriptName[0]}
+                {dataArray?.scriptName ? dataArray?.scriptName[0] : ''}
               </Box>
 
               <Typography variant="body1" sx={{ fontWeight: 500, display: 'inline' }} noWrap>
-                {dataArray.scriptName}
+                {dataArray?.scriptName}
               </Typography>
-              <Chip
-                label={dataArray.qty}
+              {Boolean(dataArray?.quantity) && <Chip
+                label={dataArray?.quantity}
                 color="primary"
                 variant="outlined"
                 size="small"
@@ -334,7 +319,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
                   lineHeight: 1,
                   borderWidth: 2,
                 }}
-              />
+              />}
             </Box>
             <Box
               sx={{
@@ -363,17 +348,19 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
       <TableCell
         padding="normal"
         align={itemCell.numeric ? 'right' : 'left'}
-        key={dataArray.id + index.toString()}
+        key={dataArray?.id + index.toString()}
         sx={{
           ...tableCellStyle,
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
           fontWeight: itemCell.id === 'ltp' ? 700 : null,
+          cursor: (itemCell.id === 'askRate' || itemCell.id === 'bidRate') ? 'pointer' : '',
         }}
         onClick={() => handleBidAskClick(dataArray, itemCell.id)}
       >
-        {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray.priceChange)
-          : itemCell.id === 'priceChange' ? getCondition(dataArray[itemCell.id], false, true, dataArray.priceChange)
-            : dataArray[itemCell.id]}
+        {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray?.priceChange)
+          : (itemCell.id === 'priceChange' || itemCell.id === 'askRate' || itemCell.id === 'bidRate')
+            ? getCondition(dataArray[itemCell.id], false, false, dataArray?.priceChange)
+            : roundToTwoIN(dataArray[itemCell.id])}
       </TableCell>
     );
   });
@@ -445,73 +432,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
     );
   };
 
-  function showToast(msg, onUndo, isStarRemoved) {
-    let didUndo = false;
-
-    const toastId = toast.custom((t) => (
-      <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
-        {isStarRemoved === 'removed'
-          ? <StarBorder sx={{ color: 'gray', mr: 0.8 }} />
-          : isStarRemoved === 'added'
-            ? <Star sx={{ color: 'gold', mr: 0.8 }} />
-            : isStarRemoved === 'delete'
-              ? <RemoveCircleSharpIcon sx={{ color: 'error.main', mr: 0.8 }} />
-              : ''}
-
-        <Typography sx={{ fontSize: '0.9rem' }}>
-          {/* {scriptName} Removed */}
-          {msg}
-        </Typography>
-        {onUndo && <Button
-          size="small"
-          sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0, backgroundColor: '#90caf933' }}
-          onClick={() => {
-            didUndo = true;
-            onUndo();
-            toast.dismiss(t.id);
-          }}
-        >
-          Undo
-        </Button>}
-      </Box>
-    ), {
-      id: Date.now(), // optional: prevent duplicate toasts
-      duration: 30000,
-      position: 'top-right',
-    });
-  };
-
-  function handleRemove(stock, idx) {
-    if (stock.qty > 0) {
-      showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
-    } else {
-      function onUndo() {
-        setDummyData(prev => [
-          ...prev.slice(0, idx),
-          stock,
-          ...prev.slice(idx)
-        ]);
-      }
-      setDummyData(prevData => prevData.filter(data => data.id !== stock.id));
-      showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
-    }
-  }
-
-  function handleStar(stockData) {
-    if (stockData.isFavorite) {
-      showToast(`${stockData.scriptName} removed from favorites.`, false, 'removed');
-    } else {
-      showToast(`${stockData.scriptName} added in favorites.`, false, 'added');
-    }
-    setDummyData(prevData =>
-      prevData.map(stock =>
-        stock.id === stockData.id
-          ? { ...stock, isFavorite: !stock.isFavorite }
-          : stock
-      )
-    );
-  }
-
   return (
     <Paper sx={{ margimTop: '0px' }}>
       <div className={classes.root_Table} style={{ margimTop: '0px' }}>
@@ -540,22 +460,22 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
             <TableHeader columnData={columnData} />
             <TableBody>
               {dummyData?.map((stock, idx) => {
-                if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                if (stock.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                   return false;
                 }
                 return (
                   <TableRow
                     tabIndex={-1}
                     key={stock.id}
-                    // key={idx}
-                    sx={{ cursor: 'pointer' }}
+                  // key={idx}
+                  // sx={{ cursor: 'pointer' }}
                   // onClick={() => setIsStockOpen(stock)}
                   >
                     {renderCell(stock, columnData, idx)}
 
                     {/* Star Icon */}
                     <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star' + stock.id}>
-                      <IconButton onClick={() => handleStar(stock)} sx={{ pl: 2 }}>
+                      <IconButton onClick={(e) => handleStar(stock, e)} sx={{ pl: 2 }}>
                         {stock.isFavorite ? (
                           <Star sx={{ color: 'gold' }} />
                         ) : (
@@ -566,7 +486,11 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
 
                     {/* Delete Icon */}
                     <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete' + stock.id}>
-                      <IconButton onClick={() => handleRemove(stock, idx)} sx={{ pl: 1.5 }}>
+                      <IconButton
+                        // onClick={() => handleRemove(stock, idx)}
+                        onClick={() => setRemoveMarket({ ...stock, idx })}
+                        sx={{ pl: 1.5 }}
+                      >
                         <Delete sx={{ color: 'error.main' }} />
                       </IconButton>
                     </TableCell>
@@ -577,14 +501,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData }) {
           </Table>
         </Box>
       </div>
-      <Toaster limit={3} />
-
-      <BottomTradePopup
-        open={Boolean(buySellPopup)}
-        onClose={() => setBuySellPopup(null)}
-        stockData={buySellPopup}
-        showToast={showToast}
-      />
     </Paper>
   );
 }

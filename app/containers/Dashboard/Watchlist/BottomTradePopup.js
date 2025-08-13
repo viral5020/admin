@@ -8,9 +8,11 @@ import {
 } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { tradePlaceAPI } from '../API/API';
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
 import toast from 'react-hot-toast';
+import { roundToTwoIN } from '../helpers/utilFunc';
 
 // const marketOptions = ['NSE', 'BSE', 'MCX'];
 const marketOptions = [
@@ -32,7 +34,7 @@ function getTabIndex(val) {
     return val === 'bid' ? 0 : 1;
 }
 
-const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
+const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
     const [tradeType, setTradeType] = useState('BUY');
     const [market, setMarket] = useState(marketOptions[0].value);
     const [lot, setLot] = useState('');
@@ -60,11 +62,15 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
     useEffect(() => {
         // console.log('&&& stockData', stockData);
         setTabIndex(getTabIndex(stockData?.field));
-    }, [stockData])
+    }, [Boolean(stockData)]) // will it work? stockData is prop and is object
+
+    useEffect(() => {
+        // console.log('&&& stockData', stockData);
+    }, [stockData]) // will it work? stockData is prop and is object
 
     const isBuy = tabIndex === 0;
 
-    const Icon = true ? ArrowDropUpIcon : ArrowDropDownIcon;
+    const Icon = stockData?.priceChange > 0 ? ArrowDropUpIcon : ArrowDropDownIcon;
 
     function isValuesValidate() {
         if (market === '' || lot === '' || qty === '' || price === '') {
@@ -80,7 +86,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
         if (!isValuesValidate()) return;
         try {
             const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex });
-            toast.success(`Trade added successfullt for ${stockData?.scriptName || 'SCRIPT NAME'} of Qty ${qty} at ${price}`);
+            toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`);
             resetAllState();
         } catch (error) {
             console.log('error', error)
@@ -101,20 +107,24 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                 sx: {
                     borderTopLeftRadius: 16,
                     borderTopRightRadius: 16,
-                    width: 600,
-                    mx: 'auto',
+                    width: isMobile ? '100%' : 600, // full width on mobile
+                    mx: isMobile ? 0 : 'auto',
                     mb: 0,
-                    // border: '5px solid #d32f2f'
+                    maxHeight: isMobile ? '90vh' : '80vh', // make sure mobile view fits screen
+                    overflowY: 'auto',
                 }
             }}
         >
-            <Box p={3} pb={0}>
+            <Box p={isMobile ? 2 : 3} pb={0}>
+                {/* Header */}
                 <Box
                     sx={{
                         display: "flex",
+                        flexDirection: 'row', // stack on mobile
                         justifyContent: "space-between",
-                        alignItems: "center",
+                        alignItems: isMobile ? "flex-start" : "center",
                         mb: 1,
+                        gap: isMobile ? 1 : 0
                     }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
@@ -125,129 +135,64 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                             sx={{ width: 35, height: 35, mr: 1, flexShrink: 0, borderRadius: 1 }}
                         />
                         <Typography
-                            variant="h6"
+                            variant={isMobile ? "subtitle1" : "h6"}
                             fontWeight={700}
-                            // dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
                             sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                        >{stockData?.scriptName || 'SCRIPT NAME'}</Typography>
+                        >
+                            {stockData?.scriptName || 'SCRIPT NAME'}
+                        </Typography>
                     </Box>
-                    <IconButton size="large" onClick={onClose}>
-                        <ArrowDropDownIcon />
+                    <IconButton onClick={onClose} sx={{ p: 0 }}>
+                        <KeyboardArrowDownIcon sx={{ fontSize: { xs: 22, md: 26 } }} />
                     </IconButton>
                 </Box>
-                {/* Script Title */}
-                {/* <Typography variant="h6" align="center" gutterBottom>
-                    {stockData?.scriptName || 'SCRIPT NAME'}
-                </Typography> */}
 
-                {/* Bid / Ask / LTP */}
-                {/* <Grid container spacing={0} justifyContent="space-between">
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Bid</Typography>
-                        <Typography color="success.main" fontWeight="bold">{stockData?.bid}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Ask</Typography>
-                        <Typography color="error.main" fontWeight="bold">{stockData?.ask}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">LTP</Typography>
-                        <Typography fontWeight="bold">{stockData?.ltp}</Typography>
-                    </Grid>
-                </Grid> */}
-
-                {/* Change / % */}
-                {/* <Grid container spacing={0} mt={1}>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Change</Typography>
-                        <Typography color={stockData?.change >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData?.change}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Change %</Typography>
-                        <Typography color={stockData?.changePercent >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData?.changePercent}%
-                        </Typography>
-                    </Grid>
-                </Grid> */}
-                {/* <Grid container spacing={0} justifyContent="space-between">
-                    <Grid item xs={2.5}>
-                        <Typography variant="subtitle2">Bid</Typography>
-                        <Typography color="success.main" fontWeight="bold">{stockData?.bid}</Typography>
-                    </Grid>
-                    <Grid item xs={2.5}>
-                        <Typography variant="subtitle2">Ask</Typography>
-                        <Typography color="error.main" fontWeight="bold">{stockData?.ask}</Typography>
-                    </Grid>
-                    <Grid item xs={2.5}>
-                        <Typography variant="subtitle2">LTP</Typography>
-                        <Typography fontWeight="bold">{stockData?.ltp}</Typography>
-                    </Grid>
-
-                </Grid> */}
-
+                {/* Bid / Ask / LTP row */}
                 <Grid container spacing={1} justifyContent="space-between">
-                    <Grid item xs={4}>
-                        <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
-                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>Bid</Typography> {/* this should bottom */}
-                            <Typography variant="h6" >
-                                {stockData?.bidRate}
-                            </Typography>
+                    <Grid item xs={isMobile ? 12 : 4}>
+                        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "left"} gap={1.5}>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2 }}>Bid</Typography>
+                            <Typography variant="h6">{roundToTwoIN(stockData?.bidRate)}</Typography>
                         </Box>
                     </Grid>
-
-                    <Grid item xs={4}>
-                        <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
-                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>Ask</Typography>
-                            <Typography variant="h6" >
-                                {stockData?.askRate}
-                            </Typography>
+                    <Grid item xs={isMobile ? 12 : 4}>
+                        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "left"} gap={1.5}>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2 }}>Ask</Typography>
+                            <Typography variant="h6">{roundToTwoIN(stockData?.askRate)}</Typography>
                         </Box>
                     </Grid>
-
-                    <Grid item xs={4}>
-                        <Box display="flex" alignItems="center" justifyContent="left" gap={1.5}>
-                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2, alignSelf: 'flex-end' }}>LTP</Typography>
-                            <Typography variant="h6">
-                                {stockData?.ltp}
-                            </Typography>
+                    <Grid item xs={isMobile ? 12 : 4}>
+                        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "left"} gap={1.5}>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2 }}>LTP</Typography>
+                            <Typography variant="h6">{roundToTwoIN(stockData?.ltp)}</Typography>
                         </Box>
                     </Grid>
                 </Grid>
 
-
-                {/* OHLC */}
+                {/* %change change OHLC */}
                 <Grid container spacing={1} mt={1}>
-                    <Grid item xs={2}>
-                        <Typography variant="subtitle2">Change</Typography>
-                        <Typography color={stockData?.change >= 0 ? 'success.main' : 'error.main'}>
-                            {stockData?.priceChange}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={2.2}>
-                        <Typography variant="subtitle2">Change %</Typography>
-                        <Typography color={stockData?.changePercent >= 0 ? 'success.main' : 'error.main'}>
-                            <Icon />{stockData?.priceChangePercent}%
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={1.9}>
-                        <Typography variant="subtitle2">Open</Typography>
-                        <Typography>{stockData?.open}</Typography>
-                    </Grid>
-                    <Grid item xs={1.9}>
-                        <Typography variant="subtitle2">Close</Typography>
-                        <Typography>{stockData?.close}</Typography>
-                    </Grid>
-                    <Grid item xs={1.9}>
-                        <Typography variant="subtitle2">High</Typography>
-                        <Typography>{stockData?.high}</Typography>
-                    </Grid>
-                    <Grid item xs={1.9}>
-                        <Typography variant="subtitle2">Low</Typography>
-                        <Typography>{stockData?.low}</Typography>
-                    </Grid>
+                    {[
+                        { label: 'Change', value: roundToTwoIN(stockData?.priceChange), color: stockData?.change >= 0 ? 'success.main' : 'error.main' },
+                        { label: 'Change %', value: <><Icon />{roundToTwoIN(stockData?.priceChangePercent)}%</>, color: stockData?.changePercent >= 0 ? 'success.main' : 'error.main' },
+                        { label: 'Open', value: roundToTwoIN(stockData?.open) },
+                        { label: 'Close', value: roundToTwoIN(stockData?.close) },
+                        { label: 'High', value: roundToTwoIN(stockData?.high) },
+                        { label: 'Low', value: roundToTwoIN(stockData?.low) },
+                    ].map((item, index) => (
+                        <Grid
+                            item
+                            xs={6}  // On mobile: 2 columns
+                            sm={2}  // On desktop: original layout
+                            key={index}
+                        >
+                            <Typography variant="subtitle2">{item.label}</Typography>
+                            <Typography color={item.color ?? 'inherit'}>
+                                {item.value}
+                            </Typography>
+                        </Grid>
+                    ))}
                 </Grid>
+
 
                 <Divider sx={{ my: 2 }} />
 
@@ -473,7 +418,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {} }) => {
                     </Box>
                 </Box>
             </Box>
-        </Drawer >
+        </Drawer>
+
     );
 };
 

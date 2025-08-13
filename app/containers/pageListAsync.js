@@ -40,7 +40,7 @@ export const Watchlist = loadable(() =>
   fallback: <Loading />,
 });
 export const StockDetailMobile = loadable(() =>
-  import('./Dashboard/StockDetailMobile'), {
+  import('./Dashboard/Watchlist/StockDetailMobile'), {
   fallback: <Loading />,
 });
 export const Ledger = loadable(() =>

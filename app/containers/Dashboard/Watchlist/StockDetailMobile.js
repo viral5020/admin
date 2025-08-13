@@ -16,7 +16,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ApexCharts from './Apexcharts'; // Adjust path to your actual component
+import ApexCharts from '../Apexcharts'; // Adjust path to your actual component
 
 const StockDetailMobile = () => {
     const theme = useTheme();
@@ -87,7 +87,7 @@ const StockDetailMobile = () => {
                 </AppBar>
 
                 {/* Chart */}
-                <Paper elevation={2} sx={{ m: 2, mt: '60px', p: 0, borderRadius: 3 }}>
+                {/* <Paper elevation={2} sx={{ m: 2, mt: '60px', p: 0, borderRadius: 3 }}>
                     <ApexCharts
                         name={scriptName}
                         data={generateCandleData()}
@@ -95,10 +95,10 @@ const StockDetailMobile = () => {
                     />
                 </Paper>
 
-                <Divider sx={{ mx: 2, mb: 2 }} />
+                <Divider sx={{ mx: 2, mb: 2 }} /> */}
 
                 {/* Stats */}
-                <Grid container spacing={1} px={2}>
+                <Grid container spacing={1} px={2} sx={{ mt: '60px' }}>
                     {[
                         { label: 'Open', value: open },
                         { label: 'Close', value: close },
@@ -106,10 +106,10 @@ const StockDetailMobile = () => {
                         { label: 'Low', value: low },
                         { label: 'Bid', value: bidRate },
                         { label: 'Ask', value: askRate },
-                        { label: 'Qty', value: qty },
-                        { label: 'Max Order', value: maxOrder },
-                        { label: 'Position', value: position },
-                        { label: 'Updated At', value: lastChangedAt },
+                        // { label: 'Qty', value: qty },
+                        // { label: 'Max Order', value: maxOrder },
+                        // { label: 'Position', value: position },
+                        // { label: 'Updated At', value: lastChangedAt },
                     ].map(({ label, value }) => (
                         <Grid item xs={6} key={label}>
                             <Paper

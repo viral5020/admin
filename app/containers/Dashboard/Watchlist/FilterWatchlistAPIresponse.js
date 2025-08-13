@@ -15964,3 +15964,146 @@ const aaa = {
         "isForex": 0
     }
 }
+
+const ddd = {
+    "InstrumentIdentifier": "SILVER-I",
+    "Exchange": "MCX",
+    "BuyPrice": 113485,
+    "ServerTime": 1754909220,
+    "SellPrice": 113509,
+    "LastTradePrice": 113515,
+    "Open": 114291,
+    "High": 114540,
+    "Low": 112817,
+    "Close": 114881,
+    "PriceChange": -1366,
+    "PriceChangePercentage": -1.19
+}
+
+const BBB_item = {
+    "script_name": "RUSHIL",
+    "script_expiry_orginal_format": "",
+    "PriceChange": -1.139999999999997,
+    "PriceChangePercentage": "-4.8%",
+    "price": 22.6,
+    "market_watch_id": "7026858",
+    "script_expiry_id": "0",
+    "script_id": "813",
+    "market_type_id": "8",
+    "script_expiry_type": "",
+    "script_lot_qty": "1",
+    "SellPrice": 22.64,
+    "BuyPrice": 22.6,
+    "colorBuyPrice": "black",
+    "colorSellPrice": "black",
+    "colorLtpPrice": "black",
+    "socket_data": {
+        "InstrumentIdentifier": "RUSHIL",
+        "Exchange": "EQ",
+        "BuyPrice": 22.6,
+        "ServerTime": 1754906400,
+        "SellPrice": 22.64,
+        "LastTradePrice": 22.6,
+        "Open": 23.75,
+        "High": 23.99,
+        "Low": 22.07,
+        "Close": 23.74,
+        "PriceChange": -1.139999999999997,
+        "PriceChangePercentage": -4.8
+    }
+}
+
+const socketwatchlist = {
+    "InstrumentIdentifier": "SILVER-I",
+    "Exchange": "MCX",
+    "BuyPrice": 113232,
+    "ServerTime": 1754993217,
+    "SellPrice": 113247,
+    "LastTradePrice": 113222,
+    "Open": 113296,
+    "High": 113750,
+    "Low": 113057,
+    "Close": 113296,
+    "PriceChange": -74,
+    "PriceChangePercentage": -0.07
+}
+
+const qwe = {
+    "market_watch_id": "7933837",
+    "market_type_id": "1",
+    "market_type_name": "MCXFUT",
+    "script_id": "161",
+    "script_name": "ZINC",
+    "script_expiry_id": "27292",
+    "script_expiry_date": "2025-07-31",
+    "script_expiry_type": "I",
+    "script_expiry_orginal_format": "31JUL2025",
+    "script_lot_qty": "5000",
+    "min_order": null,
+    "max_order": null,
+    "position_limit": null,
+    "quantity": 0
+}
+
+const qqq = {
+    "market_watch_id": "7026858",
+    "market_type_id": "8",
+    "market_type_name": "NSEEQT",
+    "script_id": "813",
+    "script_name": "RUSHIL",
+    "script_expiry_id": "0",
+    "script_expiry_date": "0000-00-00",
+    "script_expiry_type": "",
+    "script_lot_qty": "1",
+    "script_expiry_orginal_format": "",
+    "min_order": null,
+    "max_order": null,
+    "position_limit": null,
+    "quantity": 0,
+    "favourite": "0"
+}
+const org = {
+    "market_watch_id": "7933843",
+    "market_type_id": "2",
+    "market_type_name": "NSEFUT",
+    "script_id": "37",
+    "script_name": "CIPLA",
+    "script_expiry_id": "27812",
+    "script_expiry_date": "2025-08-28",
+    "script_expiry_type": "I",
+    "script_lot_qty": "375",
+    "script_expiry_orginal_format": "28AUG2025",
+    "min_order": null,
+    "max_order": null,
+    "position_limit": null,
+    "quantity": 0,
+    "favourite": "0"
+}
+
+const dummy = {
+    "market_watch_id": "7933843",
+    "market_type_id": "2",
+    "market_type_name": "NSEFUT",
+    "script_id": "37",
+    "script_name": "CIPLA",
+    "script_expiry_id": "27812",
+    "script_expiry_date": "2025-08-28",
+    "script_expiry_type": "I",
+    "script_lot_qty": "375",
+    "script_expiry_orginal_format": "28AUG2025",
+    "min_order": null,
+    "max_order": null,
+    "position_limit": null,
+    "quantity": 0,
+    "favourite": "0",
+    "id": "7933843",
+    "scriptName": "CIPLA 28 AUG 2025",
+    // "exchange": "NSEFUT",
+    "qty": 0,
+    // "time": 1755065897233,
+    // "maxOrder": 0,
+    // "position": "Buy",
+    "isFavorite": false,
+    // "lastChangedAt": "2025-08-13 06:18:17"
+}
+

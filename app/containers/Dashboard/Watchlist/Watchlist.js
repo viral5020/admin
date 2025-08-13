@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import brand from 'dan-api/dummy/brand';
 import { Helmet } from 'react-helmet';
 import Grid from '@mui/material/Grid';
@@ -30,10 +30,20 @@ import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from './MobileStockTable';
 import { Navigate, useLocation } from 'react-router-dom';
 import BackToTop from '../BackToTop';
-import { getForexWatchListDataAPI, getWatchListDataAPI } from '../API/API';
+import { favouriteActionAPI, getForexWatchListDataAPI, getWatchListDataAPI, removeMarketWatchAPI } from '../API/API';
 import { TableBody, TableHead } from 'mui-datatables';
 import useStylesCx from '../../../components/Tables/tableStyle-jss';
 import { useIsFirstRender } from '@uidotdev/usehooks';
+import { cloneDeep } from 'lodash';
+import SocketContext from '../Socket/SocketContext';
+import { formatSelectedKeys } from '../helpers/utilFunc';
+import BottomTradePopup from './BottomTradePopup';
+import toast, { Toaster } from 'react-hot-toast';
+import { toastTime } from './constant';
+import RemoveCircleSharpIcon from '@mui/icons-material/RemoveCircleSharp';
+import ReportIcon from '@mui/icons-material/Report';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
 
 
 const generateCandleData = () => {
@@ -50,6 +60,18 @@ const generateCandleData = () => {
   });
   return data;
 };
+
+const toastBoxCss = {
+  display: 'flex',
+  alignItems: 'center',
+  px: 2.5,
+  py: 1.5,
+  boxShadow: 3,
+  // minWidth: '80vw',
+  justifyContent: 'space-between',
+  borderRadius: '10px',
+}
+
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -368,35 +390,36 @@ function formatDate(str) {
   return `${day} ${month} ${year}`;
 }
 
+function setKeysOfScriptData(item) {
+  const scriptName = `${item.script_name} ${formatDate(item.script_expiry_orginal_format)}`;
+  // const maxOrder = parseInt(item.max_order, 10) || 0;
+  // const qty = parseInt(item.quantity, 10) || 0;
 
-function generateDummyWatchlistData(scripts = []) {
-  return scripts.map((item, index) => {
-    const scriptName = `${item.script_name} ${formatDate(item.script_expiry_orginal_format)}`;
-    const maxOrder = parseInt(item.max_order, 10) || 0;
-    const qty = parseInt(item.quantity, 10) || 0;
+  return {
+    ...item,
+    id: item.market_watch_id,
+    scriptName,
+    isFavorite: item.favourite == 1,
+    // exchange: item.market_type_name || 'NSE',
+    // open: getRandomPrice(280000, 290000),
+    // close: getRandomPrice(270000, 285000),
+    // high: getRandomPrice(285000, 295000),
+    // low: getRandomPrice(265000, 280000),
+    // bidRate: getRandomPrice(250000, 290000),
+    // askRate: getRandomPrice(250000, 290000),
+    // ltp: getRandomPrice(270000, 290000),
+    // priceChange: getRandomFloat(-500, 500),
+    // priceChangePercent: getRandomFloat(-2.5, 2.5),
+    // qty,
+    // time: new Date().getTime(),
+    // maxOrder,
+    // position: Math.random() > 0.5 ? 'Buy' : 'Sell',
+    // lastChangedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+  };
+}
 
-    return {
-      ...item,
-      id: item.market_watch_id,
-      scriptName,
-      exchange: item.market_type_name || 'NSE',
-      open: getRandomPrice(280000, 290000),
-      close: getRandomPrice(270000, 285000),
-      high: getRandomPrice(285000, 295000),
-      low: getRandomPrice(265000, 280000),
-      bidRate: getRandomPrice(250000, 290000),
-      askRate: getRandomPrice(250000, 290000),
-      ltp: getRandomPrice(270000, 290000),
-      priceChange: getRandomFloat(-500, 500),
-      priceChangePercent: getRandomFloat(-2.5, 2.5),
-      qty,
-      time: new Date().getTime(),
-      maxOrder,
-      position: Math.random() > 0.5 ? 'Buy' : 'Sell',
-      isFavorite: item.favourite === '1',
-      lastChangedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    };
-  });
+function setKeysOfAllScriptData(scripts = []) {
+  return scripts.map((item, index) => setKeysOfScriptData(item));
 }
 
 
@@ -408,6 +431,8 @@ function Watchlist() {
 
   const location = useLocation();
   const [isForex, setIsForex] = useState();
+  const [isFovritePage, setisFovritePage] = useState(false);
+  // const [isForexFovrite, setIsForexFovrite] = useState(false)
 
   const title = brand.name + ' - Cryptocurrency Dashboard';
   const description = brand.desc;
@@ -416,6 +441,31 @@ function Watchlist() {
   const [isStockOpen, setIsStockOpen] = useState(null);
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
   const [dummyData, setDummyData] = useState();
+
+  const [removeMarket, setRemoveMarket] = useState(false);
+
+  const [socketData, setSocketData] = useState();
+  const socketContext = useContext(SocketContext);
+  // console.log('^^^ socketContext', socketContext);
+  const socket = socketContext.socket;
+  // console.log('socket', socket);
+  const [buySellPopup, setBuySellPopup] = useState(null);
+
+  useEffect(() => {
+    // console.log('!!! dummyData', dummyData);
+    if (Boolean(buySellPopup)) {
+      const dataArray = dummyData.find(item => item.script_id === buySellPopup.script_id);
+      setBuySellPopup({ ...dataArray });
+    }
+  }, [dummyData])
+
+  function handleBidAskClick(dataArray, columnName) {
+    if (columnName === 'bidRate') {
+      setBuySellPopup({ ...dataArray, field: 'bid' });
+    } else if (columnName === 'askRate') {
+      setBuySellPopup({ ...dataArray, field: 'ask' });
+    }
+  }
 
   const sections = [
     { title: 'Nifty 50 Stocks', key: 'nifty' },
@@ -436,14 +486,145 @@ function Watchlist() {
     });
   };
 
+  const getScriptKey = (watchlistModel) => {
+    // console.log('@@@ watchlistModel', watchlistModel);
+    if (!isForex) {
+      if (watchlistModel.market_type_id === "8" || watchlistModel.market_type_id === "12" || watchlistModel.market_type_id === "6" || watchlistModel.market_type_id === "10") {
+        return watchlistModel.script_name;
+      } else if (watchlistModel.market_type_id !== "5") {
+        return `${watchlistModel.script_name}-${watchlistModel.script_expiry_type}`;
+      } else {
+        return watchlistModel.script_expiry_type;
+      }
+    } else {
+      return watchlistModel.market_type_id === "7" ? `${watchlistModel.script_name}-${watchlistModel.script_expiry_type}` : watchlistModel.script_name;
+    }
+  };
+
+  useEffect(() => {
+    // Listen for messages from the server
+    socket.on("marketWatch", data => {
+      // Assuming InstrumentIdentifier is directly inside data
+      // console.log("AAAAAAAAA data.data ", data.data);
+      const rawInstrumentId = data.InstrumentIdentifier || data.data?.InstrumentIdentifier;
+      if (!rawInstrumentId) {
+        console.error("InstrumentIdentifier not found in socket data");
+        return;
+      }
+
+      // console.log("@@@ rawInstrumentId", rawInstrumentId)
+
+      // const currentSocketData = socketDataRef.current;
+
+      // if (currentSocketData[rawInstrumentId]) {
+      //   data.data["colorBuyPrice"] = "black";
+      //   data.data["colorSellPrice"] = "black";
+
+      //   if (currentSocketData[rawInstrumentId].BuyPrice > data.data.BuyPrice) {
+      //     data.data.colorBuyPrice = "red";
+      //   } else if (currentSocketData[rawInstrumentId].BuyPrice < data.data.BuyPrice) {
+      //     data.data.colorBuyPrice = "blue";
+      //   }
+
+      //   if (currentSocketData[rawInstrumentId].SellPrice > data.data.SellPrice) {
+      //     data.data.colorSellPrice = "red";
+      //   } else if (currentSocketData[rawInstrumentId].SellPrice < data.data.SellPrice) {
+      //     data.data.colorSellPrice = "blue";
+      //   }
+
+      //   if (currentSocketData[rawInstrumentId].LastTradePrice > data.data.LastTradePrice) {
+      //     data.data.colorLtpPrice = "red";
+      //   } else if (currentSocketData[rawInstrumentId].LastTradePrice < data.data.LastTradePrice) {
+      //     data.data.colorLtpPrice = "blue";
+      //   }
+
+      // }
+
+      // Proper way to update the socket data
+      // console.log("Socket data recieveed", data.data);
+
+      setSocketData(prevData => ({
+        ...prevData,
+        [rawInstrumentId]: data.data, // Use the `InstrumentIdentifier` as the key
+      }));
+    });
+  }, []);
+
+  function addSocketDataToDummyData() {
+    const updatedData = dummyData && dummyData.map(item => getStockData(item));
+    const numWithCommasData = updatedData && updatedData.map(item => {
+      const sss = formatSelectedKeys(item);
+      // console.log('sss', sss);
+      return sss;
+    });
+    setDummyData(updatedData);
+    // setDummyData(numWithCommasData);
+  }
+
+  useEffect(() => {
+    addSocketDataToDummyData();
+  }, [socketData])
+
+  useEffect(() => {
+    // console.log('dummyData', dummyData); // chatgpt : this is not logging with data
+  }, [dummyData])
+
+  const getStockData = coinItem => {
+    var scriptNameData = getScriptKey(coinItem)
+    var coinItemFilter = scriptNameData;
+    // console.log('@@@ scriptNameData', scriptNameData);
+    // console.log('@@@ scriptNameData === YESBANK', scriptNameData === 'YESBANK');
+    // console.log('@@@ scriptNameData.length', scriptNameData.length);
+    // console.log('@@@ socketData', socketData);
+    const dataItem = socketData[coinItemFilter] || {};
+    // console.log('@@@ coinItem', coinItem);
+    // console.log('@@@ dataItem', dataItem);
+    if (dataItem != undefined) {
+      return {
+        isFavorite: coinItem.isFavorite,
+        scriptName: coinItem.scriptName,
+        script_name: coinItem.script_name,
+        script_expiry_orginal_format: coinItem.script_expiry_orginal_format,
+        priceChange: dataItem.PriceChange !== undefined ? dataItem.PriceChange : "0",
+        priceChangePercent: dataItem.PriceChangePercentage !== undefined ? dataItem.PriceChangePercentage : "0",
+        ltp: dataItem.LastTradePrice != undefined ? dataItem.LastTradePrice : "0",
+        qty: coinItem.quantity != undefined ? coinItem.quantity : "0",
+        market_watch_id: coinItem.market_watch_id,
+        script_expiry_id: coinItem.script_expiry_id,
+        script_id: coinItem.script_id,
+        market_type_id: coinItem.market_type_id,
+        script_expiry_type: coinItem.script_expiry_type,
+        script_lot_qty: coinItem.script_lot_qty,
+        askRate: dataItem.SellPrice != undefined ? dataItem.SellPrice : "0",
+        bidRate: dataItem.BuyPrice != undefined ? dataItem.BuyPrice : "0",
+        colorBuyPrice: dataItem.colorBuyPrice != undefined ? dataItem.colorBuyPrice : "black",
+        colorSellPrice: dataItem.colorSellPrice != undefined ? dataItem.colorSellPrice : "black",
+        colorLtpPrice: dataItem.colorLtpPrice != undefined ? dataItem.colorLtpPrice : "black",
+        socket_data: dataItem != undefined ? dataItem : { High: 0, Open: 0, Low: 0, Close: 0 },
+        high: dataItem.High != undefined ? dataItem.High : "0",
+        low: dataItem.Low != undefined ? dataItem.Low : "0",
+        open: dataItem.Open != undefined ? dataItem.Open : "0",
+        close: dataItem.Close != undefined ? dataItem.Close : "0",
+      };
+    };
+  };
+
   async function getWatchListData() {
     try {
       const data = isForex ? await getForexWatchListDataAPI() : await getWatchListDataAPI();
 
       // console.log('data', data);
-      const dd = generateDummyWatchlistData(data.scripts);
-      // console.log('dd', dd);
+      // console.log('WWW data.scripts', data.scripts);
+      let dd = setKeysOfAllScriptData(data.scripts);
+      dd = isFovritePage ? dd.filter(item => item.isFavorite) : dd;
+      console.log('WWW dd', dd);
       setDummyData(dd);
+      data.scripts.forEach(script => {
+        // console.log('QQQ script', script);
+        socket.emit("addMarketWatch", {
+          product: getScriptKey(script), // Assuming script_name is the key you want to emit
+        });
+      });
     } catch (error) {
       console.log('error', error);
     }
@@ -453,13 +634,129 @@ function Watchlist() {
     const path = location.pathname;
     const lastPart = path.split("/").pop();
     // console.log('lastPart', lastPart);
-    lastPart === 'forex-watchlist' ? setIsForex(true) : setIsForex(false);
+    // lastPart === 'forex-watchlist' ? setIsForex(true) : setIsForex(false);
+    // lastPart === 'fovrite-list' ? setisFovritePage(true) : setisFovritePage(false);
+
+    if (lastPart === 'forex-watchlist') {
+      setIsForex(true);
+      setisFovritePage(false);
+    } else if (lastPart === 'fovrite-list') {
+      setIsForex(false);
+      setisFovritePage(true);
+    } else if (lastPart === 'forex-fovrite-list') {
+      setIsForex(true);
+      setisFovritePage(true);
+    } else {
+      setIsForex(false);
+      setisFovritePage(false);
+    }
+    // lastPart === 'forex-fovrite-list' ? setIsForexFovrite(true) : setIsForexFovrite(false);
   }, [location.pathname])
 
   useEffect(() => {
     // console.log('isForex', isForex);
     !isFirstRender ? getWatchListData() : null;
   }, [isForex])
+
+
+  function showToast(msg, onUndo, actionIcon) {
+    let didUndo = false;
+
+    const toastId = toast.custom((t) => (
+      <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
+        {actionIcon === 'removed'
+          ? <StarBorder sx={{ color: 'gray', mr: 0.8 }} />
+          : actionIcon === 'added'
+            ? <Star sx={{ color: 'gold', mr: 0.8 }} />
+            : actionIcon === 'delete'
+              ? <RemoveCircleSharpIcon sx={{ color: 'error.main', mr: 0.8 }} />
+              : actionIcon === 'error'
+                ? <ReportIcon sx={{ color: 'error.main', mr: 0.8 }} />
+                : ''}
+
+        <Typography sx={{ fontSize: '0.9rem' }}>
+          {/* {scriptName} Removed */}
+          {msg}
+        </Typography>
+        {onUndo && <Button
+          size="small"
+          sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0, backgroundColor: '#90caf933' }}
+          onClick={() => {
+            didUndo = true;
+            onUndo();
+            toast.dismiss(t.id);
+          }}
+        >
+          Undo
+        </Button>}
+      </Box>
+    ), {
+      id: Date.now(), // optional: prevent duplicate toasts
+      duration: toastTime,
+      position: 'top-right',
+    });
+  };
+
+  async function handleStar(stockData, e) {
+    if (!!e) {
+      let starBtn = e.currentTarget;
+      starBtn.disabled = true; // chatgpt : this is not working
+      setTimeout(() => {
+        starBtn.disabled = false; // re-enable after 2 seconds
+      }, 1500);
+    }
+    let isError = false;
+    if (stockData.isFavorite) {
+      const response = await favouriteActionAPI(stockData.market_watch_id, 'remove')
+      if (response.message === 'remove Successfully') {
+        showToast(`${stockData.scriptName} removed from favorites.`, false, 'removed')
+      } else {
+        isError = true;
+        showToast(`${response.message}.`, false, 'error');
+      }
+    } else {
+      const response = await favouriteActionAPI(stockData.market_watch_id, 'add')
+      if (response.message === 'Added Successfully') {
+        showToast(`${stockData.scriptName} added in favorites.`, false, 'added')
+      } else {
+        isError = true;
+        showToast(`${response.message}.`, false, 'error');
+      }
+    }
+    console.log('isError', isError);
+    !isError ? setDummyData(prevData =>
+      prevData.map(stock => {
+        return stock.script_id === stockData.script_id
+          ? { ...stock, isFavorite: !stock.isFavorite }  // chtagpt : some times this not working : "!stock.isFavorite"
+          : stock;
+      })
+    ) : null;
+  }
+
+  function handleRemove(stock, idx) {
+    setRemoveMarket(false);
+    if (stock.quantity > 0) {
+      showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
+    } else {
+      let isUndo = false;
+      function onUndo() {
+        setDummyData(prev => [
+          ...prev.slice(0, idx),
+          stock,
+          ...prev.slice(idx)
+        ]);
+        isUndo = true;
+      }
+      setTimeout(() => {
+        console.log('setTimeout isUndo', isUndo);
+        if (!isUndo) {
+          removeMarketWatchAPI(stock.market_watch_id);
+        }
+      }, [toastTime + 500])
+      setDummyData(prevData => prevData.filter(data => data.market_watch_id !== stock.market_watch_id));
+      showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
+    }
+  }
 
 
   return (
@@ -473,7 +770,18 @@ function Watchlist() {
         <meta property="twitter:description" content={description} />
       </Helmet>
       {/* <MarketPlaceWIdget /> */}
-      <FilterComponent searchText={searchText} setSearchText={setSearchText} isDarkMode={isDarkMode} isMobile={isMobile} isForex={isForex} />
+      {!isFovritePage && <FilterComponent
+        searchText={searchText}
+        setSearchText={setSearchText}
+        isDarkMode={isDarkMode}
+        isMobile={isMobile}
+        isForex={isForex}
+        setDummyData={setDummyData}
+        socket={socket}
+        getScriptKey={getScriptKey}
+        addSocketDataToDummyData={addSocketDataToDummyData}
+        setKeysOfScriptData={setKeysOfScriptData}
+      />}
       {/* <StockTable /> */}
       <Box>
         {sections.map((section, index) => (
@@ -506,17 +814,29 @@ function Watchlist() {
                   // <MobileStockTableFlexCss
                   <MobileStockTable
                     searchText={searchText}
-                    setIsStockOpen={setIsStockOpenInMobile}
-                    isStockOpen={isStockOpenInMobile}
+                    setIsStockOpen={setIsStockOpen}
+                    // isStockOpen={isStockOpenInMobile}
                     dummyData={dummyData}
                     setDummyData={setDummyData}
                     isDarkMode={isDarkMode}
+                    handleBidAskClick={handleBidAskClick}
+                    // setBuySellPopup={setBuySellPopup}
+                    // buySellPopup={buySellPopup}
+                    showToast={showToast}
+                    handleStar={handleStar}
+                    setRemoveMarket={setRemoveMarket}
                   />
                   : <StockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
                     setDummyData={setDummyData}
                     dummyData={dummyData}
+                    handleBidAskClick={handleBidAskClick}
+                    // setBuySellPopup={setBuySellPopup}
+                    // buySellPopup={buySellPopup}
+                    showToast={showToast}
+                    handleStar={handleStar}
+                    setRemoveMarket={setRemoveMarket}
                   />}
               </AccordionDetails>
             </Accordion>
@@ -526,45 +846,90 @@ function Watchlist() {
 
       <BackToTop />
 
-      {isMobile ? isStockOpenInMobile && (
-        <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} />
-      )
-        :
-        <Dialog open={!!isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
-          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
-              <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" color="green" fontWeight="bold">
-                ₹164.85 ▲ +4.80 (+3.00%)
-              </Typography>
-            </Box>
-          </DialogTitle>
+      {/* <Navigate to="/app/dashboard/stock-details" state={{ stock: isStockOpenInMobile }} /> */}
 
-          <DialogContent sx={{ px: 2 }}>
-            <Box display="flex" alignItems="center" gap={2} mb={2}>
-              <Button variant="contained" color="success">BUY</Button>
-              <Button variant="contained" color="error">SELL</Button>
-            </Box>
+      <Dialog open={!!isStockOpen} onClose={() => setIsStockOpen(null)} maxWidth="md" fullWidth>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            justifyContent: 'space-between',
+            mb: 1,
+          }}
+        >
 
-            {/* Placeholder empty space */}
-            <Box
-              sx={{
-                height: 350,
-                border: '1px dashed #ccc',
-                borderRadius: 2,
-                backgroundColor: '#f9f9f9'
-              }}
-            ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
-          </DialogContent>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="h6">{isStockOpen?.scriptName}</Typography>
+            <Chip label="NSE" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontWeight: 'bold' }} />
+          </Box>
 
-          <DialogActions>
-            <Button onClick={() => setIsStockOpen(null)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-      }
+          <Box>
+            <Typography variant={isMobile ? "body1" : "h6"} color="green" fontWeight="bold">
+              ₹164.85 ▲ +4.80 (+3.00%)
+            </Typography>
+          </Box>
+
+        </DialogTitle>
+
+        <DialogContent sx={{ px: 2 }}>
+          {/* <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Button variant="contained" color="success">BUY</Button>
+            <Button variant="contained" color="error">SELL</Button>
+          </Box> */}
+
+          {/* Placeholder empty space */}
+          <Box
+            sx={{
+              height: isMobile ? 'auto' : 350,
+              border: '1px dashed #ccc',
+              borderRadius: 2,
+              backgroundColor: '#f9f9f9',
+            }}
+          ><ApexCharts name={isStockOpen?.scriptName} data={generateCandleData()} theme={theme} /></Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setIsStockOpen(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog
+        open={!!removeMarket}
+        onClose={() => setRemoveMarket(false)}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title" sx={{ mb: 2 }}>
+          Confirm Removal
+        </DialogTitle>
+        <DialogContent>
+          <Typography id="confirm-dialog-description">
+            Are you sure you want to remove <b>{removeMarket?.scriptName}</b> ?<br />
+            {removeMarket.isFavorite && `Note : This stock will also removed from your favorites.`}
+            {/* This action cannot be undone. */}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setRemoveMarket(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={() => handleRemove(removeMarket, removeMarket?.idx)} variant="contained" color="error" autoFocus>
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Toaster limit={3} />
+
+      <BottomTradePopup
+        open={Boolean(buySellPopup)}
+        onClose={() => setBuySellPopup(null)}
+        stockData={buySellPopup}
+        showToast={showToast}
+        isMobile={isMobile}
+      />
     </>
   );
 }

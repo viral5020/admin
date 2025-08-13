@@ -32,13 +32,17 @@ import StarSharpIcon from '@mui/icons-material/StarSharp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { useTheme } from '@emotion/react';
+import { roundToTwoIN } from '../helpers/utilFunc';
+import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
+import BottomTradePopup from './BottomTradePopup';
+
 
 function splitScriptAndDate(fullText) {
-    const parts = fullText.trim().split(' ');
-    if (parts.length < 4) return { scriptName: fullText, date: '' };
+    const parts = fullText?.trim().split(' ');
+    if (parts?.length < 4) return { scriptName: fullText, date: '' };
 
-    const date = parts.slice(-3).join(' ');
-    const scriptName = parts.slice(0, -3).join(' ');
+    const date = parts?.slice(-3).join(' ');
+    const scriptName = parts?.slice(0, -3).join(' ');
 
     return { scriptName, date };
 }
@@ -92,18 +96,21 @@ const headerBgCss = {
 
 const MobileStockTable = ({
     searchText,
-    isStockOpen,
+    // isStockOpen,
     setIsStockOpen,
     dummyData,
     isDarkMode,
     onToggleFavorite,
     favorites,
-    setDummyData
+    setDummyData,
+    handleBidAskClick,
+    setRemoveMarket,
+    handleStar,
+    showToast,
+    // setBuySellPopup,
+    // buySellPopup,
 }) => {
 
-    useEffect(() => {
-        console.log('dummyData', dummyData);
-    }, [])
     const theme = createTheme({
         palette: {
             star: '#fff', // Don't think, Just remain this as it is
@@ -115,6 +122,7 @@ const MobileStockTable = ({
     const [textColor, setTextColor] = useState('');
     const [boxStyle, setBoxStyle] = useState(boxCss);
     const [headerBoxStyle, setHeaderBoxStyle] = useState(headerBgCss);
+    const [buySellPopup, setBuySellPopup] = useState(null);
 
     useEffect(() => {
         isDarkMode ? setTextColor('#e0e0e0') : setTextColor('#1f1f1f');
@@ -179,61 +187,13 @@ const MobileStockTable = ({
         }, [500])
     };
 
-    function showToast(msg, onUndo) {
-        let didUndo = false;
-
-        const toastId = toast.custom((t) => (
-            <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
-                <Typography sx={{ fontSize: '0.9rem' }}>
-                    {/* {scriptName} Removed */}
-                    {msg}
-                </Typography>
-                {onUndo && <Button
-                    size="small"
-                    sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0 }}
-                    onClick={() => {
-                        didUndo = true;
-                        onUndo();
-                        toast.dismiss(t.id);
-                    }}
-                >
-                    Undo
-                </Button>}
-            </Box>
-        ), {
-            id: msg, // optional: prevent duplicate toasts
-            duration: 2000,
-            position: 'bottom-center',
-        });
-    };
-
-    function handleRemove(stock, idx, isQty) {
-        if (isQty) {
-            showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
-        } else {
-            function onUndo() {
-                setDummyData(prev => [
-                    ...prev.slice(0, idx),
-                    stock,
-                    ...prev.slice(idx)
-                ]);
-            }
-            removeItem(stock.id);
-            showToast(`${stock.scriptName} Removed `, onUndo);
-        }
-    }
-
-    function handleStar(stock, isFavorite) {
-        console.log("handle star called...");
-        showToast(`${stock.scriptName} ${isFavorite ? 'removed from' : 'added in'} favorites.`);
-    }
-
-    const renderActions = (item, idx, isQty, isFavorite) => ({
+    const renderActions = (item, idx, isQty) => ({
         leading: (
             <LeadingActions>
                 <SwipeAction
                     // destructive={true}
-                    onClick={() => handleStar(item, isFavorite)}
+                    onClick={() => handleStar(item)}
+                    swipeActionThreshold={0.5} // 50% swipe threshold
                 >
                     <ThemeProvider theme={theme}>
                         <Button
@@ -249,7 +209,7 @@ const MobileStockTable = ({
                             }}
                         >
                             {/* Star */}
-                            {isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
+                            {item.isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
                         </Button>
                     </ThemeProvider>
                 </SwipeAction >
@@ -258,8 +218,10 @@ const MobileStockTable = ({
         trailing: (
             <TrailingActions>
                 <SwipeAction
-                    destructive={isQty ? false : true}
-                    onClick={() => handleRemove(item, idx, isQty)}
+                    // destructive={isQty ? false : true}
+                    destructive={false}
+                    onClick={() => setRemoveMarket({ ...item, idx })}
+                    swipeActionThreshold={0.5} // 50% swipe threshold
                 >
                     <Button
                         variant="contained"
@@ -283,35 +245,62 @@ const MobileStockTable = ({
         )
     });
 
+    const formatNum = (value) => parseFloat(value ?? 0).toFixed(2);
+
     return (
         <>
             <SwipeableList type={ListType.IOS}>
                 {dummyData?.map((stock, idx) => {
-                    const isUp = stock.priceChange > 0;
+                    const obj = {
+                        "script_expiry_orginal_format": "",
+                        "priceChange": "0",
+                        "priceChangePercent": "0",
+                        "ltp": "0",
+                        "market_watch_id": "7026858",
+                        "script_expiry_id": "0",
+                        "script_id": "813",
+                        "market_type_id": "8",
+                        "script_expiry_type": "",
+                        "script_lot_qty": "1",
+                        "askRate": "0",
+                        "bidRate": "0",
+                        "colorBuyPrice": "black",
+                        "colorSellPrice": "black",
+                        "colorLtpPrice": "black",
+                        "socket_data": {},
+                        "high": "0",
+                        "low": "0",
+                        "open": "0",
+                        "close": "0"
+                    }
+                    // console.log('RRR stock', stock);
+                    const isUp = stock?.priceChange > 0;
                     const color = isDarkMode
                         ? isUp ? '#26a69a' : '#ef6d61'
                         : isUp ? '#388055' : '#BB3536';
 
                     const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
-                    const time = new Date(stock.time).toLocaleString();
+                    const time = new Date(stock?.time)?.toLocaleString();
 
-                    if (stock.scriptName.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                    if (stock?.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
                         return <></>;
                     }
 
-                    const isQty = stock.qty > 0 ? true : false;
+                    const isQty = stock?.quantity > 0 ? true : false;
                     const isFavorite = idx % 3 == 0 ? true : false;
                     const { leading, trailing } = renderActions(stock, idx, isQty, isFavorite);
 
                     return (
                         <SwipeableListItem
-                            key={stock.id}
+                            key={stock?.id}
                             leadingActions={leading}
                             trailingActions={trailing}
                         // fullSwipe={false}
                         // threshold={0.5}
                         >
-                            <Box sx={{ width: '100%', px: 0.2 }} onClick={() => setIsStockOpen(stock)}>
+                            <Box sx={{ width: '100%', px: 0.2 }}
+                            // onClick={() => setIsStockOpen(stock)}
+                            >
                                 {/* Header line */}
                                 <Stack
                                     direction="row"
@@ -329,17 +318,23 @@ const MobileStockTable = ({
                                             width: '5rem'
                                         }}
                                     >
-                                        {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
+                                        {/* {Number(stock?.ltp?.toFixed(2))?.toLocaleString('en-IN')} */}
+                                        {/* {formatNum(stock?.ltp).toLocaleString('en-IN')} */}
+                                        {roundToTwoIN(stock?.ltp)}
                                     </Typography>}
 
                                     <Typography
                                         variant="body2"
                                         fontWeight={500}
                                     >
-                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock.qty?.toLocaleString('en-IN')}
+                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock?.quantity?.toLocaleString('en-IN')}
+                                        {/* {roundToTwoIN(stock?.quantity)} */}
                                     </Typography>
 
                                     <Typography sx={{ fontSize: '0.84rem' }}>{time}</Typography>
+                                    <Typography sx={{ fontSize: '0.84rem' }}
+                                        onClick={() => setIsStockOpen(stock)}
+                                    ><CandlestickChartIcon /></Typography>
                                 </Stack>
 
                                 {/* Below Header */}
@@ -372,7 +367,7 @@ const MobileStockTable = ({
                                                 color: isDarkMode ? '#fff' : '#000'
                                             }}
                                             >
-                                                {stock.scriptName[0]}
+                                                {stock?.scriptName && stock?.scriptName[0]}
                                             </Box>
 
 
@@ -390,14 +385,15 @@ const MobileStockTable = ({
                                                         // border: '1px solid blue'
                                                     }}
                                                 >
-                                                    {splitScriptAndDate(stock.scriptName).scriptName}
+                                                    {splitScriptAndDate(stock?.scriptName).scriptName}
                                                 </Typography>
 
                                                 <Typography
                                                     variant="body2"
                                                     sx={{ color: textColor, fontSize: '0.75rem', transform: 'skewX(-10deg)' }}
                                                 >
-                                                    {splitScriptAndDate(stock.scriptName).date}
+                                                    {/* {console.log('stock?.scriptName', stock?.scriptName)} */}
+                                                    {splitScriptAndDate(stock?.scriptName).date}
                                                 </Typography>
                                             </Stack>
                                         </Stack>
@@ -433,7 +429,8 @@ const MobileStockTable = ({
                                                         // lineHeight: '0rem',
                                                     }}
                                                 >
-                                                    {stock.priceChange.toFixed(2)} ({stock.priceChangePercent.toFixed(2)}%) {' '}
+                                                    {/* {stock?.priceChange?.toFixed(2)} ({stock?.priceChangePercent?.toFixed(2)}%) {' '} */}
+                                                    {roundToTwoIN(stock?.priceChange)} ({roundToTwoIN(stock?.priceChangePercent)}%)
                                                 </Typography>
                                                 {!isSmallMobile && <Typography
                                                     variant="body2"
@@ -445,7 +442,8 @@ const MobileStockTable = ({
                                                         // left: '-0.8rem'
                                                     }}
                                                 >
-                                                    {Number(stock.ltp.toFixed(2)).toLocaleString('en-IN')}
+                                                    {/* {Number(stock?.ltp?.toFixed(2))?.toLocaleString('en-IN')} */}
+                                                    {roundToTwoIN(stock?.ltp)}
                                                 </Typography>}
                                             </Box>
                                         </Box>
@@ -463,6 +461,7 @@ const MobileStockTable = ({
                                             direction="column"
                                             justifyContent="space-between"
                                             alignItems="center"
+                                            onClick={() => handleBidAskClick(stock, 'bidRate')}
                                         >
                                             <Box
                                                 sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
@@ -471,7 +470,8 @@ const MobileStockTable = ({
                                                     sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
                                                     pt={0.6}
                                                 >
-                                                    {stock.bidRate.toLocaleString('en-IN')}
+                                                    {/* {stock?.bidRate?.toLocaleString('en-IN')} */}
+                                                    {roundToTwoIN(stock?.bidRate)}
                                                 </Typography>
 
                                                 <Typography
@@ -479,7 +479,8 @@ const MobileStockTable = ({
                                                     fontWeight='600'
                                                     pt={0.5}
                                                 >
-                                                    H: {stock.high.toLocaleString('en-IN')}
+                                                    {/* H: {stock?.high?.toLocaleString('en-IN')} */}
+                                                    {roundToTwoIN(stock?.high)}
                                                 </Typography>
                                             </Box>
                                         </Stack>
@@ -489,6 +490,7 @@ const MobileStockTable = ({
                                             direction="column"
                                             justifyContent="space-between"
                                             alignItems="center"
+                                            onClick={() => handleBidAskClick(stock, 'askRate')}
                                         >
                                             <Box
                                                 sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
@@ -497,7 +499,9 @@ const MobileStockTable = ({
                                                     sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
                                                     pt={0.6}
                                                 >
-                                                    {stock.askRate.toLocaleString('en-IN')}
+                                                    {/* {stock?.askRate?.toLocaleString('en-IN')} */}
+                                                    {roundToTwoIN(stock?.askRate)}
+                                                    { }
                                                 </Typography>
 
                                                 <Typography
@@ -505,7 +509,8 @@ const MobileStockTable = ({
                                                     fontWeight='600'
                                                     pt={0.5}
                                                 >
-                                                    L: {stock.low.toLocaleString('en-IN')}
+                                                    {/* L: {stock?.low?.toLocaleString('en-IN')} */}
+                                                    {roundToTwoIN(stock?.low)}
                                                 </Typography>
                                             </Box>
                                         </Stack>
@@ -532,13 +537,8 @@ const MobileStockTable = ({
                     );
                 })}
             </SwipeableList>
-            <Toaster limit={3} />
         </>
     );
 };
 
 export default MobileStockTable;
-
-// remark
-// date
-// 
