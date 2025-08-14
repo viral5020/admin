@@ -431,8 +431,8 @@ function Watchlist() {
 
   const location = useLocation();
   const [isForex, setIsForex] = useState();
-  const [isFovritePage, setisFovritePage] = useState(false);
-  // const [isForexFovrite, setIsForexFovrite] = useState(false)
+  const [isFavoritePage, setisFavoritePage] = useState(false);
+  // const [isForexFavorite, setIsForexFavorite] = useState(false)
 
   const title = brand.name + ' - Cryptocurrency Dashboard';
   const description = brand.desc;
@@ -614,10 +614,12 @@ function Watchlist() {
       const data = isForex ? await getForexWatchListDataAPI() : await getWatchListDataAPI();
 
       // console.log('data', data);
-      // console.log('WWW data.scripts', data.scripts);
-      let dd = setKeysOfAllScriptData(data.scripts);
-      dd = isFovritePage ? dd.filter(item => item.isFavorite) : dd;
-      console.log('WWW dd', dd);
+      // console.log('WWW data', data);
+      const aa = setKeysOfAllScriptData(data.scripts);
+
+      // console.log('isFavoritePage', isFavoritePage);
+      const dd = isFavoritePage ? aa.filter(item => item.isFavorite) : aa;
+      // console.log('WWW dd', dd);
       setDummyData(dd);
       data.scripts.forEach(script => {
         // console.log('QQQ script', script);
@@ -631,32 +633,32 @@ function Watchlist() {
   }
 
   useEffect(() => {
+    // window.location.reload();
     const path = location.pathname;
     const lastPart = path.split("/").pop();
     // console.log('lastPart', lastPart);
-    // lastPart === 'forex-watchlist' ? setIsForex(true) : setIsForex(false);
-    // lastPart === 'fovrite-list' ? setisFovritePage(true) : setisFovritePage(false);
 
     if (lastPart === 'forex-watchlist') {
       setIsForex(true);
-      setisFovritePage(false);
-    } else if (lastPart === 'fovrite-list') {
+      setisFavoritePage(false);
+    } else if (lastPart === 'favorite-list') {
       setIsForex(false);
-      setisFovritePage(true);
-    } else if (lastPart === 'forex-fovrite-list') {
+      setisFavoritePage(true);
+    } else if (lastPart === 'forex-favorite-list') {
       setIsForex(true);
-      setisFovritePage(true);
+      setisFavoritePage(true);
     } else {
       setIsForex(false);
-      setisFovritePage(false);
+      setisFavoritePage(false);
     }
-    // lastPart === 'forex-fovrite-list' ? setIsForexFovrite(true) : setIsForexFovrite(false);
+
+    // setTimeout(() => { getWatchListData(), [2000] })
   }, [location.pathname])
 
   useEffect(() => {
     // console.log('isForex', isForex);
     !isFirstRender ? getWatchListData() : null;
-  }, [isForex])
+  }, [isForex, isFavoritePage])
 
 
   function showToast(msg, onUndo, actionIcon) {
@@ -770,7 +772,7 @@ function Watchlist() {
         <meta property="twitter:description" content={description} />
       </Helmet>
       {/* <MarketPlaceWIdget /> */}
-      {!isFovritePage && <FilterComponent
+      {!isFavoritePage && <FilterComponent
         searchText={searchText}
         setSearchText={setSearchText}
         isDarkMode={isDarkMode}

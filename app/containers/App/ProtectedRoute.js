@@ -11,14 +11,14 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // console.log('ProtectedRoute entered');
   async function isProtected() {
-    // console.log("ProtectedRoute  function run");
+    const userData = JSON.parse(sessionStorage.getItem("data"));
 
-    await fetchNotificationAPI();  // chatgpt : this work
-    const isAuthorized = await checkLoginAPI();  // chatgpt : give cors error
+    await fetchNotificationAPI();
+
+    const response = await checkLoginAPI();
     // console.log('isAuthorized', isAuthorized); // isAuthorized undefined
-    if (!isAuthorized) {
+    if (response.status !== 'ok') {
       console.log("Session expired. Please login.");
       alert("Session expired. Please login.");
       window.location.href = '/login';
