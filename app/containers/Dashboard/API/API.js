@@ -694,7 +694,7 @@ export const checkLoginAPI = async () => {
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
     // console.log('response.data', response.data);
-    return response.data.status === 'ok';
+    return response.data;
   } catch (error) {
     console.error("Error in checkLogin:", error);
     throw error;
@@ -715,6 +715,8 @@ export const fetchNotificationAPI = async () => {
     throw error;
   }
 };
+
+// stored in sessionstorage > first_password_changed === 0 > navigate to changePassword
 
 export const getWatchListDataAPI = async () => {
   try {
@@ -913,7 +915,7 @@ export const fetchUserlistingAPI = async (userId, authKey) => {
     is_app: "1",
     login_user_id: userId,
     auth_key: authKey,
-     sEcho: 1,
+    sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000000,
     sSearch: "",
@@ -921,8 +923,8 @@ export const fetchUserlistingAPI = async (userId, authKey) => {
 
   try {
     const { data } = await axiosInstance.post("datatables/user_list_key", formData);
-    console.log("sedef=" , data);
-    
+    console.log("sedef=", data);
+
     return data || [];
   } catch (error) {
     console.error("Failed to fetch  list:", error);
@@ -968,7 +970,7 @@ export const fetchforexSummaryReportAPI = async (userId, authKey) => {
 
 export const fetchLedgerDetailsAPI = async (userId) => {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
-  
+
   const payload = {
     is_app: '1',
     login_user_id: dataStored?.user_id,

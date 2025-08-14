@@ -69,25 +69,26 @@ function Application(props) {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
           <Route path="/ledger" element={<Ledger />} />
-          <Route
-            path="dashboard/watchlist"
-            element={isStock ? <Watchlist /> : <Navigate to="/app" />}
-          />
+
+          <Route path="dashboard/watchlist" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />
+          <Route path="dashboard/favorite-list" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-watchlist" element={isForex ? <Watchlist /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-favorite-list" element={isForex ? <Watchlist /> : <Navigate to="/app" />} />
+
           {/* <Route path="dashboard/stock-details" element={<StockDetailMobile />} /> */}
           <Route path="dashboard/edit-Delete-Logs" element={<EditDeleteLogs />} />
           <Route path="dashboard/order-Book" element={isStock ? <OrderBook /> : <Navigate to="/app" />} />
-          <Route path="dashboard/positions" element={isStock ?<Positions /> : <Navigate to="/app" />} />
+          <Route path="dashboard/positions" element={isStock ? <Positions /> : <Navigate to="/app" />} />
           <Route path="dashboard/banned-scripts" element={<BlockedScripts />} />
-          <Route path="dashboard/max-qty-details" element={userType !== 2 && userType !== 4 && userType !== 5 && isStock ?<MaxQTYDetails />: <Navigate to="/app" />} />
+          <Route path="dashboard/max-qty-details" element={userType !== 2 && userType !== 4 && userType !== 5 && isStock ? <MaxQTYDetails /> : <Navigate to="/app" />} />
           <Route path="dashboard/rejection-logs" element={<RejectionLogs />} />
-          <Route path="dashboard/forex-order" element={isForex ?<Forex_order />: <Navigate to="/app" />} />
-          <Route path="dashboard/forex-position" element={isForex ?<Forex_position />: <Navigate to="/app" />} />
-          <Route path="dashboard/summary-report" element={userType !== 1  && isStock ?<Summary_report />: <Navigate to="/app" />} />
-          <Route path="dashboard/forex-watchlist" element={isForex ?<Watchlist />: <Navigate to="/app" />} />
-          <Route path="dashboard/forex-Summaryreport" element={userType !== 1 && isForex ?<Forexsummary />: <Navigate to="/app" />} />
-          <Route path="dashboard/Margin-management" element={userType !== 1 && userType !== 2 && isStock ?<Marginmanagement />: <Navigate to="/app" />} />
-          <Route path="dashboard/forex-Margin-management" element={userType !== 1 && userType !== 2 && isForex ?<Forexmarginmanagement />: <Navigate to="/app" />} />
-          <Route path="dashboard/Banned-Blocked-Scripts" element={userType !== 2 && isStock ? <BannedBlockedScript />: <Navigate to="/app" />} />
+          <Route path="dashboard/forex-order" element={isForex ? <Forex_order /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-position" element={isForex ? <Forex_position /> : <Navigate to="/app" />} />
+          <Route path="dashboard/summary-report" element={userType !== 1 && isStock ? <Summary_report /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-Summaryreport" element={userType !== 1 && isForex ? <Forexsummary /> : <Navigate to="/app" />} />
+          <Route path="dashboard/Margin-management" element={userType !== 1 && userType !== 2 && isStock ? <Marginmanagement /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-Margin-management" element={userType !== 1 && userType !== 2 && isForex ? <Forexmarginmanagement /> : <Navigate to="/app" />} />
+          <Route path="dashboard/Banned-Blocked-Scripts" element={userType !== 2 && isStock ? <BannedBlockedScript /> : <Navigate to="/app" />} />
           <Route path="dashboard/User-listing" element={<Userlisting />} />
         </Route>
 

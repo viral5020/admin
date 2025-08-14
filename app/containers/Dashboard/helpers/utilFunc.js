@@ -34,3 +34,8 @@ export function formatSelectedKeys(data) {
         })
     );
 }
+
+export function formatScriptIds(script) {
+    if (!Array.isArray(script) || script.length === 0) return '';
+    return JSON.stringify(script.map(val => Number(val.id))).slice(1, -1);
+}

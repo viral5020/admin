@@ -46,6 +46,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { fetchTradesDataAPI } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
+import { formatScriptIds } from "./helpers/utilFunc";
 
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -92,7 +93,7 @@ const OrderPage = () => {
     const [totals, setTotals] = useState({
         upline_grand: "0",
         downline_grand: "0",
-        self_grand:"0",
+        self_grand: "0",
         total_qty: "0",
         totalMTM: "0",
         net: "0",
@@ -176,7 +177,8 @@ const OrderPage = () => {
 
     const fetchPositions = async () => {
         setLoading(true);
-        console.log("script=", script?.id);
+        console.log('market', market);
+        console.log("script", script);
         try {
             const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
                 is_app: "1",
@@ -192,7 +194,7 @@ const OrderPage = () => {
                 group_by: client_wise_value,
 
                 market_type_id: market?.id,
-                script_id: script?.id,
+                script_id: formatScriptIds(script),
                 broker_id: broker?.id,
                 master_user_id: master?.id,
                 user_id: client?.id,
@@ -255,7 +257,7 @@ const OrderPage = () => {
             }
 
         } catch (error) {
-            console.error("Error fetching position data:", error);
+            // console.error("Error fetching position data:", error);
             setPositionData([]);
 
         } finally {
@@ -283,14 +285,14 @@ const OrderPage = () => {
     }, [positionData]);
 
     const initSocketEvents = async () => {
-        console.log("initSocketEvents=");
+        // console.log("initSocketEvents=");
         socket.emit('connected1', {
             'ty': 1
         });
         socket.on('connectionSuccess', function (args) {
 
             let flat_new = flat.filter((v, i, a) => a.indexOf(v) === i);
-            console.log("flat_new=", flat_new);
+            // console.log("flat_new=", flat_new);
             setfFlat(flat_new)
             socket.emit('connectMarketWatch', {
                 scripts: flat_new
@@ -299,7 +301,7 @@ const OrderPage = () => {
         socket.on('reconnecting', function () { })
         socket.on('reconnect', function () { })
         socket.on('marketWatch', function (args) {
-            console.log("args=", args);
+            // console.log("args=", args);
             if (args && args.data) {
 
                 if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
@@ -498,8 +500,8 @@ const OrderPage = () => {
                     }
                     iz++;
                     if (iz == newArray.length) {
-                       
-                        
+
+
                         var myArray1 = updatedData.map(function (town) {
                             return town[17];
                         }).reduce(function (a, b) {
@@ -533,7 +535,7 @@ const OrderPage = () => {
                         net = Number(net).toFixed(2);
                         net = formatNumberWithCommas(net, 2);
 
- console.log("total old=",totals.totalMTM);
+                        // console.log("total old=",totals.totalMTM);
 
                         setTotals(prv => ({
                             ...prv,
@@ -544,16 +546,16 @@ const OrderPage = () => {
                             net: net,
 
                         }));
-                        console.log("total new=",totals.totalMTM);
-                      
+                        // console.log("total new=",totals.totalMTM);
+
                     }
                 }
             }
         });
     }
-useEffect(() => {
-    console.log("totals updated:", totals.totalMTM);
-  }, [totals]);
+    useEffect(() => {
+        // console.log("totals updated:", totals.totalMTM);
+    }, [totals]);
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
         setExpanded((prev) => !prev);
@@ -622,7 +624,7 @@ useEffect(() => {
         }
     }
     const setTradeType = (element) => {
-        console.log(element);
+        // console.log(element);
         startTransition(() => {
             setOrderType(element);
             selectTradeTypeSet.current = element;
@@ -1360,13 +1362,13 @@ useEffect(() => {
                                                         const data = await response.json();
 
                                                         if (response.ok) {
-                                                            console.log("Trade placed successfully", data);
+                                                            // console.log("Trade placed successfully", data);
                                                             setCloseDialogOpen(false);
                                                         } else {
-                                                            console.error("Trade placement failed", data);
+                                                            // console.error("Trade placement failed", data);
                                                         }
                                                     } catch (error) {
-                                                        console.error("Network error:", error);
+                                                        // console.error("Network error:", error);
                                                     }
                                                 }}
                                                 variant="contained"
@@ -1418,13 +1420,13 @@ useEffect(() => {
                                                         const data = await response.json();
 
                                                         if (response.ok) {
-                                                            console.log("Trade placed successfully", data);
+                                                            // console.log("Trade placed successfully", data);
                                                             setCloseDialogOpen(false);
                                                         } else {
-                                                            console.error("Trade placement failed", data);
+                                                            // console.error("Trade placement failed", data);
                                                         }
                                                     } catch (error) {
-                                                        console.error("Network error:", error);
+                                                        // console.error("Network error:", error);
                                                     }
                                                 }}
                                                 variant="contained"
@@ -1836,13 +1838,13 @@ useEffect(() => {
                                                                                 const data = await response.json();
 
                                                                                 if (response.ok) {
-                                                                                    console.log("Trade placed successfully", data);
+                                                                                    // console.log("Trade placed successfully", data);
                                                                                     setCloseDialogOpen(false);
                                                                                 } else {
-                                                                                    console.error("Trade placement failed", data);
+                                                                                    // console.error("Trade placement failed", data);
                                                                                 }
                                                                             } catch (error) {
-                                                                                console.error("Network error:", error);
+                                                                                // console.error("Network error:", error);
                                                                             }
                                                                         }}
                                                                         variant="contained"
@@ -1894,13 +1896,13 @@ useEffect(() => {
                                                                                 const data = await response.json();
 
                                                                                 if (response.ok) {
-                                                                                    console.log("Trade placed successfully", data);
+                                                                                    // console.log("Trade placed successfully", data);
                                                                                     setCloseDialogOpen(false);
                                                                                 } else {
-                                                                                    console.error("Trade placement failed", data);
+                                                                                    // console.error("Trade placement failed", data);
                                                                                 }
                                                                             } catch (error) {
-                                                                                console.error("Network error:", error);
+                                                                                // console.error("Network error:", error);
                                                                             }
                                                                         }}
                                                                         variant="contained"
@@ -2483,13 +2485,13 @@ useEffect(() => {
                                                             const data = await response.json();
 
                                                             if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
+                                                                // console.log("Trade placed successfully", data);
                                                                 setCloseDialogOpen(false);
                                                             } else {
-                                                                console.error("Trade placement failed", data);
+                                                                // console.error("Trade placement failed", data);
                                                             }
                                                         } catch (error) {
-                                                            console.error("Network error:", error);
+                                                            // console.error("Network error:", error);
                                                         }
                                                     }}
                                                     variant="contained"
@@ -2541,13 +2543,13 @@ useEffect(() => {
                                                             const data = await response.json();
 
                                                             if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
+                                                                // console.log("Trade placed successfully", data);
                                                                 setCloseDialogOpen(false);
                                                             } else {
-                                                                console.error("Trade placement failed", data);
+                                                                // console.error("Trade placement failed", data);
                                                             }
                                                         } catch (error) {
-                                                            console.error("Network error:", error);
+                                                            // console.error("Network error:", error);
                                                         }
                                                     }}
                                                     variant="contained"

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { getInputBoxStyle } from './inputBoxStyle';
 import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
+import { clone } from 'lodash';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -63,13 +64,13 @@ const ClientMasterBrokerFilter = ({
 
         switch (type) {
             case 'client':
-                fetchOptions(`${url}/get_client_name_search`, { ...params, term: 1 }, setClientOptions);
+                fetchOptions(`${url}/get_client_name_search`, { ...params, term }, setClientOptions);
                 break;
             case 'master':
-                fetchOptions(`${url}/get_master_name_search`, { ...params, term: 1 }, setMasterOptions);
+                fetchOptions(`${url}/get_master_name_search`, { ...params, term }, setMasterOptions);
                 break;
             case 'broker':
-                fetchOptions(`${url}/get_broker_name_search`, { ...params, term: 1, term2: 2 }, setBrokerOptions);
+                fetchOptions(`${url}/get_broker_name_search`, { ...params, term, term2: 2 }, setBrokerOptions);
                 break;
             default:
                 break;
@@ -89,6 +90,7 @@ const ClientMasterBrokerFilter = ({
                     inputValue={client?.text || ''}
                     onInputChange={(e, val, reason) => {
                         (reason === 'input') && setClient({ text: val });
+                        console.log('val', val);
                         handleFetch(val, 'client');
                     }}
                     onChange={(e, val) => setClient(val)}

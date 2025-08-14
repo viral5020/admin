@@ -30,6 +30,7 @@ import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
 import { deleteTrade, updateTrade } from './API/API';
+import { formatScriptIds } from './helpers/utilFunc';
 
 const OrderBook = () => {
   const theme = useTheme();
@@ -115,7 +116,7 @@ const OrderBook = () => {
       end_date: end_date,
       start_end: start_end, //2025-07-30
       market_type_id: market?.id,
-      script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
+      script_id: formatScriptIds(script),
       broker_id: broker?.id,
       master_user_id: master?.id,
       user_id: client?.id,

@@ -98,7 +98,12 @@ if (isStock) {
         link: '/app/dashboard/watchlist',
         icon: 'list-outline'
       },
-
+      {
+        key: 'favorites',
+        name: 'Favorites',
+        link: '/app/dashboard/favorite-list',
+        icon: 'star-outline'
+      },
       {
         key: 'orderBook',
         name: 'Order Book',
@@ -124,10 +129,10 @@ if (isStock) {
 
       ...(userType !== 2
         ? [{
-           key: 'editDeleteLogs',
-  name: 'Banned/Blocked script',
-  link: '/app/dashboard/Banned-Blocked-Scripts',
-  icon: 'create-outline'
+          key: 'editDeleteLogs',
+          name: 'Banned/Blocked script',
+          link: '/app/dashboard/Banned-Blocked-Scripts',
+          icon: 'create-outline'
         }]
         : []),
 
@@ -203,6 +208,12 @@ if (isForex) {
         icon: 'list-outline'
       },
       {
+        key: 'favorites',
+        name: 'Favorites',
+        link: '/app/dashboard/forex-favorite-list',
+        icon: 'star-outline'
+      },
+      {
         key: 'forexOrder Book',
         name: 'Order Book',
         link: '/app/dashboard/forex-order',
@@ -257,26 +268,26 @@ if (userType !== 1) {
         link: '/app/dashboard/User-listing',
         icon: 'list-outline'
       },
-      
-      ...(userType !== 2  && userType !== 1
+
+      ...(userType !== 2 && userType !== 1
         ? [{
-        key: 'master_listing',
-        name: 'Master Listing',
-        // link: '/app/dashboard/forex-order',
-        icon: 'receipt-outline'
-       }]
+          key: 'master_listing',
+          name: 'Master Listing',
+          // link: '/app/dashboard/forex-order',
+          icon: 'receipt-outline'
+        }]
         : []),
 
-      ...(userType !== 2  && userType !== 1
+      ...(userType !== 2 && userType !== 1
         ? [{
-        key: 'forexpositions',
-        name: 'Broker_Listing',
-        // link: '/app/dashboard/forex-position',
-        icon: 'cube-outline'
-       }]
+          key: 'forexpositions',
+          name: 'Broker_Listing',
+          // link: '/app/dashboard/forex-position',
+          icon: 'cube-outline'
+        }]
         : []),
 
-      ...(userType !== 2  && userType !== 1
+      ...(userType !== 2 && userType !== 1
         ? [{
           key: 'add_account',
           name: 'Add Account',
@@ -284,7 +295,7 @@ if (userType !== 1) {
           icon: 'cube-outline'
         }]
         : []),
-      ...(userType === 4 
+      ...(userType === 4
         ? [{
           key: 'employee_listing',
           name: 'Employe Listing',
@@ -293,7 +304,7 @@ if (userType !== 1) {
         }]
         : []),
 
-      ...(userType === 4 
+      ...(userType === 4
         ? [{
           key: 'add_employee',
           name: 'Add Employee',

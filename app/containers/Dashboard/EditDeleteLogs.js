@@ -32,6 +32,7 @@ import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import EditDeleteLogsFilters from './EditDeleteLogsFilters';
 import FilterBtn from './filters/FilterBtn';
+import { formatScriptIds } from './helpers/utilFunc';
 
 const EditDeleteLogs = () => {
     const theme = useTheme();
@@ -77,8 +78,9 @@ const EditDeleteLogs = () => {
                     sSearch: search,
 
                     market_type_id: market?.id,
+                    script_id: formatScriptIds(script),
                     // script_id: script?.id,
-                    script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))) : '',
+                    // script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))).slice(1, -1) : '',
                     // broker_id: broker?.id,
                     master_user_id: master?.id,
                     user_id: client?.id,
