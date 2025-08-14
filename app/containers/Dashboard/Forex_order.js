@@ -108,25 +108,30 @@ const Forex_order = () => {
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   const fetchOrders = async (type = "today", searchValue = "") => {
-    setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  setLoading(true);
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-    // Include market/script if needed in API
-    const marketId = selectedMarket?.id || null;
-    const scriptIds = selectedScripts.map((s) => s?.id).filter(Boolean); // assuming each script has an id
+  const result = await fetchforexOrdersAPI({
+    userId: dataStored.user_id,
+    authKey: dataStored.auth_key,
+    type,
+    searchValue,
+    currentPage,
+    ordersPerPage,
+    end_date,
+    start_end,
+    marketId: selectedMarket?.id || null,
+    scriptIds: selectedScripts.map((s) => s?.id).filter(Boolean),
+    brokerId: broker?.id || null,
+    masterUserId: master?.id || null,
+    clientId: client?.id || null,
+    status,
+    orderType
+  });
 
-    const result = await fetchforexOrdersAPI(
-      dataStored.user_id,
-      dataStored.auth_key,
-      type,
-      searchValue,
-      marketId,        // add these to your API call if required
-      scriptIds
-    );
-
-    setOrders(result);
-    setLoading(false);
-  };
+  setOrders(result);
+  setLoading(false);
+};
 
 
   const [open, setOpen] = useState(false);
