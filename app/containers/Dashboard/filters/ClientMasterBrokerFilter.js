@@ -35,6 +35,7 @@ const ClientMasterBrokerFilter = ({
         try {
             const { data } = await axios.post(url, params);
             const results = data.results;
+            console.log('TTT results', results);
             setter(Array.isArray(results) ? results : []);
         } catch (err) {
             console.error(`Error fetching from ${url}`, err);
@@ -64,6 +65,7 @@ const ClientMasterBrokerFilter = ({
 
         switch (type) {
             case 'client':
+                console.log('TTT term', term);
                 fetchOptions(`${url}/get_client_name_search`, { ...params, term }, setClientOptions);
                 break;
             case 'master':
@@ -89,12 +91,15 @@ const ClientMasterBrokerFilter = ({
                     value={client || null}
                     inputValue={client?.text || ''}
                     onInputChange={(e, val, reason) => {
-                        (reason === 'input') && setClient({ text: val });
-                        console.log('val', val);
-                        handleFetch(val, 'client');
+                        if (reason === 'input') {
+                            setClient({ text: val });
+                            console.log('val', val);
+                            handleFetch(val, 'client');
+                        }
                     }}
                     onChange={(e, val) => setClient(val)}
                     onBlur={() => {
+                        console.log('TTT clientOptions', clientOptions);
                         const matched = clientOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === client?.text);
                         (!matched) && setClient(null);
                     }}
@@ -113,8 +118,10 @@ const ClientMasterBrokerFilter = ({
                     value={master || null}
                     inputValue={master?.text || ''}
                     onInputChange={(e, val, reason) => {
-                        (reason === 'input') && setMaster({ text: val });
-                        handleFetch(val, 'master');
+                        if (reason === 'input') {
+                            setMaster({ text: val });
+                            handleFetch(val, 'master');
+                        }
                     }}
                     onChange={(e, val) => setMaster(val)}
                     onBlur={() => {
@@ -136,8 +143,10 @@ const ClientMasterBrokerFilter = ({
                     value={broker || null}
                     inputValue={broker?.text || ''}
                     onInputChange={(e, val, reason) => {
-                        (reason === 'input') && setBroker({ text: val });
-                        handleFetch(val, 'broker');
+                        if (reason === 'input') {
+                            setBroker({ text: val });
+                            handleFetch(val, 'broker');
+                        }
                     }}
                     onChange={(e, val) => setBroker(val)}
                     onBlur={() => {
