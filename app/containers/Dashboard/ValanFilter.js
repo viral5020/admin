@@ -3,6 +3,7 @@ import { Grid, TextField, CircularProgress } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
 import { getInputBoxStyle } from './filters/inputBoxStyle';
+import { fetchValanNamesApi } from './API/API';
 
 const ValanFilter = ({ valanId, setValanId, isDarkMode }) => {
   const [valanOptions, setValanOptions] = useState([]);
@@ -17,26 +18,10 @@ const ValanFilter = ({ valanId, setValanId, isDarkMode }) => {
 
     const fetchValanNames = async () => {
       setLoadingValan(true);
-      try {
-        const response = await axios.get(
-          `http://128.199.126.171/~goldorg/ajaxfiles/get_valan_name_search?term=${encodeURIComponent(inputValan)}`
-        );
-
-        const data = Array.isArray(response.data) ? response.data : [];
-
-        // Ensure proper formatting: value + label keys
-        const formatted = data.map(item => ({
-          label: item.label || item.name || item.value || '',
-          value: item.value || item.id || item.label || '',
-        }));
-
-        setValanOptions(formatted);
-      } catch (err) {
-        console.error('Error fetching Valan IDs:', err);
-        setValanOptions([]);
-      } finally {
-        setLoadingValan(false);
-      }
+      const formatted = await fetchValanNamesApi(inputValan);
+      console.log('formatted', formatted);
+      setValanOptions(formatted);
+      setLoadingValan(false);
     };
 
     const debounce = setTimeout(fetchValanNames, 400); // Slightly longer debounce

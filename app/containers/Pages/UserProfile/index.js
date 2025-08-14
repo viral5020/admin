@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { useSelector, useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import brand from 'dan-api/dummy/brand';
 import AppBar from '@mui/material/AppBar';
 import dummy from 'dan-api/dummy/dummyContents';
@@ -44,8 +45,11 @@ function UserProfile() {
   const title = brand.name + ' - Profile';
   const description = brand.desc;
 
+  const location = useLocation();
+  const isChangePassword = location.state?.isChangePassword || false;
+
   const { classes } = useStyles();
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(isChangePassword ? 2 : 0);
 
   const mdUp = useMediaQuery(theme => theme.breakpoints.up('md'));
   const mdDown = useMediaQuery(theme => theme.breakpoints.down('md'));
@@ -77,40 +81,40 @@ function UserProfile() {
         name={dummy.user.name}
         desc="Consectetur adipiscing elit."
       /> */}
-    <AppBar position="static" className={classes.profileTab}>
-  {!mdUp && (
-    <Tabs
-      value={value}
-      onChange={handleChange}
-      variant="fullWidth"
-      indicatorColor="primary"
-      textColor="primary"
-      centered
-      className={`${classes.tabMarginTop} ${classes.thinTabs}`}
-    >
-      <Tab icon={<AccountCircle />} />
-      <Tab icon={<SettingsIcon />} />
-      <Tab icon={<PasswordIcon />} />
-      <Tab icon={<PhotoLibrary />} />
-    </Tabs>
-  )}
-  {!mdDown && (
-    <Tabs
-      value={value}
-      onChange={handleChange}
-      variant="fullWidth"
-      indicatorColor="primary"
-      textColor="primary"
-      centered
-      className={`${classes.tabMarginTop} ${classes.thinTabs}`}
-    >
-      <Tab icon={<AccountCircle />} label="BASIC" />
-      <Tab icon={<SettingsIcon />} label="SETTINGS" />
-      <Tab icon={<PasswordIcon />} label="CHANGE PASSWORD" />
-      <Tab icon={<LockIcon />} label="INVESTOR PASSWORD" />
-    </Tabs>
-  )}
-</AppBar>
+      <AppBar position="static" className={classes.profileTab}>
+        {!mdUp && (
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            variant="fullWidth"
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+            className={`${classes.tabMarginTop} ${classes.thinTabs}`}
+          >
+            <Tab icon={<AccountCircle />} />
+            <Tab icon={<SettingsIcon />} />
+            <Tab icon={<PasswordIcon />} />
+            <Tab icon={<PhotoLibrary />} />
+          </Tabs>
+        )}
+        {!mdDown && (
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            variant="fullWidth"
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+            className={`${classes.tabMarginTop} ${classes.thinTabs}`}
+          >
+            <Tab icon={<AccountCircle />} label="BASIC" />
+            <Tab icon={<SettingsIcon />} label="SETTINGS" />
+            <Tab icon={<PasswordIcon />} label="CHANGE PASSWORD" />
+            <Tab icon={<LockIcon />} label="INVESTOR PASSWORD" />
+          </Tabs>
+        )}
+      </AppBar>
 
       {value === 0 && <TabContainer><About data={dataProps} /></TabContainer>}
       {value === 1 && <TabContainer><Connection /></TabContainer>}

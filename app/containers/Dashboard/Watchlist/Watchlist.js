@@ -787,7 +787,7 @@ function Watchlist() {
       {/* <StockTable /> */}
       <Box>
         {sections.map((section, index) => (
-          <Box key={section.key} mb={2} >
+          <Box key={section.key} mb={2} mt={setisFavoritePage ? 2 : 0}>
             <Accordion
               expanded={expanded.has(section.key)}
               onChange={() => toggleExpand(section.key)}

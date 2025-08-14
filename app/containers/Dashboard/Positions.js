@@ -175,7 +175,7 @@ const OrderPage = () => {
 
 
 
-    const fetchPositions = async () => {
+    const fetchPositions = async (_, sSearch = "") => {
         setLoading(true);
         console.log('market', market);
         console.log("script", script);
@@ -187,7 +187,7 @@ const OrderPage = () => {
                 sEcho: 1,
                 iDisplayStart: 0,
                 iDisplayLength: 100000,
-                sSearch: "",
+                sSearch,
 
                 all_outstanding: all_outstanding,
                 expiry_date: exparyDate,
@@ -274,7 +274,7 @@ const OrderPage = () => {
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
-            fetchPositions(searchText.trim());
+            fetchPositions(null, searchText.trim());
         }, 500); // 500ms debounce
 
         return () => clearTimeout(delayDebounce);

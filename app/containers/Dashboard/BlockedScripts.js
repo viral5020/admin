@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import { setScriptBlockSettingAPI } from "./API/API";
 import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
+import { formatScriptIds } from "./helpers/utilFunc";
 
 const OrderPage = () => {
   const theme = useTheme();
@@ -138,7 +139,7 @@ const OrderPage = () => {
   async function handleAddScript() {
     console.log("handleAddScriptAPI called...");
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const scriptIds = script.map(script => script.id);
+    const scriptIds = formatScriptIds(script);
     console.log('market.id', market.id);
     console.log('scriptIds', scriptIds);
     //const data = await setScriptBlockSettingAPI(dataStored.user_id, dataStored.auth_key, market.id, scriptIds);
@@ -152,7 +153,7 @@ const OrderPage = () => {
     console.log("handleRemoveScriptAPI called...");
     console.log('script_block_id', script_block_id);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const scriptIds = script.map(script => script.id);
+    const scriptIds = formatScriptIds(script);
     // await removeBlockListAPI(dataStored.user_id, dataStored.auth_key, script_block_id)
   }
 

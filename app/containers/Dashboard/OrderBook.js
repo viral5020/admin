@@ -125,24 +125,6 @@ const OrderBook = () => {
       trade_type: orderType,
     };
 
-    const aa = {
-      "sEcho": 1,
-      "iDisplayStart": 0,
-      "iDisplayLength": 10,
-      "sSearch": "",
-      "is_app": 1,
-      "login_user_id": "37946",
-      "auth_key": "G3wumP6UET",
-      "isTodayTrade": "",
-      "end_date": "",
-      "start_end": "",
-      "market_type_id": "1",
-      "script_id": "[2,146,154]",
-      "is_pending": "",
-      "is_executed": "",
-      "trade_type": ""
-    }
-
     try {
       const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
         method: "POST",

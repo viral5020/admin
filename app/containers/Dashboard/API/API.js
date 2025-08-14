@@ -171,23 +171,51 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
   }
 };
 
-export const fetchforexOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+export const fetchforexOrdersAPI = async ({
+  userId,
+  authKey,
+  type = "today",
+  searchValue = "",
+  currentPage = 0,
+  ordersPerPage = 10000,
+  end_date = "",
+  start_end = "",
+  marketId = "",
+  scriptIds = [],
+  brokerId = "",
+  masterUserId = "",
+  clientId = "",
+  status = "",
+  orderType = ""
+}) => {
   const formData = {
     sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10000,
+    iDisplayStart: currentPage * ordersPerPage,
+    iDisplayLength: ordersPerPage,
     sSearch: searchValue,
     is_app: 1,
     login_user_id: userId,
     auth_key: authKey,
     isTodayTrade: type === "today" ? "today" : "",
+    end_date,
+    start_end,
+    market_type_id: marketId || "",
+    script_id: scriptIds.length ? JSON.stringify(scriptIds) : "",
+    broker_id: brokerId || "",
+    master_user_id: masterUserId || "",
+    user_id: clientId || "",
+    is_pending: status === "is_pending" ? "is_pending" : "",
+    is_executed: status === "is_executed" ? "is_executed" : "",
+    trade_type: orderType || "",
   };
+
+  console.log("Forex API formData:", formData); // debug
 
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
     return data.aaData || [];
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    console.error("Error fetching forex orders:", error);
     return [];
   }
 };
@@ -890,13 +918,16 @@ export const fetchSummaryReportAPI = async (userId, authKey) => {
   }
 };
 
-export const fetchMarginManagementListAPI = async (userId, authKey) => {
+export const fetchMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
   if (!userId || !authKey) return [];
 
   const formData = {
     is_app: "1",
     login_user_id: userId,
-    auth_key: authKey
+    auth_key: authKey,
+    broker_id: broker?.id,
+    master_user_id: master?.id,
+    user_id: client?.id,
   };
 
   try {
@@ -1103,3 +1134,22 @@ export async function favouriteActionAPI(market_watch_id, action_type) {
     console.log('err', err);
   }
 }
+
+
+export const fetchValanNamesApi = async (term) => {
+  try {
+    const defaultParams = await getDefaultParams();
+    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_valan_name_search", { ...defaultParams, term },
+    );
+
+    const data = Array.isArray(response.data.results) ? response.data.results : [];
+
+    return data.map((item) => ({
+      label: item.label || item.name || item.value || "",
+      value: item.value || item.id || item.label || "",
+    }));
+  } catch (err) {
+    console.error("Error fetching Valan IDs:", err);
+    return [];
+  }
+};

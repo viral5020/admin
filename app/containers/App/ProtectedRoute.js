@@ -1,30 +1,39 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import React, { useEffect } from 'react';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
 
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
   const location = useLocation(); // track path changes
+  const navigate = useNavigate();
+  const [isPageShown, setIsPageShown] = useState(false)
 
   if (!isLoggedIn) {
+    // setIsPageShown(false);
     alert('Please, login first.');
-    return <Navigate to="/login" replace />;
+    navigate("/login", { replace: true });
+    return;
   }
 
   async function isProtected() {
-    const userData = JSON.parse(sessionStorage.getItem("data"));
+    // const userData = JSON.parse(sessionStorage.getItem("data"));
 
     await fetchNotificationAPI();
 
     const response = await checkLoginAPI();
-    // console.log('isAuthorized', isAuthorized); // isAuthorized undefined
+
     if (response.status !== 'ok') {
-      console.log("Session expired. Please login.");
+      setIsPageShown(false);
       alert("Session expired. Please login.");
-      window.location.href = '/login';
+      navigate("/login", { replace: true });
+      return;
+    } else if (response.first_password_changed == 0) {
+      setIsPageShown(false);
+      alert("Please change your password first.");
+      navigate("/app/pages/user-profile", { replace: true, state: { isChangePassword: true }, });
       return;
     } else {
-      // console.log("Pass.......");
+      setIsPageShown(true);
     }
   }
 
@@ -32,7 +41,7 @@ const ProtectedRoute = ({ children }) => {
     isProtected();  // chagpt : does this run on every time when path
   }, [location.pathname])
 
-  return <Outlet />;
+  return isPageShown && <Outlet />;
 };
 
 export default ProtectedRoute;
