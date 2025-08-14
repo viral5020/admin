@@ -93,7 +93,7 @@ const OrderPage = () => {
     const [totals, setTotals] = useState({
         upline_grand: "0",
         downline_grand: "0",
-        self_grand:"0",
+        self_grand: "0",
         total_qty: "0",
         totalMTM: "0",
         net: "0",
@@ -140,7 +140,7 @@ const OrderPage = () => {
     const [flat, setfFlat] = useState([]);
     const [QuotationLot, setQuotationLot] = useState(0);
     const formatNumberWithCommas = (number, decimalPlaces) => {
-         if (number === undefined || number === null || isNaN(number)) return '0';
+        if (number === undefined || number === null || isNaN(number)) return '0';
         const fixedNumber = Number(number).toFixed(decimalPlaces);
         return fixedNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
@@ -500,8 +500,8 @@ const OrderPage = () => {
                     }
                     iz++;
                     if (iz == newArray.length) {
-                       
-                        
+
+
                         var myArray1 = updatedData.map(function (town) {
                             return town[17];
                         }).reduce(function (a, b) {
@@ -533,9 +533,9 @@ const OrderPage = () => {
                         myArray3 = Number(myArray3).toFixed(5);
                         myArray3 = formatNumberWithCommas(myArray3, 5);
                         net = Number(net).toFixed(5);
-                        net = formatNumberWithCommas(net,5);
+                        net = formatNumberWithCommas(net, 5);
 
- console.log("total old=",totals.totalMTM);
+                        console.log("total old=", totals.totalMTM);
 
                         setTotals(prv => ({
                             ...prv,
@@ -546,16 +546,16 @@ const OrderPage = () => {
                             net: net,
 
                         }));
-                        console.log("total new=",totals.totalMTM);
-                      
+                        console.log("total new=", totals.totalMTM);
+
                     }
                 }
             }
         });
     }
-useEffect(() => {
-    console.log("totals updated:", totals.totalMTM);
-  }, [totals]);
+    useEffect(() => {
+        console.log("totals updated:", totals.totalMTM);
+    }, [totals]);
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
         setExpanded((prev) => !prev);
@@ -1103,7 +1103,7 @@ useEffect(() => {
                                                     }}>
                                                         {row.net_qty}
                                                     </td>
-                                                    <td style={{ padding: "8px" }}>{row.net_qty > 0 ? formatNumberWithCommas(liveRates[row.check_script_name]?.BuyPrice,5) : formatNumberWithCommas(liveRates[row.check_script_name]?.SellPrice,5)}</td>
+                                                    <td style={{ padding: "8px" }}>{row.net_qty > 0 ? formatNumberWithCommas(liveRates[row.check_script_name]?.BuyPrice, 5) : formatNumberWithCommas(liveRates[row.check_script_name]?.SellPrice, 5)}</td>
                                                     <td style={{ padding: "8px" }}>
                                                         <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
                                                     </td>
@@ -1554,7 +1554,7 @@ useEffect(() => {
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">LTP</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty > 0 ?  formatNumberWithCommas (liveRates[selectedRow?.check_script_name]?.BuyPrice ,5):formatNumberWithCommas (liveRates[selectedRow?.check_script_name]?.SellPrice,5)}</Typography>
+                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty > 0 ? formatNumberWithCommas(liveRates[selectedRow?.check_script_name]?.BuyPrice, 5) : formatNumberWithCommas(liveRates[selectedRow?.check_script_name]?.SellPrice, 5)}</Typography>
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">MTM</Typography>

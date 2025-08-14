@@ -36,6 +36,12 @@ export function formatSelectedKeys(data) {
 }
 
 export function formatScriptIds(script) {
-    if (!Array.isArray(script) || script.length === 0) return '';
-    return JSON.stringify(script.map(val => Number(val.id))).slice(1, -1);
+    if (Array.isArray(script)) {
+        return script.length > 0
+            ? JSON.stringify(script.map(val => Number(val.id))).slice(1, -1)
+            : '';
+    }
+
+    // If it's a single value, just return it
+    return script ? script.id : '';
 }

@@ -89,6 +89,10 @@ const ClientMasterBrokerFilter = ({
                     options={clientOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
                     value={client || null}
+                    // isOptionEqualToValue={(option, value) => {
+                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
+                    //     return option?.text === value?.text;
+                    // }}
                     inputValue={client?.text || ''}
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
@@ -116,6 +120,10 @@ const ClientMasterBrokerFilter = ({
                     options={masterOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
                     value={master || null}
+                    // isOptionEqualToValue={(option, value) => {
+                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
+                    //     return option?.text === value?.text;
+                    // }}
                     inputValue={master?.text || ''}
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
@@ -141,6 +149,10 @@ const ClientMasterBrokerFilter = ({
                     options={brokerOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
                     value={broker || null}
+                    // isOptionEqualToValue={(option, value) => {
+                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
+                    //     return option?.text === value?.text;
+                    // }}
                     inputValue={broker?.text || ''}
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {

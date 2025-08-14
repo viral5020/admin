@@ -6,7 +6,7 @@ import axios from 'axios';
 import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 
-const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultMarketOptions }) => {
+const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultMarketOptions, isScriptMultiSelect = false }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [marketOptions, setMarketOptions] = useState(defaultMarketOptions ?? []);
@@ -16,17 +16,19 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
 
   useEffect(() => {
     console.log('market', market);
-    if (Object.keys(market || {}).length === 0) {
-      setScript([]);
-      setIsScriptNameDisable(true);
-    } else {
-      market.id ? handleFetch('', 'script') : null;
-      setIsScriptNameDisable(false);
-    }
+    setScript([]);
+    // if (Object.keys(market || {}).length === 0) {
+    //   setIsScriptNameDisable(true);
+    // } else {
+    // market?.id ? handleFetch('', 'script') : null;
+    handleFetch('', 'script')
+    // setIsScriptNameDisable(false);
+    // }
   }, [market])
 
   useEffect(() => {
     handleFetch('', "market");
+    handleFetch('', 'script');
   }, []);
 
   const inputBoxStyle = {
@@ -74,17 +76,8 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
         !defaultMarketOptions ? fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions) : null;
         break;
       case 'script':
-        fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: market.id }, setScriptOptions);
+        fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: market?.id }, setScriptOptions);
         break;
-      // case 'client':
-      //   fetchOptions(`${url}/get_client_name_search`, { term: 1 }, setClientOptions);
-      //   break;
-      // case 'master':
-      //   fetchOptions(`${url}/get_master_name_search`, { term: 1 }, setMasterOptions);
-      //   break;
-      // case 'broker':
-      //   fetchOptions(`${url}/get_broker_name_search`, { term: 1, term2: 2 }, setBrokerOptions);
-      //   break;
       default:
         break;
     }
@@ -98,6 +91,10 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
           options={marketOptions}
           getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
           value={market || null}
+          // isOptionEqualToValue={(option, value) => {
+          //   if (!value || Object.keys(value).length === 0) return false; // empty object case
+          //   return option?.text === value?.text;
+          // }}
           inputValue={market?.text || ''}//** */
           onInputChange={(e, val, reason) => {  //** */
             (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
@@ -115,7 +112,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
           sx={{
             ...inputBoxStyle,
             '& .MuiAutocomplete-input': {
-              width: '100% !important', // override dynamic width
+              width: '100% !important',
             }
           }}
         />
@@ -123,92 +120,100 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
 
       {/* (6) Script Name */}
       <Grid item xs={12} sm={6} md={3} lg={2.4} position={'relative'}>
-        <Tooltip
+        {/* <Tooltip
           arrow
-          // disableHoverListener={!isScriptNameDisable}
-          title={isScriptNameDisable ?
-            "First Select Market Name"
-            : script.map((item) => (typeof item === 'string' ? item : item.text)).join(', ')}
-        >
-          <Autocomplete
-            multiple
-            disabled={isScriptNameDisable}
-            options={scriptOptions}
-            getOptionLabel={(option) =>
-              typeof option === 'string' ? option : option?.text || ''
+          title={isScriptNameDisable
+            ? "First Select Market Name"
+            : (Array.isArray(script) ? script : [script])
+              .map((item) => (typeof item === 'string' ? item : item.text))
+              .join(', ')
+          }
+        > */}
+        <Autocomplete
+          multiple={isScriptMultiSelect}
+          // disabled={isScriptNameDisable}
+          options={scriptOptions}
+          getOptionLabel={(option) =>
+            typeof option === 'string' ? option : option?.text || ''
+          }
+          value={Array.isArray(script) ? script : (script || null)}
+          // isOptionEqualToValue={(option, value) => {
+          //   if (!value || Object.keys(value).length === 0) return false; // empty object case
+          //   return option?.text === value?.text;
+          // }}
+          filterSelectedOptions
+          onInputChange={(e, val, reason) => {
+            if (reason === 'input') {
+              handleFetch(val, 'script');
             }
-            value={Array.isArray(script) ? script : []}
-            filterSelectedOptions
-            onInputChange={(e, val, reason) => {
-              if (reason === 'input') {
-                handleFetch(val, 'script');
-              }
-            }}
-            onChange={(e, val) => {
-              setScript(val);
-            }}
-            renderOption={(props, option) => {
-              const optionText = typeof option === 'string' ? option : option.text;
-              const isSelected = script.some(
+          }}
+          onChange={(e, val) => {
+            setScript(val);
+          }}
+          renderOption={(props, option) => {
+            const optionText = typeof option === 'string' ? option : option.text;
+            const isSelected = Array.isArray(script)
+              ? script.some(
                 (item) =>
                   (typeof item === 'string' ? item : item.text) === optionText
-              );
+              )
+              : (typeof script === 'string' ? script : script?.text) === optionText;
 
-              return (
-                <li
-                  {...props}
-                  style={{
-                    backgroundColor: isSelected
-                      ? isDarkMode
-                        ? '#333'
-                        : '#e0f7fa'
-                      : 'inherit',
-                    color: isSelected ? '#999' : 'inherit',
-                    pointerEvents: isSelected ? 'none' : 'auto',
-                    opacity: isSelected ? 0.6 : 1,
-                  }}
-                  aria-disabled={isSelected}
-                >
-                  {optionText}
-                </li>
-              );
-            }}
-            // onBlur={() => {
-            //     // Filter only those scripts which exist in scriptOptions
-            //     const validScripts = script.filter((selectedItem) =>
-            //         scriptOptions.some((opt) =>
-            //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
-            //         )
-            //     );
-            //     console.log('validScripts', validScripts);
-            //     setScript(validScripts);
-            // }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Script"
-                size="small"
-                sx={inputBoxStyle}
-              />
-            )}
-            noOptionsText="No Script found"
-            fullWidth
-            sx={{
-              ...inputBoxStyle,
-              '& .MuiAutocomplete-input': {
-                width: 'auto !important', // override dynamic width
-              },
-              // height: 'auto',
-              // '&:hover': {
-              //   minHeight: 'max-content',
-              //   position: 'absolute',
-              //   border: '2px solid red'
-              // }
-            }}
-          />
-
-        </Tooltip>
+            return (
+              <li
+                {...props}
+                style={{
+                  backgroundColor: isSelected
+                    ? isDarkMode
+                      ? '#333'
+                      : '#e0f7fa'
+                    : 'inherit',
+                  color: isSelected ? '#999' : 'inherit',
+                  pointerEvents: isSelected ? 'none' : 'auto',
+                  opacity: isSelected ? 0.6 : 1,
+                }}
+                aria-disabled={isSelected}
+              >
+                {optionText}
+              </li>
+            );
+          }}
+          // onBlur={() => {
+          //     // Filter only those scripts which exist in scriptOptions
+          //     const validScripts = script.filter((selectedItem) =>
+          //         scriptOptions.some((opt) =>
+          //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
+          //         )
+          //     );
+          //     console.log('validScripts', validScripts);
+          //     setScript(validScripts);
+          // }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Script"
+              size="small"
+              sx={inputBoxStyle}
+            />
+          )}
+          noOptionsText="No Script found"
+          fullWidth
+          sx={{
+            ...inputBoxStyle,
+            '& .MuiAutocomplete-input': {
+              width: 'auto !important',
+            },
+            // height: 'auto',
+            // '&:hover': {
+            //   minHeight: 'max-content',
+            //   position: 'absolute',
+            //   border: '2px solid red'
+            // }
+          }}
+        />
+        {/* </Tooltip> */}
       </Grid>
+
 
       {/* <Grid item xs={12} sm={6} md={3} lg={2.4}>
         <AutocompleteFilter

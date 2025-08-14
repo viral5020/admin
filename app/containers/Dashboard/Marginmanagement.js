@@ -40,7 +40,8 @@ const Marginmanagement = () => {
     setLoading(true);
     const result = await fetchMarginManagementListAPI(
       dataStored.user_id,
-      dataStored.auth_key
+      dataStored.auth_key,
+      client, master, broker,
     );
 
     const formattedData = Array.isArray(result)
@@ -154,6 +155,7 @@ const Marginmanagement = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
+              onClick={fetchMarginManagementListData}
             >
               Apply
             </Button>
@@ -186,6 +188,7 @@ const Marginmanagement = () => {
                   variant="contained"
                   color="secondary"
                   sx={{ minWidth: 100, borderRadius: 0, height: 38, mt: -0.5 }}
+                  onClick={fetchMarginManagementListData}
                 >
                   Apply
                 </Button>
