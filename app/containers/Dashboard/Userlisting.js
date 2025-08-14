@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Box,
   Button,
@@ -55,24 +57,149 @@ const [selectedRow, setSelectedRow] = useState(null);
 const [invoiceData, setInvoiceData] = useState(null);
 const [invoiceLoading, setInvoiceLoading] = useState(false);
 
+const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+const [statusActionItem, setStatusActionItem] = useState(null);
+
+const [selectedUserName, setSelectedUserName] = React.useState("");
+
+const [openDialogcl, setOpenDialogcl] = React.useState(false);
+const [selectedUserId, setSelectedUserId] = React.useState(null);
+const [selectedUserIdcl, setSelectedUserIdcl] = React.useState(null);
+const [selectedUserNamecl, setSelectedUserNamecl] = React.useState("");
+
+const handleOpenDialogcl = (userId, userFullName) => {
+  setSelectedUserIdcl(userId);
+  setSelectedUserNamecl(userFullName);
+  setOpenDialogcl(true);
+};
+
+const handleCloseDialogcl = () => {
+  setOpenDialogcl(false);
+  setSelectedUserIdcl(null);
+  setSelectedUserNamecl("");
+};
+
+
+const handleOpenDialog = (userId) => {
+  setSelectedUserId(userId);
+  setOpenDialogcl(true);
+};
+
+const handleCloseDialog = () => {
+  setOpenDialogcl(false);
+  setSelectedUserId(null);
+};
+
+
+const handleStatusOpen = (row) => {
+  setStatusActionItem(row);
+  setStatusDialogOpen(true);
+};
+
+const handleStatusClose = () => {
+  setStatusDialogOpen(false);
+  setStatusActionItem(null);
+};
+
+  const [actionItem, setactionItem] = useState(null);
+
   const handleOpen = () => setOpen(true);
   const handleOpen1 = () => setOpenR(true);
   const handleClose1 = () => {setOpenR(false);
 };
+const handleConfirm = async () => {
+  try {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      const payload = {
+        is_app: '1',
+        login_user_id: dataStored?.user_id,
+        auth_key: dataStored?.auth_key,
+        user_id: actionItem.user_id,
+      };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/reset_password",
+       payload  // sending userId in body
+    );
 
-   const handleConfirm = async () => {
-    try {
-      // Call your reset password API
-      const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/reset_password", { user_id: userId });
-      console.log("Password reset response:", response.data);
-      alert("Password has been reset successfully!");
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      alert("Failed to reset password.");
-    } finally {
-      handleClose();
+    console.log("Password reset response:", response.data);
+    if (response.data.status === "ok") {
+        handleClose1();
+      toast.success("Password has been reset to '1234' successfully!");
+    } else {
+      toast.error("Failed to reset password: " + response.data.message);
     }
-  };
+  } catch (error) {
+    console.error("Error resetting password:", error);
+   toast.error("Failed to reset password due to network error.");
+  } finally {
+    handleClose1(); // close modal/dialog
+  }
+};
+
+const handleStatusConfirm = async () => {
+  if (!statusActionItem) return;
+
+  try {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const payload = {
+      is_app: '1',
+      login_user_id: dataStored?.user_id,
+      auth_key: dataStored?.auth_key,
+      user_id: statusActionItem.user_id,
+    };
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/change_user_status",
+      payload
+    );
+
+    console.log("Change status response:", response.data);
+
+    if (response.data.status === "ok") {
+        handleStatusClose();
+      toast.success("User status has been updated successfully!");
+      //fetchUserListingData(); // refresh table
+    } else {
+      toast.error("Failed to update status: " + response.data.message);
+    }
+  } catch (error) {
+    console.error("Error changing status:", error);
+    toast.error("Failed to update status due to network error.");
+  } finally {
+    handleStatusClose();
+  }
+};
+
+const handleConfirmClear = async () => {
+  if (!selectedUserId) return;
+
+  try {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const payload = {
+      is_app: "1",
+      login_user_id: dataStored?.user_id,
+      auth_key: dataStored?.auth_key,
+      user_id: selectedUserId,
+    };
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/clear_login_attempts",
+      payload
+    );
+
+    if (response.data.status === "ok") {
+         handleCloseDialog();
+      toast.success("Login attempts cleared successfully!");
+    } else {
+      toast.error("Failed to clear login attempts: " + response.data.message);
+    }
+  } catch (error) {
+    console.error("Error clearing login attempts:", error);
+    toast.error("Network error while clearing login attempts.");
+  } finally {
+    handleCloseDialog();
+  }
+};
 
 
   const fetchLedgerDetails = async (userId) => {
@@ -220,7 +347,11 @@ const [dataStored, setDataStored] = useState(() => {
           L
         </Button>,
          <Button
-        onClick={handleOpen1}
+        onClick={()=> {
+            
+            setactionItem(row);
+            handleOpen1();
+        }}
         variant="contained"
         color="warning"
         size="small"
@@ -228,26 +359,25 @@ const [dataStored, setDataStored] = useState(() => {
       >
         R
       </Button>,
-        <Button
-          key="status"
-          onClick={() => changeStatus(row.user_id)}
-          variant="contained"
-          color={row.current_status || "primary"}
-          size="small"
-          sx={{ minWidth: 30, p: "4px", m: "2px" }}
-        >
-          A
-        </Button>,
-        <Button
-          key="clear"
-          onClick={() => clearLogin(row.user_id)}
-          variant="contained"
-          color={row.current_login_status || "secondary"}
-          size="small"
-          sx={{ minWidth: 30, p: "4px", m: "2px" }}
-        >
-          CL
-        </Button>
+     <Button
+  key="status"
+  onClick={() => handleStatusOpen(row)}
+  variant="contained"
+  color={row.user_status === 1 ? "success" : "error"}
+  size="small"
+  sx={{ minWidth: 30, p: "4px", m: "2px" }}
+>
+  A
+</Button>,
+         <Button
+  onClick={() => handleOpenDialogcl(row.user_id)}
+  variant="contained"
+  color={row.user_status === 1 ? "success" : "error"} 
+  size="small"
+  sx={{ minWidth: 30, p: "4px", m: "2px" }}
+>
+  CL
+</Button>
       );
 
       if ( dataStored.user_type === 4) {
@@ -482,12 +612,13 @@ const [dataStored, setDataStored] = useState(() => {
       />
 
 
-        <Dialog open={openR} onClose={handleClose}>
+        <Dialog open={openR} onClose={handleClose1}>
         <DialogTitle>Confirm Reset</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to reset the password for this user?
-          </DialogContentText>
+  Are you sure you want to reset the password for {actionItem ? `${actionItem.user_name} (${actionItem.user_full_name})` : ""}
+</DialogContentText>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose1} color="primary">
@@ -498,6 +629,40 @@ const [dataStored, setDataStored] = useState(() => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={statusDialogOpen} onClose={handleStatusClose}>
+  <DialogTitle>Confirm Status Change</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Are you sure you want to change the status for {statusActionItem ? `${statusActionItem.user_name} (${statusActionItem.user_full_name})` : ""}
+    </DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleStatusClose} color="primary">
+      No
+    </Button>
+    <Button onClick={handleStatusConfirm} color="warning">
+      Yes
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+<Dialog open={openDialogcl} onClose={handleCloseDialogcl}>
+  <DialogTitle>Clear Login Attempts?</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Are you sure you want to clear login attempts for <b>{selectedUserName}</b>? This action cannot be undone.
+    </DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseDialog} color="inherit">Cancel</Button>
+    <Button onClick={handleConfirmClear} color="error">Confirm</Button>
+  </DialogActions>
+</Dialog>
+
+
+       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
