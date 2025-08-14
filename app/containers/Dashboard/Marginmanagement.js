@@ -9,7 +9,7 @@ import {
   Drawer,
   IconButton,
   Grid,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
@@ -26,7 +26,7 @@ const Marginmanagement = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
 
-  // 🔹 These now hold objects like { text: "Client Name" }
+  // Filter states
   const [client, setClient] = useState(null);
   const [master, setMaster] = useState(null);
   const [broker, setBroker] = useState(null);
@@ -47,8 +47,6 @@ const Marginmanagement = () => {
       ? result.map((item, index) => ({ ...item, index: index + 1 }))
       : [];
 
-    console.log("Fetched Data:", formattedData);
-
     setReportData(formattedData);
     setFilteredData(formattedData);
     setLoading(false);
@@ -58,7 +56,7 @@ const Marginmanagement = () => {
     fetchMarginManagementListData();
   }, []);
 
-  // 🔹 Search filter
+  // Search filter
   useEffect(() => {
     const query = searchQuery.toLowerCase();
     const filtered = reportData.filter(
@@ -70,7 +68,7 @@ const Marginmanagement = () => {
     setCurrentPage(0);
   }, [searchQuery, reportData]);
 
-  // 🔹 Apply Filters Button
+  // Apply Filters
   const handleApplyFilters = () => {
     let filtered = [...reportData];
 
@@ -111,7 +109,7 @@ const Marginmanagement = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          height: "100vh"
+          height: "100vh",
         }}
       >
         <CircularProgress size={40} />
@@ -121,7 +119,7 @@ const Marginmanagement = () => {
 
   return (
     <div style={{ overflowX: "auto", padding: 16 }}>
-      {/* 🔹 Filters */}
+      {/* Filters */}
       {isMobile ? (
         <Drawer
           anchor="left"
@@ -133,7 +131,7 @@ const Marginmanagement = () => {
               e.preventDefault();
               handleApplyFilters();
               setDrawerOpen(false);
-            }
+            },
           }}
         >
           <Box sx={{ width: 300, p: 2 }}>
@@ -147,7 +145,9 @@ const Marginmanagement = () => {
               setClient={setClient}
               setMaster={setMaster}
               setBroker={setBroker}
-              horizontal={false}
+              showClient={true}
+              showMaster={true}
+              showBroker={true}
             />
             <Button
               type="submit"
@@ -176,19 +176,16 @@ const Marginmanagement = () => {
                 setClient={setClient}
                 setMaster={setMaster}
                 setBroker={setBroker}
-                horizontal={true}
+                showClient={true}
+                showMaster={true}
+                showBroker={true}
               />
               <Grid item>
                 <Button
                   type="submit"
                   variant="contained"
                   color="secondary"
-                  sx={{
-                    minWidth: 100,
-                    borderRadius: 0,
-                    height: 38,
-                    mt: -0.5
-                  }}
+                  sx={{ minWidth: 100, borderRadius: 0, height: 38, mt: -0.5 }}
                 >
                   Apply
                 </Button>
@@ -198,7 +195,7 @@ const Marginmanagement = () => {
         </Box>
       )}
 
-      {/* 🔹 Search */}
+      {/* Search */}
       <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
         {isMobile && (
           <IconButton
@@ -219,28 +216,26 @@ const Marginmanagement = () => {
             padding: "6px 10px",
             fontSize: "12px",
             border: "1px solid #ccc",
-            borderRadius: "4px"
+            borderRadius: "4px",
           }}
         />
       </div>
 
-      {/* 🔹 Table */}
+      {/* Table */}
       <table
         className="table table-striped table-bordered"
         style={{
           minWidth: "1200px",
           fontSize: "12px",
           margin: 0,
-          backgroundColor:
-            theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
           color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap"
+          whiteSpace: "nowrap",
         }}
       >
         <thead
           style={{
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#444" : "#e0e0e0"
+            backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
           }}
         >
           <tr>
@@ -254,9 +249,12 @@ const Marginmanagement = () => {
               "NSEeqt",
               "Forex",
               "Comex",
-              "Total"
+              "Total",
             ].map((header) => (
-              <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+              <th
+                key={header}
+                style={{ padding: "8px 12px", fontWeight: 600 }}
+              >
                 {header}
               </th>
             ))}
