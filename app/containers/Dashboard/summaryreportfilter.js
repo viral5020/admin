@@ -72,91 +72,91 @@ const Summaryreportfilter = ({
           showBroker={userType !== 1 && userType !== 2}
         />
 
-      {/* Apply Button Row */}
-<Grid item xs={12} sm={6} md={3} lg={2.4}>
-  <Button
-    onClick={onApply}
-    sx={{
-      backgroundColor: theme.palette.secondary.main,
-      color: theme.palette.secondary.contrastText,
-      padding: '6px 12px',
-      borderRadius: '4px',
-      textTransform: 'none',
-      '&:hover': { backgroundColor: theme.palette.secondary.dark },
-    }}
-    fullWidth
-  >
-    Apply
-  </Button>
-</Grid>
+        {/* Apply Button Row */}
+        <Grid item xs={12} sm={6} md={3} lg={2.4}>
+          <Button
+            onClick={onApply}
+            sx={{
+              backgroundColor: theme.palette.secondary.main,
+              color: theme.palette.secondary.contrastText,
+              padding: '6px 12px',
+              borderRadius: '4px',
+              textTransform: 'none',
+              '&:hover': { backgroundColor: theme.palette.secondary.dark },
+            }}
+            fullWidth
+          >
+            Apply
+          </Button>
+        </Grid>
 
 
-  {/* Script Wise Summary + Buy Sell Turnover Side by Side */}
-  <Grid item xs={12}>
-  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-start' }}>
-    <Button
-      onClick={() => {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        if (!dataStored) {
-          alert("Session expired. Please log in again.");
-          return;
-        }
-        const BASE_URL = 'http://128.199.126.171/~goldorg/';
-        const authKey = dataStored.auth_key;
-        const loginUserId = dataStored.user_id;
-        const filePath = 'pdf/self_summary'; 
-        const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-        const url = new URL(fullUrl);
-        url.searchParams.set('is', '1');
-        url.searchParams.set('k', authKey);
-        url.searchParams.set('lui', loginUserId);
-        window.open(url.toString(), '_blank');
-      }}
-      sx={{
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        padding: '6px 12px',
-        borderRadius: '4px',
-        textTransform: 'none',
-        flex: 1,
-        '&:hover': { backgroundColor: theme.palette.primary.dark },
-      }}
-    >
-      Script Wise Summary
-    </Button>
+        {/* Script Wise Summary + Buy Sell Turnover Side by Side */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-start' }}>
+            <Button
+              onClick={() => {
+                const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                if (!dataStored) {
+                  alert("Session expired. Please log in again.");
+                  return;
+                }
+                const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                const authKey = dataStored.auth_key;
+                const loginUserId = dataStored.user_id;
+                const filePath = 'pdf/self_summary';
+                const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                const url = new URL(fullUrl);
+                url.searchParams.set('is', '1');
+                url.searchParams.set('k', authKey);
+                url.searchParams.set('lui', loginUserId);
+                window.open(url.toString(), '_blank');
+              }}
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                padding: '6px 12px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                flex: 1,
+                '&:hover': { backgroundColor: theme.palette.primary.dark },
+              }}
+            >
+              Script Wise Summary
+            </Button>
 
-    <Button
-      onClick={() => {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        if (!dataStored) {
-          alert("Session expired. Please log in again.");
-          return;
-        }
-        const BASE_URL = 'http://128.199.126.171/~goldorg/';
-        const authKey = dataStored.auth_key;
-        const loginUserId = dataStored.user_id;
-        const filePath = 'pdf/buy_sell_turnover'; 
-        const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-        const url = new URL(fullUrl);
-        url.searchParams.set('is', '1');
-        url.searchParams.set('k', authKey);
-        url.searchParams.set('lui', loginUserId);
-        window.open(url.toString(), '_blank');
-      }}
-      sx={{
-        backgroundColor: theme.palette.success.main,
-        color: theme.palette.success.contrastText,
-        padding: '6px 12px',
-        borderRadius: '4px',
-        textTransform: 'none',
-        flex: 1,
-        '&:hover': { backgroundColor: theme.palette.success.dark },
-      }}
-    >
-      Buy Sell Turnover
-    </Button>
-  </Box>
-</Grid>
+            <Button
+              onClick={() => {
+                const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                if (!dataStored) {
+                  alert("Session expired. Please log in again.");
+                  return;
+                }
+                const BASE_URL = 'http://128.199.126.171/~goldorg/';
+                const authKey = dataStored.auth_key;
+                const loginUserId = dataStored.user_id;
+                const filePath = 'pdf/buy_sell_turnover';
+                const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
+                const url = new URL(fullUrl);
+                url.searchParams.set('is', '1');
+                url.searchParams.set('k', authKey);
+                url.searchParams.set('lui', loginUserId);
+                window.open(url.toString(), '_blank');
+              }}
+              sx={{
+                backgroundColor: theme.palette.success.main,
+                color: theme.palette.success.contrastText,
+                padding: '6px 12px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                flex: 1,
+                '&:hover': { backgroundColor: theme.palette.success.dark },
+              }}
+            >
+              Buy Sell Turnover
+            </Button>
+          </Box>
+        </Grid>
 
 
       </Grid>

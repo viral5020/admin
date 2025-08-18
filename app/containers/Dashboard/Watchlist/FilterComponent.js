@@ -17,6 +17,7 @@ import { addMarketScriptAPI, fetchStrikeDataAPI, getMarketWatchFilterAPI, getMar
 import { constant, forex_market_type_id } from './constant';
 import { Toaster, toast } from 'react-hot-toast';
 import { functionsIn } from 'lodash';
+import { forex_comex_market } from '../helpers/utilFunc';
 
 const dummyOptions = {
     Equity: {
@@ -114,11 +115,6 @@ function changeFormat(arr) {
     return result;
 }
 
-const forexSegmentOption = [
-    { market_type_name: "FOREX", market_type_id: "6", selected: false },
-    { market_type_name: "COMEX", market_type_id: "7", selected: false }
-]
-
 
 const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isForex, setDummyData, socket, getScriptKey, setKeysOfScriptData }) => {
     const [filterOpen, setFilterOpen] = useState(false);
@@ -172,7 +168,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 getFilterData();
             } else {
                 // console.log("} else {");
-                setSegment(forexSegmentOption[0]);
+                setSegment(forex_comex_market[0]);
             }
         }
     }, [isForex])
@@ -283,7 +279,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 label: 'Segment',
                 value: segment,
                 onChange: setSegment,
-                options: isForex ? forexSegmentOption : segmentOptions,  // FOREX 2 OPTIONS : ID 6 FOREX 2 PARAMETER, ID 7 COMEX SHOW EXPIRY 4 PARAMETER
+                options: isForex ? forex_comex_market : segmentOptions,  // FOREX 2 OPTIONS : ID 6 FOREX 2 PARAMETER, ID 7 COMEX SHOW EXPIRY 4 PARAMETER
                 getOptionLabel: (opt) => opt?.market_type_name || '',
                 isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id
             },

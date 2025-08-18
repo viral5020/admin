@@ -16110,9 +16110,13 @@ const dummy = {
 
 
 
-// POSITION > RADIO BTN WANT TO UNSELECT RADIO BTN > ITS STYLOING
+// POSITION > RADIO BTN WANT TO UNSELECT RADIO BTN > ITS STYLING
 // POSITION > SEARCH
 
 // MARGIN MANAGEMENT : APPLY HAVE NO FUNCTION ON CLICK
 
 // summary report > valan id
+
+// <MarketScriptFilter /> : solve some bugs relatade to scriptOption updation on market change
+// forex orderbook : market-script filter component arrange with mine <MarketScriptFilter />
+// <MarketScriptFilter /> : make competable for forex pages

@@ -7,7 +7,7 @@ import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import DateFilter from './filters/DateFilter';
 import RadioFilter from './filters/RadioFilterField';
 import { getInputBoxStyle } from './filters/inputBoxStyle';
-import ForexComexScriptFilter from './forexorderfilter'; 
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
 
 const statusOptions = [
   { label: 'Pending Order', value: 'is_pending' },
@@ -82,11 +82,12 @@ const ForexFilter = ({
           </FormControl>
         </Grid>
 
-        <ForexComexScriptFilter
-          selectedMarket={market}
-          setSelectedMarket={setMarket}
-          selectedScripts={script}
-          setSelectedScripts={setScript}
+        <MarketScriptNameFilter
+          market={market}
+          setMarket={setMarket}
+          script={script}
+          setScript={setScript}
+          isForex={true}
         />
 
         <ClientMasterBrokerFilter

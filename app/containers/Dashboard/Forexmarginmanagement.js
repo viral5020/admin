@@ -40,7 +40,8 @@ const Forexmarginmanagement = () => {
     setLoading(true);
     const result = await fetchforexMarginManagementListAPI(
       dataStored.user_id,
-      dataStored.auth_key
+      dataStored.auth_key,
+      client, master, broker,
     );
 
     const formattedData = Array.isArray(result)
@@ -154,6 +155,7 @@ const Forexmarginmanagement = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
+              onClick={fetchMarginManagementListData}
             >
               Apply
             </Button>
@@ -189,6 +191,7 @@ const Forexmarginmanagement = () => {
                     height: 38,
                     mt: -0.5
                   }}
+                  onClick={fetchMarginManagementListData}
                 >
                   Apply
                 </Button>

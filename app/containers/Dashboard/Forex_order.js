@@ -34,6 +34,7 @@ import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
 import { deleteTrade, fetchforexOrdersAPI, updateTrade } from './API/API';
+import { formatScriptIds } from './helpers/utilFunc';
 
 const Forex_order = () => {
   const theme = useTheme();
@@ -108,30 +109,31 @@ const Forex_order = () => {
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   const fetchOrders = async (type = "today", searchValue = "") => {
-  setLoading(true);
-  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-  const result = await fetchforexOrdersAPI({
-    userId: dataStored.user_id,
-    authKey: dataStored.auth_key,
-    type,
-    searchValue,
-    currentPage,
-    ordersPerPage,
-    end_date,
-    start_end,
-    marketId: selectedMarket?.id || null,
-    scriptIds: selectedScripts.map((s) => s?.id).filter(Boolean),
-    brokerId: broker?.id || null,
-    masterUserId: master?.id || null,
-    clientId: client?.id || null,
-    status,
-    orderType
-  });
+    const result = await fetchforexOrdersAPI({
+      userId: dataStored.user_id,
+      authKey: dataStored.auth_key,
+      type,
+      searchValue,
+      currentPage,
+      ordersPerPage,
+      end_date,
+      start_end,
+      marketId: selectedMarket?.id || null,
+      scriptIds: formatScriptIds(selectedScripts),
+      brokerId: broker?.id || null,
+      masterUserId: master?.id || null,
+      clientId: client?.id || null,
+      status,
+      orderType
+    });
 
-  setOrders(result);
-  setLoading(false);
-};
+    setOrders(result);
+    setLoading(false);
+    setIsFilterChange(false);
+  };
 
 
   const [open, setOpen] = useState(false);
@@ -202,9 +204,9 @@ const Forex_order = () => {
     fetchOrders(filterType, searchText);
   }, []);
 
-  useEffect(() => {
-    fetchOrders(filterType, searchText);
-  }, [selectedMarket, selectedScripts]);
+  // useEffect(() => {
+  //   fetchOrders(filterType, searchText);
+  // }, [selectedMarket, selectedScripts]);
 
   const needsPassword = userType === 4 && deletePopup;
 

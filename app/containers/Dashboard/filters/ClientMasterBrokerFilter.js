@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
     Grid, Autocomplete, TextField, Tooltip,
 } from '@mui/material';
-import axios from 'axios';
 import { getInputBoxStyle } from './inputBoxStyle';
 import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 import { clone } from 'lodash';
+import axiosInstance from '../API/axiosconfig';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -33,7 +33,7 @@ const ClientMasterBrokerFilter = ({
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
         try {
-            const { data } = await axios.post(url, params);
+            const { data } = await axiosInstance.post(url, params);
             const results = data.results;
             console.log('TTT results', results);
             setter(Array.isArray(results) ? results : []);
@@ -107,7 +107,7 @@ const ClientMasterBrokerFilter = ({
                         const matched = clientOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === client?.text);
                         (!matched) && setClient(null);
                     }}
-                    renderInput={(params) => <TextField {...params} label="Client" size="small" sx={inputBoxStyle} />}
+                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Client" size="small" sx={inputBoxStyle} />}
                     noOptionsText="No Client found"
                     fullWidth
                     sx={inputBoxStyle}
@@ -136,7 +136,7 @@ const ClientMasterBrokerFilter = ({
                         const matched = masterOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === master?.text);
                         (!matched) && setMaster(null);
                     }}
-                    renderInput={(params) => <TextField {...params} label="Master" size="small" sx={inputBoxStyle} />}
+                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Master" size="small" sx={inputBoxStyle} />}
                     noOptionsText="No Master found"
                     fullWidth
                     sx={inputBoxStyle}
@@ -165,51 +165,12 @@ const ClientMasterBrokerFilter = ({
                         const matched = brokerOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === broker?.text);
                         (!matched) && setBroker(null);
                     }}
-                    renderInput={(params) => <TextField {...params} label="Broker" size="small" sx={inputBoxStyle} />}
+                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Broker" size="small" sx={inputBoxStyle} />}
                     noOptionsText="No Broker found"
                     fullWidth
                     sx={inputBoxStyle}
                 />
             </Grid>}
-
-            {/* {showClient && (
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <AutocompleteFilter
-                        label="Client"
-                        options={clientOptions}
-                        value={client}
-                        setValue={setClient}
-                        handleFetch={handleFetch}
-                        isDarkMode={isDarkMode}
-                    />
-                </Grid>
-            )}
-
-            {showMaster && (
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <AutocompleteFilter
-                        label="Master"
-                        options={masterOptions}
-                        value={master}
-                        setValue={setMaster}
-                        handleFetch={handleFetch}
-                        isDarkMode={isDarkMode}
-                    />
-                </Grid>
-            )}
-
-            {showBroker && (
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <AutocompleteFilter
-                        label="Broker"
-                        options={brokerOptions}
-                        value={broker}
-                        setValue={setBroker}
-                        handleFetch={handleFetch}
-                        isDarkMode={isDarkMode}
-                    />
-                </Grid>
-            )} */}
         </>
     )
 }

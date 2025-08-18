@@ -900,17 +900,47 @@ export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
 };
 
 
-export const fetchSummaryReportAPI = async (userId, authKey) => {
-  if (!userId || !authKey) return [];
+export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
 
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
   };
 
   try {
     const { data } = await axiosInstance.post("ajaxfiles/summary_report", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/summary_report_forex", formData);
     return data?.data || [];
   } catch (error) {
     console.error("Failed to fetch summary report:", error);
@@ -939,17 +969,23 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
   }
 };
 
-export const fetchUserlistingAPI = async (userId, authKey) => {
-  if (!userId || !authKey) return [];
+export const fetchUserlistingAPI = async (start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
+  const defaultParams = await getDefaultParams();
 
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000000,
-    sSearch: "",
+    sSearch: searchText || "",
+    // loginBefore,
+    // loginAfter,
+    end_date,
+    start_end,
+    broker_id,
+    master_user_id,
+    user_id,
+    status,
   };
 
   try {
@@ -963,13 +999,16 @@ export const fetchUserlistingAPI = async (userId, authKey) => {
   }
 };
 
-export const fetchforexMarginManagementListAPI = async (userId, authKey) => {
+export const fetchforexMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
   if (!userId || !authKey) return [];
 
   const formData = {
     is_app: "1",
     login_user_id: userId,
-    auth_key: authKey
+    auth_key: authKey,
+    broker_id: broker?.id,
+    master_user_id: master?.id,
+    user_id: client?.id,
   };
 
   try {
@@ -981,23 +1020,6 @@ export const fetchforexMarginManagementListAPI = async (userId, authKey) => {
   }
 };
 
-export const fetchforexSummaryReportAPI = async (userId, authKey) => {
-  if (!userId || !authKey) return [];
-
-  const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey
-  };
-
-  try {
-    const { data } = await axiosInstance.post("ajaxfiles/summary_report_forex", formData);
-    return data?.data || [];
-  } catch (error) {
-    console.error("Failed to fetch summary report:", error);
-    return [];
-  }
-};
 
 export const fetchLedgerDetailsAPI = async (userId) => {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
@@ -1141,15 +1163,24 @@ export const fetchValanNamesApi = async (term) => {
     const defaultParams = await getDefaultParams();
     const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_valan_name_search", { ...defaultParams, term },
     );
-
-    const data = Array.isArray(response.data.results) ? response.data.results : [];
-
-    return data.map((item) => ({
-      label: item.label || item.name || item.value || "",
-      value: item.value || item.id || item.label || "",
-    }));
+    return response.data.results
   } catch (err) {
     console.error("Error fetching Valan IDs:", err);
     return [];
   }
 };
+
+// export const fetchLedgerDetailsApi = async (user_id, dataStored) => {
+//   const defaultParams = await getDefaultParams();
+
+//   try {
+//     const response = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill', {
+//       ...defaultParams,
+//       user_id,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching ledger details:', error);
+//     throw error;
+//   }
+// };

@@ -24,6 +24,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import Forexsummaryfilter from "./Forexsummaryfilter";
 import Summaryreportfilter from "./summaryreportfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
+import { formatScriptIds } from "./helpers/utilFunc";
 
 const Summary_report = () => {
   const theme = useTheme();
@@ -40,7 +41,7 @@ const Summary_report = () => {
   const [start_end, setStart_end] = useState(null);
   const [end_date, setEnd_date] = useState(null);
   const [market, setMarket] = useState(null);
-  const [script, setScript] = useState([]);
+  const [script, setScript] = useState(null);
   const [client, setClient] = useState(null);
   const [master, setMaster] = useState(null);
   const [broker, setBroker] = useState(null);
@@ -94,11 +95,8 @@ const Summary_report = () => {
   };
 
   const fetchSummaryReportData = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (!dataStored?.user_id || !dataStored?.auth_key) return;
-
     setLoading(true);
-    const result = await fetchSummaryReportAPI(dataStored.user_id, dataStored.auth_key);
+    const result = await fetchSummaryReportAPI(client?.id, master?.id, broker?.id, end_date, start_end, market?.id, formatScriptIds(script), valanId?.id);
 
     const formattedData = Object.entries(result).map(([key, value], index) => ({
       ...value,
@@ -125,20 +123,20 @@ const Summary_report = () => {
     setCurrentPage(0);
   }, [searchQuery, reportData]);
 
-  const handleApplyFilters = () => {
-    let filtered = [...reportData];
-    if (valanId) filtered = filtered.filter((row) => row.valan_id === valanId);
-    if (start_end) filtered = filtered.filter((row) => new Date(row.trade_date) >= new Date(start_end));
-    if (end_date) filtered = filtered.filter((row) => new Date(row.trade_date) <= new Date(end_date));
-    if (market) filtered = filtered.filter((row) => row.market === market);
-    if (script?.length > 0) filtered = filtered.filter((row) => script.includes(row.script));
-    if (client) filtered = filtered.filter((row) => row.client === client);
-    if (master) filtered = filtered.filter((row) => row.master === master);
-    if (broker) filtered = filtered.filter((row) => row.broker === broker);
+  // const handleApplyFilters = () => {
+  //   let filtered = [...reportData];
+  //   if (valanId) filtered = filtered.filter((row) => row.valan_id === valanId);
+  //   if (start_end) filtered = filtered.filter((row) => new Date(row.trade_date) >= new Date(start_end));
+  //   if (end_date) filtered = filtered.filter((row) => new Date(row.trade_date) <= new Date(end_date));
+  //   if (market) filtered = filtered.filter((row) => row.market === market);
+  //   if (script?.length > 0) filtered = filtered.filter((row) => script.includes(row.script));
+  //   if (client) filtered = filtered.filter((row) => row.client === client);
+  //   if (master) filtered = filtered.filter((row) => row.master === master);
+  //   if (broker) filtered = filtered.filter((row) => row.broker === broker);
 
-    setFilteredData(filtered);
-    setCurrentPage(0);
-  };
+  //   setFilteredData(filtered);
+  //   setCurrentPage(0);
+  // };
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage);
@@ -196,6 +194,7 @@ const Summary_report = () => {
                 setBroker={setBroker}
                 valanId={valanId}
                 setValanId={setValanId}
+                onApply={fetchSummaryReportData}
               />
               {/* <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Apply</Button> */}
             </Box>
@@ -221,7 +220,7 @@ const Summary_report = () => {
             setBroker={setBroker}
             valanId={valanId}
             setValanId={setValanId}
-            onApply={handleApplyFilters}
+            onApply={fetchSummaryReportData}
           />
         </Box>
       )}
@@ -555,11 +554,11 @@ const Summary_report = () => {
 
       {/* 📘 Ledger Dialog - Card View */}
       <LedgerDetailsDialog
-  open={open}
-  onClose={handleClose}
-  ledgerDetails={ledgerDetails}
-  loading={loadingLedger}
-/>
+        open={open}
+        onClose={handleClose}
+        ledgerDetails={ledgerDetails}
+        loading={loadingLedger}
+      />
 
 
       {/* 🔽 Pagination */}

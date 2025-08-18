@@ -5,8 +5,8 @@ import {
 import { useTheme } from '@mui/material/styles';
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import DateFilter from './filters/DateFilter';
-import ForexComexScriptFilter from './forexorderfilter';
 import ValanFilter from './ValanFilter';
+import MarketScriptNameFilter from './filters/MarketScriptNameFilter';
 
 const Forexsummaryfilter = ({
   isDarkMode,
@@ -51,11 +51,11 @@ const Forexsummaryfilter = ({
         />
 
         {/* Market & Script Filter */}
-        <ForexComexScriptFilter
-          selectedMarket={market}
-          setSelectedMarket={setMarket}
-          selectedScripts={script}
-          setSelectedScripts={setScript}
+        <MarketScriptNameFilter
+          market={market}
+          script={script}
+          setScript={setScript}
+          setMarket={setMarket}
         />
 
         {/* Client, Master, Broker Filters */}

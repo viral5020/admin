@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchforexSummaryReportAPI, fetchSummaryReportAPI } from "./API/API";
+import { fetchforexSummaryReportAPI } from "./API/API";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -22,6 +22,7 @@ import {
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import Forexsummaryfilter from "./Forexsummaryfilter";
+import { formatScriptIds } from "./helpers/utilFunc";
 
 const Summary_report = () => {
   const theme = useTheme();
@@ -38,7 +39,7 @@ const Summary_report = () => {
   const [start_end, setStart_end] = useState(null);
   const [end_date, setEnd_date] = useState(null);
   const [market, setMarket] = useState(null);
-  const [script, setScript] = useState([]);
+  const [script, setScript] = useState(null);
   const [client, setClient] = useState(null);
   const [master, setMaster] = useState(null);
   const [broker, setBroker] = useState(null);
@@ -92,11 +93,8 @@ const Summary_report = () => {
   };
 
   const fetchforexSummaryReportData = async () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (!dataStored?.user_id || !dataStored?.auth_key) return;
-
     setLoading(true);
-    const result = await fetchforexSummaryReportAPI(dataStored.user_id, dataStored.auth_key);
+    const result = await fetchforexSummaryReportAPI(client?.id, master?.id, broker?.id, end_date, start_end, market?.id, formatScriptIds(script), valanId?.id);
 
     const formattedData = Object.entries(result).map(([key, value], index) => ({
       ...value,
@@ -123,20 +121,20 @@ const Summary_report = () => {
     setCurrentPage(0);
   }, [searchQuery, reportData]);
 
-  const handleApplyFilters = () => {
-    let filtered = [...reportData];
-    if (valanId) filtered = filtered.filter((row) => row.valan_id === valanId);
-    if (start_end) filtered = filtered.filter((row) => new Date(row.trade_date) >= new Date(start_end));
-    if (end_date) filtered = filtered.filter((row) => new Date(row.trade_date) <= new Date(end_date));
-    if (market) filtered = filtered.filter((row) => row.market === market);
-    if (script?.length > 0) filtered = filtered.filter((row) => script.includes(row.script));
-    if (client) filtered = filtered.filter((row) => row.client === client);
-    if (master) filtered = filtered.filter((row) => row.master === master);
-    if (broker) filtered = filtered.filter((row) => row.broker === broker);
+  // const handleApplyFilters = () => {
+  //   let filtered = [...reportData];
+  //   if (valanId) filtered = filtered.filter((row) => row.valan_id === valanId);
+  //   if (start_end) filtered = filtered.filter((row) => new Date(row.trade_date) >= new Date(start_end));
+  //   if (end_date) filtered = filtered.filter((row) => new Date(row.trade_date) <= new Date(end_date));
+  //   if (market) filtered = filtered.filter((row) => row.market === market);
+  //   if (script?.length > 0) filtered = filtered.filter((row) => script.includes(row.script));
+  //   if (client) filtered = filtered.filter((row) => row.client === client);
+  //   if (master) filtered = filtered.filter((row) => row.master === master);
+  //   if (broker) filtered = filtered.filter((row) => row.broker === broker);
 
-    setFilteredData(filtered);
-    setCurrentPage(0);
-  };
+  //   setFilteredData(filtered);
+  //   setCurrentPage(0);
+  // };
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage);
@@ -165,14 +163,14 @@ const Summary_report = () => {
             anchor="left"
             open={drawerOpen}
             onClose={() => setDrawerOpen(false)}
-            PaperProps={{
-              component: 'form',
-              onSubmit: (e) => {
-                e.preventDefault();
-                handleApplyFilters();
-                setDrawerOpen(false);
-              },
-            }}
+          // PaperProps={{
+          //   component: 'form',
+          //   onSubmit: (e) => {
+          //     e.preventDefault();
+          //     handleApplyFilters();
+          //     setDrawerOpen(false);
+          //   },
+          // }}
           >
             <Box sx={{ width: 300, p: 2 }}>
               <Typography variant="h6" gutterBottom>Filters</Typography>
@@ -194,6 +192,7 @@ const Summary_report = () => {
                 setBroker={setBroker}
                 valanId={valanId}
                 setValanId={setValanId}
+                onApply={fetchforexSummaryReportData}
               />
               {/* <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Apply</Button> */}
             </Box>
@@ -219,7 +218,7 @@ const Summary_report = () => {
             setBroker={setBroker}
             valanId={valanId}
             setValanId={setValanId}
-            onApply={handleApplyFilters}
+            onApply={fetchforexSummaryReportData}
           />
         </Box>
       )}
@@ -416,7 +415,7 @@ const Summary_report = () => {
           <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
             <tr>
               {[
-                "Serial No", "Name", "Code", "Ledger", 
+                "Serial No", "Name", "Code", "Ledger",
                 "All", "Outstanding", "Net MTM", "Total MTM",
                 "Downline MTM", "Upline MTM", "Self MTM", "Net Position"
               ].map((header) => (
@@ -438,7 +437,7 @@ const Summary_report = () => {
                   <td>
                     <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
                   </td>
-                  
+
                   <td>
                     {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
                       <IconButton
@@ -506,12 +505,12 @@ const Summary_report = () => {
                     )}
 
                   </td>
-                      <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
-                      <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
-                      <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
-                      <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
-                      <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
-                      <td>
+                  <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
+                  <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
+                  <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
+                  <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
+                  <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
+                  <td>
                     {row.net_pdf && row.net_pdf.trim() !== '' && (
                       <IconButton
                         size="small"

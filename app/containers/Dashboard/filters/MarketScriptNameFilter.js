@@ -1,27 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Grid, Autocomplete, TextField, Tooltip,
 } from '@mui/material';
-import axios from 'axios';
 import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
+import { forex_comex_market } from '../helpers/utilFunc';
+import axiosInstance from '../API/axiosconfig';
 
-const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultMarketOptions, isScriptMultiSelect = false }) => {
+
+const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScriptMultiSelect = false, isForex }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [marketOptions, setMarketOptions] = useState(defaultMarketOptions ?? []);
+  const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
   const [scriptOptions, setScriptOptions] = useState([]);
 
   const [isScriptNameDisable, setIsScriptNameDisable] = useState(true)
 
+  // const memoizedMarket = useMemo(() => market, [market?.text]);
+
   useEffect(() => {
     console.log('market', market);
-    setScript([]);
+    // !!market ? setScript([]) : null;
+    // setScript([]);
     // if (Object.keys(market || {}).length === 0) {
     //   setIsScriptNameDisable(true);
     // } else {
     // market?.id ? handleFetch('', 'script') : null;
-    handleFetch('', 'script')
+    // handleFetch('', 'script')
     // setIsScriptNameDisable(false);
     // }
   }, [market])
@@ -50,7 +55,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
 
   async function fetchOptions(url, params, setter) {
     try {
-      const { data } = await axios.post(url, params); // POST request with body
+      const { data } = await axiosInstance.post(url, params); // POST request with body
       const results = data.results;
       setter(Array.isArray(results) ? results : []);
     } catch (err) {
@@ -60,7 +65,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
   };
 
 
-  function handleFetch(term, type) {
+  function handleFetch(term, type, val) {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     // if (!term) return;
     let params = {
@@ -73,10 +78,10 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
 
     switch (type) {
       case 'market':
-        !defaultMarketOptions ? fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions) : null;
+        !isForex ? fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions) : null;
         break;
       case 'script':
-        fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: market?.id }, setScriptOptions);
+        isForex && !market && !val ? setScriptOptions([]) : fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: val?.id || market?.id, }, setScriptOptions);
         break;
       default:
         break;
@@ -99,14 +104,25 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
           onInputChange={(e, val, reason) => {  //** */
             (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
             handleFetch(val, 'market');
+            setScript([]); // clear script when market changes
           }}
-          onChange={(e, val) => setMarket(val)}
+          onChange={(e, val) => {
+            setMarket(val);
+            handleFetch('', 'script', val);  // param `val` used, bcs market state take time to update
+          }}
           onBlur={() => {  //** */ on focus out, if inputvalue don't match with any options then setMarket(null)
             const matched = marketOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text);
             (!matched) && setMarket(null);  // clear if unmatched
             // handleFetch('', 'market');
+            handleFetch('', 'script');
           }}
-          renderInput={(params) => <TextField {...params} label="Market" size="small" sx={inputBoxStyle} />}
+          renderInput={(params) =>
+            <TextField {...params}
+              placeholder="Start typing to search..."
+              label="Market"
+              size="small"
+              sx={inputBoxStyle}
+            />}
           noOptionsText="No Market found"
           fullWidth
           sx={{
@@ -191,6 +207,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
           renderInput={(params) => (
             <TextField
               {...params}
+              placeholder="Start typing to search..."
               label="Script"
               size="small"
               sx={inputBoxStyle}
@@ -214,30 +231,6 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, defaultM
         {/* </Tooltip> */}
       </Grid>
 
-
-      {/* <Grid item xs={12} sm={6} md={3} lg={2.4}>
-        <AutocompleteFilter
-          label="Market"
-          options={marketOptions}
-          value={market}
-          setValue={setMarket}
-          handleFetch={handleFetch}
-          isDarkMode={isDarkMode}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={6} md={3} lg={2.4}>
-        <AutocompleteFilter
-          label="Script"
-          options={scriptOptions}
-          value={script}
-          setValue={setScript}
-          handleFetch={handleFetch}
-          isDisabled={isScriptNameDisable}
-          isDarkMode={isDarkMode}
-          disableSelected={true}  // Only script disables selected options
-        />
-      </Grid> */}
     </>
   )
 }
