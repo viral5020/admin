@@ -55,6 +55,15 @@ import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrder
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import OrderBook from './OrderBook';
+import OrderPage from './BlockedScripts';
+import OrderPage1 from './Positions';
+import { Fullscreen } from 'dan-vendor/@mui/icons-material';
+import RejectionLogs from './RejectionLogs';
+
+  const rawData = sessionStorage.getItem("data");
+  const parsedData = JSON.parse(rawData);
+  const userType = parseInt(parsedData.user_type, 10);
 
 const animationVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -263,6 +272,13 @@ function PersonalDashboard() {
   const [orderType, setOrderType] = useState("MARKET");
   const [price, setPrice] = useState(0);
 
+  const [selectedItem, setSelectedItem] = useState(null);
+    const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+    const [cancelItem, setCancelItem] = useState(null);
+      const [quantity, setQuantity] = useState('');
+
+      const needsPassword = userType === 4 && deletePopup;
+
   const [dashboardData, setDashboardData] = useState({
     today_rejection: '0',
     total_rejection: '0',
@@ -285,6 +301,8 @@ function PersonalDashboard() {
     order.scrp_name?.toLowerCase().includes(pendingSearchText.toLowerCase()) ||
     order.client_full_name?.toLowerCase().includes(pendingSearchText.toLowerCase())
   );
+
+  const Fullscreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const pendingPaginatedOrders = filteredPendingOrders.slice(
     pendingCurrentPage * pendingRowsPerPage,
@@ -338,6 +356,50 @@ function PersonalDashboard() {
     handleDrawerClose(); // close drawer too
   };
 
+
+    const handleModify = (item) => {
+      setSelectedItem(item);
+      setLot(item.trd_lot);
+      setQuantity(item.trd_qty);
+      setPrice(item.trd_rate);
+      setOpen(true);
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+  
+    const handleSave = async () => {
+      if (!item?.trade_id) {
+        alert('Trade ID is missing.');
+        return;
+      }
+  
+      try {
+        const payload = {
+          trade_id: item.trade_id,
+          trade_rate: price,
+          trade_lot: lot,
+          trade_qty: quantity,
+          device_type: 0,
+        };
+  
+        console.log('Sending payload:', payload);
+  
+        const response = await updateTrade(payload);
+  
+        if (response.success) {
+          alert('Trade updated successfully.');
+          handleClose(); // Close the dialog
+          // Optionally refresh data or state here
+        } else {
+          alert(response.message || 'Failed to update trade.');
+        }
+      } catch (error) {
+        console.error('Error updating trade:', error);
+        alert('Something went wrong while updating the trade.');
+      }
+    };
 
 
   // Refs for each list item
@@ -701,510 +763,66 @@ function PersonalDashboard() {
             />
           </Box>
         </Grid>
+<Dialog
+  open={ordersDialogOpen}
+  onClose={() => setOrdersDialogOpen(false)}
+  maxWidth="md"
+  fullWidth
+  fullScreen={Fullscreen}
+>
+  {/* Custom header */}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      px: 3,
+      py: 1,
+      backdropFilter: "blur(6px)",
+      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+      color: "#fff",
+      borderTopLeftRadius: "4px",
+      borderTopRightRadius: "4px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+      position: "relative",
+    }}
+  >
+    <Typography
+      variant="h6"
+      fontWeight={800}
+      sx={{
+        textTransform: "uppercase",
+        letterSpacing: 1.5,
+        fontSize: "1rem",
+        display: "flex",
+        alignItems: "center",
+        textShadow: "0 0 6px rgba(33,203,243,0.9)",
+      }}
+    >
+      <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+      Orders
+    </Typography>
+    <IconButton
+      size="small"
+      sx={{
+        color: "#fff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: "50%",
+        "&:hover": {
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+        },
+      }}
+      onClick={() => setOrdersDialogOpen(false)}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </Box>
 
-
-        <Dialog
-          open={ordersDialogOpen}
-          fullScreen={isMobile}
-          onClose={(event, reason) => {
-            if (reason !== "backdropClick") {
-              setOrdersDialogOpen(false);
-            }
-          }}
-          fullWidth
-          maxWidth="xl"
-          disableEscapeKeyDown
-          PaperProps={{
-            sx: {
-              overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
-              maxHeight: isMobile ? "100vh" : "90vh",
-              height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
-              display: "flex",
-              flexDirection: "column",
-            },
-          }}
-        >
-          <Box sx={{ p: 0 }}>
-            {/* Blue header similar to your image */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                px: 3,
-                py: 1,
-                backdropFilter: "blur(6px)",
-                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-                color: "#fff",
-                width: "100%",
-                borderTopLeftRadius: "8px",
-                borderTopRightRadius: "8px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-                position: "relative",
-              }}
-            >
-              <Typography
-                variant="h6"
-                fontWeight={800}
-                sx={{
-                  textTransform: "uppercase",
-                  letterSpacing: 1.5,
-                  fontSize: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
-                }}
-              >
-                <AssignmentIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-                Orders
-              </Typography>
-
-              <IconButton
-                size="small"
-                sx={{
-                  color: "#fff",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "50%",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={() => setOrdersDialogOpen(false)}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Box>
-
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 0,
-                px: 1,
-                py: 1,
-                backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
-                borderRadius: 1,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                <FormControl
-                  size="small"
-                  sx={{
-                    minWidth: 120,
-                    "& .MuiOutlinedInput-root": {
-                      height: 26,
-                      "& fieldset": {
-                        borderColor: "black", // ✅ black border
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "black", // ✅ on hover
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "black", // ✅ on focus
-                      },
-                    },
-                  }}
-                >
-                  <InputLabel>Filter</InputLabel>
-                  <Select
-                    value={filterType}
-                    label="Filter"
-                    onChange={handleFilterChange}
-                  >
-                    <MenuItem value="today">Today</MenuItem>
-                    <MenuItem value="all">This Week</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  size="small"
-                  placeholder="Search orders"
-                  value={searchText}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  fullWidth
-                  sx={{
-                    ml: 1,
-                    "& .MuiOutlinedInput-root": {
-                      height: 26,
-                      "& fieldset": {
-                        borderColor: "black",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "black",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "black",
-                      },
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-            {loading ? (
-              <Box sx={{ height: 400, display: "flex", justifyContent: "center", mt: 1 }}>
-                <CircularProgress size={24} />
-              </Box>
-            ) : orders.length > 0 ? (
-              <>
-                {isMobile ? (
-                  <>
-                    {visibleOrders.map((item, index) => {
-                      const [mainName, subName] = item.scrp_name.split(" ", 2);
-                      const cleanRate = item.trd_rate?.split("(")[0].trim();
-
-                      const isBuy = item.trd_type === "Buy";
-                      const isSell = item.trd_type === "Sell";
-                      const borderGradient = isBuy
-                        ? "linear-gradient(to right, #2196f3, #21cbf3)"
-                        : isSell
-                          ? "linear-gradient(to right, #f44336, #ff7961)"
-                          : "#ccc";
-
-                      const boxShadowColor = isBuy
-                        ? "rgba(33, 150, 243, 0.3)"
-                        : isSell
-                          ? "rgba(244, 67, 54, 0.3)"
-                          : "rgba(0,0,0,0.1)";
-
-                      return (
-                        <Card
-                          key={item.trd_id || index}
-                          sx={{
-                            mb: 1,
-                            mx: 1,
-                            borderRadius: 2,
-                            // Transparent border to allow gradient
-                            border: "1px solid transparent",
-                            // Inner background color based on theme
-                            backgroundImage: (theme) =>
-                              `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"
-                              }), ${borderGradient}`,
-                            backgroundOrigin: "border-box",
-                            backgroundClip: "content-box, border-box",
-                            boxShadow: `0 4px 12px ${boxShadowColor}`,
-                            position: "relative",
-                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.02)",
-                              boxShadow: `0 8px 20px ${boxShadowColor}`,
-                            },
-                          }}
-                        >
-                          {item.is_hot && (
-                            <Box
-                              sx={{
-                                position: "absolute",
-                                top: 0,
-                                right: 0,
-                                backgroundColor: "gold",
-                                color: "#000",
-                                fontSize: "0.7em",
-                                px: 1,
-                                py: 0.3,
-                                borderBottomLeftRadius: 4,
-                                fontWeight: 700,
-                              }}
-                            >
-                              HOT
-                            </Box>
-                          )}
-
-                          <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                                {mainName}
-                                {" "}
-                                <span style={{ fontSize: "0.8em", fontWeight: 500 }}>
-                                  {subName}
-                                </span>
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                                ID: #{item.trd_id}
-                              </Typography>
-                            </Box>
-
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography
-                                  variant="body2"
-                                  component="span"
-                                  dangerouslySetInnerHTML={{ __html: item.device_type_html }}
-                                  sx={{ mr: 0.3 }}
-                                />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: isBuy ? "#2196f3" : isSell ? "#f44336" : (theme) => theme.palette.mode === "dark" ? "#fff" : "#000",
-                                    fontWeight: 700,
-                                    textTransform: "uppercase",
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}
-                                  {" "}
-                                  <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
-                                    {item.trd_type2}
-                                  </span>
-                                </Typography>
-                              </Box>
-
-                              <Typography variant="body2" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                                ({item.trd_lot}) {item.actual_lot_qty} @
-                                <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
-                                  {cleanRate}
-                                </span>
-                              </Typography>
-                            </Box>
-
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                                {item.trd_time}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: (theme) => theme.palette.mode === "dark" ? "#ccc" : "#000" }}>
-                                Commission:{" "}
-                                <span style={{ fontWeight: 700, color: "#2e7d32" }}>
-                                  {item.trd_comm_amnt}
-                                </span>
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-
-                    {visibleCount < orders.length && (
-                      <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                        <Button variant="outlined" onClick={handleLoadMore} size="small">
-                          Load More
-                        </Button>
-                      </Box>
-                    )}
-                  </>
-                ) : (
-                  <>
-
-                    <Box
-                      sx={{
-                        overflowX: "auto",
-                        overflowY: "auto",
-                        Height: "400px",
-                        border: "1px solid #ddd",
-                        borderRadius: "0px",
-                        mx: 1,
-                        scrollbarWidth: "none",
-                        "&::-webkit-scrollbar": {
-                          display: "none",
-                        },
-                        display: "flex",
-                        alignItems: orders.length === 0 ? "center" : "stretch", // center if no data
-                        justifyContent: orders.length === 0 ? "center" : "stretch", // center if no data
-                      }}
-                    >
-                      <table
-                        className="table table-striped table-bordered"
-                        style={{
-                          minWidth: "1500px",
-                          fontSize: "12px",
-                          margin: 0,
-                          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                        }}
-                      >
-                        <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                          <tr>
-                            {[
-                              "Device", "Time", "Script", "B/S", "Order Type",
-                              "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt", "Trade ID"
-                            ].map((header) => (
-                              <th
-                                key={header}
-                                style={{
-                                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedOrders.map((item, index) => {
-                            const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
-                            let backgroundColor = "#9e9e9e"; // default
-
-                            if (market === "NSEFUT") backgroundColor = "#1976d2";
-                            else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
-                            else if (market === "MCXFUT") backgroundColor = "#8e24aa";
-                            else if (market === "NYSE") backgroundColor = "#f57c00";
-
-                            return (
-                              <tr key={item.trd_id || index}>
-                                <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                <td>{item.trd_matchedtime}</td>
-                                <td>
-                                  <Box component="span">
-                                    <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
-                                      {item.scrp_name.split(" ")[0]}
-                                    </Box>{" "}
-                                    <Box component="span" sx={{ fontSize: "10px" }}>
-                                      {item.scrp_name.split(" ").slice(1).join(" ")}
-                                    </Box>
-                                  </Box>
-
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      fontSize: "10px",
-                                      px: 1,
-                                      ml: 1,
-                                      borderRadius: "8px",
-                                      backgroundColor,
-                                      color: "#fff",
-                                      display: "inline-block",
-                                    }}
-                                  >
-                                    {item.mrkt_name}
-                                  </Box>
-                                </td>
-
-                                <td
-                                  style={{
-                                    color:
-                                      item.trd_type === "Buy"
-                                        ? theme.palette.success.main
-                                        : item.trd_type === "Sell"
-                                          ? theme.palette.error.main
-                                          : theme.palette.text.primary,
-                                    textTransform: "uppercase",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {item.trd_type}
-                                </td>
-
-                                <td>{item.trd_type2}</td>
-                                <td>
-                                  <Box component="span" sx={{ fontWeight: 700 }}>
-                                    {item.actual_lot_qty}
-                                  </Box>{" "}
-                                  <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                                    ({item.trd_lot})
-                                  </Box>
-                                </td>
-                                <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                                  {item.trd_rate}
-                                </td>
-
-
-                                <td>{item.trd_status}</td>
-                                <td>{item.trd_time}</td>
-                                <td>{item.trd_comm_amnt}</td>
-                                <td>#{item.trd_id}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </Box>
-
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                        <Button
-                          size="small"
-                          disabled={currentPage === 0}
-                          onClick={() => setCurrentPage((prev) => prev - 1)}
-                          color="secondary"
-                          sx={{ mr: 1 }}
-                        >
-                          Prev
-                        </Button>
-
-                        {[...Array(totalPages)].map((_, i) => {
-                          // Show first, last, current, and neighbors; else show ellipsis
-                          if (
-                            i === 0 ||
-                            i === totalPages - 1 ||
-                            (i >= currentPage - 1 && i <= currentPage + 1)
-                          ) {
-                            return (
-                              <Button
-                                key={i}
-                                size="small"
-                                variant={i === currentPage ? "contained" : "outlined"}
-                                color="secondary"
-                                onClick={() => setCurrentPage(i)}
-                                sx={{ mx: 0.3, minWidth: "30px" }}
-                              >
-                                {i + 1}
-                              </Button>
-                            );
-                          }
-                          if (
-                            (i === 1 && currentPage > 2) ||
-                            (i === totalPages - 2 && currentPage < totalPages - 3)
-                          ) {
-                            return (
-                              <Typography key={i} sx={{ mx: 0.5 }}>
-                                ...
-                              </Typography>
-                            );
-                          }
-                          return null;
-                        })}
-
-                        <Button
-                          size="small"
-                          disabled={currentPage + 1 >= totalPages}
-                          onClick={() => setCurrentPage((prev) => prev + 1)}
-                          color="secondary"
-                          sx={{ ml: 1 }}
-                        >
-                          Next
-                        </Button>
-                        <TextField
-                          label="Go to page"
-                          type="number"
-                          size="small"
-                          InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const page = parseInt(e.target.value, 10) - 1;
-                              if (!isNaN(page) && page >= 0 && page < totalPages) {
-                                setCurrentPage(page);
-                              }
-                            }
-                          }}
-                          sx={{ width: 100 }}
-                        />
-                      </Box>
-                    </Box>
-
-                  </>
-                )}
-              </>
-            ) : (
-              <Box
-                sx={{
-                  height: "400px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  px: 1,
-                }}
-              >
-                <Typography sx={{ fontSize: "14px", color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#000" }}>
-                  No orders found.
-                </Typography>
-              </Box>
-            )}
-          </Box>
-
-        </Dialog>
-
-
+  {/* Dialog content */}
+  <DialogContent>
+    <OrderBook />
+  </DialogContent>
+</Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
@@ -1217,917 +835,67 @@ function PersonalDashboard() {
           </Box>
         </Grid>
 
-        <Dialog
-          open={positionDialogOpen}
-          onClose={handleDialogClose}
-          fullScreen={isMobile}
-          fullWidth
-          maxWidth="xl"
-          disableEscapeKeyDown
-          PaperProps={{
-            sx: {
-              overflow: "hidden",
-              maxHeight: isMobile ? "100vh" : "90vh",
-              overflowY: 'auto'
-            },
+          {/* Dialog with custom header */}
+      <Dialog
+        open={positionDialogOpen}
+        onClose={() => setPositionDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+         fullScreen={Fullscreen}
+      >
+        {/* Custom header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 3,
+            py: 1,
+            backdropFilter: "blur(6px)",
+            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+            color: "#fff",
+            borderTopLeftRadius: "4px",
+            borderTopRightRadius: "4px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            position: "relative",
           }}
         >
-          <Box sx={{ p: 0, position: "relative" }}>
-            {/* Header */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                px: 3,
-                py: 1,
-                backdropFilter: "blur(6px)",
-                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-                color: "#fff",
-                borderTopLeftRadius: "0px",
-                borderTopRightRadius: "0px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-                position: "relative",
-              }}
-            >
-              <Typography
-                variant="h6"
-                fontWeight={800}
-                sx={{
-                  textTransform: "uppercase",
-                  letterSpacing: 1.5,
-                  fontSize: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
-                }}
-              >
-                <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-                Positions
-              </Typography>
-              <IconButton
-                size="small"
-                sx={{
-                  color: "#fff",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "50%",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={handleDialogClose}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Box>
-
-            <Box sx={{ px: 1, py: 0.5, backgroundColor: "background.default" }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Search positions..."
-                size="small"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ mr: 0.5 }}>
-                      <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    height: 36,
-                    fontSize: 13,
-                    '& fieldset': {
-                      borderColor: '#ccc',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#666',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#000', // 🔥 Black border on focus
-                    },
-                  },
-                  '& input': {
-                    py: 0.5,
-                  },
-                }}
-              />
-            </Box>
-
-
-            {/* Body */}
-            {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-                <CircularProgress />
-              </Box>
-            ) : filteredPositions.length > 0 ? (
-              <>
-                {isMobile ? (
-                  <>
-                    {filteredPositions.map((row, index) => {
-                      const scriptHtml = row?.script_name || "";
-                      const parts = scriptHtml.split("<br>");
-                      const mainName = parts[0] || "";
-                      const datePart = parts[1] || "";
-
-                      const currentValue = row.total_buy * row.last_trade_price;
-                      const todaysPL = -203.0;
-                      const unrealizedPL = 8170;
-                      const unrealizedPLPerc = 10.62;
-
-                      return (
-                        <Box
-                          key={index}
-                          onClick={() => handleCardClick(row)}
-                          sx={{
-                            m: 0.2, // Reduce margin
-                            border: (theme) => `1px solid ${theme.palette.primary.main}`,
-                            borderRadius: 1.5,
-                            backgroundColor: (theme) => theme.palette.background.paper,
-                            boxShadow: (theme) =>
-                              theme.palette.mode === "dark"
-                                ? "0 0 4px rgba(255, 255, 255, 0.08)"
-                                : "0 0 4px rgba(0, 0, 0, 0.04)",
-                            overflow: "hidden",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {/* Top row */}
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              px: 0.8,
-                              py: 0.5, // Reduce vertical padding
-                            }}
-                          >
-                            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-                              <Avatar
-                                alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
-                                src="/path-to-your-logo.png"
-                                variant="square"
-                                sx={{ width: 28, height: 28, mr: 0.6, flexShrink: 0 }} // Smaller avatar, smaller margin
-                              />
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  overflow: "hidden",
-                                  flexWrap: "nowrap",
-                                  minWidth: 0,
-                                }}
-                              >
-                                <Typography
-                                  variant="subtitle2"
-                                  sx={{
-                                    fontWeight: 700,
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    mr: 0.3, // Reduce margin
-                                  }}
-                                  dangerouslySetInnerHTML={{ __html: mainName }}
-                                />
-                                <Box sx={{ display: "flex", alignItems: "center", ml: 0.4 }}>
-                                  <ShoppingBagIcon fontSize="inherit" sx={{ fontSize: 10, color: "text.disabled" }} />
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      fontSize: 10,
-                                      fontWeight: 300,
-                                      ml: 0.2,
-                                      whiteSpace: "nowrap",
-                                    }}
-                                  >
-                                    {row.total_buy} X {row.buy_avg_rate}
-                                  </Typography>
-                                </Box>
-                                {datePart && (
-                                  <Typography
-                                    variant="caption"
-                                    sx={{ opacity: 0.7, ml: 0.4, whiteSpace: "nowrap" }}
-                                    dangerouslySetInnerHTML={{ __html: datePart }}
-                                  />
-                                )}
-                              </Box>
-                            </Box>
-                            <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                {row.last_trade_price}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: row.change_value < 0
-                                    ? (theme) => theme.palette.error.main
-                                    : (theme) => theme.palette.success.main,
-                                }}
-                              >
-                                {row.change_value} ({row.change_perc}%)
-                              </Typography>
-                            </Box>
-                          </Box>
-
-                          {/* Bottom row */}
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              py: 0.3, // Reduce vertical padding
-                              px: 0.5, // Add small horizontal padding
-                              borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                              textAlign: "center",
-                              width: "100%",
-                            }}
-                          >
-                            <Box sx={{ flex: 0.5, pr: 2 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                {isNaN(currentValue)
-                                  ? "---"
-                                  : currentValue >= 1000
-                                    ? `${(currentValue / 1000).toFixed(2)}K`
-                                    : currentValue.toFixed(2)}
-                              </Typography>
-                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                Current Value
-                              </Typography>
-                            </Box>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "error.main" }}>
-                                {todaysPL.toFixed(2)}
-                              </Typography>
-                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                Today&apos;s P&amp;L
-                              </Typography>
-                            </Box>
-                            <Box sx={{ flex: 0.5 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "success.main" }}>
-                                {unrealizedPL >= 1000
-                                  ? `+${(unrealizedPL / 1000).toFixed(2)}K`
-                                  : `+${unrealizedPL.toFixed(2)}`}{" "}
-                                <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
-                                  ({unrealizedPLPerc}%)
-                                </Typography>
-                              </Typography>
-                              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                Unrealized P&amp;L
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <Box
-                    sx={{
-                      overflowX: "auto",
-                      overflowY: "auto",
-                      maxHeight: "400px",
-                      border: "1px solid #ddd",
-                      borderRadius: "0px",
-                      mx: 1,
-                      scrollbarWidth: "none",
-                      "&::-webkit-scrollbar": {
-                        display: "none",
-                      },
-                    }}
-                  >
-                    <Table
-                      stickyHeader
-                      size="small"
-                      sx={{
-                        minWidth: 1350,
-                        fontSize: "11px", // Smaller font
-                        margin: 0,
-                        borderCollapse: "collapse",
-                        "& td, & th": {
-                          padding: "4px 8px", // Reduced padding
-                          whiteSpace: "nowrap", // Prevents multiline cells
-                          fontSize: "13px", // Apply to both headers and body
-                        },
-                      }}
-                    >
-                      <TableHead
-                        sx={{
-                          backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-                        }}
-                      >
-                        <TableRow>
-                          {[
-                            "Market Type",
-                            "Script",
-                            "Total Buy",
-                            "Buy Avg Rate",
-                            "Total Sell",
-                            "Sell Avg Rate",
-                            "Net Qty",
-                            "Last Trade Price",
-                            "MTM",
-                            "Auto Closed Date",
-                            "Close Btn",
-                          ].map((col) => (
-                            <TableCell key={col}>{col}</TableCell>
-                          ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {filteredPositions.map((row, index) => {
-                          const isEven = index % 2 === 0;
-                          const rowBgColor = theme.palette.mode === "dark"
-                            ? isEven ? "#2a2a2a" : "#1f1f1f"
-                            : isEven ? "#f9f9f9" : "#ffffff";
-
-                          return (
-                            <TableRow
-                              key={index}
-                              sx={{
-                                backgroundColor: rowBgColor,
-                                height: "39px", // Minimal row height
-                              }}
-                            >
-                              <TableCell>{row.market_type_name}</TableCell>
-                              <TableCell>
-                                <span dangerouslySetInnerHTML={{ __html: row.script_name }} />
-                              </TableCell>
-                              <TableCell>{row.total_buy}</TableCell>
-                              <TableCell>{row.buy_avg_rate}</TableCell>
-                              <TableCell>{row.total_sell}</TableCell>
-                              <TableCell>{row.sell_avg_rate}</TableCell>
-                              <TableCell> {row.net_qty} {row.net_qty_lot_dis}</TableCell>
-                              <TableCell>{row.last_trade_price}</TableCell>
-                              <TableCell>
-                                <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-                              </TableCell>
-                              <TableCell>{row.trade_auto_closed_date}</TableCell>
-                              <TableCell>
-                                {row.net_qty !== 0 ? (
-                                  <Button
-                                    style={{
-                                      backgroundColor: '#d32f2f',
-                                      border: 'none',
-                                      color: '#fff',
-                                      padding: '2px 8px',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                    }}
-                                    onClick={() => {
-                                      setSelectedRow(row);
-                                      setCloseDialogOpen(true);
-                                    }}
-                                  >
-                                    Close
-                                  </Button>
-                                ) : (
-                                  <span>-</span>
-                                )}
-
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </Box>
-
-                )}
-              </>
-            ) : (
-              <Typography sx={{ p: 2 }}>No data found.</Typography>
-            )}
-
-            {/* Slide-up panel inside dialog */}
-            {/* --- Drawer Panel Inside Dialog --- */}
-            {drawerOpen && (
-              <>
-                <Slide
-                  direction="up"
-                  in={drawerOpen}
-                  mountOnEnter
-                  unmountOnExit
-                  onExited={() => {
-                    setExpanded(false); // optional reset of expanded state
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: "fixed",
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      width: "100%",
-                      bgcolor: "background.paper",
-                      borderTopLeftRadius: 16,
-                      borderTopRightRadius: 16,
-                      boxShadow: "0px -8px 30px rgba(0, 0, 0, 0.3)",
-                      p: 2,
-                      maxHeight: "85vh",
-                      display: "flex",
-                      flexDirection: "column",
-                      zIndex: 1400,
-                    }}
-                  >
-                    {/* Fixed Header */}
-                    <Box sx={{ flexShrink: 0 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          mb: 1,
-                        }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-                          <Avatar
-                            alt={selectedRow?.script_name?.replace(/<\/?[^>]+(>|$)/g, "")}
-                            src="/path-to-your-logo.png"
-                            variant="square"
-                            sx={{ width: 50, height: 50, mr: 1, flexShrink: 0 }}
-                          />
-                          <Typography
-                            variant="h6"
-                            fontWeight={700}
-                            dangerouslySetInnerHTML={{ __html: selectedRow?.script_name }}
-                            sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                          />
-                        </Box>
-                        <IconButton size="large" onClick={handleDrawerClose}>
-                          <ArrowDropDownIcon />
-                        </IconButton>
-                      </Box>
-
-                      {/* Summary Info */}
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Total Buy</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Total Sell</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Buy Avg Rate</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Sell Avg Rate</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Market Type</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.market_type_name}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">Net Qty</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">LTP</Typography>
-                          <Typography variant="body2" fontWeight={600}>{selectedRow?.last_trade_price}</Typography>
-                        </Box>
-                        <Box sx={{ flex: "1 1 22%" }}>
-                          <Typography variant="caption">MTM</Typography>
-                          <Typography
-                            variant="body2"
-                            fontWeight={600}
-                            dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
-                          />
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-                        <Typography variant="caption">Auto Closed Date</Typography>
-                        <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
-                      </Box>
-
-                      {/* Action Buttons */}
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button
-                          fullWidth
-                          sx={{
-                            background: "linear-gradient(135deg, #0d47a1, #1565c0)",
-                            color: "#fff",
-                            borderRadius: "6px",
-                            fontWeight: 600,
-                            textTransform: "uppercase",
-                            boxShadow: "0 4px 10px rgba(13, 71, 161, 0.4)",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.03)",
-                              boxShadow: "0 6px 16px rgba(13, 71, 161, 0.6)",
-                              background: "linear-gradient(135deg, #0b3c91, #0d47a1)",
-                            },
-                          }}
-                          onClick={handleViewTradesClick}
-                        >
-                          {expanded ? "Hide Trades" : "View Trades"}
-                        </Button>
-
-                        <Button
-                          fullWidth
-                          sx={{
-                            background: "linear-gradient(135deg, #b71c1c, #c62828)",
-                            color: "#fff",
-                            borderRadius: "6px",
-                            fontWeight: 600,
-                            textTransform: "uppercase",
-                            boxShadow: "0 4px 10px rgba(183, 28, 28, 0.4)",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.03)",
-                              boxShadow: "0 6px 16px rgba(183, 28, 28, 0.6)",
-                              background: "linear-gradient(135deg, #8e0000, #b71c1c)",
-                            },
-                          }}
-                          onClick={() => {
-                            setSelectedRow(selectedRow);
-                            setCloseDialogOpen(true);
-                          }}
-                        >
-                          Close Position
-                        </Button>
-                      </Box>
-                    </Box>
-
-                    {/* Scrollable Trades */}
-                    {expanded && (
-                      <Fade in={expanded} timeout={600}>
-                        <Box
-                          sx={{
-                            mt: 2,
-                            overflowY: "auto",
-                            maxHeight: "60vh",
-                            pr: 1,
-                          }}
-                        >
-                          {loadingTrades ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                height: "150px",
-                              }}
-                            >
-                              <CircularProgress size={32} thickness={4} />
-                            </Box>
-                          ) : tradesData.length > 0 ? (
-                            tradesData.map((item, index) => {
-                              const [mainName, subName] = item.scrp_name.split(" ", 2);
-                              const cleanRate = item.trd_rate?.split("(")[0].trim();
-                              const isBuy = item.trd_type === "Buy";
-                              const isSell = item.trd_type === "Sell";
-
-                              const borderGradient = isBuy
-                                ? "linear-gradient(to right, #1976d2, #0d47a1)"
-                                : isSell
-                                  ? "linear-gradient(to right, #c62828, #b71c1c)"
-                                  : "#ccc";
-
-                              const boxShadowColor = isBuy
-                                ? "rgba(25, 118, 210, 0.3)"
-                                : isSell
-                                  ? "rgba(198, 40, 40, 0.3)"
-                                  : "rgba(0,0,0,0.1)";
-
-                              return (
-                                <Card
-                                  key={item.trd_id || index}
-                                  sx={{
-                                    mb: 1,
-                                    borderRadius: 2,
-                                    position: "relative",
-                                    border: "1px solid transparent",
-                                    backgroundImage: (theme) =>
-                                      `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"
-                                      }), ${borderGradient}`,
-                                    backgroundOrigin: "border-box",
-                                    backgroundClip: "content-box, border-box",
-                                    boxShadow: `0 4px 12px ${boxShadowColor}`,
-                                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                                    "&:hover": {
-                                      transform: "scale(1.02)",
-                                      boxShadow: `0 8px 20px ${boxShadowColor}`,
-                                    },
-                                  }}
-                                >
-                                  {item.is_hot && (
-                                    <Box
-                                      sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        right: 0,
-                                        backgroundColor: "gold",
-                                        color: "#000",
-                                        fontSize: "0.7em",
-                                        px: 1,
-                                        py: 0.3,
-                                        borderBottomLeftRadius: 4,
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      HOT
-                                    </Box>
-                                  )}
-
-                                  <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                        {mainName}{" "}
-                                        <span style={{ fontSize: "0.8em", fontWeight: 500 }}>{subName}</span>
-                                      </Typography>
-                                      <Typography variant="caption">ID: #{item.trd_id}</Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                                        <Typography
-                                          variant="body2"
-                                          component="span"
-                                          dangerouslySetInnerHTML={{ __html: item.device_type_html }}
-                                          sx={{ mr: 0.3 }}
-                                        />
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            color: isBuy ? "#1976d2" : isSell ? "#c62828" : "#000",
-                                            fontWeight: 700,
-                                            textTransform: "uppercase",
-                                            display: "flex",
-                                            alignItems: "center",
-                                          }}
-                                        >
-                                          {isBuy ? "📈" : isSell ? "📉" : ""} {item.trd_type}{" "}
-                                          <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
-                                            {item.trd_type2}
-                                          </span>
-                                        </Typography>
-                                      </Box>
-
-                                      <Typography variant="body2">
-                                        ({item.trd_lot}) {item.actual_lot_qty} @{" "}
-                                        <span style={{ fontWeight: 700, fontSize: "1em", marginLeft: 4 }}>
-                                          {cleanRate}
-                                        </span>
-                                      </Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                      <Typography variant="caption">{item.trd_time}</Typography>
-                                      <Typography variant="caption">
-                                        Commission:{" "}
-                                        <span style={{ fontWeight: 700, color: "#2e7d32" }}>{item.trd_comm_amnt}</span>
-                                      </Typography>
-                                    </Box>
-                                  </CardContent>
-                                </Card>
-                              );
-                            })
-                          ) : (
-                            <Box
-                              sx={{
-                                height: 400, // ✅ Fixed height
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Typography variant="body2">No trades found</Typography>
-                            </Box>
-                          )}
-                        </Box>
-                      </Fade>
-                    )}
-                  </Box>
-                </Slide>
-
-                {/* Backdrop */}
-                <Box
-                  onClick={handleDrawerClose}
-                  sx={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    backdropFilter: "blur(5px)",
-                    backgroundColor: "rgba(0,0,0,0.2)",
-                    zIndex: 1200,
-                  }}
-                />
-              </>
-            )}
-
-
-
-          </Box>
-        </Dialog>
-
-        <Dialog open={closeDialogOpen} onClose={() => setCloseDialogOpen(false)} fullWidth maxWidth="xs">
-          {/* Header */}
-          <Box
+          <Typography
+            variant="h6"
+            fontWeight={800}
             sx={{
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              fontSize: "1rem",
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
-              background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-              color: "#fff",
-              px: 2,
-              py: 1,
+              textShadow: "0 0 6px rgba(33,203,243,0.9)",
             }}
           >
-            <Box>
-              <Typography
-                variant="subtitle2"
-                fontWeight={700}
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  maxWidth: 150, // adjust as needed
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: selectedRow?.script_name || "N/A",
-                }}
-              />
+            <TrendingUpIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+            Positions
+          </Typography>
+          <IconButton
+            size="small"
+            sx={{
+              color: "#fff",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              borderRadius: "50%",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+              },
+            }}
+            onClick={() => setpositionDialogOpen(false)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-              <Typography variant="caption" sx={{ color: "#ffb3b3" }}>
-                -396.00 (-0.71%)
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: "right" }}>
-              <Typography variant="body2">Bid: 55790.00</Typography>
-              <Typography variant="body2">Ask: 55797.60</Typography>
-            </Box>
-            {/* Uncomment below to add close icon */}
-            {/* 
-    <IconButton onClick={() => setCloseDialogOpen(false)} size="small" sx={{ color: "#fff" }}>
-      <CloseIcon />
-    </IconButton> 
-    */}
-          </Box>
-
-          {/* Open & Close Prices */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, pt: 1 }}>
-            <Typography variant="caption" color="text.secondary">Open: 56200.00</Typography>
-            <Typography variant="caption" color="text.secondary">Close: 56194.00</Typography>
-          </Box>
-
-          {/* Order Type Toggle */}
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 2 }}>
-            {["MARKET", "LIMIT", "SL"].map((label) => (
-              <Button
-                key={label}
-                variant={orderType === label ? "contained" : "outlined"}
-                onClick={() => setOrderType(label)}
-                sx={{
-                  minWidth: 60,
-                  fontWeight: 600,
-                  fontSize: "0.75rem",
-                  borderRadius: 2,
-                  backgroundColor: orderType === label ? "#2a5298" : "transparent",
-                  color: orderType === label ? "#fff" : "#2a5298",
-                  borderColor: "#2a5298",
-                  "&:hover": {
-                    backgroundColor: orderType === label ? "#1e3c72" : "#f3e5f5",
-                  },
-                }}
-              >
-                {label}
-              </Button>
-            ))}
-          </Box>
-
-          {/* Lot, Qty, Price Controls */}
-          <DialogContent sx={{ mt: 2 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-
-              {/* Lot */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography>Lot</Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <IconButton onClick={() => setLot(Math.max(0, lot - 0.01))} size="small">
-                    <RemoveIcon fontSize="small" />
-                  </IconButton>
-                  <TextField
-                    value={lot.toFixed(2)}
-                    size="small"
-                    sx={{ width: 70 }}
-                    inputProps={{ style: { textAlign: "center" } }}
-                  />
-                  <IconButton onClick={() => setLot(lot + 0.01)} size="small">
-                    <AddIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Qty */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography>Qty</Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <IconButton onClick={() => setQty(Math.max(1, qty - 1))} size="small">
-                    <RemoveIcon fontSize="small" />
-                  </IconButton>
-                  <TextField
-                    value={qty}
-                    size="small"
-                    sx={{ width: 70 }}
-                    inputProps={{ style: { textAlign: "center" } }}
-                  />
-                  <IconButton onClick={() => setQty(qty + 1)} size="small">
-                    <AddIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Price */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography>Price</Typography>
-                <TextField
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  size="small"
-                  sx={{ width: 100, mr: 3 }}
-                  inputProps={{ style: { textAlign: "center" }, step: "0.05" }}
-                />
-              </Box>
-            </Box>
-          </DialogContent>
-
-          {/* Bottom Action */}
-          <DialogActions>
-            <Button
-              fullWidth
-              onClick={async () => {
-                const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                const payload = {
-                  market_type_id: selectedRow?.market_type_id ?? 1,
-                  script_id: selectedRow?.script_id,
-                  script_expiry_id: selectedRow?.script_expiry_id,
-                  trade_type: 1,
-                  trade_rate: price,
-                  trade_qty: qty,
-                  trade_lot: lot,
-                  trade_type_x: "0",
-                  check_script_name: selectedRow?.script_name,
-                  user_id: selectedRow?.user_id || dataStored?.user_id,
-                  device_type: 0,
-                  is_app: "1",
-                  login_user_id: dataStored?.user_id,
-                  auth_key: dataStored?.auth_key,
-                };
-
-                try {
-                  const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                  });
-
-                  const data = await response.json();
-
-                  if (response.ok) {
-                    console.log("Trade placed successfully", data);
-                    setCloseDialogOpen(false);
-                  } else {
-                    console.error("Trade placement failed", data);
-                  }
-                } catch (error) {
-                  console.error("Network error:", error);
-                }
-              }}
-              variant="contained"
-              sx={{
-                backgroundColor: "#ff3d3d",
-                color: "#fff",
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                py: 1,
-                borderRadius: 1.5,
-                "&:hover": {
-                  backgroundColor: "#d32f2f",
-                },
-              }}
-            >
-              Close Position
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-
-
+        {/* Dialog content */}
+        <DialogContent>
+          <OrderPage1 /> 
+        </DialogContent>
+      </Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
           <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
@@ -2533,419 +1301,68 @@ function PersonalDashboard() {
             />
           </Box>
         </Grid>
-        <Dialog
-          open={rejectionDialogOpen}
-          fullScreen={isMobile}
-          onClose={(event, reason) => {
-            if (reason !== "backdropClick") {
-              setrejectionDialogOpen(false);
-            }
-          }}
-          fullWidth
-          maxWidth="xl"
-          disableEscapeKeyDown
-          PaperProps={{
-            sx: {
-              overflow: "hidden",       // ✅ Prevent scrolling on outer Dialog
-              maxHeight: isMobile ? "100vh" : "90vh",
-              height: isMobile ? "100vh" : "90vh",  // ✅ Fix height to avoid content overflow on Paper
-              display: "flex",
-              flexDirection: "column",
-            },
+
+         {/* Dialog with custom header */}
+      <Dialog
+        open={rejectionDialogOpen}
+        onClose={() => setrejectionDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        fullScreen={Fullscreen} 
+      >
+        {/* Custom header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 3,
+            py: 1,
+            backdropFilter: "blur(6px)",
+            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+            color: "#fff",
+            // borderTopLeftRadius: fullScreen ? 0 : 4,
+            // borderTopRightRadius: fullScreen ? 0 : 4,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            position: "relative",
           }}
         >
-          <Box sx={{ p: 0 }}>
-            {/* Header */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                px: 3,
-                py: 1,
-                backdropFilter: "blur(6px)",
-                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-                color: "#fff",
-                width: "100%",
-                borderTopLeftRadius: "8px",
-                borderTopRightRadius: "8px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-                position: "relative",
-              }}
-            >
-              <Typography
-                variant="h6"
-                fontWeight={800}
-                sx={{
-                  textTransform: "uppercase",
-                  letterSpacing: 1.5,
-                  fontSize: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  textShadow: "0 0 6px rgba(33,203,243,0.9)",
-                }}
-              >
-                <ReportIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-                Rejection Logs
-              </Typography>
+          <Typography
+            variant="h6"
+            fontWeight={800}
+            sx={{
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              fontSize: "1rem",
+              display: "flex",
+              alignItems: "center",
+              textShadow: "0 0 6px rgba(33,203,243,0.9)",
+            }}
+          >
+            <CloseIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+            Rejection Logs
+          </Typography>
+          <IconButton
+            size="small"
+            sx={{
+              color: "#fff",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              borderRadius: "50%",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+              },
+            }}
+            onClick={() => setrejectionDialogOpen(false)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-              <IconButton
-                size="small"
-                sx={{
-                  color: "#fff",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "50%",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={() => setrejectionDialogOpen(false)}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Box>
-
-            {/* Filter + Search */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                px: 1,
-                py: 1,
-                backgroundColor: (theme) => theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
-                borderRadius: 1,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                <FormControl
-                  size="small"
-                  sx={{
-                    minWidth: 120,
-                    "& .MuiOutlinedInput-root": {
-                      height: 26,
-                      "& fieldset": {
-                        borderColor: "black",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "black",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "black",
-                      },
-                    },
-                  }}
-                >
-                  <InputLabel>Filter</InputLabel>
-                  <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} label="Filter">
-                    <MenuItem value="today">Today</MenuItem>
-                    <MenuItem value="total">Total</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  size="small"
-                  placeholder="Search logs"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  fullWidth
-                  sx={{
-                    ml: 1,
-                    "& .MuiOutlinedInput-root": {
-                      height: 26,
-                      "& fieldset": {
-                        borderColor: "black",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "black",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "black",
-                      },
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-
-            {/* Content */}
-            {loading ? (
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: 400,
-                }}
-              >
-                <CircularProgress size={24} />
-              </Box>
-            ) : filteredLogs.length === 0 ? (
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: 400,
-                }}
-              >
-                <Typography sx={{ fontSize: "14px", px: 1 }}>
-                  No rejection logs found.
-                </Typography>
-              </Box>
-            ) : isMobile ? (
-              <>
-                {visibleMobileLogs.map((log, index) => {
-                  const isBuy = log.trade_type === "Buy";
-                  const isSell = log.trade_type === "Sell";
-
-                  const borderGradient = isBuy
-                    ? "linear-gradient(to right, #2196f3, #21cbf3)"
-                    : isSell
-                      ? "linear-gradient(to right, #f44336, #ff7961)"
-                      : "#ccc";
-
-                  const boxShadowColor = isBuy
-                    ? "rgba(33, 150, 243, 0.3)"
-                    : isSell
-                      ? "rgba(244, 67, 54, 0.3)"
-                      : "rgba(0,0,0,0.1)";
-
-                  return (
-                    <Card
-                      key={index}
-                      sx={{
-                        mb: 1,
-                        mx: 1,
-                        borderRadius: 2,
-                        border: "1px solid transparent",
-                        backgroundImage: (theme) =>
-                          `linear-gradient(${theme.palette.mode === "dark" ? "#333" : "#fff"}, ${theme.palette.mode === "dark" ? "#333" : "#fff"}), ${borderGradient}`,
-                        backgroundOrigin: "border-box",
-                        backgroundClip: "content-box, border-box",
-                        boxShadow: `0 4px 12px ${boxShadowColor}`,
-                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                        "&:hover": {
-                          transform: "scale(1.02)",
-                          boxShadow: `0 8px 20px ${boxShadowColor}`,
-                        },
-                      }}
-                    >
-                      <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                            {log.trade_rate} &nbsp;
-                            {log.trade_qty} Qty&nbsp;
-                            <span style={{ fontWeight: 400 }}>{log.trade_lot} Lot</span>
-                          </Typography>
-                          <Typography variant="caption" sx={{ fontStyle: "italic" }}>
-                            {log.datetime}
-                          </Typography>
-                        </Box>
-
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 700,
-                              color: isSell
-                                ? "#f44336"
-                                : isBuy
-                                  ? "#2196f3"
-                                  : "inherit",
-                            }}
-                          >
-                            {log.trade_type}
-                            <span style={{ fontWeight: 400, marginLeft: 4 }}>({log.type})</span>
-                          </Typography>
-                          <Typography variant="body2">{log.full_name}</Typography>
-                        </Box>
-
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: "#d32f2f",
-                          }}
-                        >
-                          {log.log_message}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-
-                {visibleLogCount < filteredLogs.length && (
-                  <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                    <Button variant="outlined" size="small" onClick={handleRejectionLoadMore}>
-                      Load More
-                    </Button>
-                  </Box>
-                )}
-              </>
-            ) : (
-              <>
-                <Box
-                  sx={{
-                    overflowX: "auto",
-                    overflowY: "auto",
-                    maxHeight: "400px",
-                    border: "1px solid #ddd",
-                    borderRadius: "0px",
-                    mx: 1,
-                    scrollbarWidth: "none",
-                    "&::-webkit-scrollbar": {
-                      display: "none",
-                    },
-                  }}
-                >
-                  <table
-                    className="table table-striped table-bordered"
-                    style={{
-                      minWidth: "1400px",
-                      fontSize: "12px",
-                      margin: 0,
-                      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                    }}
-                  >
-                    <thead
-                      style={{
-                        backgroundColor:
-                          theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-                      }}
-                    >
-                      <tr>
-                        {[
-                          "Type",
-                          "Datetime",
-                          "Script",
-                          "Trade Type",
-                          "Qty (Lot)",
-                          "Rate",
-                          "Message",
-                        ].map((header) => (
-                          <th key={header} style={{ fontWeight: 600 }}>
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedLogs.map((log, index) => {
-                        // Split script name and date
-                        const [scriptBase, ...rest] = log.script_name.split(" ");
-                        const scriptSuffix = rest.join(" ");
-
-                        return (
-                          <tr key={index}>
-                            <td>{log.type}</td>
-                            <td>{log.datetime}</td>
-                            <td>
-                              <span style={{ fontWeight: "bold" }}>{scriptBase}</span>{" "}
-                              {scriptSuffix}
-                            </td>
-                            <td
-                              style={{
-                                color:
-                                  log.trade_type === "Buy"
-                                    ? "green"
-                                    : log.trade_type === "Sell"
-                                      ? "red"
-                                      : undefined,
-                                fontWeight: 700,
-                              }}
-                            >
-                              {log.trade_type.toUpperCase()}
-                            </td>
-                            <td>
-                              <span style={{ fontWeight: "bold" }}>{log.trade_qty}</span>
-                              {log.trade_lot ? ` (${log.trade_lot})` : ""}
-                            </td>
-                            <td>{log.trade_rate}</td>
-                            <td>{log.log_message}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </Box>
-
-
-                {/* Pagination */}
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 1, py: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                    <Button
-                      size="small"
-                      disabled={logCurrentPage === 0}
-                      onClick={() => setLogCurrentPage((prev) => prev - 1)}
-                      color="secondary"
-                      sx={{ mr: 1 }}
-                    >
-                      Prev
-                    </Button>
-
-                    {[...Array(logTotalPages)].map((_, i) => {
-                      if (i === 0 || i === logTotalPages - 1 || (i >= logCurrentPage - 1 && i <= logCurrentPage + 1)) {
-                        return (
-                          <Button
-                            key={i}
-                            size="small"
-                            variant={i === logCurrentPage ? "contained" : "outlined"}
-                            color="secondary"
-                            onClick={() => setLogCurrentPage(i)}
-                            sx={{ mx: 0.3, minWidth: "30px" }}
-                          >
-                            {i + 1}
-                          </Button>
-                        );
-                      }
-
-                      if ((i === 1 && logCurrentPage > 2) || (i === logTotalPages - 2 && logCurrentPage < logTotalPages - 3)) {
-                        return (
-                          <Typography key={i} sx={{ mx: 0.5 }}>
-                            ...
-                          </Typography>
-                        );
-                      }
-
-                      return null;
-                    })}
-
-                    <Button
-                      size="small"
-                      disabled={logCurrentPage + 1 >= logTotalPages}
-                      onClick={() => setLogCurrentPage((prev) => prev + 1)}
-                      color="secondary"
-                      sx={{ ml: 1 }}
-                    >
-                      Next
-                    </Button>
-                    <TextField
-                      label="Go to page"
-                      type="number"
-                      size="small"
-                      InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          const page = parseInt(e.target.value, 10) - 1;
-                          if (!isNaN(page) && page >= 0 && page < totalPages) {
-                            setCurrentPage(page);
-                          }
-                        }
-                      }}
-                      sx={{ width: 100 }}
-                    />
-                  </Box>
-                </Box>
-              </>
-            )}
-          </Box>
-        </Dialog>
-
-
-
+        {/* Dialog content */}
+        <DialogContent>
+          <RejectionLogs /> {/* Component showing rejection logs */}
+        </DialogContent>
+      </Dialog>
 
         {/* <Box
           sx={{

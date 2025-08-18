@@ -162,9 +162,17 @@ function Header(props) {
                 </IconButton>
               </Tooltip>
             </div> */}
-          <Typography component="h2" className={classes.header_Title} sx={{pl: isLgUp && !sidebarOpen ? 2 : 0}}>
-            {title}
-          </Typography>
+          <Typography
+  component="h2"
+  className={classes.header_Title}
+  sx={{
+    pl: isLgUp && !sidebarOpen ? 2 : 0,
+    fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" }, // smaller on mobile
+  }}
+>
+  {title}
+</Typography>
+
         </div>
         {/* )} */}
         {/* <div className={classes.searchWrapper}> */}

@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, startTransition, useRef } from "react";
+import { formatScriptIds } from "./helpers/utilFunc";
 import {
     Box,
     Typography,
@@ -64,7 +65,8 @@ import ForexpositionFilter from "./Forexpositionfilter";
 // });
 
 
-
+    const rawData = JSON.parse(sessionStorage.getItem("data"));
+    const userType = parseInt(rawData?.user_type, 10);
 
 const OrderPage = () => {
     const theme = useTheme();
@@ -194,7 +196,7 @@ const OrderPage = () => {
                 group_by: client_wise_value,
 
                 market_type_id: market?.id,
-                script_id: script?.id,
+                script_id: formatScriptIds(script),
                 broker_id: broker?.id,
                 master_user_id: master?.id,
                 user_id: client?.id,
@@ -695,6 +697,13 @@ const OrderPage = () => {
 
     }
 
+       const getColor = (val) => {
+  const num = Number(val ?? 0); 
+  if (num > 0) return "black";
+  if (num < 0) return "black";
+  return "black";
+};
+
 
     return (
         <Box sx={{ p: 0, position: "relative" }}>
@@ -752,33 +761,184 @@ const OrderPage = () => {
                 />}
 
             {/* 🔢 MTM & Quantity Summary */}
-            <Box sx={{
-                px: 2, py: 1,
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: 2,
-                justifyContent: "space-between",
-                borderBottom: '1px solid #eee',
-            }}>
-                <Box sx={{ fontSize: 13 }}>
-                    Total MTM: ₹
-                    <strong>{(totals.totalMTM ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    Self MTM: ₹<strong>{(totals.self_grand ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    Downline MTM: ₹<strong>{(totals.downline_grand ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    Upline MTM: ₹<strong>{(totals.upline_grand ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
-                <Box sx={{ fontSize: 13 }}>
-                    Total Qty: <strong>{(totals.total_qty ?? 0).toLocaleString("en-IN")}</strong>
-                </Box>
+        <>
+           {/* Desktop View */}
+           {!isMobile && (
+         <Box
+           sx={{
+             px: 2,
+             py: 2,
+             display: "flex",
+             flexWrap: "wrap",
+             alignItems: "center",
+             gap: 2,
+             justifyContent: "space-between",
+             borderBottom: "1px solid #eee",
+             background: "#fff",
+             borderRadius: 2,
+             boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+           }}
+         >
+           {[
+             { label: "Total MTM", value: totals.totalMTM, color: "#1976d2" },
+             { label: "Self MTM", value: totals.self_grand, color: "#2e7d32" },
+             { label: "Downline MTM", value: totals.downline_grand, color: "#ed6c02" },
+             { label: "Upline MTM", value: totals.upline_grand, color: "#9c27b0" },
+             { label: "Total Qty", value: totals.total_qty, color: "#d32f2f" },
+           ].map((item, i) => (
+             <Box
+               key={i}
+               sx={{
+                 fontSize: 13,
+                 px: 2,
+                 py: 1,
+                 borderRadius: 2,
+                 border: `1px solid ${item.color}40`,
+                 background: `${item.color}08`,
+                 boxShadow: "inset 0 0 6px rgba(0,0,0,0.05)",
+                 transition: "all 0.3s ease",
+                 "&:hover": {
+                   transform: "translateY(-2px)",
+                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                 },
+               }}
+             >
+               {item.label}:{" "}
+               <Typography
+                 component="span"
+                 sx={{
+                   fontWeight: "bold",
+                   transition: "color 0.3s ease",
+                   color: getColor(item.value),
+                 }}
+               >
+                 {(item.value ?? 0).toLocaleString("en-IN")}
+               </Typography>
+             </Box>
+           ))}
+         </Box>
+       )}
+     
+           {/* Mobile View - Top Bar */}
+           {isMobile && (
+             <Box
+               sx={{
+                 py: 1.5,
+                 display: "flex",
+                 alignItems: "center",
+                 background: "#f9f9f9",
+                 borderBottom: "1px solid #eee",
+                 borderRadius: 0,
+                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+               }}
+             >
+               <Box
+                 sx={{
+                   textAlign: "center",
+                   flex: 1.2,
+                   borderRight: "1px solid #ddd",
+                 }}
+               >
+                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                   Total
+                 </Typography>
+                 <Typography
+                   sx={{
+                     fontSize: 13,
+                     fontWeight: "bold",
+                     transition: "color 0.3s ease",
+                     color: getColor(totals.totalMTM),
+                   }}
+                 >
+                   ₹{(totals.totalMTM ?? 0).toLocaleString("en-IN")}
+                 </Typography>
+               </Box>
+     
+               <Box
+                 sx={{
+                   textAlign: "center",
+                   flex: 1.2,
+                   borderRight: "1px solid #ddd",
+                 }}
+               >
+                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                   Self
+                 </Typography>
+                 <Typography
+                   sx={{
+                     fontSize: 13,
+                     fontWeight: "bold",
+                     transition: "color 0.3s ease",
+                     color: getColor(totals.self_grand),
+                   }}
+                 >
+                   ₹{(totals.self_grand ?? 0).toLocaleString("en-IN")}
+                 </Typography>
+               </Box>
+     
+               <Box
+                 sx={{
+                   textAlign: "center",
+                   flex: 1.2,
+                   borderRight: "1px solid #ddd",
+                 }}
+               >
+                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                   Downline
+                 </Typography>
+                 <Typography
+                   sx={{
+                     fontSize: 13,
+                     fontWeight: "bold",
+                     transition: "color 0.3s ease",
+                     color: getColor(totals.downline_grand),
+                   }}
+                 >
+                   ₹{(totals.downline_grand ?? 0).toLocaleString("en-IN")}
+                 </Typography>
+               </Box>
+     
+               <Box
+                 sx={{
+                   textAlign: "center",
+                   flex: 0.8,
+                   borderRight: "1px solid #ddd",
+                 }}
+               >
+                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                   Upline
+                 </Typography>
+                 <Typography
+                   sx={{
+                     fontSize: 13,
+                     fontWeight: "bold",
+                     transition: "color 0.3s ease",
+                     color: getColor(totals.upline_grand),
+                   }}
+                 >
+                   ₹{(totals.upline_grand ?? 0).toLocaleString("en-IN")}
+                 </Typography>
+               </Box>
+     
+               <Box sx={{ textAlign: "center", flex: 0.8 }}>
+                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                   Qty
+                 </Typography>
+                 <Typography
+                   sx={{
+                     fontSize: 13,
+                     fontWeight: "bold",
+                     transition: "color 0.3s ease",
+                     color: getColor(totals.total_qty),
+                   }}
+                 >
+                   {(totals.total_qty ?? 0).toLocaleString("en-IN")}
+                 </Typography>
+               </Box>
+             </Box>
+           )}
+         </>
 
-            </Box>
 
 
             {/* 🔍 Search Bar */}
@@ -834,170 +994,255 @@ const OrderPage = () => {
                 </Box>
             ) : positionData.length > 0 ? (
                 <>
-                    {isMobile ? (
-                        <>
-                            {positionData.map((row, index) => {
-                                const scriptHtml = row?.script_name || "";
-                                const parts = scriptHtml.split("<br>");
-                                const mainName = parts[0] || "";
-                                const datePart = parts[1] || "";
+                        {isMobile ? (
+                            <>
+                                {positionData.map((row, index) => {
+                                    const scriptHtml = row?.script_name || "";
+                                    const parts = scriptHtml.split("<br>");
+                                    const mainName = parts[0] || "";
+                                    const datePart = parts[1] || "";
 
-                                const currentValue = Number(
-                                    row.net_qty > 0
-                                        ? row.net_qty * (liveRates[row.check_script_name]?.BuyPrice ?? 0)
-                                        : row.net_qty * (liveRates[row.check_script_name]?.SellPrice ?? 0)
-                                ).toFixed(5);
-                                const todaysPL = row.net_qty > 0
-                                    ? row.net_qty * ((Number(liveRates[row.check_script_name]?.BuyPrice ?? 0) - Number(liveRates[row.check_script_name]?.Close ?? 0)))
-                                    : row.net_qty * ((Number(liveRates[row.check_script_name]?.SellPrice ?? 0) - Number(liveRates[row.check_script_name]?.Close ?? 0)));
+                                    const currentValue = Number(
+                                        row.net_qty > 0
+                                            ? row.net_qty * (liveRates[row.check_script_name]?.BuyPrice ?? 0)
+                                            : row.net_qty * (liveRates[row.check_script_name]?.SellPrice ?? 0)
+                                    );
 
-                                const unrealizedPL = row.net_qty > 0 ? (row.net_qty * (row.buy_avg_rate ?? 0 - liveRates[row.check_script_name]?.BuyPrice ?? 0)) : (row.net_qty * (row.sell_avg_rate ?? 0 - liveRates[row.check_script_name]?.SellPrice ?? 0));
-                                const unrealizedPLPerc = 10.62;
+                                    const todaysPL = row.net_qty > 0
+                                        ? row.net_qty * (
+                                            (Number(liveRates[row.check_script_name]?.BuyPrice ?? 0) -
+                                                Number(liveRates[row.check_script_name]?.Close ?? 0))
+                                        )
+                                        : row.net_qty * (
+                                            (Number(liveRates[row.check_script_name]?.SellPrice ?? 0) -
+                                                Number(liveRates[row.check_script_name]?.Close ?? 0))
+                                        );
 
-                                return (
-                                    <Box
-                                        key={index}
-                                        onClick={() => handleCardClick(row)}
-                                        sx={{
-                                            m: 0.2, // Reduce margin
-                                            border: (theme) => `1px solid ${theme.palette.primary.main}`,
-                                            borderRadius: 1.5,
-                                            backgroundColor: (theme) => theme.palette.background.paper,
-                                            boxShadow: (theme) =>
-                                                theme.palette.mode === "dark"
-                                                    ? "0 0 4px rgba(255, 255, 255, 0.08)"
-                                                    : "0 0 4px rgba(0, 0, 0, 0.04)",
-                                            overflow: "hidden",
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        {/* Top row */}
+                                    const unrealizedPL =
+                                        row.net_qty > 0
+                                            ? row.net_qty *
+                                            ((row.buy_avg_rate ?? 0) - (liveRates[row.check_script_name]?.BuyPrice ?? 0))
+                                            : row.net_qty *
+                                            ((row.sell_avg_rate ?? 0) - (liveRates[row.check_script_name]?.SellPrice ?? 0));
+
+                                    return (
                                         <Box
+                                            key={index}
+                                            onClick={() => handleCardClick(row)}
                                             sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                px: 0.8,
-                                                py: 0.5, // Reduce vertical padding
+                                                m: 0.2,
+                                                border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                                                borderRadius: 1.5,
+                                                backgroundColor: (theme) => theme.palette.background.paper,
+                                                boxShadow: (theme) =>
+                                                    theme.palette.mode === "dark"
+                                                        ? "0 0 4px rgba(255, 255, 255, 0.08)"
+                                                        : "0 0 4px rgba(0, 0, 0, 0.04)",
+                                                overflow: "hidden",
+                                                cursor: "pointer",
                                             }}
                                         >
-                                            <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-                                                <Avatar
-                                                    alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
-                                                    src="/path-to-your-logo.png"
-                                                    variant="square"
-                                                    sx={{ width: 28, height: 28, mr: 0.6, flexShrink: 0 }} // Smaller avatar, smaller margin
-                                                />
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        overflow: "hidden",
-                                                        flexWrap: "nowrap",
-                                                        minWidth: 0,
-                                                    }}
-                                                >
+                                         {userType !== 1 && (
+                                           <Box
+                                             sx={{
+                                               background:
+                                                 row.net_qty > 0
+                                                   ? "linear-gradient(135deg, #2e7d32 0%, #6ebb72ff 50%, #b8ddbaff 100%)" // ✅ green gradient
+                                                   : row.net_qty < 0
+                                                   ? "linear-gradient(135deg, #c62828 0%, #d16f6fff 50%, #e59191ff 100%)" // ✅ red gradient
+                                                   : "linear-gradient(135deg, #616161 0%, #757575 50%, #9e9e9e 100%)", // ✅ grey gradient
+                                               color: "#fff",
+                                               fontSize: "0.7rem",
+                                               fontWeight: 600,
+                                               px: 1,
+                                               py: 0.3,
+                                               textAlign: "left",
+                                               display: "flex",
+                                               alignItems: "center",
+                                               gap: 1,
+                                               whiteSpace: "nowrap",
+                                               overflow: "hidden",
+                                               textOverflow: "ellipsis",
+                                             }}
+                                           >
+                                             👤{" "}
+                                             {row.full_name
+                                               ?.replace(/<[^>]+>/g, " ")
+                                               ?.split(/\s+/)
+                                               .map((part, i) => (
+                                                 <Typography
+                                                   key={i}
+                                                   variant="caption"
+                                                   sx={{ color: "#fff", fontWeight: 600 }}
+                                                 >
+                                                   {part}
+                                                 </Typography>
+                                               ))}
+                                           </Box>
+                                         )}
+
+                                            {/* Top row */}
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "space-between",
+                                                    px: 0.8,
+                                                    py: 0.5,
+                                                }}
+                                            >
+                                                {row.mym_html && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{ display: "none" }}
+                                                        dangerouslySetInnerHTML={{ __html: row.mym_html }}
+                                                    />
+                                                )}
+                                                <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                                                    <Avatar
+                                                        alt={mainName.replace(/<\/?[^>]+(>|$)/g, "")}
+                                                        src="/path-to-your-logo.png"
+                                                        variant="square"
+                                                        sx={{ width: 28, height: 28, mr: 0.6, flexShrink: 0 }} // Smaller avatar, smaller margin
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            overflow: "hidden",
+                                                            flexWrap: "nowrap",
+                                                            minWidth: 0,
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            sx={{
+                                                                fontWeight: 700,
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                                mr: 0.3, // Reduce margin
+                                                            }}
+                                                            dangerouslySetInnerHTML={{ __html: mainName }}
+                                                        />
+                                                        <Box sx={{ display: "flex", alignItems: "center", ml: 0.4 }}>
+                                                            <ShoppingBagIcon fontSize="inherit" sx={{ fontSize: 10, color: "text.disabled", ml: 3 }} />
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontSize: 10,
+                                                                    fontWeight: 300,
+                                                                    ml: 0.2,
+                                                                    whiteSpace: "nowrap",
+                                                                }}
+                                                            >
+                                                                {row.net_qty}
+                                                            </Typography>
+                                                        </Box>
+                                                        {datePart && (
+                                                            <Typography
+                                                                variant="caption"
+                                                                sx={{ opacity: 0.7, ml: 0.4, whiteSpace: "nowrap" }}
+                                                                dangerouslySetInnerHTML={{ __html: datePart }}
+                                                            />
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                                <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                        {(
+                                                            row.net_qty > 0
+                                                                ? liveRates[row.check_script_name]?.BuyPrice
+                                                                : liveRates[row.check_script_name]?.SellPrice
+                                                        )?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color:
+                                                                liveRates[row.check_script_name]?.PriceChange < 0
+                                                                    ? (theme) => theme.palette.error.main
+                                                                    : (theme) => theme.palette.success.main,
+                                                        }}
+                                                    >
+                                                        {liveRates && liveRates[row.check_script_name]?.PriceChange
+                                                            ? liveRates[row.check_script_name]?.PriceChange.toLocaleString("en-IN", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })
+                                                            : "--"}{" "}
+                                                        (
+                                                        {liveRates[row.check_script_name]?.PriceChangePercentage?.toLocaleString("en-IN", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }) ?? "--"}
+                                                        %)
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Bottom row */}
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    py: 0.3,
+                                                    px: 0.5,
+                                                    borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                                                    textAlign: "center",
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                <Box sx={{ flex: 0.5, pr: 2 }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                        {currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Current Value
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 1 }}>
                                                     <Typography
                                                         variant="subtitle2"
                                                         sx={{
                                                             fontWeight: 700,
-                                                            whiteSpace: "nowrap",
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            mr: 0.3, // Reduce margin
+                                                            color: todaysPL > 0 ? "success.main" : "error.main",
                                                         }}
-                                                        dangerouslySetInnerHTML={{ __html: mainName }}
-                                                    />
-                                                    <Box sx={{ display: "flex", alignItems: "center", ml: 0.4 }}>
-                                                        <ShoppingBagIcon fontSize="inherit" sx={{ fontSize: 10, color: "text.disabled" }} />
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontSize: 10,
-                                                                fontWeight: 300,
-                                                                ml: 0.2,
-                                                                whiteSpace: "nowrap",
-                                                            }}
-                                                        >
-                                                            {row.net_qty}
-                                                        </Typography>
-                                                    </Box>
-                                                    {datePart && (
-                                                        <Typography
-                                                            variant="caption"
-                                                            sx={{ opacity: 0.7, ml: 0.4, whiteSpace: "nowrap" }}
-                                                            dangerouslySetInnerHTML={{ __html: datePart }}
-                                                        />
-                                                    )}
+                                                    >
+                                                        {todaysPL.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Today&apos;s P&amp;L
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 0.5, minWidth: "125px" }}>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            color: unrealizedPL > 0 ? "success.main" : "error.main",
+                                                        }}
+                                                    >
+                                                        {unrealizedPL >= 1000
+                                                            ? `${(unrealizedPL / 1000).toLocaleString("en-IN", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })}K`
+                                                            : unrealizedPL.toLocaleString("en-IN", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Unrealized P&amp;L
+                                                    </Typography>
                                                 </Box>
                                             </Box>
-                                            <Box sx={{ textAlign: "right", minWidth: 65, flexShrink: 0 }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                                    {row.net_qty > 0 ? liveRates[row.check_script_name]?.BuyPrice : liveRates[row.check_script_name]?.SellPrice}
-                                                </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        color: liveRates[row.check_script_name]?.PriceChange < 0
-                                                            ? (theme) => theme.palette.error.main
-                                                            : (theme) => theme.palette.success.main,
-                                                    }}
-                                                >
-                                                    {liveRates && liveRates[row.check_script_name]?.PriceChange
-                                                        ? liveRates[row.check_script_name]?.PriceChange.toFixed(5)
-                                                        : "--"}{" "} ({liveRates[row.check_script_name]?.PriceChangePercentage?.toFixed(5) ?? "--"}%)
-                                                </Typography>
-
-                                            </Box>
                                         </Box>
-
-                                        {/* Bottom row */}
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                py: 0.3, // Reduce vertical padding
-                                                px: 0.5, // Add small horizontal padding
-                                                borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                                                textAlign: "center",
-                                                width: "100%",
-                                            }}
-                                        >
-                                            <Box sx={{ flex: 0.5, pr: 2 }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                                    {currentValue}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Current Value
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ flex: 1 }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: todaysPL > 0 ? "success.main" : "error.main" }}>
-                                                    {todaysPL.toFixed(5)}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Today&apos;s P&amp;L
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ flex: 0.5, minWidth: '125px' }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: unrealizedPL > 0 ? "success.main" : "error.main" }}>
-                                                    {unrealizedPL >= 1000
-                                                        ? `${(unrealizedPL / 1000).toFixed(5)}K`
-                                                        : `${unrealizedPL.toFixed(5)}`}{" "}
-                                                    {/* <Typography component="span" variant="caption" sx={{ color: "success.main" }}>
-                                                        ({unrealizedPLPerc}%)
-                                                    </Typography> */}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Unrealized P&amp;L
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                );
-                            })}
-                        </>
-                    ) : (
+                                    );
+                                })}
+                            </>
+                        ) : (
                         <Box
                             sx={{
                                 height: 'calc(100vh - 120px)', // Adjust based on your layout
@@ -1017,130 +1262,188 @@ const OrderPage = () => {
                                     },
                                 }}
                             >
-                                <table
-                                    style={{
-                                        minWidth: "1350px",
-                                        fontSize: "12px",
-                                        borderCollapse: "collapse",
-                                        width: "100%",
-                                    }}
+                                            <table
+                                  style={{
+                                    minWidth: "1350px",
+                                    fontSize: "12px",
+                                    borderCollapse: "collapse",
+                                    width: "100%",
+                                    border: "1px solid #ddd",
+                                  }}
                                 >
-                                    <thead>
-                                        <tr>
-                                            {[
-                                                "Market Type",
-                                                "Script",
-                                                "Total Buy",
-                                                "Buy Avg Rate",
-                                                "Total Sell",
-                                                "Sell Avg Rate",
-                                                "Net Qty",
-                                                "Last Trade Price",
-                                                "MTM",
-                                                "Auto Closed Date",
-                                                "Close Btn",
-                                            ].map((heading, i) => (
-                                                <th
-                                                    key={i}
-                                                    style={{
-                                                        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-                                                        textAlign: "left",
-                                                        padding: "8px",
-                                                        position: "sticky",
-                                                        top: 0,
-                                                        zIndex: 1,
-                                                    }}
-                                                >
-                                                    {heading}
-                                                </th>
-                                            ))}
+                                  <thead>
+                                    <tr>
+                                      {[
+                                        ...(userType !== 1 ? ["Client"] : []),
+                                        "Script",
+                                        "Total Buy",
+                                        "Buy Avg Rate",
+                                        "Total Sell",
+                                        "Sell Avg Rate",
+                                        "Net Qty",
+                                        "Last Trade Price",
+                                        "MTM",
+                                        "Auto Closed Date",
+                                        "Close Btn",
+                                      ].map((heading, i) => (
+                                        <th
+                                          key={i}
+                                          style={{
+                                            backgroundColor: theme.palette.mode === "dark" ? "#333" : "#f4f4f4",
+                                            color: theme.palette.mode === "dark" ? "#fff" : "#333",
+                                            textAlign: "left",
+                                            padding: "6px 10px",
+                                            position: "sticky",
+                                            top: 0,
+                                            zIndex: 2,
+                                            fontWeight: "600",
+                                            fontSize: "13px",
+                                            borderBottom: "2px solid #ccc",
+                                          }}
+                                        >
+                                          {heading}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {positionData.map((row, index) => {
+                                      const isEven = index % 2 === 0;
+                                      const rowBgColor =
+                                        theme.palette.mode === "dark"
+                                          ? isEven
+                                            ? "#2a2a2a"
+                                            : "#1f1f1f"
+                                          : isEven
+                                          ? "#fafafa"
+                                          : "#ffffff";
+                                
+                                      const marketColors = {
+                                        NSEFUT: "#1976d2",
+                                       FOREX: "#388e3c",
+                                        COMEX: "#f57c00",
+                                      };
+                                      const chipColor = marketColors[row.market_type_name] || "#757575";
+                                
+                                      // MTM color
+                                      const mtmValue = row.mtm ?? 0;
+                                      const mtmColor = mtmValue > 0 ? "green" : mtmValue < 0 ? "red" : "#666";
+                                
+                                      return (
+                                        <tr
+                                          key={index}
+                                          style={{
+                                            backgroundColor: rowBgColor,
+                                            cursor: "pointer",
+                                            transition: "background 0.2s ease",
+                                          }}
+                                          onClick={() => openDrawer(row)}
+                                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.palette.mode === "dark" ? "#333" : "#f1f7ff")}
+                                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = rowBgColor)}
+                                        >
+                                          {/* Script + Market Chip */}
+                                              <td style={{ padding: "6px 10px" }}>
+                                                  {userType !== 1 ? (
+                                                      <span dangerouslySetInnerHTML={{ __html: row.full_name }} />
+                                                   ) : null} 
+                                              </td>
+                                
+                                          <td style={{ padding: "6px 10px" }}>
+                                            <div
+                                              style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                maxWidth: "200px",
+                                                overflow: "hidden",
+                                              }}
+                                            >
+                                              <div
+                                                style={{
+                                                  overflow: "hidden",
+                                                  textOverflow: "ellipsis",
+                                                  whiteSpace: "nowrap",
+                                                  fontWeight: 500,
+                                                  color: theme.palette.mode === "dark" ? "#fff" : "#222",
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: row.script_name }}
+                                              />
+                                              <span
+                                                style={{
+                                                  backgroundColor: chipColor,
+                                                  color: "#fff",
+                                                  padding: "1px 6px",
+                                                  borderRadius: "12px",
+                                                  fontSize: "10px",
+                                                  whiteSpace: "nowrap",
+                                                  marginLeft: "6px",
+                                                }}
+                                              >
+                                                {row.market_type_name}
+                                              </span>
+                                            </div>
+                                          </td>
+                                
+                                          {/* Numeric data */}
+                                          <td style={{ padding: "6px 10px" }}>{row.total_buy?.toLocaleString()}</td>
+                                          <td style={{ padding: "6px 10px" }}>{row.buy_avg_rate?.toLocaleString()}</td>
+                                          <td style={{ padding: "6px 10px" }}>{row.total_sell?.toLocaleString()}</td>
+                                          <td style={{ padding: "6px 10px" }}>{row.sell_avg_rate?.toLocaleString()}</td>
+                                          <td
+                                            style={{
+                                              padding: "6px 10px",
+                                              color: row.net_qty > 0 ? "green" : row.net_qty < 0 ? "red" : "#666",
+                                              fontWeight: row.net_qty !== 0 ? "bold" : "normal",
+                                            }}
+                                          >
+                                            {row.net_qty?.toLocaleString()}
+                                          </td>
+                                          <td style={{ padding: "6px 10px" }}>
+                                            {row.net_qty > 0
+                                              ? liveRates[row.check_script_name]?.BuyPrice?.toLocaleString()
+                                              : liveRates[row.check_script_name]?.SellPrice?.toLocaleString()}
+                                          </td>
+                                
+                                          {/* MTM */}
+                                         <td style={{ padding: "2px 8px" }}>
+                                  <span
+                                    style={{ fontWeight: "bold" }}
+                                    dangerouslySetInnerHTML={{ __html: row.mym_html }}
+                                  />
+                                </td>
+                                
+                                          <td style={{ padding: "6px 10px", fontSize: "11px", color: "#666" }}>
+                                            {row.trade_auto_closed_date}
+                                          </td>
+                                
+                                          {/* Close Button */}
+                                          <td style={{ padding: "6px 10px" }}>
+                                            {row.net_qty !== 0 ? (
+                                              <Button
+                                                style={{
+                                                  backgroundColor: "#d32f2f",
+                                                  border: "none",
+                                                  color: "#fff",
+                                                  padding: "3px 10px",
+                                                  borderRadius: "6px",
+                                                  cursor: "pointer",
+                                                  fontSize: "11px",
+                                                  fontWeight: "500",
+                                                }}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  openClose(row);
+                                                }}
+                                              >
+                                                Close
+                                              </Button>
+                                            ) : (
+                                              <span style={{ color: "#aaa" }}>-</span>
+                                            )}
+                                          </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {positionData.map((row, index) => {
-                                            const isEven = index % 2 === 0;
-                                            const rowBgColor =
-                                                theme.palette.mode === "dark"
-                                                    ? isEven
-                                                        ? "#2a2a2a"
-                                                        : "#1f1f1f"
-                                                    : isEven
-                                                        ? "#f9f9f9"
-                                                        : "#ffffff";
-
-                                            return (
-                                                <tr
-                                                    key={index}
-                                                    style={{
-                                                        backgroundColor: rowBgColor,
-                                                        cursor: "pointer",
-                                                    }}
-                                                    onClick={() => openDrawer(row)}
-                                                >
-                                                    <td style={{ padding: "8px" }}>{row.market_type_name}</td>
-                                                    <td style={{ padding: "8px" }}>
-                                                        <div
-                                                            style={{
-                                                                display: "inline-block",
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                                maxWidth: "180px",
-                                                                lineHeight: 1.2,
-                                                                verticalAlign: "middle",
-                                                            }}
-                                                            dangerouslySetInnerHTML={{ __html: row.script_name }}
-                                                        />
-                                                    </td>
-                                                    <td style={{ padding: "8px" }}>{row.total_buy}</td>
-                                                    <td style={{ padding: "8px" }}>{row.buy_avg_rate}</td>
-                                                    <td style={{ padding: "8px" }}>{row.total_sell}</td>
-                                                    <td style={{ padding: "8px" }}>{row.sell_avg_rate}</td>
-                                                    <td style={{
-                                                        padding: '8px',
-                                                        color: row.net_qty > 0 ? 'green' : row.net_qty < 0 ? 'red' : 'inherit',
-                                                        fontWeight: row.net_qty !== 0 ? 'bold' : 'normal'
-                                                    }}>
-                                                        {row.net_qty}
-                                                    </td>
-                                                    <td style={{ padding: "8px" }}>{row.net_qty > 0 ? formatNumberWithCommas(liveRates[row.check_script_name]?.BuyPrice, 5) : formatNumberWithCommas(liveRates[row.check_script_name]?.SellPrice, 5)}</td>
-                                                    <td style={{ padding: "8px" }}>
-                                                        <span dangerouslySetInnerHTML={{ __html: row.mym_html }} />
-                                                    </td>
-                                                    <td style={{ padding: "8px" }}>{row.trade_auto_closed_date}</td>
-                                                    <td style={{ padding: '8px' }}>
-                                                        {row.net_qty !== 0 ? (
-                                                            <Button
-                                                                style={{
-                                                                    backgroundColor: '#d32f2f',
-                                                                    border: 'none',
-                                                                    color: '#fff',
-                                                                    padding: '2px 8px',
-                                                                    borderRadius: '4px',
-                                                                    cursor: 'pointer',
-                                                                }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openClose(row);
-                                                                    // setSelectedRow(row);
-                                                                    // setCloseDialogOpen(true);
-                                                                    // setSelectedRow(row);
-                                                                    // setLot(row?.lot_size ?? 0.01);
-                                                                    // setQty(row?.net_qty ?? 1);
-                                                                    // setPrice(row?.price ?? 0);
-                                                                    // setCloseDialogOpen(true);
-                                                                }}
-                                                            >
-                                                                Close
-                                                            </Button>
-                                                        ) : (
-                                                            <span>-</span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
+                                      );
+                                    })}
+                                  </tbody>
                                 </table>
 
                                 <Dialog

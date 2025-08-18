@@ -435,63 +435,102 @@ const OrderBook = () => {
                     }}
                   >
                     <CardContent
-                      sx={{
-                        p: 0.5,
-                        "&:last-child": { pb: 0.5 },
-                      }}
-                    >
-                      {/* Row 1 */}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
-                          {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
-                        </Typography>
-                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>ID: #{item.trd_id}</Typography>
-                      </Box>
+  sx={{
+    p: 0.5,
+    "&:last-child": { pb: 0.5 },
+  }}
+>
+  {/* Thin Bar with Client Name */}
+  {userType !== 1 && (
+    <Box
+      sx={{
+        background:
+          "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+        color: "#fff",
+        fontSize: "0.7rem",
+        fontWeight: 600,
+        px: 1,
+        py: 0.3,
+        mb: 0.5, // adds spacing below bar
+        borderRadius: "4px 4px 0 0",
+        display: "flex",
+        alignItems: "center",
+        gap: 0.5,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      }}
+    >
+      👤{" "}
+      {item.client_full_name
+        ?.replace(/<[^>]+>/g, " ")
+        ?.split(/\s+/)
+        .map((part, i) => (
+          <Typography
+            key={i}
+            variant="caption"
+            sx={{
+              color: "#fff",
+              fontWeight: 600,
+              lineHeight: 1,
+            }}
+          >
+            {part}
+          </Typography>
+        ))}
+    </Box>
+  )}
 
-                      {/* Row 2 */}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+  {/* Row 1 */}
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
+      {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
+    </Typography>
+    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+      ID: #{item.trd_id}
+    </Typography>
+  </Box>
 
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{
-                              ml: 0.5,
-                              fontSize: "1rem",
-                            }}
-                          >
-                            {isBuy ? "📈" : isSell ? "📉" : ""}
-                          </Typography>
+  {/* Row 2 */}
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
 
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 700,
-                              color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
-                              ml: 0.5,
-                              m: 0,
-                              lineHeight: 1,
-                            }}
-                          >
-                            {item.trd_type}
-                            <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
-                          </Typography>
-                        </Box>
+      <Typography component="span" variant="body2" sx={{ ml: 0.5, fontSize: "1rem" }}>
+        {isBuy ? "📈" : isSell ? "📉" : ""}
+      </Typography>
 
-                        <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
-                          ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
-                        </Typography>
-                      </Box>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 700,
+          color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
+          ml: 0.5,
+          m: 0,
+          lineHeight: 1,
+        }}
+      >
+        {item.trd_type}
+        <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
+      </Typography>
+    </Box>
 
-                      {/* Row 3 */}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>{item.trd_time}</Typography>
-                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-                          Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
-                        </Typography>
-                      </Box>
-                    </CardContent>
+    <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
+      ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
+    </Typography>
+  </Box>
+
+  {/* Row 3 */}
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+      {item.trd_time}
+    </Typography>
+    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+      Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
+    </Typography>
+  </Box>
+</CardContent>
+
                   </Card>
                 </SwipeableListItem>
               );
