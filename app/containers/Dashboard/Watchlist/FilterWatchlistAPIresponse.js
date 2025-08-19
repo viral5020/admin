@@ -16120,3 +16120,15 @@ const dummy = {
 // <MarketScriptFilter /> : solve some bugs relatade to scriptOption updation on market change
 // forex orderbook : market-script filter component arrange with mine <MarketScriptFilter />
 // <MarketScriptFilter /> : make competable for forex pages
+
+
+
+// work remaining
+// viral bhai :
+// onfilter change, loading should shown only to table data not to whole page
+// some page's table  are not scrollable horizontally
+
+// mine:
+// filters and pagination
+// market script client broker master search api calls on every re-rending onf page
+// api function should run only when its parameter changes otherwise return previous response 

@@ -174,14 +174,14 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
 export const fetchforexOrdersAPI = async ({
   userId,
   authKey,
-  type = "today",
+  filterType = "today",
   searchValue = "",
   currentPage = 0,
-  ordersPerPage = 10000,
+  rowsPerPage = 10000,
   end_date = "",
   start_end = "",
   marketId = "",
-  scriptIds = [],
+  scriptIds = "",
   brokerId = "",
   masterUserId = "",
   clientId = "",
@@ -190,17 +190,17 @@ export const fetchforexOrdersAPI = async ({
 }) => {
   const formData = {
     sEcho: 1,
-    iDisplayStart: currentPage * ordersPerPage,
-    iDisplayLength: ordersPerPage,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
     sSearch: searchValue,
     is_app: 1,
     login_user_id: userId,
     auth_key: authKey,
-    isTodayTrade: type === "today" ? "today" : "",
+    isTodayTrade: filterType === "today" ? "today" : "",
     end_date,
     start_end,
     market_type_id: marketId || "",
-    script_id: scriptIds.length ? JSON.stringify(scriptIds) : "",
+    script_id: scriptIds,
     broker_id: brokerId || "",
     master_user_id: masterUserId || "",
     user_id: clientId || "",
@@ -213,7 +213,7 @@ export const fetchforexOrdersAPI = async ({
 
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
-    return data.aaData || [];
+    return data;
   } catch (error) {
     console.error("Error fetching forex orders:", error);
     return [];
@@ -969,17 +969,17 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
   }
 };
 
-export const fetchUserlistingAPI = async (start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
+export const fetchUserlistingAPI = async (currentPage, rowsPerPage, start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
   const defaultParams = await getDefaultParams();
 
   const formData = {
     ...defaultParams,
     sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10000000,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
     sSearch: searchText || "",
-    // loginBefore,
-    // loginAfter,
+    loginBefore,
+    loginAfter,
     end_date,
     start_end,
     broker_id,
@@ -990,7 +990,6 @@ export const fetchUserlistingAPI = async (start_end, end_date, loginBefore, logi
 
   try {
     const { data } = await axiosInstance.post("datatables/user_list_key", formData);
-    console.log("sedef=", data);
 
     return data || [];
   } catch (error) {

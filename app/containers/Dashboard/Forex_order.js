@@ -48,17 +48,21 @@ const Forex_order = () => {
   const [orderType, setOrderType] = useState('');  // trade_type
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [filterType, setFilterType] = useState("today");
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 800);
+  const [isFilterChange, setIsFilterChange] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState();
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalRecords, setTotalRecords] = useState();
-  const [isFilterChange, setIsFilterChange] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelItem, setCancelItem] = useState(null);
+
   const [password, setPassword] = useState('');
   const [selectedMarket, setSelectedMarket] = useState(null);
   const [selectedScripts, setSelectedScripts] = useState([]);
@@ -98,8 +102,6 @@ const Forex_order = () => {
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
 
-  const ordersPerPage = 10;
-
   useEffect(() => {
     console.log('end_date', end_date);
     console.log('start_end', start_end);
@@ -108,17 +110,17 @@ const Forex_order = () => {
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchOrders = async (type = "today", searchValue = "") => {
+  const fetchOrders = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
     const result = await fetchforexOrdersAPI({
       userId: dataStored.user_id,
       authKey: dataStored.auth_key,
-      type,
-      searchValue,
+      filterType,
+      searchValue: searchText,
       currentPage,
-      ordersPerPage,
+      rowsPerPage,
       end_date,
       start_end,
       marketId: selectedMarket?.id || null,
@@ -130,7 +132,9 @@ const Forex_order = () => {
       orderType
     });
 
-    setOrders(result);
+    setOrders(result?.aaData);
+    setTotalPages(result?.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
+    setTotalRecords(result?.iTotalRecords);
     setLoading(false);
     setIsFilterChange(false);
   };
@@ -188,24 +192,24 @@ const Forex_order = () => {
 
 
   useEffect(() => {
-    setIsFilterChange(true);
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
   }, [filterType, debouncedSearchText]);
 
   useEffect(() => {
-    !isFirstRender && fetchOrders(filterType, searchText);
+    !isFirstRender && fetchOrders();
   }, [currentPage]);
 
   useEffect(() => {
-    isFilterChange && !isFirstRender && fetchOrders(filterType, searchText);
+    isFilterChange && !isFirstRender && fetchOrders();
   }, [isFilterChange])
 
   useEffect(() => {
-    fetchOrders(filterType, searchText);
+    fetchOrders();
   }, []);
 
   // useEffect(() => {
-  //   fetchOrders(filterType, searchText);
+  //   fetchOrders(filterType);
   // }, [selectedMarket, selectedScripts]);
 
   const needsPassword = userType === 4 && deletePopup;
@@ -314,7 +318,7 @@ const Forex_order = () => {
             master={master}
             broker={broker}
             onApply={() => {
-              fetchOrders('', searchText);
+              fetchOrders();
               toggleDrawer(false)();
             }}
           />
@@ -346,7 +350,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={() => fetchOrders('', searchText)}
+            onApply={() => fetchOrders()}
           />
 
         </>

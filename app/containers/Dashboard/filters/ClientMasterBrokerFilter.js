@@ -35,7 +35,7 @@ const ClientMasterBrokerFilter = ({
         try {
             const { data } = await axiosInstance.post(url, params);
             const results = data.results;
-            console.log('TTT results', results);
+            // console.log('TTT results', results);
             setter(Array.isArray(results) ? results : []);
         } catch (err) {
             console.error(`Error fetching from ${url}`, err);
@@ -65,7 +65,7 @@ const ClientMasterBrokerFilter = ({
 
         switch (type) {
             case 'client':
-                console.log('TTT term', term);
+                // console.log('TTT term', term);
                 fetchOptions(`${url}/get_client_name_search`, { ...params, term }, setClientOptions);
                 break;
             case 'master':

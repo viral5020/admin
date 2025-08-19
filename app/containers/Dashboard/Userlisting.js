@@ -22,17 +22,23 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { fetchLedgerDetailsAPI, fetchUserlistingAPI } from "./API/API";
 import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
+import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 
 const Userlisting = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isFirstRender = useIsFirstRender();
 
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 800);
+
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
-  const rowsPerPage = 10;
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [ledgerDetails, setLedgerDetails] = useState([]);
@@ -41,7 +47,7 @@ const Userlisting = () => {
   const [databroker, setDatabroker] = useState("");
   const [master, setMaster] = useState("");
   const [user, setUser] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState({});
   const [segment, setSegment] = useState("");
   const [loginBefore, setLoginBefore] = useState("");
   const [loginAfter, setLoginAfter] = useState("");
@@ -388,17 +394,16 @@ const Userlisting = () => {
   const [dataStored, setDataStored] = useState(() => {
     return JSON.parse(sessionStorage.getItem("data")) || [];
   });
+
   const fetchUserListingData = async () => {
     setLoading(true);
     try {
-      const result = await fetchUserlistingAPI(
-        dataStored.user_id,
-        dataStored.auth_key
-      );
+      const result = await fetchUserlistingAPI(currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, user?.id, master?.id, databroker?.id, status, searchText);
 
       if (result?.aaData && Array.isArray(result.aaData)) {
         setReportData(result.aaData);
         setFilteredData(result.aaData);
+        setTotalPages(result.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
       } else {
         setReportData([]);
         setFilteredData([]);
@@ -407,8 +412,10 @@ const Userlisting = () => {
       console.error("Error fetching user listing:", error);
       setReportData([]);
       setFilteredData([]);
+    } finally {
+      setLoading(false);
+      setIsFilterChange(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -416,57 +423,62 @@ const Userlisting = () => {
   }, []);
 
   // Search filter
+  // useEffect(() => {
+  //   const query = searchText.toLowerCase();
+  //   const filtered = reportData.filter(
+  //     (row) =>
+  //       row.user_name?.toLowerCase().includes(query) ||
+  //       row.master?.toLowerCase().includes(query) ||
+  //       row.broker?.toLowerCase().includes(query)
+  //   );
+  //   setFilteredData(filtered);
+  //   setCurrentPage(0);
+  // }, [searchText, reportData]);
+
   useEffect(() => {
-    const query = searchQuery.toLowerCase();
-    const filtered = reportData.filter(
-      (row) =>
-        row.user_name?.toLowerCase().includes(query) ||
-        row.master?.toLowerCase().includes(query) ||
-        row.broker?.toLowerCase().includes(query)
-    );
-    setFilteredData(filtered);
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
-  }, [searchQuery, reportData]);
+  }, [debouncedSearchText]);
 
   // Apply filters
-const handleApplyFilters = async () => {
-  try {
-    const rawData = JSON.parse(sessionStorage.getItem("data"));
-    if (!rawData?.auth_key || !rawData?.user_id) return;
+  // const handleApplyFilters = async () => {
+  //   try {
+  //     const rawData = JSON.parse(sessionStorage.getItem("data"));
+  //     if (!rawData?.auth_key || !rawData?.user_id) return;
 
-    const payload = {
-      user,          // user filter
-      master,        // master filter
-      databroker,    // broker filter
-      status,        // status filter
-      type,          // optional type filter if needed
-      is_app: "1",
-      login_user_id: rawData.user_id,
-      auth_key: rawData.auth_key,
-    };
+  //     const payload = {
+  //       user,          // user filter
+  //       master,        // master filter
+  //       databroker,    // broker filter
+  //       status,        // status filter
+  //       type,          // optional type filter if needed
+  //       is_app: "1",
+  //       login_user_id: rawData.user_id,
+  //       auth_key: rawData.auth_key,
+  //     };
 
-    const queryParams = new URLSearchParams(payload).toString();
-    const response = await fetch(
-      `http://128.199.126.171/~goldorg/datatables/user_list_key?${queryParams}`
-    );
+  //     const queryParams = new URLSearchParams(payload).toString();
+  //     const response = await fetch(
+  //       `http://128.199.126.171/~goldorg/datatables/user_list_key?${queryParams}`
+  //     );
 
-    if (!response.ok) throw new Error("API call failed");
+  //     if (!response.ok) throw new Error("API call failed");
 
-    const data = await response.json();
-    setFilteredData(data?.aaData || []);
-    setCurrentPage(0); // reset pagination
-  } catch (error) {
-    console.error("Error fetching filtered data:", error);
-  }
-};
+  //     const data = await response.json();
+  //     setFilteredData(data?.aaData || []);
+  //     setCurrentPage(0); // reset pagination
+  //   } catch (error) {
+  //     console.error("Error fetching filtered data:", error);
+  //   }
+  // };
 
+  useEffect(() => {
+    !isFirstRender && fetchUserListingData();
+  }, [currentPage]);
 
-
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * rowsPerPage,
-    (currentPage + 1) * rowsPerPage
-  );
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchUserListingData();
+  }, [isFilterChange]);
 
   // Action handlers
   const getInvoices = (id) => console.log("Get invoices for", id);
@@ -611,14 +623,14 @@ const handleApplyFilters = async () => {
           anchor="left"
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
-          PaperProps={{
-            component: "form",
-            onSubmit: (e) => {
-              e.preventDefault();
-              handleApplyFilters();
-              setDrawerOpen(false);
-            },
-          }}
+        // PaperProps={{
+        //   component: "form",
+        //   onSubmit: (e) => {
+        //     e.preventDefault();
+        //     handleApplyFilters();
+        //     setDrawerOpen(false);
+        //   },
+        // }}
         >
           <Box sx={{ width: 300, p: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -693,8 +705,8 @@ const handleApplyFilters = async () => {
         <input
           type="text"
           placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
           style={{
             flex: 1,
             padding: "6px 10px",
@@ -741,14 +753,14 @@ const handleApplyFilters = async () => {
           </tr>
         </thead>
         <tbody>
-          {paginatedData.length === 0 ? (
+          {filteredData.length === 0 ? (
             <tr>
               <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
                 No Data Found
               </td>
             </tr>
           ) : (
-            paginatedData.map((row, index) => (
+            filteredData.map((row, index) => (
               <tr key={row.user_id || index}>
                 <td
                   dangerouslySetInnerHTML={{
