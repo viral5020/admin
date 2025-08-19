@@ -88,6 +88,65 @@ const Userlisting = () => {
 
   const [removeInvestorDialogOpen, setRemoveInvestorDialogOpen] = useState(false);
 
+  const [loginUserId] = useState(123);
+  const [dataStored, setDataStored] = useState(() => {
+    return JSON.parse(sessionStorage.getItem("data")) || [];
+  });
+
+  const fetchPageData = async () => {
+    setLoading(true);
+    try {
+      const result =
+        await fetchUserlistingAPI(
+          currentPage,
+          pageSize,
+          tradeAfter,
+          tradeBefore,
+          loginBefore,
+          loginAfter,
+          databroker?.id,
+          master?.id,
+          user?.id, status,
+          searchText
+        );
+
+      setReportData(result.aaData || []);
+      setFilteredData(result.aaData || []);
+      setTotalRecords(result.iTotalRecords || 0);
+    } catch (error) {
+      console.error("Error fetching user listing:", error);
+      setReportData([]);
+      setFilteredData([]);
+    } finally {
+      setLoading(false);
+      setIsFilterChange(false);
+    }
+  };
+
+
+  // # Pagination useEffects
+  useEffect(() => {
+    fetchPageData();
+  }, []);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
+
+  useEffect(() => {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+  }, [debouncedSearchText]);
+
+  useEffect(() => {
+    !isFirstRender && fetchPageData();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchPageData();
+  }, [isFilterChange])
+
+
   const handleViewInvestor = (row) => {
     setInvestorData(row);
     setLoginPassword("");
@@ -395,65 +454,6 @@ const Userlisting = () => {
     setSelectedRow(null);
     setLedgerDetails([]);
   };
-
-  const [loginUserId] = useState(123);
-  const [dataStored, setDataStored] = useState(() => {
-    return JSON.parse(sessionStorage.getItem("data")) || [];
-  });
-
-  const fetchPageData = async () => {
-    setLoading(true);
-    try {
-      const result =
-        await fetchUserlistingAPI(
-          currentPage,
-          pageSize,
-          tradeAfter,
-          tradeBefore,
-          loginBefore,
-          loginAfter,
-          databroker?.id,
-          master?.id,
-          user?.id, status,
-          searchText
-        );
-
-      setReportData(result.aaData || []);
-      setFilteredData(result.aaData || []);
-      setTotalRecords(result.iTotalRecords || 0);
-    } catch (error) {
-      console.error("Error fetching user listing:", error);
-      setReportData([]);
-      setFilteredData([]);
-    } finally {
-      setLoading(false);
-      setIsFilterChange(false);
-    }
-  };
-
-
-  // # Pagination useEffects
-  useEffect(() => {
-    fetchPageData();
-  }, []);
-
-  useEffect(() => {
-    setTotalPages(Math.ceil(totalRecords / pageSize));
-  }, [pageSize, totalRecords])
-
-  useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
-  }, [debouncedSearchText]);
-
-  useEffect(() => {
-    !isFirstRender && fetchPageData();
-  }, [currentPage, pageSize]);
-
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchPageData();
-  }, [isFilterChange])
-
 
   // Action handlers
   const getInvoices = (id) => console.log("Get invoices for", id);

@@ -35,6 +35,7 @@ import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
 import { deleteTrade, fetchforexOrdersAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
+import Pagination from './filters/Pagination';
 
 const Forex_order = () => {
   const theme = useTheme();
@@ -54,10 +55,11 @@ const Forex_order = () => {
   const debouncedSearchText = useDebounce(searchText, 800);
   const [isFilterChange, setIsFilterChange] = useState(false);
 
+  // # Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState();
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalRecords, setTotalRecords] = useState();
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -114,7 +116,7 @@ const Forex_order = () => {
       filterType,
       searchValue: searchText,
       currentPage,
-      rowsPerPage,
+      pageSize,
       end_date,
       start_end,
       marketId: selectedMarket?.id || null,
@@ -123,16 +125,37 @@ const Forex_order = () => {
       masterUserId: master?.id || null,
       clientId: client?.id || null,
       status,
-      orderType
+      orderType,
     });
 
+    // setTotalPages(result?.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
     setOrders(result?.aaData);
-    setTotalPages(result?.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
-    setTotalRecords(result?.iTotalRecords);
+    setTotalRecords(result?.iTotalRecords || 0);
     setLoading(false);
     setIsFilterChange(false);
   };
 
+  // # Pagination useEffects
+  useEffect(() => {
+    fetchPageData();
+  }, []);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
+
+  useEffect(() => {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+  }, [filterType, debouncedSearchText]);
+
+  useEffect(() => {
+    !isFirstRender && fetchPageData();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchPageData();
+  }, [isFilterChange])
 
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -184,30 +207,7 @@ const Forex_order = () => {
     }
   };
 
-
-  useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
-  }, [filterType, debouncedSearchText]);
-
-  useEffect(() => {
-    !isFirstRender && fetchPageData();
-  }, [currentPage]);
-
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchPageData();
-  }, [isFilterChange])
-
-  useEffect(() => {
-    fetchPageData();
-  }, []);
-
-  // useEffect(() => {
-  //   fetchPageData(filterType);
-  // }, [selectedMarket, selectedScripts]);
-
   const needsPassword = userType === 4 && deletePopup;
-
 
   const renderActions = (item, idx, isQty) => ({
     // leading: (
@@ -689,64 +689,14 @@ const Forex_order = () => {
             </table>
           </Box>
 
-
-          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
-            <Button
-              size="small"
-              disabled={currentPage === 0}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              color="secondary"
-              sx={{ mr: 1 }}
-            >
-              Prev
-            </Button>
-
-            {[...Array(totalPages)].map((_, i) => {
-              if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                return (
-                  <Button
-                    key={i}
-                    size="small"
-                    variant={i === currentPage ? 'contained' : 'outlined'}
-                    color="secondary"
-                    onClick={() => setCurrentPage(i)}
-                    sx={{ mx: 0.3, minWidth: '30px' }}
-                  >
-                    {i + 1}
-                  </Button>
-                );
-              }
-              if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-                return <Typography key={i} sx={{ mx: 0.5 }}>...</Typography>;
-              }
-              return null;
-            })}
-
-            <Button
-              size="small"
-              disabled={currentPage + 1 >= totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              color="secondary"
-              sx={{ ml: 1 }}
-            >
-              Next
-            </Button>
-            <TextField
-              label="Go to page"
-              type="number"
-              size="small"
-              InputProps={{ inputProps: { min: 1, max: totalPages } }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const page = parseInt(e.target.value, 10) - 1;
-                  if (!isNaN(page) && page >= 0 && page < totalPages) {
-                    setCurrentPage(page);
-                  }
-                }
-              }}
-              sx={{ width: 100 }}
-            />
-          </Box>
+          {/* 🔽 Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setPageSize}
+            pageSize={pageSize}
+          />
         </>
       )}
 

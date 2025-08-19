@@ -177,7 +177,7 @@ export const fetchforexOrdersAPI = async ({
   filterType = "today",
   searchValue = "",
   currentPage = 0,
-  rowsPerPage = 10000,
+  pageSize = 10000,
   end_date = "",
   start_end = "",
   marketId = "",
@@ -190,8 +190,8 @@ export const fetchforexOrdersAPI = async ({
 }) => {
   const formData = {
     sEcho: 1,
-    iDisplayStart: currentPage * rowsPerPage,
-    iDisplayLength: rowsPerPage,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
     sSearch: searchValue,
     is_app: 1,
     login_user_id: userId,
@@ -1188,7 +1188,19 @@ export const fetchValanNamesApi = async (term) => {
 //   }
 // };
 
-export const fetchMasterlistingAPI = async (currentPage, rowsPerPage, start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
+export const fetchMasterlistingAPI = async (
+  currentPage,
+  rowsPerPage,
+  start_end,
+  end_date,
+  loginBefore,
+  loginAfter,
+  broker,
+  master,
+  // user,
+  status,
+  searchText
+) => {
   const defaultParams = await getDefaultParams();
 
   const formData = {
@@ -1201,9 +1213,9 @@ export const fetchMasterlistingAPI = async (currentPage, rowsPerPage, start_end,
     loginAfter,
     end_date,
     start_end,
-    broker_id,
-    master_user_id,
-    user_id,
+    broker,
+    master,
+    // user,
     status,
   };
 

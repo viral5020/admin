@@ -31,6 +31,7 @@ import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
 import { deleteTrade, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
+import Pagination from './filters/Pagination';
 
 const OrderBook = () => {
   const theme = useTheme();
@@ -44,13 +45,18 @@ const OrderBook = () => {
   const [orderType, setOrderType] = useState('');  // trade_type
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [filterType, setFilterType] = useState("today");
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 800);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState();
-  const [totalRecords, setTotalRecords] = useState();
   const [isFilterChange, setIsFilterChange] = useState(false);
+
+  // # Pagination states
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -91,28 +97,20 @@ const OrderBook = () => {
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
 
-  const ordersPerPage = 10;
-
-  useEffect(() => {
-    console.log('end_date', end_date);
-    console.log('start_end', start_end);
-  }, [start_end, end_date])
-
-
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchOrders = async (type = "today", searchValue = "") => {
+  const fetchPageData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     const formData = {
       sEcho: 1,
-      iDisplayStart: (currentPage * ordersPerPage),
-      iDisplayLength: ordersPerPage,
-      sSearch: searchValue,
+      iDisplayStart: (currentPage * pageSize),
+      iDisplayLength: pageSize,
+      sSearch: searchText,
       is_app: 1,
       login_user_id: dataStored?.user_id,
       auth_key: dataStored?.auth_key,
-      isTodayTrade: type === "today" ? "today" : "",
+      isTodayTrade: filterType,
       end_date: end_date,
       start_end: start_end, //2025-07-30
       market_type_id: market?.id,
@@ -139,8 +137,7 @@ const OrderBook = () => {
           : setOrders(prev => [...prev, ...data.aaData])
         : setOrders(data.aaData || []);
 
-      setTotalPages(Math.ceil(data.iTotalRecords / ordersPerPage));
-      setTotalRecords(data.iTotalRecords);
+      setTotalRecords(data?.iTotalRecords || 0);
       setIsFilterChange(false);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -148,6 +145,28 @@ const OrderBook = () => {
       setLoading(false);
     }
   };
+
+  // # Pagination useEffects
+  useEffect(() => {
+    fetchPageData();
+  }, []);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
+
+  useEffect(() => {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+  }, [filterType, debouncedSearchText]);
+
+  useEffect(() => {
+    !isFirstRender && fetchPageData();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchPageData();
+  }, [isFilterChange])
 
 
   const [open, setOpen] = useState(false);
@@ -199,24 +218,6 @@ const OrderBook = () => {
       alert('Something went wrong while updating the trade.');
     }
   };
-
-
-  useEffect(() => {
-    setIsFilterChange(true);
-    setCurrentPage(0);
-  }, [filterType, debouncedSearchText]);
-
-  useEffect(() => {
-    !isFirstRender && fetchOrders(filterType, searchText);
-  }, [currentPage]);
-
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchOrders(filterType, searchText);
-  }, [isFilterChange])
-
-  useEffect(() => {
-    fetchOrders(filterType, searchText);
-  }, []);
 
   const needsPassword = userType === 4 && deletePopup;
 
@@ -321,7 +322,7 @@ const OrderBook = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={fetchOrders}
+            onApply={fetchPageData}
             userType={userType}
           />
         </Box>
@@ -349,7 +350,7 @@ const OrderBook = () => {
           client={client}
           master={master}
           broker={broker}
-          onApply={fetchOrders}
+          onApply={fetchPageData}
         />
       )}
 
@@ -435,101 +436,101 @@ const OrderBook = () => {
                     }}
                   >
                     <CardContent
-  sx={{
-    p: 0.5,
-    "&:last-child": { pb: 0.5 },
-  }}
->
-  {/* Thin Bar with Client Name */}
-  {userType !== 1 && (
-    <Box
-      sx={{
-        background:
-          "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-        color: "#fff",
-        fontSize: "0.7rem",
-        fontWeight: 600,
-        px: 1,
-        py: 0.3,
-        mb: 0.5, // adds spacing below bar
-        borderRadius: "4px 4px 0 0",
-        display: "flex",
-        alignItems: "center",
-        gap: 0.5,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
-    >
-      👤{" "}
-      {item.client_full_name
-        ?.replace(/<[^>]+>/g, " ")
-        ?.split(/\s+/)
-        .map((part, i) => (
-          <Typography
-            key={i}
-            variant="caption"
-            sx={{
-              color: "#fff",
-              fontWeight: 600,
-              lineHeight: 1,
-            }}
-          >
-            {part}
-          </Typography>
-        ))}
-    </Box>
-  )}
+                      sx={{
+                        p: 0.5,
+                        "&:last-child": { pb: 0.5 },
+                      }}
+                    >
+                      {/* Thin Bar with Client Name */}
+                      {userType !== 1 && (
+                        <Box
+                          sx={{
+                            background:
+                              "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                            color: "#fff",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            px: 1,
+                            py: 0.3,
+                            mb: 0.5, // adds spacing below bar
+                            borderRadius: "4px 4px 0 0",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          👤{" "}
+                          {item.client_full_name
+                            ?.replace(/<[^>]+>/g, " ")
+                            ?.split(/\s+/)
+                            .map((part, i) => (
+                              <Typography
+                                key={i}
+                                variant="caption"
+                                sx={{
+                                  color: "#fff",
+                                  fontWeight: 600,
+                                  lineHeight: 1,
+                                }}
+                              >
+                                {part}
+                              </Typography>
+                            ))}
+                        </Box>
+                      )}
 
-  {/* Row 1 */}
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
-      {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
-    </Typography>
-    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-      ID: #{item.trd_id}
-    </Typography>
-  </Box>
+                      {/* Row 1 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="subtitle2" fontWeight={700} sx={{ m: 0, lineHeight: 1 }}>
+                          {mainName} <span style={{ fontSize: "0.8em" }}>{subName}</span>
+                        </Typography>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+                          ID: #{item.trd_id}
+                        </Typography>
+                      </Box>
 
-  {/* Row 2 */}
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <Box sx={{ display: "flex", alignItems: "center" }}>
-      <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                      {/* Row 2 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
 
-      <Typography component="span" variant="body2" sx={{ ml: 0.5, fontSize: "1rem" }}>
-        {isBuy ? "📈" : isSell ? "📉" : ""}
-      </Typography>
+                          <Typography component="span" variant="body2" sx={{ ml: 0.5, fontSize: "1rem" }}>
+                            {isBuy ? "📈" : isSell ? "📉" : ""}
+                          </Typography>
 
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 700,
-          color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
-          ml: 0.5,
-          m: 0,
-          lineHeight: 1,
-        }}
-      >
-        {item.trd_type}
-        <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
-      </Typography>
-    </Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 700,
+                              color: isBuy ? "#2196f3" : isSell ? "#f44336" : "#000",
+                              ml: 0.5,
+                              m: 0,
+                              lineHeight: 1,
+                            }}
+                          >
+                            {item.trd_type}
+                            <span style={{ fontSize: "0.8em", fontWeight: 400 }}> {item.trd_type2}</span>
+                          </Typography>
+                        </Box>
 
-    <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
-      ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
-    </Typography>
-  </Box>
+                        <Typography variant="body2" sx={{ m: 0, lineHeight: 1 }}>
+                          ({item.trd_lot}) {item.actual_lot_qty} @ <strong>{cleanRate}</strong>
+                        </Typography>
+                      </Box>
 
-  {/* Row 3 */}
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-      {item.trd_time}
-    </Typography>
-    <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-      Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
-    </Typography>
-  </Box>
-</CardContent>
+                      {/* Row 3 */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+                          {item.trd_time}
+                        </Typography>
+                        <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
+                          Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
+                        </Typography>
+                      </Box>
+                    </CardContent>
 
                   </Card>
                 </SwipeableListItem>
@@ -733,63 +734,14 @@ const OrderBook = () => {
           </Box>
 
 
-          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
-            <Button
-              size="small"
-              disabled={currentPage === 0}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              color="secondary"
-              sx={{ mr: 1 }}
-            >
-              Prev
-            </Button>
-
-            {[...Array(totalPages)].map((_, i) => {
-              if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                return (
-                  <Button
-                    key={i}
-                    size="small"
-                    variant={i === currentPage ? 'contained' : 'outlined'}
-                    color="secondary"
-                    onClick={() => setCurrentPage(i)}
-                    sx={{ mx: 0.3, minWidth: '30px' }}
-                  >
-                    {i + 1}
-                  </Button>
-                );
-              }
-              if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-                return <Typography key={i} sx={{ mx: 0.5 }}>...</Typography>;
-              }
-              return null;
-            })}
-
-            <Button
-              size="small"
-              disabled={currentPage + 1 >= totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              color="secondary"
-              sx={{ ml: 1 }}
-            >
-              Next
-            </Button>
-            <TextField
-              label="Go to page"
-              type="number"
-              size="small"
-              InputProps={{ inputProps: { min: 1, max: totalPages } }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const page = parseInt(e.target.value, 10) - 1;
-                  if (!isNaN(page) && page >= 0 && page < totalPages) {
-                    setCurrentPage(page);
-                  }
-                }
-              }}
-              sx={{ width: 100 }}
-            />
-          </Box>
+          {/* 🔽 Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setPageSize}
+            pageSize={pageSize}
+          />
         </>
       )}
 

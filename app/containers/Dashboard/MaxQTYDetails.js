@@ -42,7 +42,9 @@ const EditDeleteLogs = () => {
 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [searchText, setSearchText] = useState('');
+
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -66,7 +68,7 @@ const EditDeleteLogs = () => {
 
   const totalPages = Math.ceil(totalRecords / pageSize);
 
-  const fetchLogs = async (search = '', append = false) => {
+  const fetchPageData = async (search = '', append = false) => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
@@ -156,13 +158,13 @@ const EditDeleteLogs = () => {
   }, [marketName]);
 
   useEffect(() => {
-    !isMobile ? fetchLogs(searchText) : fetchLogs(searchText, true);
+    !isMobile ? fetchPageData(searchText) : fetchPageData(searchText, true);
   }, [currentPage, pageSize]);
 
   useEffect(() => {
     const delay = setTimeout(() => {
       setCurrentPage(0);
-      if (!isFirstRender) fetchLogs(searchText);
+      if (!isFirstRender) fetchPageData(searchText);
     }, 500);
     return () => clearTimeout(delay);
   }, [searchText]);
@@ -170,7 +172,7 @@ const EditDeleteLogs = () => {
   useEffect(() => {
     if (!isFirstRender) {
       setCurrentPage(0);
-      fetchLogs(searchText);
+      fetchPageData(searchText);
     }
   }, [selectedUserLevel]);
 
@@ -264,19 +266,6 @@ const EditDeleteLogs = () => {
                   <MenuItem key={level.user_level_id} value={level.user_level_id}>
                     {level.user_level_name}
                   </MenuItem>
-                ))}
-              </TextField>
-
-              <TextField
-                select
-                label="Rows per page"
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(0); }}
-                size="small"
-                sx={{ width: 150 }}
-              >
-                {[10, 25, 50].map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
                 ))}
               </TextField>
             </Box>
