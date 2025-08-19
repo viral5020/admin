@@ -23,6 +23,8 @@ import { fetchLedgerDetailsAPI, fetchUserlistingAPI } from "./API/API";
 import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Pagination from "./filters/Pagination";
 
 const Userlisting = () => {
   const theme = useTheme();
@@ -31,14 +33,18 @@ const Userlisting = () => {
 
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 800);
+  const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [loading, setLoading] = useState(true);
+
+  // # Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [ledgerDetails, setLedgerDetails] = useState([]);
@@ -198,7 +204,7 @@ const Userlisting = () => {
       if (response.data.status === "ok") {
         handleStatusClose();
         toast.success("User status has been updated successfully!");
-        //fetchUserListingData(); // refresh table
+        //fetchPageData(); // refresh table
       } else {
         toast.error("Failed to update status: " + response.data.message);
       }
@@ -395,19 +401,26 @@ const Userlisting = () => {
     return JSON.parse(sessionStorage.getItem("data")) || [];
   });
 
-  const fetchUserListingData = async () => {
+  const fetchPageData = async () => {
     setLoading(true);
     try {
-      const result = await fetchUserlistingAPI(currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, databroker?.id, master?.id, user?.id, status, searchText);
+      const result =
+        await fetchUserlistingAPI(
+          currentPage,
+          pageSize,
+          tradeAfter,
+          tradeBefore,
+          loginBefore,
+          loginAfter,
+          databroker?.id,
+          master?.id,
+          user?.id, status,
+          searchText
+        );
 
-      if (result?.aaData && Array.isArray(result.aaData)) {
-        setReportData(result.aaData);
-        setFilteredData(result.aaData);
-        setTotalPages(result.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
-      } else {
-        setReportData([]);
-        setFilteredData([]);
-      }
+      setReportData(result.aaData || []);
+      setFilteredData(result.aaData || []);
+      setTotalRecords(result.iTotalRecords || 0);
     } catch (error) {
       console.error("Error fetching user listing:", error);
       setReportData([]);
@@ -418,67 +431,29 @@ const Userlisting = () => {
     }
   };
 
+
+  // # Pagination useEffects
   useEffect(() => {
-    fetchUserListingData();
+    fetchPageData();
   }, []);
 
-  // Search filter
-  // useEffect(() => {
-  //   const query = searchText.toLowerCase();
-  //   const filtered = reportData.filter(
-  //     (row) =>
-  //       row.user_name?.toLowerCase().includes(query) ||
-  //       row.master?.toLowerCase().includes(query) ||
-  //       row.broker?.toLowerCase().includes(query)
-  //   );
-  //   setFilteredData(filtered);
-  //   setCurrentPage(0);
-  // }, [searchText, reportData]);
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
 
   useEffect(() => {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
   }, [debouncedSearchText]);
 
-  // Apply filters
-  // const handleApplyFilters = async () => {
-  //   try {
-  //     const rawData = JSON.parse(sessionStorage.getItem("data"));
-  //     if (!rawData?.auth_key || !rawData?.user_id) return;
-
-  //     const payload = {
-  //       user,          // user filter
-  //       master,        // master filter
-  //       databroker,    // broker filter
-  //       status,        // status filter
-  //       type,          // optional type filter if needed
-  //       is_app: "1",
-  //       login_user_id: rawData.user_id,
-  //       auth_key: rawData.auth_key,
-  //     };
-
-  //     const queryParams = new URLSearchParams(payload).toString();
-  //     const response = await fetch(
-  //       `http://128.199.126.171/~goldorg/datatables/user_list_key?${queryParams}`
-  //     );
-
-  //     if (!response.ok) throw new Error("API call failed");
-
-  //     const data = await response.json();
-  //     setFilteredData(data?.aaData || []);
-  //     setCurrentPage(0); // reset pagination
-  //   } catch (error) {
-  //     console.error("Error fetching filtered data:", error);
-  //   }
-  // };
+  useEffect(() => {
+    !isFirstRender && fetchPageData();
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
-    !isFirstRender && fetchUserListingData();
-  }, [currentPage]);
+    isFilterChange && !isFirstRender && fetchPageData();
+  }, [isFilterChange])
 
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchUserListingData();
-  }, [isFilterChange]);
 
   // Action handlers
   const getInvoices = (id) => console.log("Get invoices for", id);
@@ -591,7 +566,7 @@ const Userlisting = () => {
             }
           }}
         >
-          <i className="fa fa-eye" />
+          <VisibilityIcon />
         </Button>
 
       );
@@ -658,7 +633,7 @@ const Userlisting = () => {
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
-              onApply={fetchUserListingData}
+              onApply={fetchPageData}
             />
           </Box>
         </Drawer>
@@ -686,7 +661,7 @@ const Userlisting = () => {
             setTradeAfter={setTradeAfter}
             type={type}
             setType={setType}
-            onApply={fetchUserListingData}
+            onApply={fetchPageData}
           />
         </Box>
       )}
@@ -790,36 +765,13 @@ const Userlisting = () => {
       </table>
 
       {/* 🔽 Pagination */}
-      <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", mt: 2 }}>
-        <Button size="small" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)} color="secondary" sx={{ mr: 1 }}>Prev</Button>
-        {[...Array(totalPages)].map((_, i) => {
-          if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            return (
-              <Button key={i} size="small" variant={i === currentPage ? "contained" : "outlined"} color="secondary" onClick={() => setCurrentPage(i)} sx={{ mx: 0.3 }}>{i + 1}</Button>
-            );
-          }
-          if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-            return <Typography key={i} sx={{ mx: 0.5 }}>...</Typography>;
-          }
-          return null;
-        })}
-        <Button size="small" disabled={currentPage + 1 >= totalPages} onClick={() => setCurrentPage((prev) => prev + 1)} color="secondary" sx={{ ml: 1 }}>Next</Button>
-        <TextField
-          label="Go to page"
-          type="number"
-          size="small"
-          InputProps={{ inputProps: { min: 1, max: totalPages } }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const page = parseInt(e.target.value, 10) - 1;
-              if (!isNaN(page) && page >= 0 && page < totalPages) {
-                setCurrentPage(page);
-              }
-            }
-          }}
-          sx={{ width: 100, ml: 2 }}
-        />
-      </Box>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setPageSize}
+        pageSize={pageSize}
+      />
 
       {/* 📘 Ledger Dialog - Card View */}
       <LedgerDetailsDialog

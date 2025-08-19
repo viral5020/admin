@@ -102,15 +102,9 @@ const Forex_order = () => {
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
 
-  useEffect(() => {
-    console.log('end_date', end_date);
-    console.log('start_end', start_end);
-  }, [start_end, end_date])
-
-
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchOrders = async () => {
+  const fetchPageData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
@@ -197,19 +191,19 @@ const Forex_order = () => {
   }, [filterType, debouncedSearchText]);
 
   useEffect(() => {
-    !isFirstRender && fetchOrders();
+    !isFirstRender && fetchPageData();
   }, [currentPage]);
 
   useEffect(() => {
-    isFilterChange && !isFirstRender && fetchOrders();
+    isFilterChange && !isFirstRender && fetchPageData();
   }, [isFilterChange])
 
   useEffect(() => {
-    fetchOrders();
+    fetchPageData();
   }, []);
 
   // useEffect(() => {
-  //   fetchOrders(filterType);
+  //   fetchPageData(filterType);
   // }, [selectedMarket, selectedScripts]);
 
   const needsPassword = userType === 4 && deletePopup;
@@ -318,7 +312,7 @@ const Forex_order = () => {
             master={master}
             broker={broker}
             onApply={() => {
-              fetchOrders();
+              fetchPageData();
               toggleDrawer(false)();
             }}
           />
@@ -350,7 +344,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={() => fetchOrders()}
+            onApply={() => fetchPageData()}
           />
 
         </>

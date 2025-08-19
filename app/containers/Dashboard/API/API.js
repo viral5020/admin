@@ -251,6 +251,8 @@ export const fetchRejectionLogsAPI = async (
   authKey,
   filterType = "",
   searchQuery = "",
+  pageSize,
+  currentPage,
   marketId,
   scriptId,
   clientId,
@@ -264,21 +266,23 @@ export const fetchRejectionLogsAPI = async (
       login_user_id: userId,
       auth_key: authKey,
       sEcho: 1,
+
       isTodayTrade: filterType,
-      iDisplayStart: 0,
-      iDisplayLength: 10000,
-      sSearch: searchQuery || "",
+      sSearch: searchQuery,
 
-      market_type_id: marketId,
-      script_id: scriptId,
-      user_id: clientId,
-      master_user_id: masterId,
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
 
-      end_date: end_date,
-      start_date: start_date,
+      // market_type_id: marketId,
+      // script_id: scriptId,
+      // user_id: clientId,
+      // master_user_id: masterId,
+
+      // end_date: end_date,
+      // start_date: start_date,
     });
 
-    return response.data.aaData || [];
+    return response.data || [];
   } catch (error) {
     console.error("Error fetching rejection logs:", error);
     return [];
@@ -969,7 +973,7 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
   }
 };
 
-export const fetchUserlistingAPI = async (currentPage, rowsPerPage, start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
+export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, broker, master, user, status, searchText) => {
   const defaultParams = await getDefaultParams();
 
   const formData = {
@@ -980,11 +984,11 @@ export const fetchUserlistingAPI = async (currentPage, rowsPerPage, start_end, e
     sSearch: searchText || "",
     loginBefore,
     loginAfter,
-    end_date,
-    start_end,
-    broker_id,
-    master_user_id,
-    user_id,
+    tradeBefore,
+    tradeAfter,
+    broker,
+    master,
+    user,
     status,
   };
 
@@ -1183,3 +1187,32 @@ export const fetchValanNamesApi = async (term) => {
 //     throw error;
 //   }
 // };
+
+export const fetchMasterlistingAPI = async (currentPage, rowsPerPage, start_end, end_date, loginBefore, loginAfter, broker_id, master_user_id, user_id, status, searchText) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
+    sSearch: searchText || "",
+    loginBefore,
+    loginAfter,
+    end_date,
+    start_end,
+    broker_id,
+    master_user_id,
+    user_id,
+    status,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("datatables/master_list_key", formData);
+
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch  list:", error);
+    return [];
+  }
+};

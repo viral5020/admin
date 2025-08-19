@@ -33,6 +33,8 @@ import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import EditDeleteLogsFilters from './EditDeleteLogsFilters';
 import FilterBtn from './filters/FilterBtn';
 import { formatScriptIds } from './helpers/utilFunc';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
+import Pagination from './filters/Pagination';
 
 const EditDeleteLogs = () => {
     const theme = useTheme();
@@ -42,11 +44,16 @@ const EditDeleteLogs = () => {
     const [loading, setLoading] = useState(false);
 
     const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 800);
+    const [isFilterChange, setIsFilterChange] = useState(false);
+    const isFirstRender = useIsFirstRender();
+
+    // # Pagination states
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
-    const totalPages = Math.ceil(totalRecords / pageSize);
     const [filterDrawer, setFilterDrawer] = useState(false);
 
     const [market, setMarket] = useState('');
@@ -62,7 +69,7 @@ const EditDeleteLogs = () => {
     const [is_deleted, setIs_deleted] = useState(false);
 
 
-    const fetchLogs = async (search = '', page = currentPage, append = false) => {
+    const fetchLogs = async (append = false) => {
         setLoading(true);
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
         try {
@@ -73,15 +80,12 @@ const EditDeleteLogs = () => {
                     login_user_id: dataStored.user_id,
                     auth_key: dataStored.auth_key,
                     sEcho: 1,
-                    iDisplayStart: page * pageSize,
+                    iDisplayStart: currentPage * pageSize,
                     iDisplayLength: pageSize,
-                    sSearch: search,
+                    sSearch: searchText,
 
                     market_type_id: market?.id,
                     script_id: formatScriptIds(script),
-                    // script_id: script?.id,
-                    // script_id: script.length > 0 ? JSON.stringify(script?.map(val => Number(val.id))).slice(1, -1) : '',
-                    // broker_id: broker?.id,
                     master_user_id: master?.id,
                     user_id: client?.id,
 
@@ -101,22 +105,31 @@ const EditDeleteLogs = () => {
             console.error('Failed to fetch logs:', err);
         } finally {
             setLoading(false);
+            setIsFilterChange(false);
         }
     };
 
+    useEffect(() => {
+        fetchLogs();
+    }, []);
 
     useEffect(() => {
-        fetchLogs(searchText);
+        setTotalPages(Math.ceil(totalRecords / pageSize));
+    }, [pageSize, totalRecords])
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+        setCurrentPage(0);
+    }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && fetchLogs();
     }, [currentPage, pageSize]);
 
     useEffect(() => {
-        const delay = setTimeout(() => {
-            setCurrentPage(0);
-            fetchLogs(searchText);
-        }, 500);
+        isFilterChange && !isFirstRender && fetchLogs();
+    }, [isFilterChange])
 
-        return () => clearTimeout(delay);
-    }, [searchText]);
 
     return (
         <>
@@ -211,7 +224,7 @@ const EditDeleteLogs = () => {
                             flexWrap: 'nowrap', // ensures everything stays on one line
                         }}
                     >
-                        <TextField
+                        {/* <TextField
                             select
                             label="Rows per page"
                             value={pageSize}
@@ -227,7 +240,7 @@ const EditDeleteLogs = () => {
                                     {option}
                                 </MenuItem>
                             ))}
-                        </TextField>
+                        </TextField> */}
 
                         <TextField
                             variant="outlined"
@@ -339,86 +352,13 @@ const EditDeleteLogs = () => {
 
 
                         {/* Pagination Controls */}
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                pt: 2,
-                                flexWrap: 'wrap',
-                                gap: 2,
-                            }}
-                        >
-                            {/* Page Numbers */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <Button
-                                    size="small"
-                                    disabled={currentPage === 0}
-                                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                                    color="secondary"
-                                    sx={{ mr: 1 }}
-                                >
-                                    Prev
-                                </Button>
-
-                                {[...Array(totalPages)].map((_, i) => {
-                                    if (
-                                        i === 0 ||
-                                        i === totalPages - 1 ||
-                                        (i >= currentPage - 1 && i <= currentPage + 1)
-                                    ) {
-                                        return (
-                                            <Button
-                                                key={i}
-                                                size="small"
-                                                variant={i === currentPage ? 'contained' : 'outlined'}
-                                                color="secondary"
-                                                onClick={() => setCurrentPage(i)}
-                                                sx={{ mx: 0.3, minWidth: '30px' }}
-                                            >
-                                                {i + 1}
-                                            </Button>
-                                        );
-                                    }
-                                    if (
-                                        (i === 1 && currentPage > 2) ||
-                                        (i === totalPages - 2 && currentPage < totalPages - 3)
-                                    ) {
-                                        return (
-                                            <Typography key={i} sx={{ mx: 0.5 }}>
-                                                ...
-                                            </Typography>
-                                        );
-                                    }
-                                    return null;
-                                })}
-
-                                <Button
-                                    size="small"
-                                    disabled={currentPage + 1 >= totalPages}
-                                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                                    color="secondary"
-                                    sx={{ ml: 1 }}
-                                >
-                                    Next
-                                </Button>
-                                <TextField
-                                    label="Go to page"
-                                    type="number"
-                                    size="small"
-                                    InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const page = parseInt(e.target.value, 10) - 1;
-                                            if (!isNaN(page) && page >= 0 && page < totalPages) {
-                                                setCurrentPage(page);
-                                            }
-                                        }
-                                    }}
-                                    sx={{ width: 100 }}
-                                />
-                            </Box>
-                        </Box>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            setCurrentPage={setCurrentPage}
+                            setPageSize={setPageSize}
+                            pageSize={pageSize}
+                        />
                     </>)}
                     {/* ...your full content */}
                 </Paper>
@@ -586,7 +526,7 @@ const EditDeleteLogs = () => {
                             onClick={() => {
                                 const nextPage = currentPage + 1;
                                 setCurrentPage(nextPage);
-                                fetchLogs(searchText, nextPage, true);
+                                fetchLogs(true);
                             }}
                             disabled={loading}
                         >

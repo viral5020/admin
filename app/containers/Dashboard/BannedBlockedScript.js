@@ -31,7 +31,7 @@ const BannedBlockedScript = () => {
         auth_key: dataStored.auth_key,
         market: selectedMarket?.name || "",
         scripts: selectedScripts.map((s) => s.name).join(","),
-        search_text: searchText.trim(),
+        sSearch: searchText.trim(),
       };
 
       console.log("🔍 Fetching with payload:", payload);
@@ -104,60 +104,60 @@ const BannedBlockedScript = () => {
             gap: 1.5,
           }}
         >
-        {filteredData.map((row, index) => (
-  <Box
-    key={index}
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      px: 0.5,
-      py: 0.2,
-      borderRadius: 2,
-      backgroundColor: "background.paper",
-      border: `1px solid ${theme.palette.divider}`,
-      backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper}),
+          {filteredData.map((row, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                px: 0.5,
+                py: 0.2,
+                borderRadius: 2,
+                backgroundColor: "background.paper",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper}),
                         linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-      backgroundOrigin: "border-box",
-      backgroundClip: "padding-box, border-box",
-      boxShadow: 1,
-      overflow: "hidden",
-      minHeight: 60,
-    }}
-  >
-    <Box
-      sx={{
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-        flex: 1,
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      {/* Script name */}
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ fontSize: 15, verticalAlign: "middle", fontWeight: "bold" }}
-      >
-        {row.script_name}
-      </Typography>
+                backgroundOrigin: "border-box",
+                backgroundClip: "padding-box, border-box",
+                boxShadow: 1,
+                overflow: "hidden",
+                minHeight: 60,
+              }}
+            >
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                {/* Script name */}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontSize: 15, verticalAlign: "middle", fontWeight: "bold" }}
+                >
+                  {row.script_name}
+                </Typography>
 
-      {/* Reason beside name */}
-      {(row.banned || row.blocked) && (
-        <Typography
-          variant="caption"
-          sx={{ color: "error.main", fontWeight: 500 }}
-        >
-          {row.banned && "Banned by NSE"}
-          {row.blocked && "Blocked by Upline"}
-        </Typography>
-      )}
-    </Box>
-  </Box>
-))}
+                {/* Reason beside name */}
+                {(row.banned || row.blocked) && (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "error.main", fontWeight: 500 }}
+                  >
+                    {row.banned && "Banned by NSE"}
+                    {row.blocked && "Blocked by Upline"}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          ))}
 
 
         </Box>

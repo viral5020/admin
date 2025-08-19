@@ -2,7 +2,7 @@ import React from 'react'
 import DateFilter from './filters/DateFilter'
 import MarketScriptNameFilter from './filters/MarketScriptNameFilter'
 import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter'
-import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme  } from '@mui/material'
+import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material'
 
 const EditDeleteLogsFilters = ({
     setEnd_date,
@@ -21,7 +21,7 @@ const EditDeleteLogsFilters = ({
     master,
     setClient,
     setMaster,
-    onApply 
+    onApply
 }) => {
     const theme = useTheme();
     return (
@@ -55,15 +55,16 @@ const EditDeleteLogsFilters = ({
 
                 <DateFilter
                     label="Trade After"
-                    value={end_date}
-                    onChange={setEnd_date}
+                    value={start_date}
+                    onChange={setStart_date}
                 />
 
                 <DateFilter
                     label="Trade Before"
-                    value={start_date}
-                    onChange={setStart_date}
+                    value={end_date}
+                    onChange={setEnd_date}
                 />
+
 
                 <MarketScriptNameFilter
                     market={market}
@@ -81,24 +82,24 @@ const EditDeleteLogsFilters = ({
                 />
 
                 {/* Apply Button */}
-               <Grid item xs={12} sm={6} md={3} lg={2.4}>
-      <Button
-                            fullWidth
-                            onClick={() => onApply()}
-                            sx={{
-                                backgroundColor: theme.palette.secondary.main,
-                                color: theme.palette.secondary.contrastText,
-                                padding: '6px 12px',
-                                borderRadius: '4px',
-                                textTransform: 'none',
-                                '&:hover': {
-                                    backgroundColor: theme.palette.secondary.dark,
-                                },
-                            }}
-                        >
-                            Apply
-                        </Button>
-</Grid>
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Button
+                        fullWidth
+                        onClick={() => onApply()}
+                        sx={{
+                            backgroundColor: theme.palette.secondary.main,
+                            color: theme.palette.secondary.contrastText,
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.secondary.dark,
+                            },
+                        }}
+                    >
+                        Apply
+                    </Button>
+                </Grid>
 
             </Grid>
         </>
