@@ -398,7 +398,7 @@ const Userlisting = () => {
   const fetchUserListingData = async () => {
     setLoading(true);
     try {
-      const result = await fetchUserlistingAPI(currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, user?.id, master?.id, databroker?.id, status, searchText);
+      const result = await fetchUserlistingAPI(currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, databroker?.id, master?.id, user?.id, status, searchText);
 
       if (result?.aaData && Array.isArray(result.aaData)) {
         setReportData(result.aaData);
