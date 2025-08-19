@@ -303,6 +303,7 @@ function PersonalDashboard() {
   );
 
   const Fullscreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const pendingPaginatedOrders = filteredPendingOrders.slice(
     pendingCurrentPage * pendingRowsPerPage,
@@ -769,6 +770,13 @@ function PersonalDashboard() {
   maxWidth="md"
   fullWidth
   fullScreen={Fullscreen}
+  PaperProps={{
+    sx: {
+      margin: 0, // remove default margin
+      // borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
+      overflow: "hidden", // ensures content fits exactly
+    },
+  }}
 >
   {/* Custom header */}
   <Box
@@ -776,15 +784,12 @@ function PersonalDashboard() {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      px: 3,
-      py: 1,
+      px: 2,
+      py: 1.5,
       backdropFilter: "blur(6px)",
       background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
       color: "#fff",
-      borderTopLeftRadius: "4px",
-      borderTopRightRadius: "4px",
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-      position: "relative",
     }}
   >
     <Typography
@@ -793,7 +798,6 @@ function PersonalDashboard() {
       sx={{
         textTransform: "uppercase",
         letterSpacing: 1.5,
-        fontSize: "1rem",
         display: "flex",
         alignItems: "center",
         textShadow: "0 0 6px rgba(33,203,243,0.9)",
@@ -808,9 +812,7 @@ function PersonalDashboard() {
         color: "#fff",
         backgroundColor: "rgba(255, 255, 255, 0.1)",
         borderRadius: "50%",
-        "&:hover": {
-          backgroundColor: "rgba(255, 255, 255, 0.2)",
-        },
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
       }}
       onClick={() => setOrdersDialogOpen(false)}
     >
@@ -818,11 +820,17 @@ function PersonalDashboard() {
     </IconButton>
   </Box>
 
-  {/* Dialog content */}
-  <DialogContent>
+  {/* Dialog content with no extra padding */}
+  <DialogContent
+    sx={{
+      p: 0.5, // remove default padding
+      "&:first-of-type": { paddingTop: 0.5 }, // ensures top padding removed
+    }}
+  >
     <OrderBook />
   </DialogContent>
 </Dialog>
+
 
         <Grid item xs={6} sm={6} md={3}>
           <Box onClick={() => setpositionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
@@ -836,66 +844,73 @@ function PersonalDashboard() {
         </Grid>
 
           {/* Dialog with custom header */}
-      <Dialog
-        open={positionDialogOpen}
-        onClose={() => setPositionDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-         fullScreen={Fullscreen}
-      >
-        {/* Custom header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: 3,
-            py: 1,
-            backdropFilter: "blur(6px)",
-            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-            color: "#fff",
-            borderTopLeftRadius: "4px",
-            borderTopRightRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-            position: "relative",
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={800}
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-              fontSize: "1rem",
-              display: "flex",
-              alignItems: "center",
-              textShadow: "0 0 6px rgba(33,203,243,0.9)",
-            }}
-          >
-            <TrendingUpIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-            Positions
-          </Typography>
-          <IconButton
-            size="small"
-            sx={{
-              color: "#fff",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "50%",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
-              },
-            }}
-            onClick={() => setpositionDialogOpen(false)}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
+     <Dialog
+  open={positionDialogOpen}
+  onClose={() => setPositionDialogOpen(false)}
+  maxWidth="md"
+  fullWidth
+  fullScreen={fullScreen} // mobile only
+  PaperProps={{
+    sx: {
+      margin: 0, // remove default margin
+      borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
+      overflow: "hidden", // ensures content fits exactly
+    },
+  }}
+>
+  {/* Custom header */}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      px: 2,
+      py: 1.5,
+      backdropFilter: "blur(6px)",
+      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+      color: "#fff",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+    }}
+  >
+    <Typography
+      variant="h6"
+      fontWeight={800}
+      sx={{
+        textTransform: "uppercase",
+        letterSpacing: 1.5,
+        display: "flex",
+        alignItems: "center",
+        textShadow: "0 0 6px rgba(33,203,243,0.9)",
+      }}
+    >
+      <TrendingUpIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+      Positions
+    </Typography>
+    <IconButton
+      size="small"
+      sx={{
+        color: "#fff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: "50%",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+      }}
+      onClick={() => setpositionDialogOpen(false)}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </Box>
 
-        {/* Dialog content */}
-        <DialogContent>
-          <OrderPage1 /> 
-        </DialogContent>
-      </Dialog>
+  {/* Dialog content with no extra spacing */}
+  <DialogContent
+  sx={{
+    p: 0, // remove all padding
+    pl: 0, // add little left padding (theme spacing 2 → 16px)
+    "&:first-of-type": { paddingTop: 0 }, // ensure top padding removed
+  }}
+>
+  <OrderPage1 />
+</DialogContent>
+</Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
           <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
@@ -1303,66 +1318,72 @@ function PersonalDashboard() {
         </Grid>
 
          {/* Dialog with custom header */}
-      <Dialog
-        open={rejectionDialogOpen}
-        onClose={() => setrejectionDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-        fullScreen={Fullscreen} 
-      >
-        {/* Custom header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: 3,
-            py: 1,
-            backdropFilter: "blur(6px)",
-            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-            color: "#fff",
-            // borderTopLeftRadius: fullScreen ? 0 : 4,
-            // borderTopRightRadius: fullScreen ? 0 : 4,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-            position: "relative",
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={800}
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-              fontSize: "1rem",
-              display: "flex",
-              alignItems: "center",
-              textShadow: "0 0 6px rgba(33,203,243,0.9)",
-            }}
-          >
-            <CloseIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-            Rejection Logs
-          </Typography>
-          <IconButton
-            size="small"
-            sx={{
-              color: "#fff",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "50%",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
-              },
-            }}
-            onClick={() => setrejectionDialogOpen(false)}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
+     <Dialog
+  open={rejectionDialogOpen}
+  onClose={() => setrejectionDialogOpen(false)}
+  maxWidth="md"
+  fullWidth
+  fullScreen={fullScreen} // mobile only
+  PaperProps={{
+    sx: {
+      margin: 0, // remove default margin
+      borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
+      overflow: "hidden", // ensures content fits exactly
+    },
+  }}
+>
+  {/* Custom header */}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      px: 3,
+      py: 1,
+      backdropFilter: "blur(6px)",
+      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+      color: "#fff",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+    }}
+  >
+    <Typography
+      variant="h6"
+      fontWeight={800}
+      sx={{
+        textTransform: "uppercase",
+        letterSpacing: 1.5,
+        display: "flex",
+        alignItems: "center",
+        textShadow: "0 0 6px rgba(33,203,243,0.9)",
+      }}
+    >
+      <CloseIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+      Rejection Logs
+    </Typography>
+    <IconButton
+      size="small"
+      sx={{
+        color: "#fff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: "50%",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+      }}
+      onClick={() => setrejectionDialogOpen(false)}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </Box>
 
-        {/* Dialog content */}
-        <DialogContent>
-          <RejectionLogs /> {/* Component showing rejection logs */}
-        </DialogContent>
-      </Dialog>
+  {/* Dialog content with no spacing */}
+  <DialogContent
+    sx={{
+      p: 0, // remove all padding
+      "&:first-of-type": { paddingTop: 0 }, // remove top padding
+    }}
+  >
+    <RejectionLogs /> {/* Component showing rejection logs */}
+  </DialogContent>
+</Dialog>
 
         {/* <Box
           sx={{

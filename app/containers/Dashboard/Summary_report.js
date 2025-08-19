@@ -18,6 +18,7 @@ import {
   Grid,
   Drawer,
   useMediaQuery,
+  Chip,
 } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -266,7 +267,18 @@ const Summary_report = () => {
                     {/* Top row: Name & Code */}
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <Typography variant="subtitle2" fontWeight={600}>
-                        {row.user_name}
+                        <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                          {row.user_name}
+
+                          {/* Show Chip only on mobile (xs to sm) */}
+                          <Box sx={{ display: { xs: "inline-flex", sm: "none" } }}>
+                            {{
+                              1: <Chip label="U" color="primary" size="small" />,
+                              2: <Chip label="B" color="success" size="small" />,
+                              3: <Chip label="M" color="warning" size="small" />
+                            }[row.user_type] || null}
+                          </Box>
+                        </Box>
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         #{row.user_code}
@@ -402,18 +414,19 @@ const Summary_report = () => {
         </Grid>
       ) : (
 
-        <table
-          className="table table-striped table-bordered"
-          style={{
-            minWidth: "1650px",
-            fontSize: "12px",
-            margin: 0,
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-            color: theme.palette.mode === "dark" ? "#fff" : "#000",
-            whiteSpace: "nowrap",
-          }}
-        >
+      <table
+  className="table table-striped table-bordered"
+  style={{
+    minWidth: "1650px",
+    fontSize: "11px",   // smaller font
+    margin: 0,
+    borderCollapse: "collapse", // tighter layout
+    backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    whiteSpace: "nowrap",
+    lineHeight: 0.5,    // tighter row height
+  }}
+>
           <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
             <tr>
               {[
@@ -434,10 +447,79 @@ const Summary_report = () => {
               paginatedData.map((row) => (
                 <tr key={row.user_id}>
                   <td>{row.index}</td>
-                  <td>{row.user_name}</td>
-                  <td>{row.user_code}</td>
                   <td>
-                    <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
+                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+  <span>{row.user_name}</span>
+  {{
+    1: (
+      <Chip
+        label="U"
+        color="primary"
+        size="small"
+        sx={{
+          fontSize: "11px",                 // readable small text
+          height: "20px",                   // safe min height
+          lineHeight: "16px",               // keeps text centered
+          px: 0.5,
+          "& .MuiChip-label": {
+            px: 0.6,                        // tighter horizontal padding
+            lineHeight: "16px"              // ensures text isn’t cut
+          }
+        }}
+      />
+    ),
+    2: (
+      <Chip
+        label="B"
+        color="success"
+        size="small"
+        sx={{
+          fontSize: "11px",
+          height: "20px",
+          lineHeight: "16px",
+          px: 0.5,
+          "& .MuiChip-label": {
+            px: 0.6,
+            lineHeight: "16px"
+          }
+        }}
+      />
+    ),
+    3: (
+      <Chip
+        label="M"
+        color="warning"
+        size="small"
+        sx={{
+          fontSize: "11px",
+          height: "20px",
+          lineHeight: "16px",
+          px: 0.5,
+          "& .MuiChip-label": {
+            px: 0.6,
+            lineHeight: "16px"
+          }
+        }}
+      />
+    )
+  }[row.user_type] || null}
+</Box>
+
+                  </td>
+                  <td>{row.user_code}</td>
+                 <td>
+                    <Button
+                      size="small"
+                      onClick={() => handleOpenLedger(row)}
+                      sx={{
+                        fontSize: "11px",      // smaller text
+                        minWidth: "50px",      // avoid big default width
+                        padding: "2px 6px",    // thinner button
+                        lineHeight: 1.2
+                      }}
+                    >
+                      Ledger
+                    </Button>
                   </td>
                   <td>{row.ledger_amt?.toLocaleString()}</td>
                   <td>

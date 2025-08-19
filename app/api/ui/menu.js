@@ -256,6 +256,8 @@ if (isForex) {
   });
 }
 
+// ---------- User Menu ----------
+
 if (userType !== 1) {
   menu.push({
     key: 'user',
@@ -273,7 +275,7 @@ if (userType !== 1) {
         ? [{
           key: 'master_listing',
           name: 'Master Listing',
-          // link: '/app/dashboard/forex-order',
+          link: '/app/dashboard/Master-Listing',
           icon: 'receipt-outline'
         }]
         : []),
