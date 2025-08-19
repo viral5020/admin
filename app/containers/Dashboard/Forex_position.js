@@ -32,7 +32,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from '@mui/icons-material/Close';
 // import FilterListIcon from '@mui/icons-material/FilterList';
 // import { styled } from "@mui/material/styles";
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import axios from 'axios';
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -267,6 +267,32 @@ const OrderPage = () => {
         }
     };
 
+  const items = [
+    { label: "Total MTM", value: totals.totalMTM, key: "totalMTM", color: "#1976d2" },
+    { label: "Self MTM", value: totals.self_grand, key: "self_grand", color: "#2e7d32" },
+    { label: "Downline MTM", value: totals.downline_grand, key: "downline_grand", color: "#ed6c02" },
+    { label: "Upline MTM", value: totals.upline_grand, key: "upline_grand", color: "#9c27b0" },
+    { label: "Total Qty", value: totals.total_qty, key: "total_qty", color: "#d32f2f" },
+  ];
+ const [highlighted, setHighlighted] = useState({});
+ const prevTotals = useRef({ ...totals });
+
+  useEffect(() => {
+    items.forEach(item => {
+      if (prevTotals.current[item.key] !== item.value) {
+        // Value changed → trigger highlight
+        setHighlighted(prev => ({ ...prev, [item.key]: true }));
+
+        // Remove highlight after a short delay
+        setTimeout(() => {
+          setHighlighted(prev => ({ ...prev, [item.key]: false }));
+        }, 1200);
+      }
+    });
+
+    // Update previous values
+    prevTotals.current = { ...totals };
+  }, [totals]);
 
 
     useEffect(() => {
@@ -704,7 +730,6 @@ const OrderPage = () => {
   return "black";
 };
 
-
     return (
         <Box sx={{ p: 0, position: "relative" }}>
             {/* Filter Drawer for Mobile */}
@@ -765,181 +790,207 @@ const OrderPage = () => {
            {/* Desktop View */}
            {!isMobile && (
          <Box
-           sx={{
-             px: 2,
-             py: 2,
-             display: "flex",
-             flexWrap: "wrap",
-             alignItems: "center",
-             gap: 2,
-             justifyContent: "space-between",
-             borderBottom: "1px solid #eee",
-             background: "#fff",
-             borderRadius: 2,
-             boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-           }}
-         >
-           {[
-             { label: "Total MTM", value: totals.totalMTM, color: "#1976d2" },
-             { label: "Self MTM", value: totals.self_grand, color: "#2e7d32" },
-             { label: "Downline MTM", value: totals.downline_grand, color: "#ed6c02" },
-             { label: "Upline MTM", value: totals.upline_grand, color: "#9c27b0" },
-             { label: "Total Qty", value: totals.total_qty, color: "#d32f2f" },
-           ].map((item, i) => (
-             <Box
-               key={i}
                sx={{
-                 fontSize: 13,
                  px: 2,
-                 py: 1,
+                 py: 2,
+                 display: "flex",
+                 flexWrap: "wrap",
+                 alignItems: "center",
+                 gap: 2,
+                 justifyContent: "space-between",
+                 borderBottom: theme.palette.mode === "dark" ? "1px solid #333" : "1px solid #eee",
+                 background: theme.palette.mode === "dark" ? "#121212" : "#ffffffff",
                  borderRadius: 2,
-                 border: `1px solid ${item.color}40`,
-                 background: `${item.color}08`,
-                 boxShadow: "inset 0 0 6px rgba(0,0,0,0.05)",
-                 transition: "all 0.3s ease",
-                 "&:hover": {
-                   transform: "translateY(-2px)",
-                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                 },
+                 boxShadow:
+                   theme.palette.mode === "dark"
+                     ? "0 4px 12px rgba(0,0,0,0.3)"
+                     : "0 4px 12px rgba(0,0,0,0.05)",
                }}
              >
-               {item.label}:{" "}
-               <Typography
-                 component="span"
-                 sx={{
-                   fontWeight: "bold",
-                   transition: "color 0.3s ease",
-                   color: getColor(item.value),
-                 }}
-               >
-                 {(item.value ?? 0).toLocaleString("en-IN")}
-               </Typography>
-             </Box>
-           ))}
+              <>
+                    {items.map((item, i) => {
+                      const bgColor = highlighted[item.key]
+                        ? alpha(item.color, theme.palette.mode === "dark" ? 0.35 : 0.25)
+                        : alpha(item.color, theme.palette.mode === "dark" ? 0.1 : 0.05);
+              
+                      const borderColor = alpha(item.color, theme.palette.mode === "dark" ? 0.35 : 0.25);
+              
+                      return (
+                        <Box
+                          key={i}
+                          sx={{
+                            fontSize: 13,
+                            px: 2,
+                            py: 1,
+                            borderRadius: 2,
+                            border: `1px solid ${borderColor}`,
+                            background: bgColor,
+                            boxShadow: "inset 0 0 6px rgba(0,0,0,0.05)",
+                            transition: "all 0.5s ease",
+                          }}
+                        >
+                          {item.label}:{" "}
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontWeight: "bold",
+                              transition: "color 0.3s ease",
+                              color: getColor(item.value),
+                            }}
+                          >
+                            {(item.value ?? 0).toLocaleString("en-IN")}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </>
          </Box>
        )}
      
            {/* Mobile View - Top Bar */}
-           {isMobile && (
-             <Box
-               sx={{
-                 py: 1.5,
-                 display: "flex",
-                 alignItems: "center",
-                 background: "#f9f9f9",
-                 borderBottom: "1px solid #eee",
-                 borderRadius: 0,
-                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-               }}
-             >
-               <Box
-                 sx={{
-                   textAlign: "center",
-                   flex: 1.2,
-                   borderRight: "1px solid #ddd",
-                 }}
-               >
-                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
-                   Total
-                 </Typography>
-                 <Typography
-                   sx={{
-                     fontSize: 13,
-                     fontWeight: "bold",
-                     transition: "color 0.3s ease",
-                     color: getColor(totals.totalMTM),
-                   }}
-                 >
-                   ₹{(totals.totalMTM ?? 0).toLocaleString("en-IN")}
-                 </Typography>
-               </Box>
-     
-               <Box
-                 sx={{
-                   textAlign: "center",
-                   flex: 1.2,
-                   borderRight: "1px solid #ddd",
-                 }}
-               >
-                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
-                   Self
-                 </Typography>
-                 <Typography
-                   sx={{
-                     fontSize: 13,
-                     fontWeight: "bold",
-                     transition: "color 0.3s ease",
-                     color: getColor(totals.self_grand),
-                   }}
-                 >
-                   ₹{(totals.self_grand ?? 0).toLocaleString("en-IN")}
-                 </Typography>
-               </Box>
-     
-               <Box
-                 sx={{
-                   textAlign: "center",
-                   flex: 1.2,
-                   borderRight: "1px solid #ddd",
-                 }}
-               >
-                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
-                   Downline
-                 </Typography>
-                 <Typography
-                   sx={{
-                     fontSize: 13,
-                     fontWeight: "bold",
-                     transition: "color 0.3s ease",
-                     color: getColor(totals.downline_grand),
-                   }}
-                 >
-                   ₹{(totals.downline_grand ?? 0).toLocaleString("en-IN")}
-                 </Typography>
-               </Box>
-     
-               <Box
-                 sx={{
-                   textAlign: "center",
-                   flex: 0.8,
-                   borderRight: "1px solid #ddd",
-                 }}
-               >
-                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
-                   Upline
-                 </Typography>
-                 <Typography
-                   sx={{
-                     fontSize: 13,
-                     fontWeight: "bold",
-                     transition: "color 0.3s ease",
-                     color: getColor(totals.upline_grand),
-                   }}
-                 >
-                   ₹{(totals.upline_grand ?? 0).toLocaleString("en-IN")}
-                 </Typography>
-               </Box>
-     
-               <Box sx={{ textAlign: "center", flex: 0.8 }}>
-                 <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
-                   Qty
-                 </Typography>
-                 <Typography
-                   sx={{
-                     fontSize: 13,
-                     fontWeight: "bold",
-                     transition: "color 0.3s ease",
-                     color: getColor(totals.total_qty),
-                   }}
-                 >
-                   {(totals.total_qty ?? 0).toLocaleString("en-IN")}
-                 </Typography>
-               </Box>
-             </Box>
-           )}
-         </>
+         {isMobile && (
+  <Box
+    sx={{
+      position: "relative",
+      left: 0,
+      right: 0,
+      width: "100vw",         // full viewport width
+      ml: "calc(-50vw + 50%)", // cancel parent padding/margin
+      px: 0,
+      display: "flex",
+      flexDirection: "column",
+      backgroundColor:
+        theme.palette.mode === "dark" ? "#121212" : "#f9f9f9",
+      borderBottom:
+        theme.palette.mode === "dark" ? "1px solid #333" : "1px solid #eee",
+      boxShadow:
+        theme.palette.mode === "dark"
+          ? "0 2px 4px rgba(0,0,0,0.3)"
+          : "0 2px 4px rgba(0,0,0,0.05)",
+    }}
+  >
+    {/* Row 1 - Total & Self */}
+    <Box sx={{ display: "flex", width: "100%" }}>
+      {[
+        { key: "totalMTM", label: "Total", value: totals.totalMTM, color: "#1976d2", flex: 1 },
+        { key: "self_grand", label: "Self", value: totals.self_grand, color: "#2e7d32", flex: 1 },
+      ].map((col, i) => {
+        const bgColor = highlighted[col.key]
+          ? alpha(col.color, theme.palette.mode === "dark" ? 0.35 : 0.25)
+          : alpha(col.color, theme.palette.mode === "dark" ? 0.1 : 0.05);
 
+        return (
+          <Box
+            key={col.key}
+            sx={{
+              flex: col.flex,
+              textAlign: "center",
+              py: 0.5,
+              px: 0,
+              borderRight:
+                i === 0
+                  ? theme.palette.mode === "dark"
+                    ? "1px solid #333"
+                    : "1px solid #ddd"
+                  : "none",
+              background: bgColor,
+              transition: "all 0.4s ease",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: 10,
+                lineHeight: 1,
+                color:
+                  theme.palette.mode === "dark"
+                    ? "#fff"
+                    : "text.secondary",
+              }}
+            >
+              {col.label}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: "bold",
+                lineHeight: 1.5,
+                transition: "color 0.3s ease",
+                color:
+                  theme.palette.mode === "dark"
+                    ? "#fff"
+                    : getColor(col.value),
+              }}
+            >
+              {(col.value ?? 0).toLocaleString("en-IN")}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
 
+    {/* Row 2 - Downline, Upline, Qty */}
+    <Box sx={{ display: "flex", width: "100%" }}>
+      {[
+        { key: "downline_grand", label: "Downline", value: totals.downline_grand, color: "#ed6c02", flex: 2 },
+        { key: "upline_grand", label: "Upline", value: totals.upline_grand, color: "#9c27b0", flex: 1 },
+        { key: "total_qty", label: "Qty", value: totals.total_qty, color: "#0288d1", flex: 1 },
+      ].map((col, i, arr) => {
+        const bgColor = highlighted[col.key]
+          ? alpha(col.color, theme.palette.mode === "dark" ? 0.35 : 0.25)
+          : alpha(col.color, theme.palette.mode === "dark" ? 0.1 : 0.05);
+
+        return (
+          <Box
+            key={col.key}
+            sx={{
+              flex: col.flex,
+              textAlign: "center",
+              py: 0.5,
+              px: 0,
+              borderRight:
+                i < arr.length - 1
+                  ? theme.palette.mode === "dark"
+                    ? "1px solid #333"
+                    : "1px solid #ddd"
+                  : "none",
+              background: bgColor,
+              transition: "all 0.4s ease",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: 10,
+                lineHeight: 1,
+                color:
+                  theme.palette.mode === "dark"
+                    ? "#fff"
+                    : "text.secondary",
+              }}
+            >
+              {col.label}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: "bold",
+                lineHeight: 1.5,
+                transition: "color 0.3s ease",
+                color:
+                  theme.palette.mode === "dark"
+                    ? "#fff"
+                    : getColor(col.value),
+              }}
+            >
+              {(col.value ?? 0).toLocaleString("en-IN")}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  </Box>
+)}
+
+    </>
 
             {/* 🔍 Search Bar */}
             <Box sx={{
@@ -1836,14 +1887,18 @@ const OrderPage = () => {
                                                             <Typography variant="caption">Total Sell</Typography>
                                                             <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
                                                         </Box>
-                                                        <Box sx={{ flex: "1 1 22%" }}>
-                                                            <Typography variant="caption">Buy Avg Rate</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
-                                                        </Box>
-                                                        <Box sx={{ flex: "1 1 22%" }}>
-                                                            <Typography variant="caption">Sell Avg Rate</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
-                                                        </Box>
+                                                                                                   <Box sx={{ flex: "1 1 22%" }}>
+                                                         <Typography variant="caption">Buy Avg Rate</Typography>
+                                                         <Typography variant="body2" fontWeight={600}>
+                                                           {selectedRow?.buy_avg_rate?.toLocaleString()}
+                                                         </Typography>
+                                                       </Box>
+                                                       <Box sx={{ flex: "1 1 22%" }}>
+                                                         <Typography variant="caption">Sell Avg Rate</Typography>
+                                                         <Typography variant="body2" fontWeight={600}>
+                                                           {selectedRow?.sell_avg_rate?.toLocaleString()}
+                                                         </Typography>
+                                                       </Box>
                                                     </Box>
 
                                                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
@@ -2483,13 +2538,17 @@ const OrderPage = () => {
                                         <Typography variant="caption">Total Sell</Typography>
                                         <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
                                     </Box>
-                                    <Box sx={{ flex: "1 1 22%" }}>
-                                        <Typography variant="caption">Buy Avg Rate</Typography>
-                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.buy_avg_rate}</Typography>
+                                                                                <Box sx={{ flex: "1 1 22%" }}>
+                                      <Typography variant="caption">Buy Avg Rate</Typography>
+                                      <Typography variant="body2" fontWeight={600}>
+                                        {selectedRow?.buy_avg_rate?.toLocaleString()}
+                                      </Typography>
                                     </Box>
                                     <Box sx={{ flex: "1 1 22%" }}>
-                                        <Typography variant="caption">Sell Avg Rate</Typography>
-                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.sell_avg_rate}</Typography>
+                                      <Typography variant="caption">Sell Avg Rate</Typography>
+                                      <Typography variant="body2" fontWeight={600}>
+                                        {selectedRow?.sell_avg_rate?.toLocaleString()}
+                                      </Typography>
                                     </Box>
                                 </Box>
 
