@@ -90,7 +90,7 @@ if (isStock) {
   menu.push({
     key: 'stock_trading',
     name: 'Stock Trading',
-    icon: 'ion-ios-briefcase-outline',
+    // icon: 'ion-ios-briefcase-outline',
     child: [
       {
         key: 'crypto',
@@ -199,7 +199,7 @@ if (isForex) {
   menu.push({
     key: 'forex_trading',
     name: 'Forex Trading',
-    icon: 'ion-ios-swap-outline',
+    // icon: 'ion-ios-swap-outline',
     child: [
       {
         key: 'crypto',
@@ -262,7 +262,7 @@ if (userType !== 1) {
   menu.push({
     key: 'user',
     name: 'User',
-    icon: 'ion-ios-swap-outline',
+    // icon: 'ion-ios-swap-outline',
     child: [
       {
         key: 'user_listing',
@@ -318,6 +318,127 @@ if (userType !== 1) {
   });
 }
 
+// Utility Menu
+
+if (userType !== 2) {
+  menu.push({
+    key: 'utility',
+    name: 'Utility',
+    // icon: 'ion-ios-swap-outline',
+    child: [
+      ...(userType !== 1 && (isForex || isStock) || true
+        ? [{
+          key: 'bulk-trading',
+          name: 'Bulk trading',
+          // link: '/app/dashboard/bulk-trading',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType !== 2 && userType !== 1 || true
+        ? [{
+          key: 'bill-filter',
+          name: 'Bill filter',
+          // link: '/app/dashboard/bill-filter',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType !== 2 && (isForex || isStock) || true
+        ? [{
+          key: 'trade-edit-delete-log',
+          name: 'Trade edit delete log',
+          // link: '/app/dashboard/trade-edit-delete-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...((userType === 4 || userType === 5) && (isForex || isStock) || true
+        ? [{
+          key: 'trade-edit-delete-log-old',
+          name: 'Trade edit delete log old',
+          // link: '/app/dashboard/trade-edit-delete-log-old',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType === 3 || userType === 4 || userType === 5 || true
+        ? [{
+          key: 'user-edit-log',
+          name: 'User edit log',
+          // link: '/app/dashboard/user-edit-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType !== 2 && userType !== 1 || true
+        ? [{
+          key: 'ip-address-log',
+          name: 'IP address log',
+          // link: '/app/dashboard/ip-address-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType === 4 && userType === 5 || true
+        ? [{
+          key: 'admin-login-list',
+          name: 'Admin login list',
+          // link: '/app/dashboard/admin-login-list',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType === 3 || userType === 4 || userType === 5 || true
+        ? [{
+          key: 'cash-edit-delete-log',
+          name: 'Cash edit delete log',
+          // link: '/app/dashboard/cash-edit-delete-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) || true
+        ? [{
+          key: 'auto-square-up-log',
+          name: 'Auto Square Up log',
+          // link: '/app/dashboard/auto-square-up-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) || true
+        ? [{
+          key: 'cross-trade-log',
+          name: 'Cross trade log',
+          // link: '/app/dashboard/cross-trade-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType !== 2 && (isForex || isStock) || true
+        ? [{
+          key: 'rejection-log',
+          name: 'Rejection log',
+          // link: '/app/dashboard/rejection-log',
+          icon: 'receipt-outline'
+        }]
+        : []),
+      ...(userType === 4 || userType === 5 || true
+        ? [{
+          key: 'valan',
+          name: 'Valan',
+          // link: '/app/dashboard/valan',
+          icon: 'receipt-outline'
+        }]
+        : []),
+    ]
+  });
+}
+
+// bulk tradind 1 na ho to dekhega and is stock or is forex
+// bill filter 1 and 2 nai to dikhega
+// trade edit deldte log is forex or is stock and user type 2 na ho to
+// trade edit deldte log old is forex or is stock and 4 or 5
+// user edit log 3    4   or 5 ho to dikhega
+// IP address log 1 and 2 na ho to
+
+// Admin login list 4 or5 ho to
+// cash edit delet log  3 4 or5 ho to
+// auto square up log is forex or is stock and 3 4 or 5
+// cross trade log is forex or is stock and 3 4 or 5
+// rejection log is forex or is stock and 2 an ho to
+// valan 4 or 5 ho to dihega
 
 menu.push({
   key: 'ledger',

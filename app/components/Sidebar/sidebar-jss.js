@@ -331,7 +331,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
       }
     },
     [`&.${classes.rounded}`]: {
-      paddingRight: theme.spacing(1.5),
+      paddingRight: theme.spacing(0),
       '& a': {
         borderRadius: `0 ${theme.spacing(3)} ${theme.spacing(3)} 0`,
       },
