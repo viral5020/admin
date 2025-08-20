@@ -54,6 +54,7 @@ import Forexmarginmanagement from '../Dashboard/Forexmarginmanagement';
 import BannedBlockedScript from '../Dashboard/BannedBlockedScript';
 import Userlisting from '../Dashboard/Userlisting';
 import MasterList from '../Dashboard/MasterList';
+import BrokerListing from '../Dashboard/BrokerListing';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -92,6 +93,7 @@ function Application(props) {
           <Route path="dashboard/Banned-Blocked-Scripts" element={userType !== 2 && isStock ? <BannedBlockedScript /> : <Navigate to="/app" />} />
           <Route path="dashboard/User-listing" element={<Userlisting />} />
           <Route path="dashboard/Master-Listing" element={<MasterList />} />
+          <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

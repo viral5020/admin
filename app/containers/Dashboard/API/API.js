@@ -1228,3 +1228,44 @@ export const fetchMasterlistingAPI = async (
     return [];
   }
 };
+
+export const fetchBrokerlistingAPI = async (
+  currentPage,
+  rowsPerPage,
+  start_end,
+  end_date,
+  loginBefore,
+  loginAfter,
+  broker,
+  master,
+  // user,
+  status,
+  searchText
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
+    sSearch: searchText || "",
+    loginBefore,
+    loginAfter,
+    end_date,
+    start_end,
+    broker,
+    master,
+    // user,
+    status,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("datatables/broker_list2", formData);
+
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch  list:", error);
+    return [];
+  }
+};

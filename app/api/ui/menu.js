@@ -283,8 +283,8 @@ if (userType !== 1) {
       ...(userType !== 2 && userType !== 1
         ? [{
           key: 'forexpositions',
-          name: 'Broker_Listing',
-          // link: '/app/dashboard/forex-position',
+          name: 'Broker Listing',
+          link: '/app/dashboard/Broker-Listing',
           icon: 'cube-outline'
         }]
         : []),
