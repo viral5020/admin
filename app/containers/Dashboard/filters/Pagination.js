@@ -1,18 +1,53 @@
-import React from "react";
-import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    Box,
+    Button,
+    MenuItem,
+    TextField,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { useDebounce } from "@uidotdev/usehooks";
 
-const Pagination = ({ currentPage, totalPages, setCurrentPage, setPageSize, pageSize }) => {
+const Pagination = ({
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+    pageSize,
+    disablePagination = false, // new prop
+}) => {
+    const isMobile = useMediaQuery("(max-width:600px)");
+    const [pageNo, setPageNo] = useState()
+    const debouncedSearchText = useDebounce(pageNo, 2000);
+    const gotoPageRef = useRef();
+
+    useEffect(() => {
+        const page = parseInt(pageNo, 10) - 1;
+        if (!isNaN(page) && page >= 0 && page < totalPages) {
+            console.log('page', page);
+            setCurrentPage(page);
+        }
+        setPageNo('');
+        gotoPageRef.current.blur();
+    }, [debouncedSearchText])
+
     return (
         <Box
             sx={{
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent: isMobile ? "center" : "space-between",
                 alignItems: "center",
                 pt: 2,
-                flexWrap: "wrap",
+                flexDirection: isMobile ? "column" : "row",
                 gap: 2,
+                opacity: disablePagination ? 0.5 : 1, // dimmed if disabled
+                pointerEvents: disablePagination ? "none" : "auto", // fully disabled
             }}
         >
+            {/* Rows per page */}
             <TextField
                 select
                 label="Rows per page"
@@ -23,6 +58,7 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage, setPageSize, page
                 }}
                 size="small"
                 sx={{ width: 150, flexShrink: 0 }}
+                disabled={disablePagination}
             >
                 {[10, 25, 50].map((option) => (
                     <MenuItem key={option} value={option}>
@@ -31,25 +67,38 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage, setPageSize, page
                 ))}
             </TextField>
 
-            {/* Page Numbers */}
-            <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            {/* Page Controls */}
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 1,
+                    rowGap: 2,
+                    justifyContent: "center",
+                }}
+            >
                 {/* Prev Button */}
                 <Button
                     size="small"
-                    disabled={currentPage === 0}
+                    disabled={disablePagination || currentPage === 0}
                     onClick={() => setCurrentPage((prev) => prev - 1)}
                     color="secondary"
-                    sx={{ mr: 1 }}
+                    sx={{ p: 0, minWidth: 0 }}
                 >
-                    Prev
+                    {isMobile ? <ArrowBackIosNewIcon /> : 'Prev'}
                 </Button>
 
-                {/* Page Buttons */}
+                {/* {!isMobile && (
+                    <> */}
+                {/* Page Numbers */}
                 {[...Array(totalPages)].map((_, i) => {
                     if (
                         i === 0 ||
                         i === totalPages - 1 ||
-                        (i >= currentPage - 1 && i <= currentPage + 1)
+                        (i >= currentPage - 1 && i <= currentPage + 1 && !isMobile) ||
+                        (i >= currentPage - 1 && i <= currentPage + 1 && isMobile && totalPages <= 5) ||
+                        i === currentPage
                     ) {
                         return (
                             <Button
@@ -58,7 +107,8 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage, setPageSize, page
                                 variant={i === currentPage ? "contained" : "outlined"}
                                 color="secondary"
                                 onClick={() => setCurrentPage(i)}
-                                sx={{ mx: 0.3, minWidth: "30px" }}
+                                sx={{ minWidth: "30px" }}
+                                disabled={disablePagination}
                             >
                                 {i + 1}
                             </Button>
@@ -76,34 +126,41 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage, setPageSize, page
                     }
                     return null;
                 })}
-
                 {/* Next Button */}
+
                 <Button
                     size="small"
-                    disabled={currentPage + 1 >= totalPages}
+                    disabled={disablePagination || currentPage + 1 >= totalPages}
                     onClick={() => setCurrentPage((prev) => prev + 1)}
                     color="secondary"
-                    sx={{ ml: 1 }}
+                    sx={{ p: 0, minWidth: 0 }}
                 >
-                    Next
+                    {isMobile ? <ArrowForwardIosIcon /> : 'Next'}
                 </Button>
 
                 {/* Go to Page */}
                 <TextField
+
                     label="Go to page"
                     type="number"
                     size="small"
                     InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            const page = parseInt(e.target.value, 10) - 1;
-                            if (!isNaN(page) && page >= 0 && page < totalPages) {
-                                setCurrentPage(page);
-                            }
-                        }
-                    }}
-                    sx={{ width: 100, ml: 2 }}
+                    inputRef={gotoPageRef}
+                    // onKeyDown={(e) => {
+                    //     if (e.key === "Enter") {
+                    //         const page = parseInt(e.target.value, 10) - 1;
+                    //         if (!isNaN(page) && page >= 0 && page < totalPages) {
+                    //             setCurrentPage(page);
+                    //         }
+                    //     }
+                    // }}
+                    value={pageNo}
+                    onChange={e => setPageNo(e.target.value)}
+                    sx={{ width: 100, ml: isMobile ? 0 : 2 }}
+                    disabled={disablePagination}
                 />
+                {/* </>
+                )} */}
             </Box>
         </Box>
     );
