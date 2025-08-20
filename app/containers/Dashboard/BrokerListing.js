@@ -552,16 +552,24 @@ const BrokerListing = () => {
       //   >
       //     CL
       //   </Button>,
-      <Button
-        key="status"
-        // onClick={() => handleStatusOpen(row)}
-        variant="contained"
-        color={row.user_status === 1 ? "success" : "error"}
-        size="small"
-        sx={{ minWidth: 30, p: "4px", m: "2px" }}
-      >
-        E
-      </Button>,
+   <Button
+  key="status"
+  variant="contained"
+  size="small"
+  sx={{
+    minWidth: 30,
+    p: "4px",
+    m: "2px",
+    backgroundColor: "#ff9800", // orange 500
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "#fb8c00", // darker orange
+    },
+  }}
+>
+  E
+</Button>
+
     );
 
     if (dataStored.user_type === 4) {
@@ -724,57 +732,69 @@ const BrokerListing = () => {
         Go Back
       </Button> */}
 
-      <table
-        className="table table-striped table-bordered"
+      <div
         style={{
-          minWidth: "1200px",
-          fontSize: "12px",
-          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap",
+          overflowX: "auto",
         }}
       >
-        <thead
+
+        <table
+          className="table table-striped table-bordered"
           style={{
-            backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+            minWidth: "1200px",
+            fontSize: "12px",
+            backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            whiteSpace: "nowrap",
           }}
         >
-          <tr>
-            {[
-              "Name",
-              "Login id",
-              //   "Parent",
-              //   "Percentage",
-              "Master",
-              "T User",
-              "Outstanding",
-              "Live Brokrage",
-              "Login ip",
-              "Login date",
-              "Join Date",
-              "Status",
-              "Actions",
-            ].map((header) => (
-              <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.length === 0 ? (
+          <thead
+            style={{
+              backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+            }}
+          >
             <tr>
-              <td colSpan="12" style={{ padding: 16, textAlign: "center" }}>
-                No Data Found
-              </td>
+              {[
+                "Name",
+                "Login id",
+                //   "Parent",
+                //   "Percentage",
+                "Master",
+                "T User",
+                "Outstanding",
+                "Live Brokrage",
+                "Login ip",
+                "Login date",
+                "Join Date",
+                "Status",
+                "Actions",
+              ].map((header) => (
+                <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+                  {header}
+                </th>
+              ))}
             </tr>
-          ) : (
-            filteredData.map((row, index) => (
-              <tr key={row.user_id || index}>
-                <td>{row.user_full_name || "-"}</td>
-                <td>{row.loginid || "-"}</td>
-                <td>{row.master_full_name || "-"}</td>
-                {/* <td
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="12" style={{ textAlign: "center", padding: 20 }}>
+                  <CircularProgress size={24} />
+                </td>
+              </tr>
+            ) : filteredData.length === 0 ? (
+              <tr>
+                <td colSpan="12" style={{ textAlign: "center", padding: 20 }}>
+                  No Data Found
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((row, index) => (
+                <tr key={row.user_id || index}>
+                  <td>{row.user_full_name || "-"}</td>
+                  <td>{row.loginid || "-"}</td>
+                  <td>{row.master_full_name || "-"}</td>
+                  {/* <td
                   style={{
                     cursor: row.out_standing ? "pointer" : "default",
                     color: row.masters_under ? "blue" : "inherit",
@@ -792,37 +812,37 @@ const BrokerListing = () => {
                   {row.masters_under || "-"}
                 </td> */}
 
-                <td
-                  style={{
-                    cursor: row.total_user_count ? "pointer" : "default",
-                    color: row.total_user_count ? "blue" : "inherit",
-                  }}
-                  onClick={async () => {
-                    if (!row.total_user_count) return;
+                  <td
+                    style={{
+                      cursor: row.total_user_count ? "pointer" : "default",
+                      color: row.total_user_count ? "blue" : "inherit",
+                    }}
+                    onClick={async () => {
+                      if (!row.total_user_count) return;
 
-                    setSelectedUserId(row.fetch_user_id);
-                    await fetchUserData(row.fetch_user_id); // Fetch only this user
-                    setIsDialogOpen(true); // Open dialog
-                  }}
-                >
-                  {/* {console.log('@@@ row', row)} */}
-                  {row.total_user_count || "-"}
-                </td>
+                      setSelectedUserId(row.fetch_user_id);
+                      await fetchUserData(row.fetch_user_id); // Fetch only this user
+                      setIsDialogOpen(true); // Open dialog
+                    }}
+                  >
+                    {/* {console.log('@@@ row', row)} */}
+                    {row.total_user_count || "-"}
+                  </td>
 
-                <td>{row.out_standing || "-"}</td>
-                <td>{row.live_brokerage || "-"}</td>
-                <td>{row.last_login_ip || "-"}</td>
-                <td>{row.last_login_time || "-"}</td>
-                <td>{row.creation_time || "-"}</td>
+                  <td>{row.out_standing || "-"}</td>
+                  <td>{row.live_brokerage || "-"}</td>
+                  <td>{row.last_login_ip || "-"}</td>
+                  <td>{row.last_login_time || "-"}</td>
+                  <td>{row.creation_time || "-"}</td>
 
-                <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                <td>{renderActions(row)}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
+                  <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+                  <td>{renderActions(row)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* # Pagination */}
       <Pagination

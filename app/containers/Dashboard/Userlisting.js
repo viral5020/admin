@@ -94,7 +94,7 @@ const Userlisting = () => {
   });
 
   const fetchPageData = async () => {
-    setLoading(false);
+    setLoading(true);
     try {
       const result =
         await fetchUserlistingAPI(
@@ -575,70 +575,56 @@ const Userlisting = () => {
     return buttons;
   };
 
-  if (loading) {
-    return (
+  return (
+    <div style={{ padding: 16 }}>
+      {/* Filters - Fixed on top */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backgroundColor: theme.palette.background.paper,
+          p: 1,
+          mb: 2,
         }}
       >
-        <CircularProgress size={40} />
-      </Box>
-    );
-  }
-
-  return (
-    <div style={{ overflowX: "auto", padding: 16 }}>
-      {/* Filters */}
-      {isMobile ? (
-        <Drawer
-          anchor="left"
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-        // PaperProps={{
-        //   component: "form",
-        //   onSubmit: (e) => {
-        //     e.preventDefault();
-        //     handleApplyFilters();
-        //     setDrawerOpen(false);
-        //   },
-        // }}
-        >
-          <Box sx={{ width: 300, p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Filters
-            </Typography>
-            <UserListFilter
-              isDarkMode={theme.palette.mode === "dark"}
-              databroker={databroker}
-              setDatabroker={setDatabroker}
-              master={master}
-              setMaster={setMaster}
-              user={user}
-              setUser={setUser}
-              status={status}
-              setStatus={setStatus}
-              segment={segment}
-              setSegment={setSegment}
-              loginBefore={loginBefore}
-              setLoginBefore={setLoginBefore}
-              loginAfter={loginAfter}
-              setLoginAfter={setLoginAfter}
-              tradeBefore={tradeBefore}
-              setTradeBefore={setTradeBefore}
-              tradeAfter={tradeAfter}
-              setTradeAfter={setTradeAfter}
-              type={type}
-              setType={setType}
-              onApply={fetchPageData}
-            />
-          </Box>
-        </Drawer>
-      ) : (
-        <Box sx={{ mb: 2, p: 1 }}>
+        {isMobile ? (
+          <Drawer
+            anchor="left"
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+          >
+            <Box sx={{ width: 300, p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Filters
+              </Typography>
+              <UserListFilter
+                isDarkMode={theme.palette.mode === "dark"}
+                databroker={databroker}
+                setDatabroker={setDatabroker}
+                master={master}
+                setMaster={setMaster}
+                user={user}
+                setUser={setUser}
+                status={status}
+                setStatus={setStatus}
+                segment={segment}
+                setSegment={setSegment}
+                loginBefore={loginBefore}
+                setLoginBefore={setLoginBefore}
+                loginAfter={loginAfter}
+                setLoginAfter={setLoginAfter}
+                tradeBefore={tradeBefore}
+                setTradeBefore={setTradeBefore}
+                tradeAfter={tradeAfter}
+                setTradeAfter={setTradeAfter}
+                type={type}
+                setType={setType}
+                onApply={fetchPageData}
+              />
+            </Box>
+          </Drawer>
+        ) : (
           <UserListFilter
             isDarkMode={theme.palette.mode === "dark"}
             databroker={databroker}
@@ -663,8 +649,8 @@ const Userlisting = () => {
             setType={setType}
             onApply={fetchPageData}
           />
-        </Box>
-      )}
+        )}
+      </Box>
 
       {/* Search */}
       <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
@@ -692,84 +678,77 @@ const Userlisting = () => {
         />
       </div>
 
-      {/* Table */}
-      <table
-        className="table table-striped table-bordered"
-        style={{
-          minWidth: "1200px",
-          fontSize: "12px",
-          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap",
-        }}
-      >
-        <thead
+      {/* Table Wrapper (scrollable horizontally) */}
+      <div style={{ overflowX: "auto" }}>
+        <table
+          className="table table-striped table-bordered"
           style={{
+            minWidth: "1200px",
+            fontSize: "12px",
             backgroundColor:
-              theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+              theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            whiteSpace: "nowrap",
           }}
         >
-          <tr>
-            {[
-              "User Code",
-              "User Name",
-              "Broker",
-              "Master",
-              "Login IP",
-              "Login Time",
-              "Joining Date",
-              "Status",
-              "Actions",
-            ].map((header) => (
-              <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-       <tbody>
-  {loading ? (
-    <tr>
-      <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
-        Loading...
-      </td>
-    </tr>
-  ) : filteredData.length === 0 ? (
-    <tr>
-      <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
-        No Data Found
-      </td>
-    </tr>
-  ) : (
-    filteredData.map((row, index) => (
-      <tr key={row.user_id || index}>
-        <td
-          dangerouslySetInnerHTML={{
-            __html: row.user_code || "",
-          }}
-        />
-        <td>{row.user_name || "-"}</td>
-        <td
-          dangerouslySetInnerHTML={{
-            __html: row.broker || "-",
-          }}
-        />
-        <td
-          dangerouslySetInnerHTML={{
-            __html: row.master || "-",
-          }}
-        />
-        <td>{row.login_ip || "-"}</td>
-        <td>{row.login_time || "-"}</td>
-        <td>{row.creation_time || "-"}</td>
-        <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-        <td>{renderActions(row)}</td>
-      </tr>
-    ))
-  )}
-</tbody>
-
-      </table>
+          <thead
+            style={{
+              backgroundColor:
+                theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+              position: "sticky",
+              top: 0,
+              zIndex: 5,
+            }}
+          >
+            <tr>
+              {[
+                "User Code",
+                "User Name",
+                "Broker",
+                "Master",
+                "Login IP",
+                "Login Time",
+                "Joining Date",
+                "Status",
+                "Actions",
+              ].map((header) => (
+                <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="9" style={{ textAlign: "center", padding: 20 }}>
+                  <CircularProgress size={24} />
+                </td>
+              </tr>
+            ) : filteredData.length === 0 ? (
+              <tr>
+                <td colSpan="9" style={{ textAlign: "center", padding: 20 }}>
+                  No Data Found
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((row, index) => (
+                <tr key={row.user_id || index}>
+                  <td dangerouslySetInnerHTML={{ __html: row.user_code || "" }} />
+                  <td>{row.user_name || "-"}</td>
+                  <td dangerouslySetInnerHTML={{ __html: row.broker || "-" }} />
+                  <td dangerouslySetInnerHTML={{ __html: row.master || "-" }} />
+                  <td>{row.login_ip || "-"}</td>
+                  <td>{row.login_time || "-"}</td>
+                  <td>{row.creation_time || "-"}</td>
+                  <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+                  <td>{renderActions(row)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* 🔽 Pagination */}
       <Pagination
