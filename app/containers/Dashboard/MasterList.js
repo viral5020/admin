@@ -592,219 +592,229 @@ const Userlisting = () => {
   };
 
   return (
-    <div style={{ overflowX: "auto", padding: 16 }}>
-      {/* Filters */}
-      {isMobile ? (
-        <Drawer
-          anchor="left"
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-        >
-          <Box sx={{ width: 300, p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Filters
-            </Typography>
-            <UserListFilter
-              isDarkMode={theme.palette.mode === "dark"}
-              databroker={databroker}
-              setDatabroker={setDatabroker}
-              master={master}
-              setMaster={setMaster}
-              user={user}
-              setUser={setUser}
-              status={status}
-              setStatus={setStatus}
-              segment={segment}
-              setSegment={setSegment}
-              loginBefore={loginBefore}
-              setLoginBefore={setLoginBefore}
-              loginAfter={loginAfter}
-              setLoginAfter={setLoginAfter}
-              tradeBefore={tradeBefore}
-              setTradeBefore={setTradeBefore}
-              tradeAfter={tradeAfter}
-              setTradeAfter={setTradeAfter}
-              type={type}
-              setType={setType}
-              onApply={fetchMasterListingData}
-            />
-          </Box>
-        </Drawer>
-      ) : (
-        <Box sx={{ mb: 2, p: 1 }}>
-          <UserListFilter
-            isDarkMode={theme.palette.mode === "dark"}
-            databroker={databroker}
-            setDatabroker={setDatabroker}
-            master={master}
-            setMaster={setMaster}
-            user={user}
-            setUser={setUser}
-            status={status}
-            setStatus={setStatus}
-            segment={segment}
-            setSegment={setSegment}
-            loginBefore={loginBefore}
-            setLoginBefore={setLoginBefore}
-            loginAfter={loginAfter}
-            setLoginAfter={setLoginAfter}
-            tradeBefore={tradeBefore}
-            setTradeBefore={setTradeBefore}
-            tradeAfter={tradeAfter}
-            setTradeAfter={setTradeAfter}
-            type={type}
-            setType={setType}
-            onApply={fetchMasterListingData}
-          />
-        </Box>
-      )}
-
-      {/* Search */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
-        {isMobile && (
-          <IconButton
-            onClick={() => setDrawerOpen(true)}
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            <FilterListIcon />
-          </IconButton>
-        )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
+    <div style={{ padding: 16 }}>
+  {/* Filters */}
+  {isMobile ? (
+    <Drawer
+      anchor="left"
+      open={drawerOpen}
+      onClose={() => setDrawerOpen(false)}
+    >
+      <Box sx={{ width: 300, p: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Filters
+        </Typography>
+        <UserListFilter
+          isDarkMode={theme.palette.mode === "dark"}
+          databroker={databroker}
+          setDatabroker={setDatabroker}
+          master={master}
+          setMaster={setMaster}
+          user={user}
+          setUser={setUser}
+          status={status}
+          setStatus={setStatus}
+          segment={segment}
+          setSegment={setSegment}
+          loginBefore={loginBefore}
+          setLoginBefore={setLoginBefore}
+          loginAfter={loginAfter}
+          setLoginAfter={setLoginAfter}
+          tradeBefore={tradeBefore}
+          setTradeBefore={setTradeBefore}
+          tradeAfter={tradeAfter}
+          setTradeAfter={setTradeAfter}
+          type={type}
+          setType={setType}
+          onApply={fetchMasterListingData}
         />
-      </div>
+      </Box>
+    </Drawer>
+  ) : (
+    <Box sx={{ mb: 2, p: 1 }}>
+      <UserListFilter
+        isDarkMode={theme.palette.mode === "dark"}
+        databroker={databroker}
+        setDatabroker={setDatabroker}
+        master={master}
+        setMaster={setMaster}
+        user={user}
+        setUser={setUser}
+        status={status}
+        setStatus={setStatus}
+        segment={segment}
+        setSegment={setSegment}
+        loginBefore={loginBefore}
+        setLoginBefore={setLoginBefore}
+        loginAfter={loginAfter}
+        setLoginAfter={setLoginAfter}
+        tradeBefore={tradeBefore}
+        setTradeBefore={setTradeBefore}
+        tradeAfter={tradeAfter}
+        setTradeAfter={setTradeAfter}
+        type={type}
+        setType={setType}
+        onApply={fetchMasterListingData}
+      />
+    </Box>
+  )}
 
-      <Button
-        //   variant="contained"
-        color="secondary"
-        onClick={() => {
-          setMaster({ id: "" });
-          fetchMasterListingData(true);
-        }}
+  {/* Search */}
+  <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
+    {isMobile && (
+      <IconButton
+        onClick={() => setDrawerOpen(true)}
+        color="primary"
+        sx={{ mr: 1 }}
       >
-        Go Back
-      </Button>
+        <FilterListIcon />
+      </IconButton>
+    )}
+    <input
+      type="text"
+      placeholder="Search..."
+      value={searchText}
+      onChange={(e) => setSearchText(e.target.value)}
+      style={{
+        flex: 1,
+        padding: "6px 10px",
+        fontSize: "12px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+      }}
+    />
+  </div>
 
-      <table
-        className="table table-striped table-bordered"
+  <Button
+    color="secondary"
+    onClick={() => {
+      setMaster({ id: "" });
+      fetchMasterListingData(true);
+    }}
+  >
+    Go Back
+  </Button>
+
+  {/* 📌 Only the table scrolls */}
+  <div
+    style={{
+       overflowX: "auto",
+    }}
+  >
+    <table
+      className="table table-striped table-bordered"
+      style={{
+        minWidth: "1200px",
+        fontSize: "12px",
+        backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <thead
         style={{
-          minWidth: "1200px",
-          fontSize: "12px",
-          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap",
+          backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
         }}
       >
-        <thead
-          style={{
-            backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-          }}
-        >
+        <tr>
+          {[
+            "Name",
+            "Login id",
+            "Parent",
+            "Percentage",
+            "T Master",
+            "T User",
+            "T Broker",
+            "Login Time",
+            "Login ip",
+            "Join Date",
+            "Status",
+            "Actions",
+          ].map((header) => (
+            <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+              {header}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {loading ? (
           <tr>
-            {[
-              "Name",
-              "Login id",
-              "Parent",
-              "Percentage",
-              "T Master",
-              "T User",
-              "T Broker",
-              "Login Time",
-              "Login ip",
-              "Join Date",
-              "Status",
-              "Actions",
-            ].map((header) => (
-              <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
-                {header}
-              </th>
-            ))}
+            <td colSpan="12" style={{ textAlign: "center", padding: 20 }}>
+              <CircularProgress size={24} />
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {filteredData.length === 0 ? (
-            <tr>
-              <td colSpan="12" style={{ padding: 16, textAlign: "center" }}>
-                No Data Found
+        ) : filteredData.length === 0 ? (
+          <tr>
+            <td colSpan="12" style={{ textAlign: "center", padding: 20 }}>
+              No Data Found
+            </td>
+          </tr>
+        ) : (
+          filteredData.map((row, index) => (
+            <tr key={row.user_id || index}>
+              <td>{row.user_full_name || "-"}</td>
+              <td>{row.user_name || "-"}</td>
+              <td>{row.master || "-"}</td>
+              <td>{row.percentage || "-"}</td>
+              <td
+                style={{
+                  cursor: row.masters_under ? "pointer" : "default",
+                  color: row.masters_under ? "blue" : "inherit",
+                }}
+                onClick={() => {
+                  if (!row.masters_under) return;
+                  setMaster({ id: row.user_id });
+                  currentPage === 0
+                    ? fetchMasterListingData(null, row.user_id)
+                    : setCurrentPage(0);
+                  setSelectedUserId(row.user_id);
+                  setOpenDialog(true);
+                }}
+              >
+                {row.masters_under || "-"}
               </td>
+              <td
+                style={{
+                  cursor: row.users_under ? "pointer" : "default",
+                  color: row.users_under ? "blue" : "inherit",
+                }}
+                onClick={async () => {
+                  if (!row.users_under) return;
+                  setSelectedUserId(row.user_id);
+                  await fetchUserListOfMaster(row.user_id);
+                  setIsDialogOpen("user");
+                }}
+              >
+                {row.users_under || "-"}
+              </td>
+              <td
+                style={{
+                  cursor: row.brokers_under ? "pointer" : "default",
+                  color: row.brokers_under ? "blue" : "inherit",
+                }}
+                onClick={async () => {
+                  if (!row.brokers_under) return;
+                  await fetchBrokerListOfMaster(row.user_id);
+                  setIsDialogOpen("broker");
+                }}
+              >
+                {row.brokers_under || "-"}
+              </td>
+              <td>{row.login_time || "-"}</td>
+              <td>{row.login_ip || "-"}</td>
+              <td>{row.creation_time || "-"}</td>
+              <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+              <td>{renderActions(row)}</td>
             </tr>
-          ) : (
-            filteredData.map((row, index) => (
-              <tr key={row.user_id || index}>
-                <td>{row.user_full_name || "-"}</td>
-                <td>{row.user_name || "-"}</td>
-                <td>{row.master || "-"}</td>
-                <td>{row.percentage || "-"}</td>
-                <td
-                  style={{
-                    cursor: row.masters_under ? "pointer" : "default",
-                    color: row.masters_under ? "blue" : "inherit",
-                  }}
-                  onClick={() => {
-                    if (!row.masters_under) return;
-
-                    setMaster({ id: row.user_id });
-                    // fetchMasterListingData(row.user_id);   // fetch only for this master user
-                    currentPage === 0 ? fetchMasterListingData(null, row.user_id) : setCurrentPage(0);
-                    setSelectedUserId(row.user_id);        // set selected user ID
-                    setOpenDialog(true);                   // open the dialog
-                  }}
-                >
-                  {row.masters_under || "-"}
-                </td>
-                {/* {console.log('@@ row', row)} */}
-                <td
-                  style={{
-                    cursor: row.users_under ? "pointer" : "default",
-                    color: row.users_under ? "blue" : "inherit",
-                  }}
-                  onClick={async () => {
-                    if (!row.users_under) return;
-
-                    setSelectedUserId(row.user_id);
-                    await fetchUserListOfMaster(row.user_id); // Fetch only this user
-                    setIsDialogOpen('user'); // Open dialog
-                  }}
-                >
-                  {/* {console.log('@@@ row', row)} */}
-                  {row.users_under || "-"}
-                </td>
-
-                <td
-                  style={{
-                    cursor: row.brokers_under ? "pointer" : "default",
-                    color: row.brokers_under ? "blue" : "inherit",
-                  }}
-                  onClick={async () => {
-                    if (!row.brokers_under) return;
-
-                    // setSelectedUserId(row.user_id);
-                    await fetchBrokerListOfMaster(row.user_id);
-                    setIsDialogOpen('broker');
-                  }}
-                >{row.brokers_under || "-"}</td>
-                <td>{row.login_time || "-"}</td>
-                <td>{row.login_ip || "-"}</td>
-                <td>{row.creation_time || "-"}</td>
-                <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                <td>{renderActions(row)}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
 
       {/* # Pagination */}
       <Pagination
@@ -985,76 +995,78 @@ const Userlisting = () => {
           ) : dialogData.length === 0 ? (
             <DialogContentText>No data found for this user.</DialogContentText>
           ) : isDialogOpen === 'user' ? (
-            <table
-              className="table table-striped table-bordered"
-              style={{
-                minWidth: "1200px",
-                fontSize: "12px",
-                backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                whiteSpace: "nowrap",
+            <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+  <table
+    className="table table-striped table-bordered"
+    style={{
+      minWidth: "1200px",
+      fontSize: "12px",
+      backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+      whiteSpace: "nowrap", // keeps columns in a single line
+    }}
+  >
+    <thead
+      style={{
+        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+      }}
+    >
+      <tr>
+        {[
+          "User Code",
+          "User Name",
+          "Broker",
+          "Master",
+          "Login IP",
+          "Login Time",
+          "Joining Date",
+          "Status",
+          "Actions",
+        ].map((header) => (
+          <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+            {header}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {dialogData.length === 0 ? (
+        <tr>
+          <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
+            No Data Found
+          </td>
+        </tr>
+      ) : (
+        dialogData.map((row, index) => (
+          <tr key={row.user_id || index}>
+            <td
+              dangerouslySetInnerHTML={{
+                __html: row.user_code || "",
               }}
-            >
-              <thead
-                style={{
-                  backgroundColor:
-                    theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-                }}
-              >
-                <tr>
-                  {[
-                    "User Code",
-                    "User Name",
-                    "Broker",
-                    "Master",
-                    "Login IP",
-                    "Login Time",
-                    "Joining Date",
-                    "Status",
-                    "Actions",
-                  ].map((header) => (
-                    <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {dialogData.length === 0 ? (
-                  <tr>
-                    <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
-                      No Data Found
-                    </td>
-                  </tr>
-                ) : (
-                  dialogData.map((row, index) => (
-                    <tr key={row.user_id || index}>
-                      <td
-                        dangerouslySetInnerHTML={{
-                          __html: row.user_code || "",
-                        }}
-                      />
-                      <td>{row.user_name || "-"}</td>
-                      <td
-                        dangerouslySetInnerHTML={{
-                          __html: row.broker || "-",
-                        }}
-                      />
-                      <td
-                        dangerouslySetInnerHTML={{
-                          __html: row.master || "-",
-                        }}
-                      />
-                      <td>{row.login_ip || "-"}</td>
-                      <td>{row.login_time || "-"}</td>
-                      <td>{row.creation_time || "-"}</td>
-                      <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                      <td>{renderActions(row)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            />
+            <td>{row.user_name || "-"}</td>
+            <td
+              dangerouslySetInnerHTML={{
+                __html: row.broker || "-",
+              }}
+            />
+            <td
+              dangerouslySetInnerHTML={{
+                __html: row.master || "-",
+              }}
+            />
+            <td>{row.login_ip || "-"}</td>
+            <td>{row.login_time || "-"}</td>
+            <td>{row.creation_time || "-"}</td>
+            <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+            <td>{renderActions(row)}</td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
+
           ) : isDialogOpen === 'broker' ? (
             <table
               className="table table-striped table-bordered"
@@ -1075,8 +1087,6 @@ const Userlisting = () => {
                   {[
                     "Name",
                     "Login id",
-                    //   "Parent",
-                    //   "Percentage",
                     "Master",
                     "T User",
                     "Outstanding",
