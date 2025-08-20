@@ -25,6 +25,7 @@ import { fetchBrokerlistingAPI, fetchLedgerDetailsAPI, fetchMasterlistingAPI, fe
 import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
+import Pagination from "./filters/Pagination";
 
 const BrokerListing = () => {
   const theme = useTheme();
@@ -33,14 +34,18 @@ const BrokerListing = () => {
 
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 800);
+  const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [loading, setLoading] = useState(true);
+
+  // # Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [ledgerDetails, setLedgerDetails] = useState([]);
@@ -81,13 +86,9 @@ const BrokerListing = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [investorPassword, setInvestorPassword] = useState("");
   const [passwordErrors, setPasswordErrors] = useState({});
-  const [totalRecords, setTotalRecords] = useState(0);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState([]);
-
-
-  const [pageSize, setPageSize] = useState(10);
 
   const [masterData, setMasterData] = useState([]);
 
@@ -438,31 +439,26 @@ const BrokerListing = () => {
   // }, []);
 
 
-  const fetchBrokerListingData = async (clearMaster) => {
+  const fetchBrokerListingData = async () => {
     setLoading(true);
     try {
       const result = await fetchBrokerlistingAPI(
         currentPage,
-        rowsPerPage,
+        pageSize,
         tradeAfter,
         tradeBefore,
         loginBefore,
         loginAfter,
         databroker?.id,
-        clearMaster ? "" : master?.id,
+        master?.id,
         // userId, // use the clicked userId here
         status,
         searchText
       );
 
-      if (result?.aaData && Array.isArray(result.aaData)) {
-        setReportData(result.aaData);
-        setFilteredData(result.aaData);
-        setTotalPages(result.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
-      } else {
-        setReportData([]);
-        setFilteredData([]);
-      }
+      setReportData(result?.aaData || []);
+      setFilteredData(result?.aaData || []);
+      setTotalRecords(result?.iTotalRecords || 0);
     } catch (error) {
       console.error("Error fetching master listing:", error);
       setReportData([]);
@@ -472,44 +468,16 @@ const BrokerListing = () => {
       setIsFilterChange(false);
     }
   };
+
+  // # Pagination useEffects
   useEffect(() => {
     fetchBrokerListingData();
   }, []);
 
-  // const handleMasterClick = async (user_id) => {
-  //   try {
-  //     const result = await fetchMasterlistingAPI(
-  //       0,              // currentPage
-  //       rowsPerPage,    // rows per page
-  //       null,           // start_end
-  //       null,           // end_date
-  //       null,           // loginBefore
-  //       null,           // loginAfter
-  //       null,           // broker_id
-  //       user_id,   // ✅ filter by this master
-  //       null,           // user_id
-  //       null,           // status
-  //       searchText      // keep search text if any
-  //     );
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
 
-  //     if (result?.aaData && Array.isArray(result.aaData)) {
-  //       setReportData(result.aaData);
-  //       setFilteredData(result.aaData);
-  //       setTotalPages(
-  //         result.iTotalRecords
-  //           ? Math.ceil(result.iTotalRecords / rowsPerPage)
-  //           : 0
-  //       );
-  //       setCurrentPage(0); // reset to first page
-  //     } else {
-  //       setReportData([]);
-  //       setFilteredData([]);
-  //       setTotalPages(0);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching master listing:", error);
-  //   }
-  // };
   useEffect(() => {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
@@ -517,11 +485,11 @@ const BrokerListing = () => {
 
   useEffect(() => {
     !isFirstRender && fetchBrokerListingData();
-  }, [currentPage]);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     isFilterChange && !isFirstRender && fetchBrokerListingData();
-  }, [isFilterChange]);
+  }, [isFilterChange])
 
   // Action handlers
   const getInvoices = (id) => console.log("Get invoices for", id);
@@ -856,37 +824,14 @@ const BrokerListing = () => {
       </table>
 
 
-      {/* 🔽 Pagination */}
-      <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", mt: 2 }}>
-        <Button size="small" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)} color="secondary" sx={{ mr: 1 }}>Prev</Button>
-        {[...Array(totalPages)].map((_, i) => {
-          if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            return (
-              <Button key={i} size="small" variant={i === currentPage ? "contained" : "outlined"} color="secondary" onClick={() => setCurrentPage(i)} sx={{ mx: 0.3 }}>{i + 1}</Button>
-            );
-          }
-          if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-            return <Typography key={i} sx={{ mx: 0.5 }}>...</Typography>;
-          }
-          return null;
-        })}
-        <Button size="small" disabled={currentPage + 1 >= totalPages} onClick={() => setCurrentPage((prev) => prev + 1)} color="secondary" sx={{ ml: 1 }}>Next</Button>
-        <TextField
-          label="Go to page"
-          type="number"
-          size="small"
-          InputProps={{ inputProps: { min: 1, max: totalPages } }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const page = parseInt(e.target.value, 10) - 1;
-              if (!isNaN(page) && page >= 0 && page < totalPages) {
-                setCurrentPage(page);
-              }
-            }
-          }}
-          sx={{ width: 100, ml: 2 }}
-        />
-      </Box>
+      {/* # Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setPageSize}
+        pageSize={pageSize}
+      />
 
       {/* 📘 Ledger Dialog - Card View */}
       <LedgerDetailsDialog
