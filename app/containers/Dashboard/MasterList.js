@@ -399,7 +399,7 @@ const Userlisting = () => {
   }, []);
 
 
-  const fetchMasterListingData = async (clearMaster) => {
+  const fetchMasterListingData = async (clearMaster, masterId) => {
     setLoading(true);
     try {
       const result = await fetchMasterlistingAPI(
@@ -410,7 +410,7 @@ const Userlisting = () => {
         loginBefore,
         loginAfter,
         databroker?.id,
-        clearMaster ? "" : master?.id,
+        clearMaster ? "" : masterId || master?.id,
         // userId, // use the clicked userId here
         status,
         searchText
@@ -781,14 +781,14 @@ const Userlisting = () => {
 
                     setMaster({ id: row.user_id });
                     // fetchMasterListingData(row.user_id);   // fetch only for this master user
-                    setCurrentPage(0);
+                    currentPage === 0 ? fetchMasterListingData(null, row.user_id) : setCurrentPage(0);
                     setSelectedUserId(row.user_id);        // set selected user ID
                     setOpenDialog(true);                   // open the dialog
                   }}
                 >
                   {row.masters_under || "-"}
                 </td>
-
+                {/* {console.log('@@ row', row)} */}
                 <td
                   style={{
                     cursor: row.users_under ? "pointer" : "default",
