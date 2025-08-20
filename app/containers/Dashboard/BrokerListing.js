@@ -439,11 +439,11 @@ const BrokerListing = () => {
   // }, []);
 
 
-  const fetchBrokerListingData = async () => {
+  const fetchBrokerListingData = async (current_page) => {
     setLoading(true);
     try {
       const result = await fetchBrokerlistingAPI(
-        currentPage,
+        current_page ?? currentPage,
         pageSize,
         tradeAfter,
         tradeBefore,
@@ -552,23 +552,23 @@ const BrokerListing = () => {
       //   >
       //     CL
       //   </Button>,
-   <Button
-  key="status"
-  variant="contained"
-  size="small"
-  sx={{
-    minWidth: 30,
-    p: "4px",
-    m: "2px",
-    backgroundColor: "#ff9800", // orange 500
-    color: "#fff",
-    "&:hover": {
-      backgroundColor: "#fb8c00", // darker orange
-    },
-  }}
->
-  E
-</Button>
+      <Button
+        key="status"
+        variant="contained"
+        size="small"
+        sx={{
+          minWidth: 30,
+          p: "4px",
+          m: "2px",
+          backgroundColor: "#ff9800", // orange 500
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#fb8c00", // darker orange
+          },
+        }}
+      >
+        E
+      </Button>
 
     );
 
@@ -662,7 +662,10 @@ const BrokerListing = () => {
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
-              onApply={fetchBrokerListingData}
+              onApply={() => {
+                currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
+              }}
+              forBroker={true}
             />
           </Box>
         </Drawer>
@@ -690,7 +693,10 @@ const BrokerListing = () => {
             setTradeAfter={setTradeAfter}
             type={type}
             setType={setType}
-            onApply={fetchBrokerListingData}
+            onApply={() => {
+              currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
+            }}
+            forBroker={true}
           />
         </Box>
       )}

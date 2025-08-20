@@ -973,35 +973,6 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
   }
 };
 
-export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, broker, master, user, status, searchText) => {
-  const defaultParams = await getDefaultParams();
-
-  const formData = {
-    ...defaultParams,
-    sEcho: 1,
-    iDisplayStart: currentPage * rowsPerPage,
-    iDisplayLength: rowsPerPage,
-    sSearch: searchText || "",
-    loginBefore,
-    loginAfter,
-    tradeBefore,
-    tradeAfter,
-    broker,
-    master,
-    user,
-    status,
-  };
-
-  try {
-    const { data } = await axiosInstance.post("datatables/user_list_key", formData);
-
-    return data || [];
-  } catch (error) {
-    console.error("Failed to fetch  list:", error);
-    return [];
-  }
-};
-
 export const fetchforexMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
   if (!userId || !authKey) return [];
 
@@ -1188,11 +1159,40 @@ export const fetchValanNamesApi = async (term) => {
 //   }
 // };
 
+export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, broker, master, user, status, searchText) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
+    sSearch: searchText || "",
+    loginBefore,
+    loginAfter,
+    tradeBefore,
+    tradeAfter,
+    broker,
+    master,
+    user,
+    status,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("datatables/user_list_key", formData);
+
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch  list:", error);
+    return [];
+  }
+};
+
 export const fetchMasterlistingAPI = async (
   currentPage,
   rowsPerPage,
-  start_end,
-  end_date,
+  joinAfter,
+  joinBefore,
   loginBefore,
   loginAfter,
   broker,
@@ -1211,8 +1211,8 @@ export const fetchMasterlistingAPI = async (
     sSearch: searchText || "",
     loginBefore,
     loginAfter,
-    end_date,
-    start_end,
+    joinBefore,
+    joinAfter,
     broker,
     master,
     // user,
@@ -1232,8 +1232,8 @@ export const fetchMasterlistingAPI = async (
 export const fetchBrokerlistingAPI = async (
   currentPage,
   rowsPerPage,
-  start_end,
-  end_date,
+  joinAfter,
+  joinBefore,
   loginBefore,
   loginAfter,
   broker,
@@ -1252,8 +1252,8 @@ export const fetchBrokerlistingAPI = async (
     sSearch: searchText || "",
     loginBefore,
     loginAfter,
-    end_date,
-    start_end,
+    joinAfter,
+    joinBefore,
     broker,
     master,
     // user,
