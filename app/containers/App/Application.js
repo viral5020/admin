@@ -87,7 +87,7 @@ function Application(props) {
           <Route path="dashboard/forex-order" element={isForex ? <Forex_order /> : <Navigate to="/app" />} />
           <Route path="dashboard/forex-position" element={isForex ? <Forex_position /> : <Navigate to="/app" />} />
           <Route path="dashboard/summary-report" element={userType !== 1 && isStock ? <Summary_report /> : <Navigate to="/app" />} />
-          <Route path="dashboard/forex-Summaryreport" element={userType !== 1 && isForex ? <Forexsummary /> : <Navigate to="/app" />} />
+          <Route path="dashboard/forex-Summary-report" element={userType !== 1 && isForex ? <Forexsummary /> : <Navigate to="/app" />} />
           <Route path="dashboard/Margin-management" element={userType !== 1 && userType !== 2 && isStock ? <Marginmanagement /> : <Navigate to="/app" />} />
           <Route path="dashboard/forex-Margin-management" element={userType !== 1 && userType !== 2 && isForex ? <Forexmarginmanagement /> : <Navigate to="/app" />} />
           <Route path="dashboard/Banned-Blocked-Scripts" element={userType !== 2 && isStock ? <BannedBlockedScript /> : <Navigate to="/app" />} />

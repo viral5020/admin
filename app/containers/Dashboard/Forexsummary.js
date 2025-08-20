@@ -50,30 +50,51 @@ const Summary_report = () => {
   const [ledgerDetails, setLedgerDetails] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // ---------- Helpers ----------
+  const openSecuredPdf = (filePath) => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    if (!dataStored) {
+      alert("Session expired. Please log in again.");
+      return;
+    }
+    const BASE_URL = "http://128.199.126.171/~goldorg/";
+    const authKey = dataStored.auth_key;
+    const loginUserId = dataStored.user_id;
+    const fullUrl = filePath.startsWith("http") ? filePath : `${BASE_URL}${filePath}`;
+    const url = new URL(fullUrl);
+    url.searchParams.set("is", "1");
+    url.searchParams.set("k", authKey);
+    url.searchParams.set("lui", loginUserId);
+    window.open(url.toString(), "_blank");
+  };
+
+  // ---------- Ledger ----------
   const fetchLedgerDetails = async (userId) => {
     setLoadingLedger(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
       const payload = {
-        is_app: '1',
+        is_app: "1",
         login_user_id: dataStored?.user_id,
         auth_key: dataStored?.auth_key,
         user_id: userId,
       };
 
       const response = await axios.post(
-        'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
+        "http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill",
         payload
       );
 
-      if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
-        const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
+      if (response.data.status === "ok" && Array.isArray(response.data.data)) {
+        const filtered = response.data.data.filter(
+          (item) => item.valan_name !== "Opening Balance"
+        );
         setLedgerDetails(filtered);
       } else {
         setLedgerDetails([]);
       }
     } catch (err) {
-      console.error('Error fetching ledger details:', err);
+      console.error("Error fetching ledger details:", err);
       setLedgerDetails([]);
     } finally {
       setLoadingLedger(false);
@@ -92,479 +113,483 @@ const Summary_report = () => {
     setLedgerDetails([]);
   };
 
+  // ---------- Report ----------
   const fetchforexSummaryReportData = async () => {
     setLoading(true);
-    const result = await fetchforexSummaryReportAPI(client?.id, master?.id, broker?.id, end_date, start_end, market?.id, formatScriptIds(script), valanId?.id);
+    try {
+      const result = await fetchforexSummaryReportAPI(
+        client?.id,
+        master?.id,
+        broker?.id,
+        end_date,
+        start_end,
+        market?.id,
+        formatScriptIds(script),
+        valanId?.id
+      );
 
-    const formattedData = Object.entries(result).map(([key, value], index) => ({
-      ...value,
-      user_id: key,
-      index: index + 1,
-    }));
+      const formattedData = Object.entries(result || {}).map(([key, value], index) => ({
+        ...value,
+        user_id: key,
+        index: index + 1,
+      }));
 
-    setReportData(formattedData);
-    setFilteredData(formattedData);
-    setLoading(false);
+      setReportData(formattedData);
+      setFilteredData(formattedData);
+    } catch (e) {
+      console.error("fetchforexSummaryReportData error:", e);
+      setReportData([]);
+      setFilteredData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchforexSummaryReportData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Search filter
   useEffect(() => {
     const query = searchQuery.toLowerCase();
-    const filtered = reportData.filter((row) =>
-      row.user_name?.toLowerCase().includes(query) ||
-      row.user_code?.toLowerCase().includes(query)
+    const filtered = reportData.filter(
+      (row) =>
+        row.user_name?.toLowerCase().includes(query) ||
+        row.user_code?.toLowerCase().includes(query)
     );
     setFilteredData(filtered);
     setCurrentPage(0);
   }, [searchQuery, reportData]);
 
-  // const handleApplyFilters = () => {
-  //   let filtered = [...reportData];
-  //   if (valanId) filtered = filtered.filter((row) => row.valan_id === valanId);
-  //   if (start_end) filtered = filtered.filter((row) => new Date(row.trade_date) >= new Date(start_end));
-  //   if (end_date) filtered = filtered.filter((row) => new Date(row.trade_date) <= new Date(end_date));
-  //   if (market) filtered = filtered.filter((row) => row.market === market);
-  //   if (script?.length > 0) filtered = filtered.filter((row) => script.includes(row.script));
-  //   if (client) filtered = filtered.filter((row) => row.client === client);
-  //   if (master) filtered = filtered.filter((row) => row.master === master);
-  //   if (broker) filtered = filtered.filter((row) => row.broker === broker);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+  const paginatedData = filteredData.slice(
+    currentPage * rowsPerPage,
+    (currentPage + 1) * rowsPerPage
+  );
 
-  //   setFilteredData(filtered);
-  //   setCurrentPage(0);
-  // };
-
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const paginatedData = filteredData.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage);
-
-  if (loading) {
-    return (
+  // ---------- Layout ----------
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "#fafafa",
+      }}
+    >
+      {/* Sticky Filters + Search */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh"
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
+          background: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+          borderBottom: `1px solid ${theme.palette.mode === "dark" ? "#333" : "#e5e5e5"}`,
+          p: 1,
         }}
       >
-        <CircularProgress size={40} />
-      </Box>
-    );
-  }
-
-  return (
-    <div style={{ overflowX: "auto", padding: 16 }}>
-      {/* Filters */}
-      {isMobile ? (
-        <>
-          <Drawer
-            anchor="left"
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-          // PaperProps={{
-          //   component: 'form',
-          //   onSubmit: (e) => {
-          //     e.preventDefault();
-          //     handleApplyFilters();
-          //     setDrawerOpen(false);
-          //   },
-          // }}
-          >
-            <Box sx={{ width: 300, p: 2 }}>
-              <Typography variant="h6" gutterBottom>Filters</Typography>
-              <Forexsummaryfilter
-                isDarkMode={theme.palette.mode === "dark"}
-                start_end={start_end}
-                setStart_end={setStart_end}
-                end_date={end_date}
-                setEnd_date={setEnd_date}
-                market={market}
-                setMarket={setMarket}
-                script={script}
-                setScript={setScript}
-                client={client}
-                setClient={setClient}
-                master={master}
-                setMaster={setMaster}
-                broker={broker}
-                setBroker={setBroker}
-                valanId={valanId}
-                setValanId={setValanId}
-                onApply={fetchforexSummaryReportData}
-              />
-              {/* <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Apply</Button> */}
+        {/* Filters */}
+        {isMobile ? (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconButton onClick={() => setDrawerOpen(true)} color="primary">
+                <FilterListIcon />
+              </IconButton>
+              {/* <Typography variant="subtitle1" sx={{ flex: 0, mr: 1 }}>
+                Filters
+              </Typography> */}
+              <Box sx={{ flex: 1 }}>
+                <TextField
+                  placeholder="Search by name or code"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
             </Box>
-          </Drawer>
-        </>
-      ) : (
-        <Box sx={{ mb: 2 }}>
-          <Forexsummaryfilter
-            isDarkMode={theme.palette.mode === "dark"}
-            start_end={start_end}
-            setStart_end={setStart_end}
-            end_date={end_date}
-            setEnd_date={setEnd_date}
-            market={market}
-            setMarket={setMarket}
-            script={script}
-            setScript={setScript}
-            client={client}
-            setClient={setClient}
-            master={master}
-            setMaster={setMaster}
-            broker={broker}
-            setBroker={setBroker}
-            valanId={valanId}
-            setValanId={setValanId}
-            onApply={fetchforexSummaryReportData}
-          />
-        </Box>
-      )}
 
-      {/* Search */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-        {isMobile && (
-          <IconButton onClick={() => setDrawerOpen(true)} color="primary" sx={{ mr: 1 }}>
-            <FilterListIcon />
-          </IconButton>
-        )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px"
-          }}
-        />
-      </div>
-
-      {isMobile ? (
-        <Grid container spacing={0.5}>
-          {paginatedData.length === 0 ? (
-            <Grid item xs={12}>
-              <Typography align="center" sx={{ py: 1 }}>No Data Found</Typography>
-            </Grid>
-          ) : (
-            paginatedData.map((row) => (
-              <Grid item xs={12} key={row.user_id}>
-                <Card
-                  sx={{
-                    borderLeft: `4px solid ${Number(row.self_m2m) >= 0 ? "#1976d2" : "#d32f2f"}`,
-                    boxShadow: 1
+            <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+              <Box sx={{ width: 300, p: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  Filters
+                </Typography>
+                <Forexsummaryfilter
+                  isDarkMode={theme.palette.mode === "dark"}
+                  start_end={start_end}
+                  setStart_end={setStart_end}
+                  end_date={end_date}
+                  setEnd_date={setEnd_date}
+                  market={market}
+                  setMarket={setMarket}
+                  script={script}
+                  setScript={setScript}
+                  client={client}
+                  setClient={setClient}
+                  master={master}
+                  setMaster={setMaster}
+                  broker={broker}
+                  setBroker={setBroker}
+                  valanId={valanId}
+                  setValanId={setValanId}
+                  onApply={() => {
+                    fetchforexSummaryReportData();
+                    setDrawerOpen(false);
                   }}
-                >
-                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-                    {/* Top row: Name & Code */}
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {row.user_name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        #{row.user_code}
-                      </Typography>
-                    </Box>
+                />
+              </Box>
+            </Drawer>
+          </>
+        ) : (
+          <>
+            <Forexsummaryfilter
+              isDarkMode={theme.palette.mode === "dark"}
+              start_end={start_end}
+              setStart_end={setStart_end}
+              end_date={end_date}
+              setEnd_date={setEnd_date}
+              market={market}
+              setMarket={setMarket}
+              script={script}
+              setScript={setScript}
+              client={client}
+              setClient={setClient}
+              master={master}
+              setMaster={setMaster}
+              broker={broker}
+              setBroker={setBroker}
+              valanId={valanId}
+              setValanId={setValanId}
+              onApply={fetchforexSummaryReportData}
+            />
 
-                    {/* Ledger amt */}
-                    <Typography variant="body2">
-                      Ledger: ₹{row.ledger_amt?.toLocaleString()}
-                    </Typography>
+            {/* Search row desktop */}
+            <Box sx={{ mt: 1 }}>
+              <TextField
+                placeholder="Search by name or code"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="small"
+                fullWidth
+              />
+            </Box>
+          </>
+        )}
+      </Box>
 
-                    {/* MTM Row */}
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body2">Net MTM: {row.netm2m}</Typography>
-                      <Typography variant="body2">Total MTM: {row.totalm2m}</Typography>
-                    </Box>
-
-                    {/* PDF + Ledger button in one row */}
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
-                      <Box display="flex" gap={0.5}>
-                        {/* MCX */}
-                        {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
-                          <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                              if (!dataStored) {
-                                alert("Session expired. Please log in again.");
-                                return;
-                              }
-                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                              const authKey = dataStored.auth_key;
-                              const loginUserId = dataStored.user_id;
-                              const filePath = row.mcx_pdf;
-                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                              const url = new URL(fullUrl);
-                              url.searchParams.set('is', '1');
-                              url.searchParams.set('k', authKey);
-                              url.searchParams.set('lui', loginUserId);
-                              window.open(url.toString(), '_blank');
-                            }}
-                          >
-                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
-                              MCX
-                            </Typography>
-                          </Box>
-                        )}
-
-                        {/* NSE */}
-                        {row.nse_pdf && row.nse_pdf.trim() !== '' && (
-                          <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                              if (!dataStored) {
-                                alert("Session expired. Please log in again.");
-                                return;
-                              }
-                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                              const authKey = dataStored.auth_key;
-                              const loginUserId = dataStored.user_id;
-                              const filePath = row.nse_pdf;
-                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                              const url = new URL(fullUrl);
-                              url.searchParams.set('is', '1');
-                              url.searchParams.set('k', authKey);
-                              url.searchParams.set('lui', loginUserId);
-                              window.open(url.toString(), '_blank');
-                            }}
-                          >
-                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
-                              NSE
-                            </Typography>
-                          </Box>
-                        )}
-
-                        {/* NET */}
-                        {row.net_pdf && row.net_pdf.trim() !== '' && (
-                          <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                              if (!dataStored) {
-                                alert("Session expired. Please log in again.");
-                                return;
-                              }
-                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                              const authKey = dataStored.auth_key;
-                              const loginUserId = dataStored.user_id;
-                              const filePath = row.net_pdf;
-                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                              const url = new URL(fullUrl);
-                              url.searchParams.set('is', '1');
-                              url.searchParams.set('k', authKey);
-                              url.searchParams.set('lui', loginUserId);
-                              window.open(url.toString(), '_blank');
-                            }}
-                          >
-                            <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                            <Typography variant="caption" sx={{ fontSize: '0.65rem', mt: 0.2 }}>
-                              NET
-                            </Typography>
-                          </Box>
-                        )}
-
-
-                      </Box>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{ p: 0.5, minWidth: 'auto' }}
-                        onClick={() => handleOpenLedger(row)}
-                      >
-                        Show Ledger
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
+      {/* Scrollable Content Area (vertical) */}
+      <Box sx={{ flex: 1, overflowY: "auto", p: 1 }}>
+        {isMobile ? (
+          // -------- Mobile Card View (loader inside this area) --------
+          <Grid container spacing={0.75}>
+            {loading ? (
+              <Grid item xs={12}>
+                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                  <CircularProgress size={30} />
+                </Box>
               </Grid>
-            ))
-          )}
-        </Grid>
-      ) : (
-
-        <table
-          className="table table-striped table-bordered"
-          style={{
-            minWidth: "1650px",
-            fontSize: "12px",
-            margin: 0,
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-            color: theme.palette.mode === "dark" ? "#fff" : "#000",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-            <tr>
-              {[
-                "Serial No", "Name", "Code", "Ledger",
-                "All", "Outstanding", "Net MTM", "Total MTM",
-                "Downline MTM", "Upline MTM", "Self MTM", "Net Position"
-              ].map((header) => (
-                <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>{header}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan="13" style={{ padding: 16, textAlign: "center" }}>No Data Found</td>
-              </tr>
+            ) : paginatedData.length === 0 ? (
+              <Grid item xs={12}>
+                <Typography align="center" sx={{ py: 2 }}>
+                  No Data Found
+                </Typography>
+              </Grid>
             ) : (
-              paginatedData.map((row) => (
-                <tr key={row.user_id}>
-                  <td>{row.index}</td>
-                  <td>{row.user_name}</td>
-                  <td>{row.user_code}</td>
-                  <td>
-                    <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
-                  </td>
+              paginatedData.map((row) => {
+                const m2mColor = Number(row.self_m2m ?? 0) >= 0 ? "#1976d2" : "#d32f2f";
+                return (
+                  <Grid item xs={12} key={row.user_id}>
+                    <Card
+                      sx={{
+                        borderLeft: `4px solid ${m2mColor}`,
+                        boxShadow: 1,
+                      }}
+                    >
+                      <CardContent sx={{ p: 1.25, "&:last-child": { pb: 1.25 } }}>
+                        {/* Top: Name & Code */}
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            {row.user_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            #{row.user_code}
+                          </Typography>
+                        </Box>
 
-                  <td>
-                    {row.mcx_pdf && row.mcx_pdf.trim() !== '' && (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                          if (!dataStored) {
-                            alert("Session expired. Please log in again.");
-                            return;
-                          }
+                        {/* Ledger amount */}
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                          Ledger: ₹{Number(row.ledger_amt ?? 0).toLocaleString()}
+                        </Typography>
 
-                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                          const authKey = dataStored.auth_key;
-                          const loginUserId = dataStored.user_id;
+                        {/* MTM Row */}
+                        <Box display="flex" justifyContent="space-between" sx={{ mt: 0.5 }}>
+                          <Typography variant="body2">Net MTM: {row.netm2m}</Typography>
+                          <Typography variant="body2">Total MTM: {row.totalm2m}</Typography>
+                        </Box>
 
-                          const filePath = row.mcx_pdf;
+                        {/* PDFs + Ledger button */}
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          mt={0.75}
+                        >
+                          <Box display="flex" gap={1}>
+                            {/* MCX */}
+                            {row.mcx_pdf && row.mcx_pdf.trim() !== "" && (
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => openSecuredPdf(row.mcx_pdf)}
+                              >
+                                <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                                <Typography variant="caption" sx={{ fontSize: "0.65rem", mt: 0.2 }}>
+                                  MCX
+                                </Typography>
+                              </Box>
+                            )}
+                            {/* NSE */}
+                            {row.nse_pdf && row.nse_pdf.trim() !== "" && (
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => openSecuredPdf(row.nse_pdf)}
+                              >
+                                <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                                <Typography variant="caption" sx={{ fontSize: "0.65rem", mt: 0.2 }}>
+                                  NSE
+                                </Typography>
+                              </Box>
+                            )}
+                            {/* NET */}
+                            {row.net_pdf && row.net_pdf.trim() !== "" && (
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => openSecuredPdf(row.net_pdf)}
+                              >
+                                <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                                <Typography variant="caption" sx={{ fontSize: "0.65rem", mt: 0.2 }}>
+                                  NET
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
 
-                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                          const url = new URL(fullUrl);
-
-                          url.searchParams.set('is', '1');
-                          url.searchParams.set('k', authKey);
-                          url.searchParams.set('lui', loginUserId);
-
-                          window.open(url.toString(), '_blank');
-                        }}
-                        sx={{ p: 0.3 }}
-                      >
-                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                      </IconButton>
-                    )}
-
-                  </td>
-
-                  <td>
-                    {row.nse_pdf && row.nse_pdf.trim() !== '' && (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                          if (!dataStored) {
-                            alert("Session expired. Please log in again.");
-                            return;
-                          }
-
-                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                          const authKey = dataStored.auth_key;
-                          const loginUserId = dataStored.user_id;
-
-                          const filePath = row.nse_pdf;
-
-                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                          const url = new URL(fullUrl);
-
-                          url.searchParams.set('is', '1');
-                          url.searchParams.set('k', authKey);
-                          url.searchParams.set('lui', loginUserId);
-
-                          window.open(url.toString(), '_blank');
-                        }}
-                        sx={{ p: 0.3 }}
-                      >
-                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                      </IconButton>
-                    )}
-
-                  </td>
-                  <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
-                  <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
-                  <td>
-                    {row.net_pdf && row.net_pdf.trim() !== '' && (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                          if (!dataStored) {
-                            alert("Session expired. Please log in again.");
-                            return;
-                          }
-
-                          const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                          const authKey = dataStored.auth_key;
-                          const loginUserId = dataStored.user_id;
-
-                          const filePath = row.net_pdf;
-
-                          const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                          const url = new URL(fullUrl);
-
-                          url.searchParams.set('is', '1');
-                          url.searchParams.set('k', authKey);
-                          url.searchParams.set('lui', loginUserId);
-
-                          window.open(url.toString(), '_blank');
-                        }}
-                        sx={{ p: 0.3 }}
-                      >
-                        <PictureAsPdfIcon sx={{ color: '#d32f2f', fontSize: '1.2rem' }} />
-                      </IconButton>
-                    )}
-
-                  </td>
-                </tr>
-              ))
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ p: 0.5, minWidth: "auto" }}
+                            onClick={() => handleOpenLedger(row)}
+                          >
+                            Show Ledger
+                          </Button>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })
             )}
-          </tbody>
-        </table>
-      )}
+          </Grid>
+        ) : (
+          // -------- Desktop Table (only this scrolls horizontally) --------
+          <Box sx={{ overflowX: "auto" }}>
+            <table
+              className="table table-striped table-bordered"
+              style={{
+                minWidth: "1650px",
+                fontSize: "12px",
+                margin: 0,
+                backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                whiteSpace: "nowrap",
+                borderCollapse: "collapse",
+              }}
+            >
+              <thead
+                style={{
+                  backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 5,
+                }}
+              >
+                <tr>
+                  {[
+                    "Serial No",
+                    "Name",
+                    "Code",
+                    "Ledger",
+                    "All",
+                    "Outstanding",
+                    "Net MTM",
+                    "Total MTM",
+                    "Downline MTM",
+                    "Upline MTM",
+                    "Self MTM",
+                    "Net Position",
+                  ].map((header) => (
+                    <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
+                      <CircularProgress size={30} />
+                    </td>
+                  </tr>
+                ) : paginatedData.length === 0 ? (
+                  <tr>
+                    <td colSpan={12} style={{ padding: 16, textAlign: "center" }}>
+                      No Data Found
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedData.map((row) => (
+                    <tr key={row.user_id}>
+                      <td>{row.index}</td>
+                      <td>{row.user_name}</td>
+                      <td>{row.user_code}</td>
+                      <td>
+                        <Button onClick={() => handleOpenLedger(row)}>Ledger</Button>
+                      </td>
+                      {/* All (MCX) */}
+                      <td>
+                        {row.mcx_pdf && row.mcx_pdf.trim() !== "" && (
+                          <IconButton
+                            size="small"
+                            onClick={() => openSecuredPdf(row.mcx_pdf)}
+                            sx={{ p: 0.3 }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                          </IconButton>
+                        )}
+                      </td>
+                      {/* Outstanding (NSE) */}
+                      <td>
+                        {row.nse_pdf && row.nse_pdf.trim() !== "" && (
+                          <IconButton
+                            size="small"
+                            onClick={() => openSecuredPdf(row.nse_pdf)}
+                            sx={{ p: 0.3 }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                          </IconButton>
+                        )}
+                      </td>
+                      <td>{Number(row.netm2m ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.totalm2m ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.downline_amount ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.upline_amount ?? 0).toFixed(2)}</td>
+                      <td>{Number(row.self_m2m ?? 0).toFixed(2)}</td>
+                      {/* Net Position (NET) */}
+                      <td>
+                        {row.net_pdf && row.net_pdf.trim() !== "" && (
+                          <IconButton
+                            size="small"
+                            onClick={() => openSecuredPdf(row.net_pdf)}
+                            sx={{ p: 0.3 }}
+                          >
+                            <PictureAsPdfIcon sx={{ color: "#d32f2f", fontSize: "1.2rem" }} />
+                          </IconButton>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </Box>
+        )}
+      </Box>
 
-      {/* 📘 Ledger Dialog - Card View */}
+      {/* Pagination (shared) */}
+      <Box
+        sx={{
+          borderTop: `1px solid ${theme.palette.mode === "dark" ? "#333" : "#e5e5e5"}`,
+          p: 1,
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+          bgcolor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+        }}
+      >
+        <Button
+          size="small"
+          disabled={currentPage === 0}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          color="secondary"
+        >
+          Prev
+        </Button>
+
+        {[...Array(totalPages)].map((_, i) => {
+          if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            return (
+              <Button
+                key={i}
+                size="small"
+                variant={i === currentPage ? "contained" : "outlined"}
+                color="secondary"
+                onClick={() => setCurrentPage(i)}
+              >
+                {i + 1}
+              </Button>
+            );
+          }
+          if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
+            return (
+              <Typography key={i} sx={{ mx: 0.5 }}>
+                ...
+              </Typography>
+            );
+          }
+          return null;
+        })}
+
+        <Button
+          size="small"
+          disabled={currentPage + 1 >= totalPages}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          color="secondary"
+        >
+          Next
+        </Button>
+
+        <TextField
+          label="Go to page"
+          type="number"
+          size="small"
+          InputProps={{ inputProps: { min: 1, max: totalPages } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const page = parseInt(e.target.value, 10) - 1;
+              if (!isNaN(page) && page >= 0 && page < totalPages) {
+                setCurrentPage(page);
+              }
+            }
+          }}
+          sx={{ width: 120, ml: 1 }}
+        />
+      </Box>
+
+      {/* Ledger Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>Ledger Details</DialogTitle>
         <DialogContent dividers sx={{ p: 0.5 }}>
-          {/* {selectedRow && (
-      <>
-        <Typography variant="body2">
-          <strong>User Name:</strong> {selectedRow.user_name}
-        </Typography>
-        <Typography variant="body2">
-          <strong>User Code:</strong> {selectedRow.user_code}
-        </Typography>
-      </>
-    )} */}
-
           {loadingLedger ? (
             <Box sx={{ textAlign: "center", my: 4 }}>
               <CircularProgress />
@@ -574,7 +599,6 @@ const Summary_report = () => {
               {ledgerDetails.map((entry, idx) => {
                 const isBuy = Number(entry.credit) > 0;
                 const borderColor = isBuy ? "#1976d2" : "#d32f2f";
-
                 return (
                   <Grid item xs={12} md={6} key={idx}>
                     <Box
@@ -588,14 +612,8 @@ const Summary_report = () => {
                         gap: 0,
                       }}
                     >
-                      {/* Top: Name (left) and Date (right) */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
+                      {/* Top: Name & Date */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {entry.valan_name}
                         </Typography>
@@ -604,7 +622,7 @@ const Summary_report = () => {
                         </Typography>
                       </Box>
 
-                      {/* Bottom Row: Values + PDF */}
+                      {/* Values + PDF */}
                       <Box
                         sx={{
                           display: "flex",
@@ -620,33 +638,15 @@ const Summary_report = () => {
                           {entry.credit !== "-" ? `₹${Number(entry.credit).toLocaleString()}` : "-"}
                         </Typography>
                         <Typography variant="body2">
-                          ₹{Number(entry.balance).toLocaleString()}
+                          ₹{Number(entry.balance ?? 0).toLocaleString()}
                         </Typography>
-                        {entry.download && entry.download.trim() !== '' ? (
+
+                        {entry.download && entry.download.trim() !== "" ? (
                           <a
                             href="#"
                             onClick={(e) => {
                               e.preventDefault();
-
-                              const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                              if (!dataStored) {
-                                alert("Session expired. Please log in again.");
-                                return;
-                              }
-
-                              const BASE_URL = 'http://128.199.126.171/~goldorg/';
-                              const authKey = dataStored.auth_key;
-                              const loginUserId = dataStored.user_id;
-
-                              const filePath = entry.download;
-                              const fullUrl = filePath.startsWith('http') ? filePath : `${BASE_URL}${filePath}`;
-                              const url = new URL(fullUrl);
-
-                              url.searchParams.set('is', '1');
-                              url.searchParams.set('k', authKey);
-                              url.searchParams.set('lui', loginUserId);
-
-                              window.open(url.toString(), '_blank');
+                              openSecuredPdf(entry.download);
                             }}
                             style={{
                               fontSize: "0.75rem",
@@ -658,15 +658,10 @@ const Summary_report = () => {
                             PDF
                           </a>
                         ) : (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: "0.75rem" }}
-                          >
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
                             No PDF
                           </Typography>
                         )}
-
                       </Box>
                     </Box>
                   </Grid>
@@ -683,40 +678,7 @@ const Summary_report = () => {
           <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
-
-
-      {/* 🔽 Pagination */}
-      <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", mt: 2 }}>
-        <Button size="small" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)} color="secondary" sx={{ mr: 1 }}>Prev</Button>
-        {[...Array(totalPages)].map((_, i) => {
-          if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            return (
-              <Button key={i} size="small" variant={i === currentPage ? "contained" : "outlined"} color="secondary" onClick={() => setCurrentPage(i)} sx={{ mx: 0.3 }}>{i + 1}</Button>
-            );
-          }
-          if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-            return <Typography key={i} sx={{ mx: 0.5 }}>...</Typography>;
-          }
-          return null;
-        })}
-        <Button size="small" disabled={currentPage + 1 >= totalPages} onClick={() => setCurrentPage((prev) => prev + 1)} color="secondary" sx={{ ml: 1 }}>Next</Button>
-        <TextField
-          label="Go to page"
-          type="number"
-          size="small"
-          InputProps={{ inputProps: { min: 1, max: totalPages } }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const page = parseInt(e.target.value, 10) - 1;
-              if (!isNaN(page) && page >= 0 && page < totalPages) {
-                setCurrentPage(page);
-              }
-            }
-          }}
-          sx={{ width: 100, ml: 2 }}
-        />
-      </Box>
-    </div>
+    </Box>
   );
 };
 

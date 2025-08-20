@@ -41,7 +41,9 @@ const Marginmanagement = () => {
     const result = await fetchMarginManagementListAPI(
       dataStored.user_id,
       dataStored.auth_key,
-      client, master, broker,
+      client,
+      master,
+      broker
     );
 
     const formattedData = Array.isArray(result)
@@ -103,24 +105,9 @@ const Marginmanagement = () => {
     (currentPage + 1) * rowsPerPage
   );
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress size={40} />
-      </Box>
-    );
-  }
-
   return (
-    <div style={{ overflowX: "auto", padding: 16 }}>
-      {/* Filters */}
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Filters (fixed top) */}
       {isMobile ? (
         <Drawer
           anchor="left"
@@ -162,7 +149,7 @@ const Marginmanagement = () => {
           </Box>
         </Drawer>
       ) : (
-        <Box sx={{ mb: 2, p: 1 }}>
+        <Box sx={{ p: 2, borderBottom: "1px solid #ddd" }}>
           <Box
             component="form"
             onSubmit={(e) => {
@@ -195,100 +182,111 @@ const Marginmanagement = () => {
               </Grid>
             </Grid>
           </Box>
+
+          {/* Search */}
+          <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+            {isMobile && (
+              <IconButton
+                onClick={() => setDrawerOpen(true)}
+                color="primary"
+                sx={{ mr: 1 }}
+              >
+                <FilterListIcon />
+              </IconButton>
+            )}
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                flex: 1,
+                padding: "6px 10px",
+                fontSize: "12px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            />
+          </Box>
         </Box>
       )}
 
-      {/* Search */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
-        {isMobile && (
-          <IconButton
-            onClick={() => setDrawerOpen(true)}
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            <FilterListIcon />
-          </IconButton>
-        )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+      {/* Table wrapper with scroll */}
+      <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+        <table
+          className="table table-striped table-bordered"
           style={{
-            flex: 1,
-            padding: "6px 10px",
+            minWidth: "1200px",
             fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        />
-      </div>
-
-      {/* Table */}
-      <table
-        className="table table-striped table-bordered"
-        style={{
-          minWidth: "1200px",
-          fontSize: "12px",
-          margin: 0,
-          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          whiteSpace: "nowrap",
-        }}
-      >
-        <thead
-          style={{
-            backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+            margin: 0,
+            backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            whiteSpace: "nowrap",
           }}
         >
-          <tr>
-            {[
-              "Name",
-              "Code",
-              "NSEFUT",
-              "MCXFUT",
-              "NSE OPT",
-              "Global",
-              "NSEeqt",
-              "Forex",
-              "Comex",
-              "Total",
-            ].map((header) => (
-              <th
-                key={header}
-                style={{ padding: "8px 12px", fontWeight: 600 }}
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.length === 0 ? (
+          <thead
+            style={{
+              backgroundColor:
+                theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+            }}
+          >
             <tr>
-              <td colSpan="10" style={{ padding: 16, textAlign: "center" }}>
-                No Data Found
-              </td>
+              {[
+                "Name",
+                "Code",
+                "NSEFUT",
+                "MCXFUT",
+                "NSE OPT",
+                "Global",
+                "NSEeqt",
+                "Forex",
+                "Comex",
+                "Total",
+              ].map((header) => (
+                <th
+                  key={header}
+                  style={{ padding: "8px 12px", fontWeight: 600 }}
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
-          ) : (
-            paginatedData.map((row, index) => (
-              <tr key={row.user_code || index}>
-                <td>{row.user_details}</td>
-                <td>{row.user_code}</td>
-                <td>{row.nse_margin ?? 0}</td>
-                <td>{row.mcx_margin ?? 0}</td>
-                <td>{row.nseopt_margin ?? 0}</td>
-                <td>{row.global_margin ?? 0}</td>
-                <td>{row.nseeqt_margin ?? 0}</td>
-                <td>{row.forex_margin ?? 0}</td>
-                <td>{row.comex_margin ?? 0}</td>
-                <td>{row.total ?? 0}</td>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="10" style={{ textAlign: "center", padding: 30 }}>
+                  <Box display="flex" justifyContent="center">
+                    <CircularProgress size={30} />
+                  </Box>
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            ) : paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan="10" style={{ padding: 16, textAlign: "center" }}>
+                  No Data Found
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((row, index) => (
+                <tr key={row.user_code || index}>
+                  <td>{row.user_details}</td>
+                  <td>{row.user_code}</td>
+                  <td>{row.nse_margin ?? 0}</td>
+                  <td>{row.mcx_margin ?? 0}</td>
+                  <td>{row.nseopt_margin ?? 0}</td>
+                  <td>{row.global_margin ?? 0}</td>
+                  <td>{row.nseeqt_margin ?? 0}</td>
+                  <td>{row.forex_margin ?? 0}</td>
+                  <td>{row.comex_margin ?? 0}</td>
+                  <td>{row.total ?? 0}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </Box>
+    </Box>
   );
 };
 

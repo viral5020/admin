@@ -247,7 +247,7 @@ if (isForex) {
         ? [{
           key: 'Max QTY details',
           name: 'summary report',
-          link: '/app/dashboard/forex-Summaryreport',
+          link: '/app/dashboard/forex-Summary-report',
           icon: 'reader-outline'
         }]
         : []),

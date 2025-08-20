@@ -94,7 +94,7 @@ const Userlisting = () => {
   });
 
   const fetchPageData = async () => {
-    setLoading(true);
+    setLoading(false);
     try {
       const result =
         await fetchUserlistingAPI(
@@ -727,41 +727,48 @@ const Userlisting = () => {
             ))}
           </tr>
         </thead>
-        <tbody>
-          {filteredData.length === 0 ? (
-            <tr>
-              <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
-                No Data Found
-              </td>
-            </tr>
-          ) : (
-            filteredData.map((row, index) => (
-              <tr key={row.user_id || index}>
-                <td
-                  dangerouslySetInnerHTML={{
-                    __html: row.user_code || "",
-                  }}
-                />
-                <td>{row.user_name || "-"}</td>
-                <td
-                  dangerouslySetInnerHTML={{
-                    __html: row.broker || "-",
-                  }}
-                />
-                <td
-                  dangerouslySetInnerHTML={{
-                    __html: row.master || "-",
-                  }}
-                />
-                <td>{row.login_ip || "-"}</td>
-                <td>{row.login_time || "-"}</td>
-                <td>{row.creation_time || "-"}</td>
-                <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                <td>{renderActions(row)}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
+       <tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
+        Loading...
+      </td>
+    </tr>
+  ) : filteredData.length === 0 ? (
+    <tr>
+      <td colSpan="9" style={{ padding: 16, textAlign: "center" }}>
+        No Data Found
+      </td>
+    </tr>
+  ) : (
+    filteredData.map((row, index) => (
+      <tr key={row.user_id || index}>
+        <td
+          dangerouslySetInnerHTML={{
+            __html: row.user_code || "",
+          }}
+        />
+        <td>{row.user_name || "-"}</td>
+        <td
+          dangerouslySetInnerHTML={{
+            __html: row.broker || "-",
+          }}
+        />
+        <td
+          dangerouslySetInnerHTML={{
+            __html: row.master || "-",
+          }}
+        />
+        <td>{row.login_ip || "-"}</td>
+        <td>{row.login_time || "-"}</td>
+        <td>{row.creation_time || "-"}</td>
+        <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+        <td>{renderActions(row)}</td>
+      </tr>
+    ))
+  )}
+</tbody>
+
       </table>
 
       {/* 🔽 Pagination */}
