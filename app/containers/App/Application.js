@@ -55,6 +55,7 @@ import BannedBlockedScript from '../Dashboard/BannedBlockedScript';
 import Userlisting from '../Dashboard/Userlisting';
 import MasterList from '../Dashboard/MasterList';
 import BrokerListing from '../Dashboard/BrokerListing';
+import Addacount from '../Dashboard/Addacount';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -94,6 +95,7 @@ function Application(props) {
           <Route path="dashboard/User-listing" element={<Userlisting />} />
           <Route path="dashboard/Master-Listing" element={<MasterList />} />
           <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
+          <Route path="dashboard/Add-Account" element={<Addacount />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

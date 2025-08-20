@@ -150,7 +150,7 @@ if (isStock) {
           key: 'Max QTY details',
           name: 'margin managemnet',
           link: '/app/dashboard/Margin-management',
-          icon: 'reader-outline'
+          icon: 'book-outline'
         }]
         : []),
 
@@ -168,7 +168,7 @@ if (isStock) {
           key: 'Summary report',
           name: 'summary report',
           link: '/app/dashboard/summary-report',
-          icon: 'reader-outline'
+          icon: 'trending-up'
         }]
         : []),
 
@@ -239,7 +239,7 @@ if (isForex) {
           key: 'Max QTY details',
           name: 'margin managemnet',
           link: '/app/dashboard/forex-Margin-management',
-          icon: 'reader-outline'
+          icon: 'book-outline'
         }]
         : []),
 
@@ -248,7 +248,7 @@ if (isForex) {
           key: 'Max QTY details',
           name: 'summary report',
           link: '/app/dashboard/forex-Summary-report',
-          icon: 'reader-outline'
+          icon: 'trending-up'
         }]
         : []),
 
@@ -293,8 +293,8 @@ if (userType !== 1) {
         ? [{
           key: 'add_account',
           name: 'Add Account',
-          // link: '/app/dashboard/positions',
-          icon: 'cube-outline'
+          link: '/app/dashboard/Add-Account',
+          icon: 'add-circle-outline'
         }]
         : []),
       ...(userType === 4
