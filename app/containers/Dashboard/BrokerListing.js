@@ -375,13 +375,13 @@ const BrokerListing = () => {
     return JSON.parse(sessionStorage.getItem("data")) || [];
   });
 
-  const fetchUserData = async (userId) => {
-    console.log('@@@ userId', userId);
+  const fetchUserData = async (brokerId) => {
+    console.log('@@@ userId', brokerId);
     setLoading(true);
     try {
-      console.log("Fetching data for user:", userId);
+      console.log("Fetching data for user:", brokerId);
 
-      const result = await fetchUserlistingAPI(0, 100000, null, null, null, null, null, userId);
+      const result = await fetchUserlistingAPI(0, 100000, undefined, undefined, undefined, undefined, brokerId);
 
       setDialogData(result.aaData || []); // Store in dialogData
     } catch (error) {
@@ -394,51 +394,51 @@ const BrokerListing = () => {
 
 
   // Initial fetch on component mount
-  useEffect(() => {
-    fetchUserData();
-  }, []);
+  // useEffect(() => {
+  //   fetchUserData();
+  // }, []);
 
 
-  const fetchMasterListingData = async (clearMaster) => {
-    setLoading(true);
-    try {
-      const result = await fetchMasterlistingAPI(
-        currentPage,
-        rowsPerPage,
-        tradeAfter,
-        tradeBefore,
-        loginBefore,
-        loginAfter,
-        databroker?.id,
-        clearMaster ? "" : master?.id,
-        // userId, // use the clicked userId here
-        status,
-        searchText
-      );
+  // const fetchMasterListingData = async (clearMaster) => {
+  //   setLoading(true);
+  //   try {
+  //     const result = await fetchMasterlistingAPI(
+  //       currentPage,
+  //       rowsPerPage,
+  //       tradeAfter,
+  //       tradeBefore,
+  //       loginBefore,
+  //       loginAfter,
+  //       databroker?.id,
+  //       clearMaster ? "" : master?.id,
+  //       // userId, // use the clicked userId here
+  //       status,
+  //       searchText
+  //     );
 
-      if (result?.aaData && Array.isArray(result.aaData)) {
-        setReportData(result.aaData);
-        setFilteredData(result.aaData);
-        setTotalPages(result.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
-      } else {
-        setReportData([]);
-        setFilteredData([]);
-      }
-    } catch (error) {
-      console.error("Error fetching master listing:", error);
-      setReportData([]);
-      setFilteredData([]);
-    } finally {
-      setLoading(false);
-      setIsFilterChange(false);
-    }
-  };
-  useEffect(() => {
-    fetchMasterListingData();
-  }, []);
+  //     if (result?.aaData && Array.isArray(result.aaData)) {
+  //       setReportData(result.aaData);
+  //       setFilteredData(result.aaData);
+  //       setTotalPages(result.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
+  //     } else {
+  //       setReportData([]);
+  //       setFilteredData([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching master listing:", error);
+  //     setReportData([]);
+  //     setFilteredData([]);
+  //   } finally {
+  //     setLoading(false);
+  //     setIsFilterChange(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   fetchMasterListingData();
+  // }, []);
 
 
-    const fetchBrokerListingData = async (clearMaster) => {
+  const fetchBrokerListingData = async (clearMaster) => {
     setLoading(true);
     try {
       const result = await fetchBrokerlistingAPI(
@@ -476,51 +476,51 @@ const BrokerListing = () => {
     fetchBrokerListingData();
   }, []);
 
-  const handleMasterClick = async (user_id) => {
-    try {
-      const result = await fetchMasterlistingAPI(
-        0,              // currentPage
-        rowsPerPage,    // rows per page
-        null,           // start_end
-        null,           // end_date
-        null,           // loginBefore
-        null,           // loginAfter
-        null,           // broker_id
-        user_id,   // ✅ filter by this master
-        null,           // user_id
-        null,           // status
-        searchText      // keep search text if any
-      );
+  // const handleMasterClick = async (user_id) => {
+  //   try {
+  //     const result = await fetchMasterlistingAPI(
+  //       0,              // currentPage
+  //       rowsPerPage,    // rows per page
+  //       null,           // start_end
+  //       null,           // end_date
+  //       null,           // loginBefore
+  //       null,           // loginAfter
+  //       null,           // broker_id
+  //       user_id,   // ✅ filter by this master
+  //       null,           // user_id
+  //       null,           // status
+  //       searchText      // keep search text if any
+  //     );
 
-      if (result?.aaData && Array.isArray(result.aaData)) {
-        setReportData(result.aaData);
-        setFilteredData(result.aaData);
-        setTotalPages(
-          result.iTotalRecords
-            ? Math.ceil(result.iTotalRecords / rowsPerPage)
-            : 0
-        );
-        setCurrentPage(0); // reset to first page
-      } else {
-        setReportData([]);
-        setFilteredData([]);
-        setTotalPages(0);
-      }
-    } catch (error) {
-      console.error("Error fetching master listing:", error);
-    }
-  };
+  //     if (result?.aaData && Array.isArray(result.aaData)) {
+  //       setReportData(result.aaData);
+  //       setFilteredData(result.aaData);
+  //       setTotalPages(
+  //         result.iTotalRecords
+  //           ? Math.ceil(result.iTotalRecords / rowsPerPage)
+  //           : 0
+  //       );
+  //       setCurrentPage(0); // reset to first page
+  //     } else {
+  //       setReportData([]);
+  //       setFilteredData([]);
+  //       setTotalPages(0);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching master listing:", error);
+  //   }
+  // };
   useEffect(() => {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
   }, [debouncedSearchText]);
 
   useEffect(() => {
-    !isFirstRender && fetchMasterListingData();
+    !isFirstRender && fetchBrokerListingData();
   }, [currentPage]);
 
   useEffect(() => {
-    isFilterChange && !isFirstRender && fetchMasterListingData();
+    isFilterChange && !isFirstRender && fetchBrokerListingData();
   }, [isFilterChange]);
 
   // Action handlers
@@ -568,22 +568,22 @@ const BrokerListing = () => {
       >
         A
       </Button>,
-    //   <Button
-    //     onClick={() => handleOpenDialogcl(row.user_id)}
-    //     variant="contained"
-    //     size="small"
-    //     sx={{
-    //       minWidth: 30,
-    //       p: "4px",
-    //       m: "2px",
-    //       backgroundColor: "#9c27b0", // Purple
-    //       "&:hover": {
-    //         backgroundColor: "#7b1fa2", // Darker purple on hover
-    //       },
-    //     }}
-    //   >
-    //     CL
-    //   </Button>,
+      //   <Button
+      //     onClick={() => handleOpenDialogcl(row.user_id)}
+      //     variant="contained"
+      //     size="small"
+      //     sx={{
+      //       minWidth: 30,
+      //       p: "4px",
+      //       m: "2px",
+      //       backgroundColor: "#9c27b0", // Purple
+      //       "&:hover": {
+      //         backgroundColor: "#7b1fa2", // Darker purple on hover
+      //       },
+      //     }}
+      //   >
+      //     CL
+      //   </Button>,
       <Button
         key="status"
         // onClick={() => handleStatusOpen(row)}
@@ -686,7 +686,7 @@ const BrokerListing = () => {
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
-              onApply={fetchMasterListingData}
+              onApply={fetchBrokerListingData}
             />
           </Box>
         </Drawer>
@@ -714,7 +714,7 @@ const BrokerListing = () => {
             setTradeAfter={setTradeAfter}
             type={type}
             setType={setType}
-            onApply={fetchMasterListingData}
+            onApply={fetchBrokerListingData}
           />
         </Box>
       )}
@@ -744,10 +744,7 @@ const BrokerListing = () => {
           }}
         />
       </div>
-
-
-
-
+      {/* 
       <Button
         //   variant="contained"
         color="secondary"
@@ -757,8 +754,7 @@ const BrokerListing = () => {
         }}
       >
         Go Back
-      </Button>
-
+      </Button> */}
 
       <table
         className="table table-striped table-bordered"
@@ -779,8 +775,8 @@ const BrokerListing = () => {
             {[
               "Name",
               "Login id",
-            //   "Parent",
-            //   "Percentage",
+              //   "Parent",
+              //   "Percentage",
               "Master",
               "T User",
               "Outstanding",
@@ -836,8 +832,8 @@ const BrokerListing = () => {
                   onClick={async () => {
                     if (!row.total_user_count) return;
 
-                    setSelectedUserId(row.user_id);
-                    await fetchUserData(row.user_id); // Fetch only this user
+                    setSelectedUserId(row.fetch_user_id);
+                    await fetchUserData(row.fetch_user_id); // Fetch only this user
                     setIsDialogOpen(true); // Open dialog
                   }}
                 >
@@ -850,7 +846,7 @@ const BrokerListing = () => {
                 <td>{row.last_login_ip || "-"}</td>
                 <td>{row.last_login_time || "-"}</td>
                 <td>{row.creation_time || "-"}</td>
-               
+
                 <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
                 <td>{renderActions(row)}</td>
               </tr>

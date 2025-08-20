@@ -21,7 +21,7 @@ import {
   TextField
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { fetchLedgerDetailsAPI, fetchMasterlistingAPI, fetchUserlistingAPI } from "./API/API";
+import { fetchBrokerlistingAPI, fetchLedgerDetailsAPI, fetchMasterlistingAPI, fetchUserlistingAPI } from "./API/API";
 import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
@@ -375,14 +375,11 @@ const Userlisting = () => {
     return JSON.parse(sessionStorage.getItem("data")) || [];
   });
 
-  const fetchUserData = async (userId) => {
-    console.log('@@@ userId', userId);
+  const fetchUserListOfMaster = async (masterId) => {
+    console.log('@@@ userId', masterId);
     setLoading(true);
     try {
-      console.log("Fetching data for user:", userId);
-
-      const result = await fetchUserlistingAPI(0, 100000, null, null, null, null, null, userId);
-
+      const result = await fetchUserlistingAPI(0, 100000, null, null, null, null, null, masterId);
       setDialogData(result.aaData || []); // Store in dialogData
     } catch (error) {
       console.error("Error fetching user listing:", error);
@@ -392,11 +389,24 @@ const Userlisting = () => {
     }
   };
 
+  const fetchBrokerListOfMaster = async (masterId) => {
+    setLoading(true);
+    try {
+      const result = await fetchBrokerlistingAPI(0, 100000, null, null, null, null, null, masterId,);
+      setDialogData(result.aaData || []);
+    } catch (error) {
+      console.error("Error fetching master listing:", error);
+      setDialogData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Initial fetch on component mount
-  useEffect(() => {
-    fetchUserData();
-  }, []);
+
+  // // Initial fetch on component mount
+  // useEffect(() => {
+  //   fetchUserListOfMaster();
+  // }, []);
 
 
   const fetchMasterListingData = async (clearMaster, masterId) => {
@@ -706,9 +716,6 @@ const Userlisting = () => {
         />
       </div>
 
-
-
-
       <Button
         //   variant="contained"
         color="secondary"
@@ -719,7 +726,6 @@ const Userlisting = () => {
       >
         Go Back
       </Button>
-
 
       <table
         className="table table-striped table-bordered"
@@ -798,15 +804,27 @@ const Userlisting = () => {
                     if (!row.users_under) return;
 
                     setSelectedUserId(row.user_id);
-                    await fetchUserData(row.user_id); // Fetch only this user
-                    setIsDialogOpen(true); // Open dialog
+                    await fetchUserListOfMaster(row.user_id); // Fetch only this user
+                    setIsDialogOpen('user'); // Open dialog
                   }}
                 >
                   {/* {console.log('@@@ row', row)} */}
                   {row.users_under || "-"}
                 </td>
 
-                <td>{row.brokers_under || "-"}</td>
+                <td
+                  style={{
+                    cursor: row.brokers_under ? "pointer" : "default",
+                    color: row.brokers_under ? "blue" : "inherit",
+                  }}
+                  onClick={async () => {
+                    if (!row.brokers_under) return;
+
+                    // setSelectedUserId(row.user_id);
+                    await fetchBrokerListOfMaster(row.user_id);
+                    setIsDialogOpen('broker');
+                  }}
+                >{row.brokers_under || "-"}</td>
                 <td>{row.login_time || "-"}</td>
                 <td>{row.login_ip || "-"}</td>
                 <td>{row.creation_time || "-"}</td>
@@ -1013,14 +1031,14 @@ const Userlisting = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="md">
+      <Dialog open={!!isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>User Details</DialogTitle>
         <DialogContent dividers>
           {loading ? (
             <DialogContentText>Loading user data...</DialogContentText>
           ) : dialogData.length === 0 ? (
             <DialogContentText>No data found for this user.</DialogContentText>
-          ) : (
+          ) : isDialogOpen === 'user' ? (
             <table
               className="table table-striped table-bordered"
               style={{
@@ -1091,7 +1109,106 @@ const Userlisting = () => {
                 )}
               </tbody>
             </table>
-          )}
+          ) : isDialogOpen === 'broker' ? (
+            <table
+              className="table table-striped table-bordered"
+              style={{
+                minWidth: "1200px",
+                fontSize: "12px",
+                backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <thead
+                style={{
+                  backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+                }}
+              >
+                <tr>
+                  {[
+                    "Name",
+                    "Login id",
+                    //   "Parent",
+                    //   "Percentage",
+                    "Master",
+                    "T User",
+                    "Outstanding",
+                    "Live Brokrage",
+                    "Login ip",
+                    "Login date",
+                    "Join Date",
+                    "Status",
+                    "Actions",
+                  ].map((header) => (
+                    <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {dialogData.length === 0 ? (
+                  <tr>
+                    <td colSpan="12" style={{ padding: 16, textAlign: "center" }}>
+                      No Data Found
+                    </td>
+                  </tr>
+                ) : (
+                  dialogData.map((row, index) => (
+                    <tr key={row.user_id || index}>
+                      <td>{row.user_full_name || "-"}</td>
+                      <td>{row.loginid || "-"}</td>
+                      <td>{row.master_full_name || "-"}</td>
+                      {/* <td
+                  style={{
+                    cursor: row.out_standing ? "pointer" : "default",
+                    color: row.masters_under ? "blue" : "inherit",
+                  }}
+                  onClick={() => {
+                    if (!row.masters_under) return;
+
+                    setMaster({ id: row.user_id });
+                    // fetchMasterListingData(row.user_id);   // fetch only for this master user
+                    setCurrentPage(0);
+                    setSelectedUserId(row.user_id);        // set selected user ID
+                    setOpenDialog(true);                   // open the dialog
+                  }}
+                >
+                  {row.masters_under || "-"}
+                </td> */}
+
+                      <td
+                        style={{
+                          cursor: row.total_user_count ? "pointer" : "default",
+                          color: row.total_user_count ? "blue" : "inherit",
+                        }}
+                      // onClick={async () => {
+                      //   if (!row.total_user_count) return;
+
+                      //   setSelectedUserId(row.user_id);
+                      //   await fetchUserData(row.user_id); // Fetch only this user
+                      //   setIsDialogOpen(true); // Open dialog
+                      // }}
+                      >
+                        {/* {console.log('@@@ row', row)} */}
+                        {row.total_user_count || "-"}
+                      </td>
+
+                      <td>{row.out_standing || "-"}</td>
+                      <td>{row.live_brokerage || "-"}</td>
+                      <td>{row.last_login_ip || "-"}</td>
+                      <td>{row.last_login_time || "-"}</td>
+                      <td>{row.creation_time || "-"}</td>
+
+                      <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
+                      <td>{renderActions(row)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : null}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
