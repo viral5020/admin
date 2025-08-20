@@ -93,12 +93,12 @@ const Userlisting = () => {
     return JSON.parse(sessionStorage.getItem("data")) || [];
   });
 
-  const fetchPageData = async () => {
+  const fetchPageData = async (current_page) => {
     setLoading(true);
     try {
       const result =
         await fetchUserlistingAPI(
-          currentPage,
+          current_page ?? currentPage,
           pageSize,
           tradeAfter,
           tradeBefore,
@@ -620,7 +620,9 @@ const Userlisting = () => {
                 setTradeAfter={setTradeAfter}
                 type={type}
                 setType={setType}
-                onApply={fetchPageData}
+                onApply={() => {
+                  currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
+                }}
               />
             </Box>
           </Drawer>
@@ -647,7 +649,9 @@ const Userlisting = () => {
             setTradeAfter={setTradeAfter}
             type={type}
             setType={setType}
-            onApply={fetchPageData}
+            onApply={() => {
+              currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
+            }}
           />
         )}
       </Box>

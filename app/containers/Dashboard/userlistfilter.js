@@ -29,6 +29,8 @@ const UserListFilter = ({
   setTradeBefore,
   setTradeAfter,
   onApply,
+  forBroker = false,
+  forMaster = false,
 }) => {
   const theme = useTheme();
   const [userType, setUserType] = useState(null);
@@ -58,8 +60,8 @@ const UserListFilter = ({
         {/* Login & Trade Dates */}
         <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />
         <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />
-        <DateFilter label="Trade After" value={tradeAfter} onChange={setTradeAfter} />
-        <DateFilter label="Trade Before" value={tradeBefore} onChange={setTradeBefore} />
+        <DateFilter label={forMaster || forBroker ? 'Join After' : 'Trade After'} value={tradeAfter} onChange={setTradeAfter} />
+        <DateFilter label={forMaster || forBroker ? 'Join Before' : 'Trade Before'} value={tradeBefore} onChange={setTradeBefore} />
 
         {/* Client / Master / Broker */}
         <ClientMasterBrokerFilter
@@ -69,9 +71,9 @@ const UserListFilter = ({
           setClient={setUser}
           setMaster={setMaster}
           setBroker={setDatabroker}
-          showClient={userType !== 1}
+          showClient={userType !== 1 && !forMaster && !forBroker}
           showMaster={userType !== 1}
-          showBroker={userType !== 1 && userType !== 2}
+          showBroker={userType !== 1 && userType !== 2 && !forBroker}
         />
 
         {/* Apply Button */}
