@@ -16,6 +16,12 @@ import { openAction } from 'dan-redux/modules/ui';
 import useStyles from './sidebar-jss';
 import { position } from 'stylis';
 
+const hrStyle = {
+  margin: 0,
+  width: "75%",
+  margin: "0px 15px",
+}
+
 // eslint-disable-next-line
 function MainMenu(props) {
   const { classes, cx } = useStyles();
@@ -45,7 +51,10 @@ function MainMenu(props) {
           <ListItem
             button
             to={item.linkParent ? item.linkParent : '#'}
-            sx={{ marginLeft: !item.icon ? paddingLevel : 0 }}
+            sx={{
+              marginLeft: !item.icon ? paddingLevel : 0,
+              // border: '2px solid green'
+            }}
             className={
               cx(
                 classes.head,
@@ -60,7 +69,9 @@ function MainMenu(props) {
                 <i className={item.icon} />
               </ListItemIcon>
             )}
-            <ListItemText classes={{ primary: classes.primary }} variant="inset" primary={item.name} />
+            <ListItemText classes={{ primary: classes.primary }} variant="inset" primary={item.name} sx={{
+              // border: '2px solid red'
+            }} />
             {!item.linkParent && (
               <span>
                 {open.indexOf(item.key) > -1 ? <ExpandLess /> : <ExpandMore />}
@@ -68,20 +79,23 @@ function MainMenu(props) {
             )}
           </ListItem>
           {!item.linkParent && (
-            <Collapse
-              component="div"
-              className={cx(
-                classes.nolist,
-                (item.keyParent ? classes.child : ''),
-              )}
-              in={open.indexOf(item.key) > -1}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List className={classes.dense} component="nav">
-                {getMenus(item.child, item.level)}
-              </List>
-            </Collapse>
+            <>
+              <Collapse
+                component="div"
+                className={cx(
+                  classes.nolist,
+                  (item.keyParent ? classes.child : ''),
+                )}
+                in={open.indexOf(item.key) > -1}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List className={classes.dense} component="nav">
+                  {getMenus(item.child, item.level)}
+                </List>
+              </Collapse>
+              <hr style={hrStyle} />
+            </>
           )}
         </div>
       );
@@ -102,7 +116,10 @@ function MainMenu(props) {
       <ListItem
         key={index.toString()}
         button
-        sx={{ pl: paddingLevel }}
+        sx={{
+          pl: paddingLevel,
+          // border: '2px solid blue'
+        }}
         className={cx(classes.nested, (item.link === '/app' && location.pathname !== '/app') ? 'rootPath' : '')}
         component={NavLink}
         to={item.link}
@@ -111,7 +128,7 @@ function MainMenu(props) {
         <Box
           sx={{
             flex: 1,
-            pl: '30px',
+            pl: '17px',
             display: 'flex',
             justifyContent: 'space-between'
           }}
@@ -122,7 +139,10 @@ function MainMenu(props) {
               <ion-icon name={item.icon} style={{ width: '22px', height: '22px', position: 'relative', top: '4px' }}></ion-icon>
             </ListItemIcon>
           )}
-          <ListItemText classes={{ primary: classes.primary }} primary={item.name} />
+          <ListItemText classes={{ primary: classes.primary }} primary={item.name}
+            sx={{
+              // border: '2px solid red'
+            }} />
           {item.badge && (
             <Chip color="primary" label={item.badge} className={classes.badge} />
           )}
