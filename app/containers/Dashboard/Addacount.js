@@ -18,34 +18,58 @@ export default function AddAccountForm() {
     name: "",
     password: "",
     remarks: "",
-    userLevel: [],
-    marketType: [],
+    userLevel: [], // selected user level ids
+    marketType: [], // selected market type ids
+    // extra fields used in UI/payload
+    partnership: "",
+    shortTradeAvoid: "",
+    freshLimitAllowed: null, // "yes" | "no" | null
+    // defaults and per-market/script options
+    defaultOptions: {
+      // keys: minPctComm, maxPctComm, minLotComm, maxLotComm, marginLimit, nextMarginLimit
+      minPctComm: "",
+      maxPctComm: "",
+      minLotComm: "",
+      maxLotComm: "",
+      marginLimit: false,
+      nextMarginLimit: false,
+    },
+    marketOptions: {}, // keyed by market_type_id or script id depending on API response
+    accountTypes: [], // optional; fallback to userLevel if left empty
+    // balance & limits that may be required by API
+    openingBalance: 0,
+    balanceType: 0,
+    nseLimit: "",
+    nseLimit_max: "",
+    nseMinPercentWise: "",
+    nseMaxPercentWise: "",
+    mcxLimit: "",
+    mcxLimit_max: "",
   });
 
-  const [userLevels, setUserLevels] = useState([]);
-  const [marketTypes, setMarketTypes] = useState([]);
+  const [userLevels, setUserLevels] = useState([]); // fetched list
+  const [marketTypes, setMarketTypes] = useState([]); // fetched list (may include scripts)
 
+  // Basic generic handler
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Checkbox handler for arrays (userLevel, marketType, accountTypes, etc.)
   const handleCheckboxChange = (type, id) => {
     setFormData((prev) => {
       const current = prev[type] || [];
-      return {
-        ...prev,
-        [type]: current.includes(id)
-          ? current.filter((item) => item !== id)
-          : [...current, id],
-      };
+      const updated =
+        current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      return { ...prev, [type]: updated };
     });
   };
 
+  // Fetch user levels & market types when userType === "3"
   useEffect(() => {
     if (formData.userType === "3") {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-
+      const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
       const payload = {
         is_app: 1,
         login_user_id: dataStored?.user_id,
@@ -60,15 +84,98 @@ export default function AddAccountForm() {
         )
         .then((res) => {
           if (res.data) {
+            // store whatever API returns
             setUserLevels(res.data.user_level || []);
             setMarketTypes(res.data.market_type || []);
           }
         })
         .catch((err) => console.error("API Error:", err));
+    } else {
+      // clear fetched lists when not master
+      setUserLevels([]);
+      setMarketTypes([]);
     }
   }, [formData.userType]);
+  
 
-   {/* Automatically populate MCX fields when component mounts or defaults change */}
+  // Initialize marketOptions when marketTypes change (or if defaultOptions change we propagate)
+  useEffect(() => {
+    if (!Array.isArray(marketTypes)) return;
+
+    // Build keys:
+    // - If marketTypes item includes a 'scripts' array, create entries per script (keyed by script id)
+    // - Otherwise create an entry keyed by market_type_id
+    const newMarketOptions = { ...formData.marketOptions };
+
+    marketTypes.forEach((mkt) => {
+      if (Array.isArray(mkt.scripts) && mkt.scripts.length > 0) {
+        // mkt.scripts may contain objects; derive a string id for each
+        mkt.scripts.forEach((sc) => {
+          // robust key detection (fallback to string conversion)
+          const scriptId =
+            (sc && (sc.script || sc.script_id || sc.id || sc.market_type_id)) ||
+            sc ||
+            null;
+          const key = String(scriptId);
+          if (!newMarketOptions[key]) {
+            newMarketOptions[key] = {
+              minPctComm: formData.defaultOptions?.minPctComm || "",
+              maxPctComm: formData.defaultOptions?.maxPctComm || "",
+              minLotComm: formData.defaultOptions?.minLotComm || "",
+              maxLotComm: formData.defaultOptions?.maxLotComm || "",
+              marginLimit: formData.defaultOptions?.marginLimit || false,
+              nextMarginLimit: formData.defaultOptions?.nextMarginLimit || false,
+            };
+          }
+        });
+      } else {
+        // fallback to market_type_id as a key
+        const key = String(mkt.market_type_id);
+        if (!newMarketOptions[key]) {
+          newMarketOptions[key] = {
+            minPctComm: formData.defaultOptions?.minPctComm || "",
+            maxPctComm: formData.defaultOptions?.maxPctComm || "",
+            minLotComm: formData.defaultOptions?.minLotComm || "",
+            maxLotComm: formData.defaultOptions?.maxLotComm || "",
+            marginLimit: formData.defaultOptions?.marginLimit || false,
+            nextMarginLimit: formData.defaultOptions?.nextMarginLimit || false,
+          };
+        }
+      }
+    });
+
+    setFormData((prev) => ({ ...prev, marketOptions: newMarketOptions }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketTypes]);
+
+  // When defaultOptions change, propagate values to existing marketOptions keys (but don't overwrite other custom fields)
+  useEffect(() => {
+    const keys = Object.keys(formData.marketOptions || {});
+    if (keys.length === 0) return;
+
+    setFormData((prev) => {
+      const updated = { ...prev.marketOptions };
+      keys.forEach((k) => {
+        updated[k] = {
+          ...updated[k],
+          minPctComm:
+            prev.defaultOptions?.minPctComm !== "" ? prev.defaultOptions.minPctComm : updated[k].minPctComm,
+          maxPctComm:
+            prev.defaultOptions?.maxPctComm !== "" ? prev.defaultOptions.maxPctComm : updated[k].maxPctComm,
+          minLotComm:
+            prev.defaultOptions?.minLotComm !== "" ? prev.defaultOptions.minLotComm : updated[k].minLotComm,
+          maxLotComm:
+            prev.defaultOptions?.maxLotComm !== "" ? prev.defaultOptions.maxLotComm : updated[k].maxLotComm,
+          marginLimit: prev.defaultOptions?.marginLimit ?? updated[k].marginLimit,
+          nextMarginLimit: prev.defaultOptions?.nextMarginLimit ?? updated[k].nextMarginLimit,
+        };
+      });
+      return { ...prev, marketOptions: updated };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.defaultOptions.minPctComm, formData.defaultOptions.maxPctComm, formData.defaultOptions.minLotComm, formData.defaultOptions.maxLotComm, formData.defaultOptions.marginLimit, formData.defaultOptions.nextMarginLimit]);
+
+    {/* Automatically populate MCX fields when component mounts or defaults change */}
   {useEffect(() => {
     if (!marketTypes) return;
 
@@ -85,10 +192,211 @@ export default function AddAccountForm() {
 
     setFormData((prev) => ({ ...prev, marketOptions: updatedMarketOptions }));
   }, [formData.defaultOptions, marketTypes])}
+  // helper to update a specific market/script option
+  const handleMarketOptionChange = (key, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      marketOptions: {
+        ...prev.marketOptions,
+        [key]: { ...prev.marketOptions?.[key], [field]: value },
+      },
+    }));
+  };
 
+  // Build the API payload from formData
+  const buildPayload = () => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    // markets array: convert ids to strings (API sample shows strings)
+    const markets = (formData.marketType || []).map(String);
+
+    // accountTypes fallback to selected userLevel if not explicitly provided
+    const accountTypes =
+      (formData.accountTypes && formData.accountTypes.length > 0)
+        ? formData.accountTypes.map(String)
+        : (formData.userLevel || []).map(String);
+
+    // Build mcxScripts:
+    // Two approaches:
+    // 1) If marketTypes contains an item named "MCXFUT" with a scripts array, use that scripts array to build entries
+    // 2) Otherwise, fallback to keys in marketOptions (which we initialized earlier)
+    const mcxScripts = [];
+
+    // find MCX market entry (if exists)
+    const mcxMarket = (marketTypes || []).find(
+      (m) => String(m.market_type_name).toUpperCase() === "MCXFUT"
+    );
+
+    if (mcxMarket && Array.isArray(mcxMarket.scripts) && mcxMarket.scripts.length > 0) {
+      mcxMarket.scripts.forEach((sc) => {
+        const scriptId =
+          (sc && (sc.script || sc.script_id || sc.id || sc.market_type_id)) ||
+          sc ||
+          null;
+        const key = String(scriptId);
+        const opts = formData.marketOptions?.[key] || {};
+        // Map to API naming: percentComm, percentCommMax, lotComm, lotCommMax
+        mcxScripts.push({
+          script: key,
+          percentComm: parseFloat(opts.minPctComm || 0) || 0,
+          percentCommMax: parseFloat(opts.maxPctComm || 0) || 0,
+          lotComm: parseFloat(opts.minLotComm || 0) || 0,
+          lotCommMax: parseFloat(opts.maxLotComm || 0) || 0,
+        });
+      });
+    } else {
+      // fallback: use keys in marketOptions (only include numeric-like keys to avoid picking up non-script keys)
+      Object.keys(formData.marketOptions || {}).forEach((key) => {
+        // optionally filter keys that are selected markets
+        const opts = formData.marketOptions[key];
+        if (!opts) return;
+        mcxScripts.push({
+          script: String(key),
+          percentComm: parseFloat(opts.minPctComm || 0) || 0,
+          percentCommMax: parseFloat(opts.maxPctComm || 0) || 0,
+          lotComm: parseFloat(opts.minLotComm || 0) || 0,
+          lotCommMax: parseFloat(opts.maxLotComm || 0) || 0,
+        });
+      });
+    }
+
+    const payload = {
+      // session/auth fields (many endpoints expect them)
+      is_app: 1,
+      login_user_id: dataStored?.user_id,
+      auth_key: dataStored?.auth_key,
+
+      // main data fields as requested
+      userType: Number(formData.userType) || 0,
+      name: formData.name || "",
+      password: formData.password || "",
+      openingBalance: Number(formData.openingBalance) || 0,
+      balanceType: Number(formData.balanceType) || 0,
+      remarks: formData.remarks || "",
+      freshLimitAllowed: formData.freshLimitAllowed === "yes" ? 1 : 0,
+      short_trade_minutes: Number(formData.shortTradeAvoid) || 0,
+      partnershipPercentage: Number(formData.partnership) || 0,
+      partnershipType: Number(formData.partnershipType) || 0,
+      markets: markets,
+      accountTypes: accountTypes,
+      nseLimit: Number(formData.nseLimit) || 0,
+      nseLimit_max: Number(formData.nseLimit_max) || 0,
+      nseMinPercentWise: parseFloat(formData.nseMinPercentWise || 0) || 0,
+      nseMaxPercentWise: parseFloat(formData.nseMaxPercentWise || 0) || 0,
+      mcxLimit: Number(formData.mcxLimit) || 0,
+      mcxLimit_max: Number(formData.mcxLimit_max) || 0,
+      // mcxScripts built above
+      mcxScripts: mcxScripts,
+    };
+
+    return payload;
+  };
+
+  // Form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Submit:", formData);
+    const payload = buildPayload();
+    console.log("Payload to send:", payload);
+
+    axios
+      .post("http://128.199.126.171/~goldorg/ajaxfiles/create_user", payload, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((res) => {
+        console.log("Create user response:", res.data);
+        // handle success UI as needed
+      })
+      .catch((err) => {
+        console.error("Create user error:", err);
+        // handle error UI as needed
+      });
+  };
+
+  // helper render: show per-market/script commission fields for MCXFUT (mirrors your previous UI)
+  const renderMcxSection = (mkt) => {
+    // We'll render either per-script fields if scripts exist; otherwise render single group
+    if (Array.isArray(mkt.scripts) && mkt.scripts.length > 0) {
+      return mkt.scripts.map((sc) => {
+        const scriptId =
+          (sc && (sc.script || sc.script_id || sc.id || sc.market_type_id)) ||
+          sc ||
+          null;
+        const key = String(scriptId);
+        const opts = formData.marketOptions?.[key] || {};
+        return (
+          <div key={key} style={{ marginLeft: 32, marginTop: 12 }}>
+            <FormControlLabel
+              control={<Checkbox size="small" checked disabled />}
+              label={sc && (sc.script_name || sc.name || String(key))}
+            />
+            <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+              <TextField
+                label="percentComm"
+                size="small"
+                value={opts.minPctComm || ""}
+                onChange={(e) => handleMarketOptionChange(key, "minPctComm", e.target.value)}
+              />
+              <TextField
+                label="percentCommMax"
+                size="small"
+                value={opts.maxPctComm || ""}
+                onChange={(e) => handleMarketOptionChange(key, "maxPctComm", e.target.value)}
+              />
+              <TextField
+                label="lotComm"
+                size="small"
+                value={opts.minLotComm || ""}
+                onChange={(e) => handleMarketOptionChange(key, "minLotComm", e.target.value)}
+              />
+              <TextField
+                label="lotCommMax"
+                size="small"
+                value={opts.maxLotComm || ""}
+                onChange={(e) => handleMarketOptionChange(key, "maxLotComm", e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      });
+    }
+
+    // fallback: single market entry keyed by market_type_id
+    const key = String(mkt.market_type_id);
+    const opts = formData.marketOptions?.[key] || {};
+    return (
+      <div key={key} style={{ marginLeft: 32, marginTop: 12 }}>
+        <FormControlLabel
+          control={<Checkbox size="small" checked disabled />}
+          label={mkt.market_type_name}
+        />
+        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+          <TextField
+            label="minPctComm"
+            size="small"
+            value={opts.minPctComm || ""}
+            onChange={(e) => handleMarketOptionChange(key, "minPctComm", e.target.value)}
+          />
+          <TextField
+            label="maxPctComm"
+            size="small"
+            value={opts.maxPctComm || ""}
+            onChange={(e) => handleMarketOptionChange(key, "maxPctComm", e.target.value)}
+          />
+          <TextField
+            label="minLotComm"
+            size="small"
+            value={opts.minLotComm || ""}
+            onChange={(e) => handleMarketOptionChange(key, "minLotComm", e.target.value)}
+          />
+          <TextField
+            label="maxLotComm"
+            size="small"
+            value={opts.maxLotComm || ""}
+            onChange={(e) => handleMarketOptionChange(key, "maxLotComm", e.target.value)}
+          />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -100,7 +408,6 @@ export default function AddAccountForm() {
         fontSize: "0.9rem",
       }}
     >
-
       {/* Basic Details */}
       <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
         Basic Details
@@ -162,8 +469,8 @@ export default function AddAccountForm() {
         </div>
       </div>
 
-    {/* Master Options */}
-{formData.userType === "3" && (
+      {/* Master Options */}
+     {formData.userType === "3" && (
   <>
     {/* Partnership + Short Trade */}
     <div
@@ -444,130 +751,70 @@ export default function AddAccountForm() {
             </FormGroup>
           ) : mkt.market_type_name === "BINARY" ? (
             /* -------------------- Binary -------------------- */
-            <FormGroup
-              row
-              sx={{
-                ml: 4,
-                mt: 1,
-                "& .MuiFormControlLabel-root": { mr: 3, minWidth: "200px" },
-              }}
-            >
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Margin Limit"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Next Margin Limit"
-              />
-            </FormGroup>
+
+ <div
+  style={{
+    display: "flex",
+    gap: "12px",
+    marginLeft: "32px",
+    marginTop: "12px",
+  }}
+>
+  {["Margin Limit", "Next Margin Limit"].map((key) => (
+    <TextField
+      key={key}
+      label={key}                 // Label appears inside the text box
+      size="small"
+      variant="outlined"
+      sx={{ minWidth: "150px" }}  // same width as your other fields
+      value={formData.marketOptions?.[mkt.market_type_id]?.[key.replace(/ /g, "")] || ""}
+      onChange={(e) => {
+        const value = e.target.value;
+        setFormData((prev) => ({
+          ...prev,
+          marketOptions: {
+            ...prev.marketOptions,
+            [mkt.market_type_id]: {
+              ...prev.marketOptions?.[mkt.market_type_id],
+              [key.replace(/ /g, "")]: value,
+            },
+          },
+        }));
+      }}
+    />
+  ))}
+</div>
+
+
+
           ) : (
             /* -------------------- Default Markets -------------------- */
-            <FormGroup
-              row
-              sx={{
-                ml: 4,
-                mt: 1,
-                "& .MuiFormControlLabel-root": { mr: 3, minWidth: "200px" },
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={
-                      formData.marketOptions?.[mkt.market_type_id]
-                        ?.marginLimit || false
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        marketOptions: {
-                          ...formData.marketOptions,
-                          [mkt.market_type_id]: {
-                            ...formData.marketOptions?.[mkt.market_type_id],
-                            marginLimit: e.target.checked,
-                          },
-                        },
-                      })
-                    }
-                  />
-                }
-                label="Margin Limit"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={
-                      formData.marketOptions?.[mkt.market_type_id]
-                        ?.nextMarginLimit || false
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        marketOptions: {
-                          ...formData.marketOptions,
-                          [mkt.market_type_id]: {
-                            ...formData.marketOptions?.[mkt.market_type_id],
-                            nextMarginLimit: e.target.checked,
-                          },
-                        },
-                      })
-                    }
-                  />
-                }
-                label="Next Margin Limit"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={
-                      formData.marketOptions?.[mkt.market_type_id]
-                        ?.minLotBrokerage || false
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        marketOptions: {
-                          ...formData.marketOptions,
-                          [mkt.market_type_id]: {
-                            ...formData.marketOptions?.[mkt.market_type_id],
-                            minLotBrokerage: e.target.checked,
-                          },
-                        },
-                      })
-                    }
-                  />
-                }
-                label="Minimum Lot Wise Brokerage"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={
-                      formData.marketOptions?.[mkt.market_type_id]
-                        ?.maxLotBrokerage || false
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        marketOptions: {
-                          ...formData.marketOptions,
-                          [mkt.market_type_id]: {
-                            ...formData.marketOptions?.[mkt.market_type_id],
-                            maxLotBrokerage: e.target.checked,
-                          },
-                        },
-                      })
-                    }
-                  />
-                }
-                label="Max Lot Wise Brokerage"
-              />
-            </FormGroup>
+           
+<div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
+  {["marginLimit", "nextMarginLimit", "minLotBrokerage", "maxLotBrokerage"].map((key) => (
+    <TextField
+      key={key}
+      label={key.replace(/([A-Z])/g, " $1")} // Adds space before capital letters
+      size="small"
+      value={formData.marketOptions?.[mkt.market_type_id]?.[key] || ""}
+      onChange={(e) => {
+        const value = e.target.value;
+        setFormData((prev) => ({
+          ...prev,
+          marketOptions: {
+            ...prev.marketOptions,
+            [mkt.market_type_id]: {
+              ...prev.marketOptions?.[mkt.market_type_id],
+              [key]: value,
+            },
+          },
+        }));
+      }}
+    />
+  ))}
+</div>
+
+
           )}
         </>
       )}
@@ -580,11 +827,8 @@ export default function AddAccountForm() {
   </>
 )}
 
-
       {/* Remarks */}
-      <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
-        Remarks
-      </Typography>
+      <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>Remarks</Typography>
       <TextField
         name="remarks"
         value={formData.remarks}
@@ -613,6 +857,40 @@ export default function AddAccountForm() {
             bgcolor: "error.main",
             "&:hover": { bgcolor: "error.dark" },
             textTransform: "none",
+          }}
+          onClick={() => {
+            // simple reset - adjust behaviour as needed
+            setFormData({
+              userType: "",
+              name: "",
+              password: "",
+              remarks: "",
+              userLevel: [],
+              marketType: [],
+              partnership: "",
+              shortTradeAvoid: "",
+              freshLimitAllowed: null,
+              defaultOptions: {
+                minPctComm: "",
+                maxPctComm: "",
+                minLotComm: "",
+                maxLotComm: "",
+                marginLimit: false,
+                nextMarginLimit: false,
+              },
+              marketOptions: {},
+              accountTypes: [],
+              openingBalance: 0,
+              balanceType: 0,
+              nseLimit: "",
+              nseLimit_max: "",
+              nseMinPercentWise: "",
+              nseMaxPercentWise: "",
+              mcxLimit: "",
+              mcxLimit_max: "",
+            });
+            setUserLevels([]);
+            setMarketTypes([]);
           }}
         >
           Cancel
