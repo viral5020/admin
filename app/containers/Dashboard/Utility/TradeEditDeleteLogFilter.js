@@ -68,20 +68,22 @@ const TradeEditDeleteLogFilter = ({
                 />
 
 
-                <MarketScriptNameFilter
-                    market={market}
-                    script={script}
-                    setScript={setScript}
-                    setMarket={setMarket}
-                />
+                {market && script && setScript && setMarket &&
+                    <MarketScriptNameFilter
+                        market={market}
+                        script={script}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                    />}
 
-                <ClientMasterBrokerFilter
-                    client={client}
-                    master={master}
-                    setClient={setClient}
-                    setMaster={setMaster}
-                    showBroker={false}
-                />
+                {client && master && setClient && setMaster &&
+                    <ClientMasterBrokerFilter
+                        client={client}
+                        master={master}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        showBroker={false}
+                    />}
 
                 {isAdminOnly && setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <FormControlLabel
