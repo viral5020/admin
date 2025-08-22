@@ -1176,52 +1176,570 @@ const buildPayload = () => {
 )}
 
 {/* User Options */}
- {formData.userType === "1" && (
-        <div>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            User Options
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <Typography>Order Outside of High Low</Typography>
-                <RadioGroup
-                  row
-                  value={formData.orderOutsideHighLow}
-                  onChange={(e) => handleChange("orderOutsideHighLow", e.target.value)}
-                >
-                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio />} label="No" />
-                </RadioGroup>
-              </FormControl>
-            </Grid>
+{formData.userType === "1" && (
+  <>
+    <Divider sx={{ mb: 2 }} />
 
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <Typography>Apply Auto Square</Typography>
-                <RadioGroup
-                  row
-                  value={formData.applyAutoSquare}
-                  onChange={(e) => handleChange("applyAutoSquare", e.target.value)}
-                >
-                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio />} label="No" />
-                </RadioGroup>
-              </FormControl>
-            </Grid>
+    {/* ================= ACCOUNT DETAILS ================= */}
+    <div style={{ padding: 12 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        ACCOUNT DETAILS
+      </Typography>
 
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
+     
+<Grid container spacing={2}>
+  {/* Order Outside of High Low */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>Order Outside of High Low</Typography>
+      <RadioGroup
+        row
+        value={formData.orderOutsideHighLow}
+        onChange={(e) =>
+          handleChange("orderOutsideHighLow", e.target.value)
+        }
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* Apply Auto Square */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>Apply Auto Square</Typography>
+      <RadioGroup
+        row
+        value={formData.applyAutoSquare}
+        onChange={(e) => handleChange("applyAutoSquare", e.target.value)}
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* Intra Day Auto Square */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>Intra Day Auto Square</Typography>
+      <RadioGroup
+        row
+        value={formData.intradayAutoSquare}
+        onChange={(e) =>
+          handleChange("intradayAutoSquare", e.target.value)
+        }
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* Only Position Squareoff */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>Only Position Squareoff</Typography>
+      <RadioGroup
+        row
+        value={formData.onlyPositionSquareoff}
+        onChange={(e) =>
+          handleChange("onlyPositionSquareoff", e.target.value)
+        }
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* MTM Linked with Ledger (Stock) */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>MTM Linked with Ledger (Stock)</Typography>
+      <RadioGroup
+        row
+        value={formData.mtmLinkedLedger}
+        onChange={(e) => handleChange("mtmLinkedLedger", e.target.value)}
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* Apply Auto Square Forex/Comex */}
+  <Grid item xs={4}>
+    <FormControl fullWidth>
+      <Typography>Apply Auto Square (Forex/Comex)</Typography>
+      <RadioGroup
+        row
+        value={formData.applyAutoSquareForex}
+        onChange={(e) =>
+          handleChange("applyAutoSquareForex", e.target.value)
+        }
+      >
+        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+        <FormControlLabel value="no" control={<Radio />} label="No" />
+      </RadioGroup>
+    </FormControl>
+  </Grid>
+
+  {/* Other TextFields */}
+    {/* Row 1 */}
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Close Alert Margin (Forex/Comex)"
+      value={formData.closeAlertMarginForex}
+      onChange={(e) => handleChange("closeAlertMarginForex", e.target.value)}
+    />
+  </Grid>
+  <Grid item xs={12} md={4}>
+ <FormControl fullWidth size="small">
+      <InputLabel>Broker Name</InputLabel>
+      <Select
+  multiple
+  value={formData.brokerName || []} // <-- make sure it's array
+  onChange={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      brokerName: e.target.value, // 👈 all selected brokers
+    }))
+  }
+  MenuProps={{
+    disablePortal: true,
+    anchorOrigin: { vertical: "bottom", horizontal: "left" },
+    transformOrigin: { vertical: "top", horizontal: "left" },
+    PaperProps: { style: { maxHeight: 200 } },
+  }}
+>
+  {BrokerList.map((broker) => (
+    <MenuItem key={broker.broker_id} value={broker.broker_id}>
+      {broker.broker_name}
+    </MenuItem>
+  ))}
+</Select>
+
+    </FormControl>
+
+
+  </Grid>
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Loss Alert Percentage (Forex/Comex)"
+      value={formData.lossAlertPercentageForex}
+      onChange={(e) => handleChange("lossAlertPercentageForex", e.target.value)}
+    />
+  </Grid>
+
+  {/* Row 2 */}
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Loss Alert Percentage"
+      value={formData.lossAlertPercentage}
+      onChange={(e) => handleChange("lossAlertPercentage", e.target.value)}
+    />
+  </Grid>
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Close Alert Margin"
+      value={formData.closeAlertMargin}
+      onChange={(e) => handleChange("closeAlertMargin", e.target.value)}
+    />
+  </Grid>
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Min Rate Stop Amount"
+      value={formData.minRateStopAmount}
+      onChange={(e) => handleChange("minRateStopAmount", e.target.value)}
+    />
+  </Grid>
+
+  {/* Row 3 */}
+  <Grid item xs={12} md={4}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Short Trade Avoid"
+      value={formData.shortTradeAvoid}
+      onChange={(e) => handleChange("shortTradeAvoid", e.target.value)}
+    />
+  </Grid>
+</Grid>
+    </div>
+
+    <Divider sx={{ my: 2 }} />
+
+    {/* ================= ADDITIONAL DETAILS ================= */}
+    <div style={{ padding: 12 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        ADDITIONAL DETAILS
+      </Typography>
+
+ <Grid container spacing={2}>
+  {/* Account Type Dropdown */}
+  <Grid item xs={6}>
+    <FormControl fullWidth size="small">
+      <InputLabel>User Level</InputLabel>
+      <Select
+        value={formData.userLevel || ""}
+        onChange={(e) => setFormData({ ...formData, userLevel: e.target.value })}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              width: 300,
+              maxHeight: 250,
+              p: 1,
+            },
+          },
+        }}
+      >
+        {userLevels.map((lvl) => (
+          <MenuItem key={lvl.user_level_id} value={lvl.user_level_id}>
+            {lvl.user_level_name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  </Grid>
+
+  {/* Market Type Section */}
+  <Grid item xs={12}>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
+      Market Type
+    </Typography>
+
+    {marketTypes.map((mkt) => {
+      const isChecked = formData.marketType.includes(mkt.market_type_id);
+      const config = marketConfig[mkt.market_type_name];
+      const selectedBrokers = formData.brokerName || [];
+
+      return (
+        <div key={mkt.market_type_id} style={{ marginBottom: "16px" }}>
+          {/* Main Market Type Checkbox */}
+          <FormControlLabel
+            control={
+              <Checkbox
                 size="small"
-                label="Close Alert Margin"
-                value={formData.closeAlertMargin}
-                onChange={(e) => handleChange("closeAlertMargin", e.target.value)}
+                checked={isChecked}
+                onChange={() =>
+                  handleCheckboxChange("marketType", mkt.market_type_id)
+                }
               />
-            </Grid>
-          </Grid>
+            }
+            label={mkt.market_type_name}
+          />
+
+          {isChecked && config && (
+            <div style={{ marginLeft: "32px", marginTop: "12px" }}>
+              {/* === MCXFUT-specific section === */}
+              {mkt.market_type_name === "MCXFUT" && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Margin Limit"
+                      size="small"
+                      type="number"
+                      fullWidth
+                      value={formData.marketOptions?.MCXFUT?.marginLimit || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          marketOptions: {
+                            ...prev.marketOptions,
+                            MCXFUT: {
+                              ...prev.marketOptions?.MCXFUT,
+                              marginLimit: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Script Limit"
+                      size="small"
+                      type="number"
+                      fullWidth
+                      value={formData.marketOptions?.MCXFUT?.scriptLimit || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          marketOptions: {
+                            ...prev.marketOptions,
+                            MCXFUT: {
+                              ...prev.marketOptions?.MCXFUT,
+                              scriptLimit: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Commission Type</InputLabel>
+                      <Select
+                        value={formData.marketOptions?.MCXFUT?.commissionType || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            marketOptions: {
+                              ...prev.marketOptions,
+                              MCXFUT: {
+                                ...prev.marketOptions?.MCXFUT,
+                                commissionType: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                      >
+                        <MenuItem value={1}>Script Wise (1)</MenuItem>
+                        <MenuItem value={0}>Same for All (0)</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Brokerage Type</InputLabel>
+                      <Select
+                        value={formData.marketOptions?.MCXFUT?.brokerageType || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            marketOptions: {
+                              ...prev.marketOptions,
+                              MCXFUT: {
+                                ...prev.marketOptions?.MCXFUT,
+                                brokerageType: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                      >
+                        <MenuItem value={2}>Percentage Wise</MenuItem>
+                        <MenuItem value={0}>MCX Lot Wise</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Global Commission Fields */}
+                  {["deliveryCommission", "intradayCommission", "deliveryBrokerCommission", "intradayBrokerCommission"].map(
+                    (key) => (
+                      <Grid item xs={6} key={key}>
+                        <TextField
+                          label={{
+                            deliveryCommission: "Delivery Commission",
+                            intradayCommission: "Intraday Commission",
+                            deliveryBrokerCommission: "Delivery Broker Commission",
+                            intradayBrokerCommission: "Intraday Broker Commission",
+                          }[key]}
+                          size="small"
+                          type="number"
+                          fullWidth
+                          value={formData.marketOptions?.MCXFUT?.[key] || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              marketOptions: {
+                                ...prev.marketOptions,
+                                MCXFUT: {
+                                  ...prev.marketOptions?.MCXFUT,
+                                  [key]: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                      </Grid>
+                    )
+                  )}
+
+                  {/* Script-wise MCX commissions */}
+                  {formData.marketOptions?.MCXFUT?.commissionType === 1 &&
+                    config.hasMcxScripts &&
+                    Mcxscript.map((script) => (
+                      <Grid item xs={12} key={script.script_id} style={{ marginBottom: "12px" }}>
+                        <FormControlLabel
+                          control={<Checkbox size="small" checked disabled />}
+                          label={script.script_name}
+                        />
+                        <Grid container spacing={2} style={{ marginTop: "8px", marginLeft: "24px" }}>
+                          {["deliveryCommission", "intradayCommission", "deliveryBrokerCommission", "intradayBrokerCommission"].map(
+                            (key) => (
+                              <Grid item xs={6} key={key}>
+                                <TextField
+                                  label={{
+                                    deliveryCommission: "Delivery Commission",
+                                    intradayCommission: "Intraday Commission",
+                                    deliveryBrokerCommission: "Delivery Broker Commission",
+                                    intradayBrokerCommission: "Intraday Broker Commission",
+                                  }[key]}
+                                  size="small"
+                                  type="number"
+                                  fullWidth
+                                  value={formData.marketOptions?.MCXFUT?.[key] || ""}
+                                  InputProps={key === "deliveryCommission" ? { readOnly: true } : {}}
+                                  onChange={
+                                    key === "deliveryCommission"
+                                      ? undefined
+                                      : (e) =>
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            marketOptions: {
+                                              ...prev.marketOptions,
+                                              MCXFUT: {
+                                                ...prev.marketOptions?.MCXFUT,
+                                                [key]: e.target.value,
+                                              },
+                                            },
+                                          }))
+                                  }
+                                />
+                              </Grid>
+                            )
+                          )}
+                        </Grid>
+                      </Grid>
+                    ))}
+                </Grid>
+              )}
+
+              {/* === Generic fields for other markets === */}
+              {mkt.market_type_name !== "MCXFUT" && config.fields?.map((field) => {
+                if (field.type === "group") {
+                  return (
+                    <div key={field.label} style={{ marginTop: "12px" }}>
+                      <strong>{field.label}</strong>
+                      {selectedBrokers.map((brokerId, brokerIndex) => {
+                        const brokerName = BrokerList.find((b) => b.broker_id === brokerId)?.broker_name || `Broker ${brokerIndex + 1}`;
+                        return (
+                          <div key={brokerId} style={{ marginLeft: "24px", marginTop: "8px" }}>
+                            <h4>{brokerName}</h4>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                              {field.children.map((child, childIndex) => {
+                                const isReadOnly = brokerIndex > 0 && childIndex < 2;
+                                const value = isReadOnly
+                                  ? formData.marketOptions?.[mkt.market_type_id]?.[`${field.children[childIndex].key}_${selectedBrokers[0]}`] || ""
+                                  : formData.marketOptions?.[mkt.market_type_id]?.[`${child.key}_${brokerId}`] || "";
+                                return (
+                                  <TextField
+                                    key={`${child.key}_${brokerId}`}
+                                    label={`${child.label} (${brokerName})`}
+                                    size="small"
+                                    type={child.type}
+                                    value={value}
+                                    InputProps={{ readOnly: isReadOnly }}
+                                    onChange={(e) => {
+                                      const newValue = e.target.value;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        marketOptions: {
+                                          ...prev.marketOptions,
+                                          [mkt.market_type_id]: {
+                                            ...prev.marketOptions?.[mkt.market_type_id],
+                                            [`${child.key}_${brokerId}`]: newValue,
+                                          },
+                                        },
+                                      }));
+                                    }}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                return (
+                  <TextField
+                    key={field.key}
+                    label={field.label}
+                    size="small"
+                    type={field.type}
+                    value={formData.marketOptions?.[mkt.market_type_id]?.[field.key] || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        marketOptions: {
+                          ...prev.marketOptions,
+                          [mkt.market_type_id]: {
+                            ...prev.marketOptions?.[mkt.market_type_id],
+                            [field.key]: value,
+                          },
+                        },
+                      }));
+                    }}
+                  />
+                );
+              })}
+
+              {/* Optional Brokerage dropdown */}
+              {config.hasBrokerageDropdown && (
+                <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                  <InputLabel>Brokerage Type</InputLabel>
+                  <Select
+                    value={formData.marketOptions?.[mkt.market_type_id]?.brokerageType || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        marketOptions: {
+                          ...prev.marketOptions,
+                          [mkt.market_type_id]: {
+                            ...prev.marketOptions?.[mkt.market_type_id],
+                            brokerageType: e.target.value,
+                          },
+                        },
+                      }))
+                    }
+                  >
+                    <MenuItem value="2">Percentage Wise</MenuItem>
+                    <MenuItem value="0">Lot Wise</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+
+              {/* Optional Script-wise checkbox */}
+              {config.hasScriptWiseCheckbox && (
+                <FormControlLabel
+                  control={<Checkbox size="small" />}
+                  label="Script Wise Value = 1"
+                  style={{ display: "block", marginTop: "12px" }}
+                />
+              )}
+
+         
+            </div>
+          )}
         </div>
-      )}
+      );
+    })}
+  </Grid>
+</Grid>
+
+
+    </div>
+  </>
+)}
 
 
       {/* Remarks */}
