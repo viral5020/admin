@@ -132,7 +132,7 @@ const OrderBook = () => {
       const data = await response.json();
 
       isMobile
-        ? isFilterChange
+        ? isFilterChange || currentPage === 0
           ? setOrders(data.aaData || [])
           : setOrders(prev => [...prev, ...data.aaData])
         : setOrders(data.aaData || []);
@@ -146,6 +146,15 @@ const OrderBook = () => {
     }
   };
 
+  function onFilterApply() {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+    toggleDrawer(false)();
+  }
+
+  useEffect(() => {
+    console.log('orders.length', orders.length);
+  }, [orders])
   // # Pagination useEffects
   useEffect(() => {
     fetchPageData();
@@ -322,8 +331,8 @@ const OrderBook = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={fetchPageData}
             userType={userType}
+            onApply={onFilterApply}
           />
         </Box>
       </Drawer>
@@ -350,7 +359,7 @@ const OrderBook = () => {
           client={client}
           master={master}
           broker={broker}
-          onApply={fetchPageData}
+          onApply={onFilterApply}
         />
       )}
 

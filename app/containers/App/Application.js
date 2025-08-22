@@ -45,7 +45,8 @@ import {
   RejectionLogs,
   Forex_order,
   Summary_report,
-  Forex_position
+  Forex_position,
+  TradeEditDeleteLog
 } from '../pageListAsync';
 import ProtectedRoute from './ProtectedRoute';
 import Forexsummary from '../Dashboard/Forexsummary';
@@ -96,6 +97,8 @@ function Application(props) {
           <Route path="dashboard/Master-Listing" element={<MasterList />} />
           <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
           <Route path="dashboard/Add-Account" element={<Addacount />} />
+
+          <Route path='dashboard/trade-edit-delete-log' element={userType !== 2 && (isForex || isStock) ? <TradeEditDeleteLog /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

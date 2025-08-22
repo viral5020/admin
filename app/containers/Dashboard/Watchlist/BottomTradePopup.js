@@ -14,27 +14,13 @@ import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
 import toast from 'react-hot-toast';
 import { roundToTwoIN } from '../helpers/utilFunc';
 
-// const marketOptions = ['NSE', 'BSE', 'MCX'];
 const marketOptions = [
     { label: "market", value: 0 },
     { label: "lot", value: 1 },
-    { label: "stock", value: 2 }
+    { label: "Stock Loss", value: 2 }
 ]
 
-const TabPanel = ({ children, value, index }) => {
-    if (value !== index) return null;
-    return (
-        <Box sx={{ p: 2 }}>
-            <Typography>{children}</Typography>
-        </Box>
-    );
-};
-
-function getTabIndex(val) {
-    return val === 'bid' ? 0 : 1;
-}
-
-const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
+const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, setTabIndex }) => {
     const [tradeType, setTradeType] = useState('BUY');
     const [market, setMarket] = useState(marketOptions[0].value);
     const [lot, setLot] = useState('');
@@ -43,7 +29,6 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
     const [isAllRequired, setIsAllRequired] = useState();
     const [client, setClient] = useState();
 
-    const [tabIndex, setTabIndex] = useState(getTabIndex(stockData?.field));
 
     const [userType, setUserType] = useState('');
 
@@ -61,19 +46,26 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
 
     useEffect(() => {
         // console.log('&&& stockData', stockData);
-        setTabIndex(getTabIndex(stockData?.field));
-    }, [Boolean(stockData)]) // will it work? stockData is prop and is object
+        !!stockData && resetAllState()
+        // : setTabIndex(getTabIndex(stockData?.field));
+    }, [Boolean(stockData)])
 
     useEffect(() => {
         // console.log('&&& stockData', stockData);
-    }, [stockData]) // will it work? stockData is prop and is object
+        // setPrice(tabIndex)
+    }, [stockData])
+
+    useEffect(() => {
+        // console.log('tabIndex', tabIndex);
+        market == 0 && (tabIndex === 0 ? setPrice(stockData?.bidRate) : setPrice(stockData?.askRate));
+    }, [tabIndex, stockData])
 
     const isBuy = tabIndex === 0;
 
     const Icon = stockData?.priceChange > 0 ? ArrowDropUpIcon : ArrowDropDownIcon;
 
     function isValuesValidate() {
-        if (market === '' || lot === '' || qty === '' || price === '') {
+        if (market === '' || lot === '' || qty === '' || (market != 0 && price === '')) {
             setIsAllRequired(true);
             return false;
         } else {
@@ -85,11 +77,14 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
     async function handleSubmit() {
         if (!isValuesValidate()) return;
         try {
-            const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex });
-            toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`);
+            const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex, client });
+            response.status === 'ok'
+                ? toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 })
+                : toast.error(`${response.message}.`, { duration: 15000 });
             resetAllState();
         } catch (error) {
             console.log('error', error)
+            toast.error(error.message || "Some error occured.");
         }
     }
 
@@ -277,28 +272,27 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
                             // backgroundColor: isBuy ? '#e8f5e9' : '#ffebee',
                         }}
                     >
-                        {userType != 1 && userType != 2 ?
-                            <Grid container spacing={1}>
-                                {/* Market Dropdown */}
-                                <Grid item xs={6}>
-                                    <TextField
-                                        select
-                                        label="Market"
-                                        fullWidth
-                                        margin="dense"
-                                        value={market}
-                                        onChange={(e) => setMarket(e.target.value)}
-                                        required
-                                    >
-                                        {marketOptions.map((opt) => (
-                                            <MenuItem key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
 
-                                {/* ClientMasterBrokerFilter */}
+                        <Grid container spacing={1}>
+                            {/* Market Dropdown */}
+                            <Grid item xs={6}>
+                                <TextField
+                                    select
+                                    label="Market"
+                                    fullWidth
+                                    margin="dense"
+                                    value={market}
+                                    onChange={(e) => setMarket(e.target.value)}
+                                    required
+                                >
+                                    {marketOptions.map((opt) => (
+                                        <MenuItem key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+                            {userType != 1 && userType != 2 &&
                                 <Grid item xs={6} sx={{
                                     ".mui-style-ltr-fseu8t-MuiGrid-root": {
                                         maxWidth: "100%",
@@ -314,22 +308,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile }) => {
                                         showMaster={false}
                                     />
                                 </Grid>
-                            </Grid>
-                            : <TextField
-                                select
-                                label="Market"
-                                fullWidth
-                                margin="dense"
-                                value={market}
-                                onChange={(e) => setMarket(e.target.value)}
-                                required
-                            >
-                                {marketOptions.map((opt) => (
-                                    <MenuItem key={opt.value} value={opt.value}>
-                                        {opt.label}
-                                    </MenuItem>
-                                ))}
-                            </TextField>}
+                            }
+                        </Grid>
 
 
                         {/* Inputs: Lot, Qty, Price */}

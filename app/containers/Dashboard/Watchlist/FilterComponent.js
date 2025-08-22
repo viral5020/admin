@@ -414,7 +414,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                     <Box sx={{ display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: 1 }}>
 
                         {isMobile && <FilterBtn setFilterOpen={setFilterOpen} icon='add' />}
-                        {isMobile && <FilterBtn />}
+                        {/* {isMobile && <FilterBtn />} */}
 
                         <TextField
                             label="Search"

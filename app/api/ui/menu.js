@@ -346,7 +346,7 @@ if (userType !== 2) {
         ? [{
           key: 'trade-edit-delete-log',
           name: 'Trade edit delete log',
-          // link: '/app/dashboard/trade-edit-delete-log',
+          link: '/app/dashboard/trade-edit-delete-log',
           icon: 'receipt-outline'
         }]
         : []),

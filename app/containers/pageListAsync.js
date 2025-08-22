@@ -84,6 +84,12 @@ export const Positions = loadable(() =>
   fallback: <Loading />,
 });
 
+// Utility
+export const TradeEditDeleteLog = loadable(() =>
+  import('./Dashboard/Utility/TradeEditDeleteLog'), {
+  fallback: <Loading />,
+});
+
 // Widgets
 export const Infographics = loadable(() =>
   import('./Widgets/Infographics'), {

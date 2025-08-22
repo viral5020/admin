@@ -27,16 +27,16 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
-import FilterBtn from './filters/FilterBtn';
-import { formatScriptIds } from './helpers/utilFunc';
+import TradeEditDeleteLogFilter from './TradeEditDeleteLogFilter';
+import FilterBtn from '../filters/FilterBtn';
+import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
-import Pagination from './filters/Pagination';
-import { editDeleteLogLogsAPI } from './API/API';
-import BackToTop from './helpers/BackToTop';
+import Pagination from '../filters/Pagination';
+import { tradeEditDeleteLogLogsAPI } from '../API/API';
+import BackToTop from '../helpers/BackToTop';
 
 
-const EditDeleteLogs = () => {
+const TradeEditDeleteLog = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -66,12 +66,13 @@ const EditDeleteLogs = () => {
 
     const [is_updated, setIs_updated] = useState(false);
     const [is_deleted, setIs_deleted] = useState(false);
+    const [isAdminOnly, setIsAdminOnly] = useState(false);
 
 
     const fetchLogs = async () => {
         setLoading(true);
         const scriptIds = formatScriptIds(script);
-        const result = await editDeleteLogLogsAPI(
+        const result = await tradeEditDeleteLogLogsAPI(
             currentPage,
             pageSize,
             searchText,
@@ -83,6 +84,7 @@ const EditDeleteLogs = () => {
             start_date,
             is_deleted,
             is_updated,
+            isAdminOnly,
         );
 
         const data = result.aaData || [];
@@ -155,6 +157,8 @@ const EditDeleteLogs = () => {
                         master={master}
                         setClient={setClient}
                         setMaster={setMaster}
+                        isAdminOnly={isAdminOnly}
+                        setIsAdminOnly={setIsAdminOnly}
                         onApply={onFilterApply}
                     />
 
@@ -222,7 +226,8 @@ const EditDeleteLogs = () => {
                             <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Log</TableCell>
+                                        <TableCell>Action</TableCell>
+                                        <TableCell>Client</TableCell>
                                         <TableCell>Script</TableCell>
                                         <TableCell>Type</TableCell>
                                         <TableCell>Qty (Lot)</TableCell>
@@ -245,6 +250,8 @@ const EditDeleteLogs = () => {
                                                         {log.log_type}
                                                     </span>
                                                 </TableCell>
+
+                                                <TableCell>{log.user_full_name}</TableCell>
 
                                                 <TableCell>
                                                     <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
@@ -329,6 +336,8 @@ const EditDeleteLogs = () => {
                                 master={master}
                                 setClient={setClient}
                                 setMaster={setMaster}
+                                isAdminOnly={isAdminOnly}
+                                setIsAdminOnly={setIsAdminOnly}
                                 onApply={onFilterApply}
                             />
                         </Box>
@@ -470,4 +479,4 @@ const EditDeleteLogs = () => {
     );
 };
 
-export default EditDeleteLogs;
+export default TradeEditDeleteLog;
