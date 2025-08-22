@@ -29,31 +29,32 @@ const TradeEditDeleteLogFilter = ({
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    size="small"
-                                    checked={is_updated}
-                                    onChange={(e) => setIs_updated(e.target.checked)}
-                                />
-                            }
-                            label="Update"
-                            sx={{ mr: 2, ml: 0.5 }}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    size="small"
-                                    checked={is_deleted}
-                                    onChange={(e) => setIs_deleted(e.target.checked)}
-                                />
-                            }
-                            label="Delete"
-                        />
-                    </FormGroup>
-                </Grid>
+                {setIs_deleted && is_deleted && setIs_updated && is_updated &&
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        checked={is_updated}
+                                        onChange={(e) => setIs_updated(e.target.checked)}
+                                    />
+                                }
+                                label="Update"
+                                sx={{ mr: 2, ml: 0.5 }}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        checked={is_deleted}
+                                        onChange={(e) => setIs_deleted(e.target.checked)}
+                                    />
+                                }
+                                label="Delete"
+                            />
+                        </FormGroup>
+                    </Grid>}
 
                 <DateFilter
                     label="Trade After"
@@ -119,7 +120,7 @@ const TradeEditDeleteLogFilter = ({
                     </Button>
                 </Grid>
 
-            </Grid>
+            </Grid >
         </>
     )
 }
