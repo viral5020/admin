@@ -16107,7 +16107,70 @@ const dummy = {
     // "lastChangedAt": "2025-08-13 06:18:17"
 }
 
-
+const rrrrr = {
+    "status": "ok",
+    "is_unmatched": false,
+    "message": "Placed Successfully",
+    "data": [],
+    "nse_margin": "348110950000 / 1,000,000,000,000",
+    "mcx_margin": "94826315000000 / 100,000,000,000,000",
+    "nseopt_margin": "9392378599990 / 10,000,000,000,000",
+    "nseeqt_margin": "99998970000000 / 100,000,000,000,000",
+    "global_margin": "94935959700003 / 100,000,000,000,000",
+    "forex_margin": "479975269000 / 1,000,000,000,000",
+    "comex_margin": " / 1,000,000,000,000",
+    "cricket_margin": "0 / 0",
+    "product_name": "SILVER 05SEP2025",
+    "trade_type": "Buy",
+    "quantity": 0,
+    "trade_qty": 30,
+    "trade_rate": 112531,
+    "script_name": "SILVER 05SEP2025",
+    "is_bulk_trading": false,
+    "bData": {},
+    "concerned": [
+        "37946",
+        "1",
+        "0",
+        "0",
+        "0"
+    ],
+    "trade": {
+        "device": 1,
+        "datetime": "19:07:13",
+        "client_name": "DEMO DEV 3 (949391) </br>/ Demo master nnn",
+        "market_type_id": 1,
+        "script_name": "SILVER 05SEP2025",
+        "trade_type": "Market Buy",
+        "trade_type2": "Buy",
+        "trade_lot": "1.00",
+        "trade_qty": "30",
+        "trade_rate": "112,531.00",
+        "trade_id": 31532434,
+        "product": "SILVER-I",
+        "user_id": "41297",
+        "trade_qty1": 30,
+        "trade_rate1": 112531,
+        "concerned_users": [
+            1,
+            41297,
+            37946
+        ],
+        "alert_percentage": 90,
+        "user_auto_square_up": 0,
+        "apply_square_up_limit": 0,
+        "is_alert": 1,
+        "market_type": "MCXFUT",
+        "trade_rate_2": "112,531.00 (112,531.00)",
+        "trade_ip": null,
+        "trade_type3": "Executed",
+        "trade_type4": "Market Buy",
+        "trade_time": "2025-08-20 19:07:13",
+        "trade_matchedtime": "2025-08-20 19:07:13",
+        "net_rate": "112,531.00",
+        "isForex": 0
+    }
+}
 
 
 // POSITION > RADIO BTN WANT TO UNSELECT RADIO BTN > ITS STYLING
@@ -16131,4 +16194,18 @@ const dummy = {
 // mine:
 // filters and pagination
 // market script client broker master search api calls on every re-rending onf page
-// api function should run only when its parameter changes otherwise return previous response 
+// api function should run only when its parameter changes otherwise return previous response
+
+
+
+
+// datatables/trade_log_view
+// market_type_id
+// script_id
+// user_id
+// master_user_id
+// start_date
+// end_date
+// is_deleted
+// is_updated
+// is_admin

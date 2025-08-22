@@ -110,7 +110,7 @@ const Forex_order = () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-    const result = await fetchforexOrdersAPI({
+    const data = await fetchforexOrdersAPI({
       userId: dataStored.user_id,
       authKey: dataStored.auth_key,
       filterType,
@@ -129,11 +129,26 @@ const Forex_order = () => {
     });
 
     // setTotalPages(result?.iTotalRecords ? Math.ceil(result.iTotalRecords / rowsPerPage) : 0);
-    setOrders(result?.aaData);
-    setTotalRecords(result?.iTotalRecords || 0);
-    setLoading(false);
+    isMobile
+      ? isFilterChange || currentPage === 0
+        ? setOrders(data.aaData || [])
+        : setOrders(prev => [...prev, ...data.aaData])
+      : setOrders(data.aaData || []);
+
+    setTotalRecords(data?.iTotalRecords || 0);
     setIsFilterChange(false);
+    setLoading(false);
   };
+
+  function onFilterApply() {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+    toggleDrawer(false)();
+  }
+
+  useEffect(() => {
+    console.log('orders.length', orders.length);
+  }, [orders])
 
   // # Pagination useEffects
   useEffect(() => {
@@ -311,10 +326,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={() => {
-              fetchPageData();
-              toggleDrawer(false)();
-            }}
+            onApply={onFilterApply}
           />
         </Box>
 
@@ -344,7 +356,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
-            onApply={() => fetchPageData()}
+            onApply={onFilterApply}
           />
 
         </>

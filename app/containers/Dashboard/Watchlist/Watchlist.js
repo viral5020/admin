@@ -29,7 +29,7 @@ import { useTheme } from '@mui/material/styles';
 import MarketPlaceWIdget from 'dan-components/Widget/MarketPlaceWIdget';
 import MobileStockTable from './MobileStockTable';
 import { Navigate, useLocation } from 'react-router-dom';
-import BackToTop from '../BackToTop';
+import BackToTop from '../helpers/BackToTop';
 import { favouriteActionAPI, getForexWatchListDataAPI, getWatchListDataAPI, removeMarketWatchAPI } from '../API/API';
 import { TableBody, TableHead } from 'mui-datatables';
 import useStylesCx from '../../../components/Tables/tableStyle-jss';
@@ -450,6 +450,7 @@ function Watchlist() {
   const socket = socketContext.socket;
   // console.log('socket', socket);
   const [buySellPopup, setBuySellPopup] = useState(null);
+  const [tabIndex, setTabIndex] = useState(null);
 
   useEffect(() => {
     // console.log('!!! dummyData', dummyData);
@@ -461,9 +462,11 @@ function Watchlist() {
 
   function handleBidAskClick(dataArray, columnName) {
     if (columnName === 'bidRate') {
-      setBuySellPopup({ ...dataArray, field: 'bid' });
+      setBuySellPopup({ ...dataArray });
+      setTabIndex(0);
     } else if (columnName === 'askRate') {
-      setBuySellPopup({ ...dataArray, field: 'ask' });
+      setBuySellPopup({ ...dataArray });
+      setTabIndex(1);
     }
   }
 
@@ -588,7 +591,7 @@ function Watchlist() {
         priceChange: dataItem.PriceChange !== undefined ? dataItem.PriceChange : "0",
         priceChangePercent: dataItem.PriceChangePercentage !== undefined ? dataItem.PriceChangePercentage : "0",
         ltp: dataItem.LastTradePrice != undefined ? dataItem.LastTradePrice : "0",
-        qty: coinItem.quantity != undefined ? coinItem.quantity : "0",
+        quantity: coinItem.quantity != undefined ? coinItem.quantity : "0",
         market_watch_id: coinItem.market_watch_id,
         script_expiry_id: coinItem.script_expiry_id,
         script_id: coinItem.script_id,
@@ -812,8 +815,6 @@ function Watchlist() {
               </AccordionSummary>
               <AccordionDetails>
                 {isMobile ?
-                  // <WithOneAction/>
-                  // <MobileStockTableFlexCss
                   <MobileStockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
@@ -828,7 +829,9 @@ function Watchlist() {
                     handleStar={handleStar}
                     setRemoveMarket={setRemoveMarket}
                   />
-                  : <StockTable
+
+                  :
+                  <StockTable
                     searchText={searchText}
                     setIsStockOpen={setIsStockOpen}
                     setDummyData={setDummyData}
@@ -927,10 +930,15 @@ function Watchlist() {
 
       <BottomTradePopup
         open={Boolean(buySellPopup)}
-        onClose={() => setBuySellPopup(null)}
+        onClose={() => {
+          setTabIndex(null);
+          setBuySellPopup(null);
+        }}
         stockData={buySellPopup}
         showToast={showToast}
         isMobile={isMobile}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
       />
     </>
   );

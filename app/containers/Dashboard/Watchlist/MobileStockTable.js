@@ -327,8 +327,7 @@ const MobileStockTable = ({
                                         variant="body2"
                                         fontWeight={500}
                                     >
-                                        {isSmallMobile ? 'Q : ' : 'Qty : '}{stock?.quantity?.toLocaleString('en-IN')}
-                                        {/* {roundToTwoIN(stock?.quantity)} */}
+                                        {isSmallMobile ? 'Q : ' : 'Qty : '} {stock?.quantity}
                                     </Typography>
 
                                     <Typography sx={{ fontSize: '0.84rem' }}>{time}</Typography>

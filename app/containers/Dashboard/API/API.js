@@ -1030,17 +1030,18 @@ export const tradePlaceAPI = async (dataObj) => {
   const defaultParams = await getDefaultParams();
   const payload = {
     ...defaultParams,
+    device_type: 0,
+
     market_type_id: dataObj.market_type_id,
-    script_id: dataObj.id,
+    script_id: dataObj.script_id,
     script_expiry_id: dataObj.script_expiry_id,
     trade_rate: dataObj.price,
     trade_qty: dataObj.qty,
     trade_lot: dataObj.lot,
-    trade_type: dataObj.market, // market, lot ,.. > market price has value and disablabled
+    trade_type: dataObj.market, // market, lot ,stock loss.. > market price has value and disablabled
     trade_type_x: dataObj.tradeType, // buy sell
-    check_script_name: dataObj.script_name,
-    // user_id: , // or pass as `params.user_id`  ERROR: IF DOESN'T SEND IT THEN GIVE ERROR IN POST MAN
-    device_type: 0,
+    check_script_name: dataObj.script_expiry_type ? `${dataObj.script_name}-${dataObj.script_expiry_type}` : dataObj.script_name, // HOW THIS SHOULD BE SET
+    user_id: dataObj.client.id
   };
   console.log('payload', payload);
 
@@ -1267,5 +1268,96 @@ export const fetchBrokerlistingAPI = async (
   } catch (error) {
     console.error("Failed to fetch  list:", error);
     return [];
+  }
+};
+
+// utility function for API call
+export const tradeEditDeleteLogLogsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/trade_log_view.php", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const editDeleteLogLogsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/trade_log_view.php", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
   }
 };
