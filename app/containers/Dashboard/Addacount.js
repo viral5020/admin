@@ -9,8 +9,15 @@ import {
   TextField,
   Typography,
   Divider,
+  Grid,
+  FormControl,
+  InputLabel,
+  IconButton,
 } from "@mui/material";
 import axios from "axios";
+import { RadioGroup } from "@mui/material";
+import { Radio } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function AddAccountForm() {
   const [formData, setFormData] = useState({
@@ -18,15 +25,14 @@ export default function AddAccountForm() {
     name: "",
     password: "",
     remarks: "",
-    userLevel: [], // selected user level ids
-    marketType: [], // selected market type ids
-    // extra fields used in UI/payload
+    userLevel: [], 
+    marketType: [], 
+     brokerName: [],
     partnership: "",
     shortTradeAvoid: "",
-    freshLimitAllowed: null, // "yes" | "no" | null
-    // defaults and per-market/script options
+    freshLimitAllowed: null, 
+   
     defaultOptions: {
-      // keys: minPctComm, maxPctComm, minLotComm, maxLotComm, marginLimit, nextMarginLimit
       minPctComm: "",
       maxPctComm: "",
       minLotComm: "",
@@ -34,9 +40,8 @@ export default function AddAccountForm() {
       marginLimit: false,
       nextMarginLimit: false,
     },
-    marketOptions: {}, // keyed by market_type_id or script id depending on API response
-    accountTypes: [], // optional; fallback to userLevel if left empty
-    // balance & limits that may be required by API
+    marketOptions: {}, 
+    accountTypes: [], 
     openingBalance: 0,
     balanceType: 0,
     nseLimit: "",
@@ -47,16 +52,73 @@ export default function AddAccountForm() {
     mcxLimit_max: "",
   });
 
-  const [userLevels, setUserLevels] = useState([]); // fetched list
-  const [marketTypes, setMarketTypes] = useState([]); // fetched list (may include scripts)
+  const [userLevels, setUserLevels] = useState([]); 
+  const [marketTypes, setMarketTypes] = useState([]); 
+  const [Mcxscript, setMcxscript] = useState([]);
+  const [BrokerList, setBrokerList] = useState([]);
 
-  // Basic generic handler
+  const [errors, setErrors] = useState({});
+
+   const [open, setOpen] = useState(false);
+
+  const validateForm = () => {
+  let newErrors = {};
+
+  if (!formData.userType) newErrors.userType = "User type is required";
+  if (!formData.name) newErrors.name = "Name is required";
+  if (!formData.password) newErrors.password = "Password is required";
+  if (!formData.partnership) newErrors.partnership = "Partnership is required";
+if (!formData.shortTradeAvoid) newErrors.shortTradeAvoid = "Short trade avoid time is required";
+if (!formData.userLevel || formData.userLevel.length === 0) {
+  newErrors.userLevel = "Please select at least one user level";
+}
+if (!formData.freshLimitAllowed || formData.freshLimitAllowed.length === 0) {
+  newErrors.freshLimitAllowed = "Fresh Limit Allowed is required";
+}
+
+ if (!formData.marketType || formData.marketType.length === 0) {
+    newErrors.marketType = "Please select at least one market type";
+  }
+
+  // 2. Check fields for each selected market
+  formData.marketType.forEach((marketId) => {
+    const mkt = marketTypes.find((m) => m.market_type_id === marketId);
+    const opts = formData.marketOptions?.[marketId] || {};
+
+    if (mkt?.market_type_name === "MCXFUT") {
+      ["marginLimit", "nextMarginLimit", "minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].forEach((field) => {
+        if (!opts[field]) {
+          newErrors[`market_${marketId}_${field}`] = `${field} is required`;
+        }
+      });
+    } 
+    else if (mkt?.market_type_name === "BINARY") {
+      ["MarginLimit", "NextMarginLimit"].forEach((field) => {
+        if (!opts[field]) {
+          newErrors[`market_${marketId}_${field}`] = `${field} is required`;
+        }
+      });
+    } 
+    else if (["NSEFUT", "NSEOPT", "NSEEQT", "NSECDS", "MCXFUT","GLOBAL FUTURES", "FOREX","CRICKET","BINARY", "COMEX"].includes(mkt?.market_type_name)) {
+      ["marginLimit", "nextMarginLimit", "minLotBrokerage", "maxLotBrokerage"].forEach((field) => {
+        if (!opts[field]) {
+          newErrors[`market_${marketId}_${field}`] = `${field} is required`;
+        }
+      });
+    }
+  });
+
+  setErrors(newErrors);
+
+  return Object.keys(newErrors).length === 0; // true if no errors
+};
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Checkbox handler for arrays (userLevel, marketType, accountTypes, etc.)
   const handleCheckboxChange = (type, id) => {
     setFormData((prev) => {
       const current = prev[type] || [];
@@ -66,9 +128,156 @@ export default function AddAccountForm() {
     });
   };
 
-  // Fetch user levels & market types when userType === "3"
+const marketConfig = {
+  NSEFUT: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Percentage Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  NSEOPT: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Lot Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  NSEEQT: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Percentage Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  NSECDS: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Lot Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  "GLOBAL FUTURES": {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Percentage Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  FOREX: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Lot Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  COMEX: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+      {
+        label: "NSE Option (Lot Wise)",
+        type: "group",
+        children: [
+          { key: "deliveryCommission", label: "Delivery Commission", type: "number" },
+          { key: "intradayCommission", label: "Intraday Commission", type: "number" },
+          { key: "deliveryBrokerCommission", label: "Delivery Broker Commission", type: "number" },
+          { key: "deliveryIntradayCommission", label: "Delivery Intraday Commission", type: "number" },
+        ],
+      },
+    ],
+    hasBrokerCheckbox: true,
+  },
+
+  BINARY: {
+    fields: [
+      { key: "nseMarginLimit", label: "NSE Margin Limit", type: "number" },
+      { key: "nseScriptLimit", label: "NSE Script Limit", type: "number" },
+    ],
+    hasBrokerCheckbox: false,
+  },
+
+  MCXFUT: {
+    fields: [
+      { key: "marginLimit", label: "Margin Limit", type: "number" },
+      { key: "scriptLimit", label: "Script Limit", type: "number" },
+    ],
+    // hasBrokerageDropdown: true, // Brokerage Type (Lot Wise / Percentage Wise)
+    // hasScriptWiseCheckbox: true, // Script Wise Value = 1
+    hasMcxScripts: true,         // Fetch MCX Scripts
+  },
+};
+
+
+
   useEffect(() => {
-    if (formData.userType === "3") {
+    if (formData.userType === "3" || formData.userType === "1") {
       const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
       const payload = {
         is_app: 1,
@@ -84,217 +293,309 @@ export default function AddAccountForm() {
         )
         .then((res) => {
           if (res.data) {
-            // store whatever API returns
             setUserLevels(res.data.user_level || []);
             setMarketTypes(res.data.market_type || []);
+            setMcxscript(res.data.mcx_script || []);
+            setBrokerList(res.data.broker_list || []);
           }
         })
         .catch((err) => console.error("API Error:", err));
     } else {
-      // clear fetched lists when not master
       setUserLevels([]);
       setMarketTypes([]);
+       setMcxscript([]);
+       setBrokerList([]);
     }
   }, [formData.userType]);
   
 
-  // Initialize marketOptions when marketTypes change (or if defaultOptions change we propagate)
-  useEffect(() => {
-    if (!Array.isArray(marketTypes)) return;
 
-    // Build keys:
-    // - If marketTypes item includes a 'scripts' array, create entries per script (keyed by script id)
-    // - Otherwise create an entry keyed by market_type_id
-    const newMarketOptions = { ...formData.marketOptions };
+ // ✅ Initialize marketOptions based on mcxscript + defaultOptions
+useEffect(() => {
+  if (!Array.isArray(Mcxscript)) return;
 
-    marketTypes.forEach((mkt) => {
-      if (Array.isArray(mkt.scripts) && mkt.scripts.length > 0) {
-        // mkt.scripts may contain objects; derive a string id for each
-        mkt.scripts.forEach((sc) => {
-          // robust key detection (fallback to string conversion)
-          const scriptId =
-            (sc && (sc.script || sc.script_id || sc.id || sc.market_type_id)) ||
-            sc ||
-            null;
-          const key = String(scriptId);
-          if (!newMarketOptions[key]) {
-            newMarketOptions[key] = {
-              minPctComm: formData.defaultOptions?.minPctComm || "",
-              maxPctComm: formData.defaultOptions?.maxPctComm || "",
-              minLotComm: formData.defaultOptions?.minLotComm || "",
-              maxLotComm: formData.defaultOptions?.maxLotComm || "",
-              marginLimit: formData.defaultOptions?.marginLimit || false,
-              nextMarginLimit: formData.defaultOptions?.nextMarginLimit || false,
-            };
-          }
-        });
-      } else {
-        // fallback to market_type_id as a key
-        const key = String(mkt.market_type_id);
-        if (!newMarketOptions[key]) {
-          newMarketOptions[key] = {
-            minPctComm: formData.defaultOptions?.minPctComm || "",
-            maxPctComm: formData.defaultOptions?.maxPctComm || "",
-            minLotComm: formData.defaultOptions?.minLotComm || "",
-            maxLotComm: formData.defaultOptions?.maxLotComm || "",
-            marginLimit: formData.defaultOptions?.marginLimit || false,
-            nextMarginLimit: formData.defaultOptions?.nextMarginLimit || false,
-          };
-        }
-      }
-    });
+  const updatedOptions = Mcxscript.reduce((acc, sc) => {
+    const key = String(sc.script_id);
 
-    setFormData((prev) => ({ ...prev, marketOptions: newMarketOptions }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketTypes]);
+    acc[key] = {
+      // keep old values if any
+      ...formData.marketOptions?.[key],
 
-  // When defaultOptions change, propagate values to existing marketOptions keys (but don't overwrite other custom fields)
-  useEffect(() => {
-    const keys = Object.keys(formData.marketOptions || {});
-    if (keys.length === 0) return;
-
-    setFormData((prev) => {
-      const updated = { ...prev.marketOptions };
-      keys.forEach((k) => {
-        updated[k] = {
-          ...updated[k],
-          minPctComm:
-            prev.defaultOptions?.minPctComm !== "" ? prev.defaultOptions.minPctComm : updated[k].minPctComm,
-          maxPctComm:
-            prev.defaultOptions?.maxPctComm !== "" ? prev.defaultOptions.maxPctComm : updated[k].maxPctComm,
-          minLotComm:
-            prev.defaultOptions?.minLotComm !== "" ? prev.defaultOptions.minLotComm : updated[k].minLotComm,
-          maxLotComm:
-            prev.defaultOptions?.maxLotComm !== "" ? prev.defaultOptions.maxLotComm : updated[k].maxLotComm,
-          marginLimit: prev.defaultOptions?.marginLimit ?? updated[k].marginLimit,
-          nextMarginLimit: prev.defaultOptions?.nextMarginLimit ?? updated[k].nextMarginLimit,
-        };
-      });
-      return { ...prev, marketOptions: updated };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.defaultOptions.minPctComm, formData.defaultOptions.maxPctComm, formData.defaultOptions.minLotComm, formData.defaultOptions.maxLotComm, formData.defaultOptions.marginLimit, formData.defaultOptions.nextMarginLimit]);
-
-    {/* Automatically populate MCX fields when component mounts or defaults change */}
-  {useEffect(() => {
-    if (!marketTypes) return;
-
-    const updatedMarketOptions = marketTypes.reduce((acc, mkt) => {
-      acc[mkt.market_type_id] = {
-        minPctComm: formData.defaultOptions?.minPctComm || "",
-        maxPctComm: formData.defaultOptions?.maxPctComm || "",
-        minLotComm: formData.defaultOptions?.minLotComm || "",
-        maxLotComm: formData.defaultOptions?.maxLotComm || "",
-        ...formData.marketOptions?.[mkt.market_type_id],
-      };
-      return acc;
-    }, {});
-
-    setFormData((prev) => ({ ...prev, marketOptions: updatedMarketOptions }));
-  }, [formData.defaultOptions, marketTypes])}
-  // helper to update a specific market/script option
-  const handleMarketOptionChange = (key, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      marketOptions: {
-        ...prev.marketOptions,
-        [key]: { ...prev.marketOptions?.[key], [field]: value },
-      },
-    }));
-  };
-
-  // Build the API payload from formData
-  const buildPayload = () => {
-    const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    // markets array: convert ids to strings (API sample shows strings)
-    const markets = (formData.marketType || []).map(String);
-
-    // accountTypes fallback to selected userLevel if not explicitly provided
-    const accountTypes =
-      (formData.accountTypes && formData.accountTypes.length > 0)
-        ? formData.accountTypes.map(String)
-        : (formData.userLevel || []).map(String);
-
-    // Build mcxScripts:
-    // Two approaches:
-    // 1) If marketTypes contains an item named "MCXFUT" with a scripts array, use that scripts array to build entries
-    // 2) Otherwise, fallback to keys in marketOptions (which we initialized earlier)
-    const mcxScripts = [];
-
-    // find MCX market entry (if exists)
-    const mcxMarket = (marketTypes || []).find(
-      (m) => String(m.market_type_name).toUpperCase() === "MCXFUT"
-    );
-
-    if (mcxMarket && Array.isArray(mcxMarket.scripts) && mcxMarket.scripts.length > 0) {
-      mcxMarket.scripts.forEach((sc) => {
-        const scriptId =
-          (sc && (sc.script || sc.script_id || sc.id || sc.market_type_id)) ||
-          sc ||
-          null;
-        const key = String(scriptId);
-        const opts = formData.marketOptions?.[key] || {};
-        // Map to API naming: percentComm, percentCommMax, lotComm, lotCommMax
-        mcxScripts.push({
-          script: key,
-          percentComm: parseFloat(opts.minPctComm || 0) || 0,
-          percentCommMax: parseFloat(opts.maxPctComm || 0) || 0,
-          lotComm: parseFloat(opts.minLotComm || 0) || 0,
-          lotCommMax: parseFloat(opts.maxLotComm || 0) || 0,
-        });
-      });
-    } else {
-      // fallback: use keys in marketOptions (only include numeric-like keys to avoid picking up non-script keys)
-      Object.keys(formData.marketOptions || {}).forEach((key) => {
-        // optionally filter keys that are selected markets
-        const opts = formData.marketOptions[key];
-        if (!opts) return;
-        mcxScripts.push({
-          script: String(key),
-          percentComm: parseFloat(opts.minPctComm || 0) || 0,
-          percentCommMax: parseFloat(opts.maxPctComm || 0) || 0,
-          lotComm: parseFloat(opts.minLotComm || 0) || 0,
-          lotCommMax: parseFloat(opts.maxLotComm || 0) || 0,
-        });
-      });
-    }
-
-    const payload = {
-      // session/auth fields (many endpoints expect them)
-      is_app: 1,
-      login_user_id: dataStored?.user_id,
-      auth_key: dataStored?.auth_key,
-
-      // main data fields as requested
-      userType: Number(formData.userType) || 0,
-      name: formData.name || "",
-      password: formData.password || "",
-      openingBalance: Number(formData.openingBalance) || 0,
-      balanceType: Number(formData.balanceType) || 0,
-      remarks: formData.remarks || "",
-      freshLimitAllowed: formData.freshLimitAllowed === "yes" ? 1 : 0,
-      short_trade_minutes: Number(formData.shortTradeAvoid) || 0,
-      partnershipPercentage: Number(formData.partnership) || 0,
-      partnershipType: Number(formData.partnershipType) || 0,
-      markets: markets,
-      accountTypes: accountTypes,
-      nseLimit: Number(formData.nseLimit) || 0,
-      nseLimit_max: Number(formData.nseLimit_max) || 0,
-      nseMinPercentWise: parseFloat(formData.nseMinPercentWise || 0) || 0,
-      nseMaxPercentWise: parseFloat(formData.nseMaxPercentWise || 0) || 0,
-      mcxLimit: Number(formData.mcxLimit) || 0,
-      mcxLimit_max: Number(formData.mcxLimit_max) || 0,
-      // mcxScripts built above
-      mcxScripts: mcxScripts,
+      // fallback to defaultOptions if not set
+      minPctComm: formData.marketOptions?.[key]?.minPctComm ?? formData.defaultOptions?.minPctComm ?? "",
+      maxPctComm: formData.marketOptions?.[key]?.maxPctComm ?? formData.defaultOptions?.maxPctComm ?? "",
+      minLotComm: formData.marketOptions?.[key]?.minLotComm ?? formData.defaultOptions?.minLotComm ?? "",
+      maxLotComm: formData.marketOptions?.[key]?.maxLotComm ?? formData.defaultOptions?.maxLotComm ?? "",
+      marginLimit: formData.marketOptions?.[key]?.marginLimit ?? formData.defaultOptions?.marginLimit ?? "",
+      nextMarginLimit: formData.marketOptions?.[key]?.nextMarginLimit ?? formData.defaultOptions?.nextMarginLimit ?? "",
     };
 
-    return payload;
+    return acc;
+  }, {});
+
+  setFormData((prev) => ({ ...prev, marketOptions: updatedOptions }));
+}, [Mcxscript, formData.defaultOptions]);
+
+useEffect(() => {
+  if (!Array.isArray(Mcxscript) || Mcxscript.length === 0) return;
+
+  setFormData((prev) => {
+    const updated = { ...prev.marketOptions };
+
+    Mcxscript.forEach((sc) => {
+      const key = String(
+        sc?.script_id || sc?.id || sc?.script || sc?.market_type_id
+      );
+
+      updated[key] = {
+        ...updated[key], // preserve user changes if already typed
+
+        // Always pull defaults if available, else keep old, else blank
+        minPctComm:
+          prev.defaultOptions?.minPctComm ??
+          updated[key]?.minPctComm ??
+          "",
+        maxPctComm:
+          prev.defaultOptions?.maxPctComm ??
+          updated[key]?.maxPctComm ??
+          "",
+        minLotComm:
+          prev.defaultOptions?.minLotComm ??
+          updated[key]?.minLotComm ??
+          "",
+        maxLotComm:
+          prev.defaultOptions?.maxLotComm ??
+          updated[key]?.maxLotComm ??
+          "",
+        marginLimit:
+          prev.defaultOptions?.marginLimit ??
+          updated[key]?.marginLimit ??
+          false,
+        nextMarginLimit:
+          prev.defaultOptions?.nextMarginLimit ??
+          updated[key]?.nextMarginLimit ??
+          false,
+      };
+    });
+
+    return { ...prev, marketOptions: updated };
+  });
+}, [
+  Mcxscript,
+  formData.defaultOptions?.minPctComm,
+  formData.defaultOptions?.maxPctComm,
+  formData.defaultOptions?.minLotComm,
+  formData.defaultOptions?.maxLotComm,
+  formData.defaultOptions?.marginLimit,
+  formData.defaultOptions?.nextMarginLimit,
+]);
+
+
+
+  // useEffect(() => {
+  //   const keys = Object.keys(formData.marketOptions || {});
+  //   if (keys.length === 0) return;
+
+  //   setFormData((prev) => {
+  //     const updated = { ...prev.marketOptions };
+  //     keys.forEach((k) => {
+  //       updated[k] = {
+  //         ...updated[k],
+  //         minPctComm:
+  //           prev.defaultOptions?.minPctComm !== "" ? prev.defaultOptions.minPctComm : updated[k].minPctComm,
+  //         maxPctComm:
+  //           prev.defaultOptions?.maxPctComm !== "" ? prev.defaultOptions.maxPctComm : updated[k].maxPctComm,
+  //         minLotComm:
+  //           prev.defaultOptions?.minLotComm !== "" ? prev.defaultOptions.minLotComm : updated[k].minLotComm,
+  //         maxLotComm:
+  //           prev.defaultOptions?.maxLotComm !== "" ? prev.defaultOptions.maxLotComm : updated[k].maxLotComm,
+  //         marginLimit: prev.defaultOptions?.marginLimit ?? updated[k].marginLimit,
+  //         nextMarginLimit: prev.defaultOptions?.nextMarginLimit ?? updated[k].nextMarginLimit,
+  //       };
+  //     });
+  //     return { ...prev, marketOptions: updated };
+  //   });
+  // }, [formData.defaultOptions.minPctComm, formData.defaultOptions.maxPctComm, formData.defaultOptions.minLotComm, formData.defaultOptions.maxLotComm, formData.defaultOptions.marginLimit, formData.defaultOptions.nextMarginLimit]);
+  
+  // {useEffect(() => {
+  //   if (!marketTypes) return;
+
+  //   const updatedMarketOptions = marketTypes.reduce((acc, mkt) => {
+  //     acc[mkt.market_type_id] = {
+  //       minPctComm: formData.defaultOptions?.minPctComm || "",
+  //       maxPctComm: formData.defaultOptions?.maxPctComm || "",
+  //       minLotComm: formData.defaultOptions?.minLotComm || "",
+  //       maxLotComm: formData.defaultOptions?.maxLotComm || "",
+  //       ...formData.marketOptions?.[mkt.market_type_id],
+  //     };
+  //     return acc;
+  //   }, {});
+
+  //   setFormData((prev) => ({ ...prev, marketOptions: updatedMarketOptions }));
+  // }, [formData.defaultOptions, marketTypes])}
+
+ const handleMarketOptionChange = (key, field, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    marketOptions: {
+      ...prev.marketOptions,
+      [key]: { ...prev.marketOptions?.[key], [field]: value },
+    },
+  }));
+};
+
+
+const buildPayload = () => {
+  const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+  const numOrZero = (v) =>
+    v !== "" && v !== null && v !== undefined ? Number(v) : 0;
+
+  // 🔑 Map backend field prefixes
+  const marketKeyMap = {
+    NSEFUT: "nse",
+    NSECASH: "nseCash",
+    BSEFUT: "bse",
+    FOREX: "forex",
+    BINARY: "binary",
+    CRICKET: "cricket",
+    MCXFUT: "mcx", // but mcx has special script logic
+    // add more if backend expects different prefixes
   };
+
+  const payload = {
+    is_app: 1,
+    login_user_id: dataStored?.user_id,
+    auth_key: dataStored?.auth_key,
+    freshLimitAllowed: formData.freshLimitAllowed === "yes" ? 1 : 0,
+  };
+
+  // ---------- General User Fields ----------
+  if ("userType" in formData) payload.userType = numOrZero(formData.userType);
+  if ("name" in formData) payload.name = formData.name || "";
+  if ("password" in formData) payload.password = formData.password || "";
+  if ("openingBalance" in formData) payload.openingBalance = numOrZero(formData.openingBalance);
+  if ("balanceType" in formData) payload.balanceType = numOrZero(formData.balanceType);
+  if ("remarks" in formData) payload.remarks = formData.remarks || "";
+  if ("shortTradeAvoid" in formData) payload.short_trade_minutes = numOrZero(formData.shortTradeAvoid);
+  if ("partnership" in formData) payload.partnershipPercentage = numOrZero(formData.partnership);
+  if ("partnershipType" in formData) payload.partnershipType = numOrZero(formData.partnershipType);
+
+  // ---------- Dropdown Fields ----------
+  if (formData.marketType?.length)
+    payload.markets = formData.marketType.map(String);
+
+  if (formData.accountTypes?.length || formData.userLevel?.length) {
+    payload.accountTypes = (formData.accountTypes?.length
+      ? formData.accountTypes
+      : formData.userLevel
+    ).map(String);
+  }
+
+  // ---------- Market Specific Handling ----------
+  const mcxScripts = [];
+
+  (formData.marketType || []).forEach((mktId) => {
+    const opts = formData.marketOptions?.[mktId] || {};
+    const mkt = marketTypes.find((m) => m.market_type_id === mktId);
+    if (!mkt) return;
+
+    const prefix = marketKeyMap[mkt.market_type_name];
+
+ switch (mkt.market_type_name) {
+  case "MCXFUT":
+    // Top-level MCX limits
+    if ("marginLimit" in opts)
+      payload.mcxLimit = numOrZero(opts.marginLimit);
+    if ("nextMarginLimit" in opts)
+      payload.mcxLimit_max = numOrZero(opts.nextMarginLimit);
+
+    // Commission % wise
+    if ("minLotBrokerage" in opts)
+      payload.mcxMinPercentWise = numOrZero(opts.minLotBrokerage);
+    if ("maxLotBrokerage" in opts)
+      payload.mcxMaxPercentWise = numOrZero(opts.maxLotBrokerage);
+
+    // Per-script commissions
+    (Mcxscript || []).forEach((sc) => {
+      const scOpts = formData.marketOptions?.[sc.script_id] || {};
+      mcxScripts.push({
+        script: String(sc.script_id),
+        percentComm: numOrZero(scOpts.minPctComm ?? formData.defaultOptions?.minPctComm),
+        percentCommMax: numOrZero(scOpts.maxPctComm ?? formData.defaultOptions?.maxPctComm),
+        lotComm: numOrZero(scOpts.minLotComm ?? formData.defaultOptions?.minLotComm),
+        lotCommMax: numOrZero(scOpts.maxLotComm ?? formData.defaultOptions?.maxLotComm),
+      });
+    });
+    break;
+
+  case "NSEFUT":
+  case "NSECASH":
+  case "BSEFUT":
+  case "GLOBAL":
+  case "FOREX":
+  case "COMEX":
+    if ("marginLimit" in opts)
+      payload[`${prefix}Limit`] = numOrZero(opts.marginLimit);
+    if ("nextMarginLimit" in opts)
+      payload[`${prefix}Limit_max`] = numOrZero(opts.nextMarginLimit);
+
+    // Commission % wise
+    if ("minLotBrokerage" in opts)
+      payload[`${prefix}MinPercentWise`] = numOrZero(opts.minLotBrokerage);
+    if ("maxLotBrokerage" in opts)
+      payload[`${prefix}MaxPercentWise`] = numOrZero(opts.maxLotBrokerage);
+    break;
+
+  case "BINARY":
+    if ("MarginLimit" in opts)
+      payload[`${prefix}Limit`] = numOrZero(opts.MarginLimit);
+    if ("NextMarginLimit" in opts)
+      payload[`${prefix}Limit_max`] = numOrZero(opts.NextMarginLimit);
+
+    // Commission % wise
+    if ("minLotBrokerage" in opts)
+      payload[`${prefix}MinPercentWise`] = numOrZero(opts.minLotBrokerage);
+    if ("maxLotBrokerage" in opts)
+      payload[`${prefix}MaxPercentWise`] = numOrZero(opts.maxLotBrokerage);
+    break;
+
+  case "CRICKET":
+    payload[`${prefix}Limit`] =
+      opts.casinoAllowed !== undefined ? (opts.casinoAllowed ? 1 : 0) : null;
+    break;
+
+  default:
+    if (!prefix) return;
+    if ("marginLimit" in opts)
+      payload[`${prefix}Limit`] = numOrZero(opts.marginLimit);
+    if ("nextMarginLimit" in opts)
+      payload[`${prefix}Limit_max`] = numOrZero(opts.nextMarginLimit);
+
+    // Default → lot wise commission
+    if ("minLotBrokerage" in opts)
+      payload[`${prefix}MinLotWise`] = numOrZero(opts.minLotBrokerage);
+    if ("maxLotBrokerage" in opts)
+      payload[`${prefix}MaxLotWise`] = numOrZero(opts.maxLotBrokerage);
+    break;
+}
+
+
+  });
+
+  if (mcxScripts.length) payload.mcxScripts = mcxScripts;
+
+  return payload;
+};
 
   // Form submit
   const handleSubmit = (e) => {
     e.preventDefault();
+
+      if (!validateForm()) {
+    console.log("Validation failed:", errors);
+    return; // stop API call
+  }
     const payload = buildPayload();
     console.log("Payload to send:", payload);
 
@@ -312,9 +613,9 @@ export default function AddAccountForm() {
       });
   };
 
-  // helper render: show per-market/script commission fields for MCXFUT (mirrors your previous UI)
+
   const renderMcxSection = (mkt) => {
-    // We'll render either per-script fields if scripts exist; otherwise render single group
+   
     if (Array.isArray(mkt.scripts) && mkt.scripts.length > 0) {
       return mkt.scripts.map((sc) => {
         const scriptId =
@@ -413,102 +714,120 @@ export default function AddAccountForm() {
         Basic Details
       </Typography>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        {/* User Type */}
-        <div>
-          <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>User Type</Typography>
-          <Select
-            name="userType"
-            value={formData.userType}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            displayEmpty
-          >
-            <MenuItem value="">
-              <em>Select Type</em>
-            </MenuItem>
-            <MenuItem value="1">User</MenuItem>
-            <MenuItem value="2">Broker</MenuItem>
-            <MenuItem value="3">Master</MenuItem>
-          </Select>
-        </div>
+  <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "12px",
+    marginBottom: "16px",
+  }}
+>
+  {/* User Type */}
+  <div>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>User Type</Typography>
+    <Select
+      name="userType"
+      value={formData.userType}
+      onChange={handleChange}
+      fullWidth
+      size="small"
+      displayEmpty
+      error={!!errors.userType} // show red border if error
+    >
+      <MenuItem value="">
+        <em>Select Type</em>
+      </MenuItem>
+      <MenuItem value="1">User</MenuItem>
+      <MenuItem value="2">Broker</MenuItem>
+      <MenuItem value="3">Master</MenuItem>
+    </Select>
+    {errors.userType && (
+      <Typography color="error" sx={{ fontSize: "0.75rem" }}>
+        {errors.userType}
+      </Typography>
+    )}
+  </div>
 
-        {/* Name */}
-        <div>
-          <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Name</Typography>
-          <TextField
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter Name"
-            fullWidth
-            size="small"
-          />
-        </div>
+  {/* Name */}
+  <div>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Name</Typography>
+    <TextField
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      placeholder="Enter Name"
+      fullWidth
+      size="small"
+      error={!!errors.name}
+      helperText={errors.name}
+    />
+  </div>
 
-        {/* Password */}
-        <div>
-          <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Password</Typography>
-          <TextField
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter Password"
-            fullWidth
-            size="small"
-          />
-        </div>
-      </div>
+  {/* Password */}
+  <div>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Password</Typography>
+    <TextField
+      type="password"
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      placeholder="Enter Password"
+      fullWidth
+      size="small"
+      error={!!errors.password}
+      helperText={errors.password}
+    />
+  </div>
+</div>
+
 
       {/* Master Options */}
      {formData.userType === "3" && (
   <>
     {/* Partnership + Short Trade */}
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "12px",
-        marginBottom: "16px",
-      }}
-    >
-      <div>
-        <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
-          Partnership (%)
-        </Typography>
-        <TextField
-          name="partnership"
-          value={formData.partnership || ""}
-          onChange={handleChange}
-          placeholder="Enter %"
-          fullWidth
-          size="small"
-        />
-      </div>
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "12px",
+    marginBottom: "16px",
+  }}
+>
+  {/* Partnership (%) */}
+  <div>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
+      Partnership (%)
+    </Typography>
+    <TextField
+      name="partnership"
+      value={formData.partnership || ""}
+      onChange={handleChange}
+      placeholder="Enter %"
+      fullWidth
+      size="small"
+      error={!!errors.partnership}
+      helperText={errors.partnership}
+    />
+  </div>
 
-      <div>
-        <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
-          Short Trade Avoid
-        </Typography>
-        <TextField
-          name="shortTradeAvoid"
-          value={formData.shortTradeAvoid || ""}
-          onChange={handleChange}
-          placeholder="Enter Minutes"
-          fullWidth
-          size="small"
-        />
-      </div>
-    </div>
+  {/* Short Trade Avoid */}
+  <div>
+    <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
+      Short Trade Avoid
+    </Typography>
+    <TextField
+      name="shortTradeAvoid"
+      value={formData.shortTradeAvoid || ""}
+      onChange={handleChange}
+      placeholder="Enter Minutes"
+      fullWidth
+      size="small"
+      error={!!errors.shortTradeAvoid}
+      helperText={errors.shortTradeAvoid}
+    />
+  </div>
+</div>
+
 
     <Divider sx={{ mb: 2 }} />
 
@@ -542,6 +861,9 @@ export default function AddAccountForm() {
         label="No"
       />
     </FormGroup>
+     <Typography color="error" sx={{ fontSize: "0.75rem", mt: -1, mb: 1 }}>
+    {errors.freshLimitAllowed}
+  </Typography>
 
     <Divider sx={{ mb: 2 }} />
 
@@ -549,29 +871,50 @@ export default function AddAccountForm() {
     <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
       User Level
     </Typography>
-    <FormGroup
-      row
-      sx={{
-        mb: 2,
-        "& .MuiFormControlLabel-root": { mr: 3, minWidth: "160px" },
-      }}
-    >
-      {userLevels.map((lvl) => (
-        <FormControlLabel
-          key={lvl.user_level_id}
-          control={
-            <Checkbox
-              size="small"
-              checked={formData.userLevel.includes(lvl.user_level_id)}
-              onChange={() =>
-                handleCheckboxChange("userLevel", lvl.user_level_id)
-              }
-            />
-          }
-          label={lvl.user_level_name}
-        />
-      ))}
-    </FormGroup>
+        <FormControl fullWidth size="small">
+      <InputLabel>User Level</InputLabel>
+      <Select
+        value={formData.userLevel || ""}
+        onChange={(e) => setFormData({ ...formData, userLevel: e.target.value })}
+         multiple // optional, if you want multi-select
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              width: 300, // dropdown width
+              maxHeight: 250,
+              p: 1,
+            },
+          },
+        }}
+      >
+        {/* Close Button on top */}
+        {/* <MenuItem
+          disabled
+          sx={{ justifyContent: "flex-end", minHeight: "32px", pt: 0 }}
+        >
+          <IconButton
+            size="small"
+            onClick={() => setOpen(false)}
+            sx={{ ml: "auto", mr: 0 }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </MenuItem> */}
+
+        {userLevels.map((lvl) => (
+          <MenuItem key={lvl.user_level_id} value={lvl.user_level_id}>
+            {lvl.user_level_name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    {errors.userLevel && (
+  <Typography color="error" sx={{ fontSize: "0.75rem", mt: -1, mb: 1 }}>
+    {errors.userLevel}
+  </Typography>
+)}
 
     <Divider sx={{ mb: 2 }} />
 
@@ -604,116 +947,104 @@ export default function AddAccountForm() {
         <>
           {/* -------------------- MCXFUT -------------------- */}
           {mkt.market_type_name === "MCXFUT" ? (
-<>
-  {/* Top checkboxes */}
-  <FormGroup
-    row
-    sx={{
-      ml: 4,
-      mt: 1,
-      "& .MuiFormControlLabel-root": { mr: 3, minWidth: "200px" },
-    }}
-  >
-    <FormControlLabel
-      control={
-        <Checkbox
-          size="small"
-          checked={formData.defaultOptions?.marginLimit || false}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              defaultOptions: {
-                ...formData.defaultOptions,
-                marginLimit: e.target.checked,
-              },
-            })
-          }
-        />
-      }
-      label="Margin Limit"
-    />
-    <FormControlLabel
-      control={
-        <Checkbox
-          size="small"
-          checked={formData.defaultOptions?.nextMarginLimit || false}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              defaultOptions: {
-                ...formData.defaultOptions,
-                nextMarginLimit: e.target.checked,
-              },
-            })
-          }
-        />
-      }
-      label="Next Margin Limit"
-    />
-  </FormGroup>
+            <>
+              <div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
+                <TextField
+                  label="Margin Limit"
+                  size="small"
+                  type="number"
+                  value={formData.defaultOptions?.marginLimit || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      defaultOptions: {
+                        ...formData.defaultOptions,
+                        marginLimit: e.target.value,  // keep as string for input
+                      },
+                    })
+                  }
+                />
 
-  {/* Default commission text fields */}
-  <div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
-    {["minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].map((key) => (
-      <TextField
-        key={key}
-        label={`Default ${key}`}
-        size="small"
-        value={formData.defaultOptions?.[key] || ""}
-        onChange={(e) => {
-          const value = e.target.value;
-          setFormData((prev) => ({
-            ...prev,
-            defaultOptions: { ...prev.defaultOptions, [key]: value },
-            // Apply to all MCX items
-            marketOptions: prev.marketTypes?.reduce((acc, mkt) => {
-              acc[mkt.market_type_id] = {
-                ...prev.marketOptions?.[mkt.market_type_id],
-                [key]: value,
-              };
-              return acc;
-            }, {}),
-          }));
-        }}
-      />
-    ))}
-  </div>
+<TextField
+  label="Next Margin Limit"
+  size="small"
+  type="number"
+  value={formData.defaultOptions?.nextMarginLimit || ""}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      defaultOptions: {
+        ...formData.defaultOptions,
+        nextMarginLimit: e.target.value,
+      },
+    })
+  }
+/>
 
-  {/* MCX Checkboxes + individual text fields */}
-  {marketTypes.map((mcx) => (
-    <div key={mcx.market_type_id} style={{ marginLeft: "32px", marginTop: "12px" }}>
-      <FormControlLabel
-        control={<Checkbox size="small" checked disabled />}
-        label={mcx.market_type_name}
-      />
+              </div>
 
-      {/* MCX commission fields */}
-      <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
-        {["minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].map((key) => (
-          <TextField
-            key={key}
-            label={key}
-            size="small"
-            value={formData.marketOptions?.[mcx.market_type_id]?.[key] || ""}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                marketOptions: {
-                  ...prev.marketOptions,
-                  [mcx.market_type_id]: {
-                    ...prev.marketOptions?.[mcx.market_type_id],
-                    [key]: e.target.value,
-                  },
-                },
-              }))
-            }
-          />
-        ))}
-      </div>
-    </div>
-  ))}
-</>
 
+              {/* Default commission text fields */}
+              <div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
+                {["minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].map((key) => (
+                  <TextField
+                    key={key}
+                    label={`Default ${key}`}
+                    size="small"
+                    value={formData.defaultOptions?.[key] || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        defaultOptions: { ...prev.defaultOptions, [key]: value },
+                        // Apply to all MCX scripts instead of market types
+                        marketOptions: prev.mcxscript?.reduce((acc, script) => {
+                          acc[script.script_id] = {
+                            ...prev.marketOptions?.[script.script_id],
+                            [key]: value,
+                          };
+                          return acc;
+                        }, {}),
+                      }));
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* MCX script checkboxes + individual text fields */}
+              {Mcxscript.map((script) => (
+                <div key={script.script_id} style={{ marginLeft: "32px", marginTop: "12px" }}>
+                  <FormControlLabel
+                    control={<Checkbox size="small" checked={script.selected} disabled />}
+                    label={script.script_name}
+                  />
+
+                  {/* Commission fields per script */}
+                  <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
+                    {["minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].map((key) => (
+                      <TextField
+                        key={key}
+                        label={key}
+                        size="small"
+                        value={formData.marketOptions?.[script.script_id]?.[key] || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            marketOptions: {
+                              ...prev.marketOptions,
+                              [script.script_id]: {
+                                ...prev.marketOptions?.[script.script_id],
+                                [key]: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
           ) : mkt.market_type_name === "CRICKET" ? (
             /* -------------------- Cricket -------------------- */
             <FormGroup
@@ -790,29 +1121,33 @@ export default function AddAccountForm() {
           ) : (
             /* -------------------- Default Markets -------------------- */
            
-<div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
-  {["marginLimit", "nextMarginLimit", "minLotBrokerage", "maxLotBrokerage"].map((key) => (
-    <TextField
-      key={key}
-      label={key.replace(/([A-Z])/g, " $1")} // Adds space before capital letters
-      size="small"
-      value={formData.marketOptions?.[mkt.market_type_id]?.[key] || ""}
-      onChange={(e) => {
-        const value = e.target.value;
-        setFormData((prev) => ({
-          ...prev,
-          marketOptions: {
-            ...prev.marketOptions,
-            [mkt.market_type_id]: {
-              ...prev.marketOptions?.[mkt.market_type_id],
-              [key]: value,
-            },
-          },
-        }));
-      }}
-    />
-  ))}
-</div>
+                  <div style={{ display: "flex", gap: "12px", marginLeft: "32px", marginTop: "12px" }}>
+                    {["marginLimit", "nextMarginLimit", "minLotBrokerage", "maxLotBrokerage"].map((key) => (
+                      <TextField
+                        key={key}
+                        label={key.replace(/([A-Z])/g, " $1")} // Adds space before capital letters
+                        size="small"
+                        type="number"
+                        value={formData.marketOptions?.[mkt.market_type_id]?.[key] ?? ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            marketOptions: {
+                              ...prev.marketOptions,
+                              [mkt.market_type_id]: {
+                                ...prev.marketOptions?.[mkt.market_type_id],
+                                [key]: value === "" ? "" : Number(value), // ✅ convert to number
+                              },
+                            },
+                          }));
+                        }}
+                         error={!!errors[`market_${mkt.market_type_id}_${key}`]}
+    helperText={errors[`market_${mkt.market_type_id}_${key}`]}
+                      />
+                    ))}
+
+                  </div>
 
 
           )}
@@ -823,9 +1158,71 @@ export default function AddAccountForm() {
 })}
 
 
+{errors.marketType && (
+  <Typography color="error" sx={{ fontSize: "0.75rem", mt: -1, mb: 1 }}>
+    {errors.marketType}
+  </Typography>
+)}
+
     <Divider sx={{ mb: 2 }} />
   </>
 )}
+
+      {/* Broker Options */}
+     {formData.userType === "2" && (
+  <>
+    <Divider sx={{ mb: 2 }} />
+  </>
+)}
+
+{/* User Options */}
+ {formData.userType === "1" && (
+        <div>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            User Options
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <Typography>Order Outside of High Low</Typography>
+                <RadioGroup
+                  row
+                  value={formData.orderOutsideHighLow}
+                  onChange={(e) => handleChange("orderOutsideHighLow", e.target.value)}
+                >
+                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <Typography>Apply Auto Square</Typography>
+                <RadioGroup
+                  row
+                  value={formData.applyAutoSquare}
+                  onChange={(e) => handleChange("applyAutoSquare", e.target.value)}
+                >
+                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Close Alert Margin"
+                value={formData.closeAlertMargin}
+                onChange={(e) => handleChange("closeAlertMargin", e.target.value)}
+              />
+            </Grid>
+          </Grid>
+        </div>
+      )}
+
 
       {/* Remarks */}
       <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>Remarks</Typography>
