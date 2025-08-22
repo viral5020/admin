@@ -29,7 +29,7 @@ const TradeEditDeleteLogFilter = ({
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
-                {setIs_deleted && is_deleted && setIs_updated && is_updated &&
+                {setIs_deleted && setIs_updated &&
                     <Grid item xs={12} sm={6} md={3} lg={2.4}>
                         <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
                             <FormControlLabel
@@ -69,7 +69,7 @@ const TradeEditDeleteLogFilter = ({
                 />
 
 
-                {market && script && setScript && setMarket &&
+                {setScript && setMarket &&
                     <MarketScriptNameFilter
                         market={market}
                         script={script}
@@ -77,7 +77,7 @@ const TradeEditDeleteLogFilter = ({
                         setMarket={setMarket}
                     />}
 
-                {client && master && setClient && setMaster &&
+                {setClient && setMaster &&
                     <ClientMasterBrokerFilter
                         client={client}
                         master={master}
@@ -86,7 +86,7 @@ const TradeEditDeleteLogFilter = ({
                         showBroker={false}
                     />}
 
-                {isAdminOnly && setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                {setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <FormControlLabel
                         control={
                             <Checkbox
