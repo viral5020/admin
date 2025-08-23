@@ -8,7 +8,7 @@ import { forex_comex_market } from '../helpers/utilFunc';
 import axiosInstance from '../API/axiosconfig';
 
 
-const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScriptMultiSelect = false, isForex }) => {
+const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScriptMultiSelect = false, isForex, showMarket = true, showScript = true }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
@@ -91,7 +91,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
   return (
     <>
       {/* (5) Market Name */}
-      <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      {showMarket && <Grid item xs={12} sm={6} md={3} lg={2.4}>
         <Autocomplete
           options={marketOptions}
           getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
@@ -133,9 +133,9 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
           }}
         />
       </Grid>
-
+      }
       {/* (6) Script Name */}
-      <Grid item xs={12} sm={6} md={3} lg={2.4} position={'relative'}>
+      {showScript && <Grid item xs={12} sm={6} md={3} lg={2.4} position={'relative'}>
         {/* <Tooltip
           arrow
           title={isScriptNameDisable
@@ -229,7 +229,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
           }}
         />
         {/* </Tooltip> */}
-      </Grid>
+      </Grid>}
 
     </>
   )

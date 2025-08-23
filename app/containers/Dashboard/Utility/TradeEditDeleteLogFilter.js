@@ -75,8 +75,10 @@ const TradeEditDeleteLogFilter = ({
                     <MarketScriptNameFilter
                         market={market}
                         script={script}
-                        setScript={setScript}
                         setMarket={setMarket}
+                        setScript={setScript}
+                        showMarket={Boolean(setMarket)}
+                        showScript={Boolean(setScript)}
                     />}
 
                 <ClientMasterBrokerFilter
