@@ -70,16 +70,14 @@ const TradeEditDeleteLogFilter = ({
                     onChange={setEnd_date}
                 />
 
-
-                {setScript && setMarket &&
-                    <MarketScriptNameFilter
-                        market={market}
-                        script={script}
-                        setMarket={setMarket}
-                        setScript={setScript}
-                        showMarket={Boolean(setMarket)}
-                        showScript={Boolean(setScript)}
-                    />}
+                <MarketScriptNameFilter
+                    market={market}
+                    script={script}
+                    setMarket={setMarket}
+                    setScript={setScript}
+                    showMarket={Boolean(setMarket)}
+                    showScript={Boolean(setScript)}
+                />
 
                 <ClientMasterBrokerFilter
                     client={client}
