@@ -86,9 +86,10 @@ const TradeEditDeleteLogFilter = ({
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
-                    showBroker={Boolean(setClient)}
-                    showClient={Boolean(setMaster)}
-                    showMaster={Boolean(setBroker)}
+
+                    showClient={Boolean(setClient)}
+                    showBroker={Boolean(setBroker)}
+                    showMaster={Boolean(setMaster)}
                 />
 
                 {setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
