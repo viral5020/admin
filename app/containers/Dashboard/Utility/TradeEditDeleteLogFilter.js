@@ -19,8 +19,10 @@ const TradeEditDeleteLogFilter = ({
     setMarket,
     client,
     master,
+    broker,
     setClient,
     setMaster,
+    setBroker,
     isAdminOnly,
     setIsAdminOnly,
     onApply
@@ -77,14 +79,17 @@ const TradeEditDeleteLogFilter = ({
                         setMarket={setMarket}
                     />}
 
-                {setClient && setMaster &&
-                    <ClientMasterBrokerFilter
-                        client={client}
-                        master={master}
-                        setClient={setClient}
-                        setMaster={setMaster}
-                        showBroker={false}
-                    />}
+                <ClientMasterBrokerFilter
+                    client={client}
+                    master={master}
+                    broker={broker}
+                    setClient={setClient}
+                    setMaster={setMaster}
+                    setBroker={setBroker}
+                    showBroker={Boolean(setClient)}
+                    showClient={Boolean(setMaster)}
+                    showMaster={Boolean(setBroker)}
+                />
 
                 {setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <FormControlLabel
