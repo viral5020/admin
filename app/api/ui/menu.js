@@ -326,7 +326,7 @@ if (userType !== 2) {
     name: 'Utility',
     // icon: 'ion-ios-swap-outline',
     child: [
-      ...(userType !== 1 && (isForex || isStock) || true
+      ...(userType !== 1 && (isForex || isStock) 
         ? [{
           key: 'bulk-trading',
           name: 'Bulk trading',
@@ -334,7 +334,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && userType !== 1 || true
+      ...(userType !== 2 && userType !== 1 
         ? [{
           key: 'bill-filter',
           name: 'Bill filter',
@@ -342,7 +342,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && (isForex || isStock) || true
+      ...(userType !== 2 && (isForex || isStock) 
         ? [{
           key: 'trade-edit-delete-log',
           name: 'Trade edit delete log',
@@ -350,7 +350,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...((userType === 4 || userType === 5) && (isForex || isStock) || true
+      ...((userType === 4 || userType === 5) && (isForex || isStock) 
         ? [{
           key: 'trade-edit-delete-log-old',
           name: 'Trade edit delete log old',
@@ -358,7 +358,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 3 || userType === 4 || userType === 5 || true
+      ...(userType === 3 || userType === 4 || userType === 5 
         ? [{
           key: 'user-edit-log',
           name: 'User edit log',
@@ -366,7 +366,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && userType !== 1 || true
+      ...(userType !== 2 && userType !== 1 
         ? [{
           key: 'ip-address-log',
           name: 'IP address log',
@@ -374,7 +374,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 4 && userType === 5 || true
+      ...(userType === 4 && userType === 5 
         ? [{
           key: 'admin-login-list',
           name: 'Admin login list',
@@ -382,7 +382,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 3 || userType === 4 || userType === 5 || true
+      ...( userType === 4 || userType === 5 
         ? [{
           key: 'cash-edit-delete-log',
           name: 'Cash edit delete log',
@@ -390,7 +390,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) || true
+      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
         ? [{
           key: 'auto-square-up-log',
           name: 'Auto Square Up log',
@@ -398,7 +398,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) || true
+      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) 
         ? [{
           key: 'cross-trade-log',
           name: 'Cross trade log',
@@ -406,7 +406,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && (isForex || isStock) || true
+      ...(userType !== 2 && (isForex || isStock) 
         ? [{
           key: 'rejection-log',
           name: 'Rejection log',
@@ -414,7 +414,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 4 || userType === 5 || true
+      ...(userType === 4 || userType === 5 
         ? [{
           key: 'valan',
           name: 'Valan',
@@ -422,9 +422,34 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
+           ...(userType === 1 
+        ? [{
+          key: 'ledger',
+          name: 'Ledger',
+          link: '/app/ledger',
+          icon: 'time-outline'
+        }]
+        : []),
+             ...(userType === 3 
+        ? [{
+          key: 'ledger',
+          name: 'Ledger Report',
+          link: '/app/ledger-report',
+          icon: 'time-outline'
+        }]
+        : []),
+             ...(userType !== 2 && userType !== 1  
+        ? [{
+          key: 'ledger',
+          name: 'Cash Ledger',
+          link: '/app/Cash-ledger',
+          icon: 'time-outline'
+        }]
+        : []),
     ]
   });
 }
+
 
 // bulk tradind 1 na ho to dekhega and is stock or is forex
 // bill filter 1 and 2 nai to dikhega
@@ -440,19 +465,12 @@ if (userType !== 2) {
 // rejection log is forex or is stock and 2 an ho to
 // valan 4 or 5 ho to dihega
 
-menu.push({
-  key: 'ledger',
-  name: 'Ledger',
-  link: '/app/ledger',
-  icon: 'time-outline'
-});
-
-menu.push({
-  key: 'editDeleteLogs',
-  name: 'Edit Delete',
-  link: '/app/dashboard/edit-Delete-Logs',
-  icon: 'create-outline'
-});
+// menu.push({
+//   key: 'editDeleteLogs',
+//   name: 'Edit Delete',
+//   link: '/app/dashboard/edit-Delete-Logs',
+//   icon: 'create-outline'
+// });
 
 // userType !== 2 && menu.push({
 //   key: 'editDeleteLogs',
@@ -467,6 +485,7 @@ userType !== 2 && menu.push({
   link: '/app/dashboard/Banned-scripts',
   icon: 'ban-outline'
 });
+
 
 menu.push({
   key: 'Rejection Logs',

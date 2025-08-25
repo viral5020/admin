@@ -60,8 +60,8 @@ const UserListFilter = ({
         {/* Login & Trade Dates */}
         <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />
         <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />
-        <DateFilter label={forMaster || forBroker ? 'Join After' : 'Trade After'} value={tradeAfter} onChange={setTradeAfter} />
-        <DateFilter label={forMaster || forBroker ? 'Join Before' : 'Trade Before'} value={tradeBefore} onChange={setTradeBefore} />
+        <DateFilter label={forMaster || forBroker ? 'Join After' : 'Join After'} value={tradeAfter} onChange={setTradeAfter} />
+        <DateFilter label={forMaster || forBroker ? 'Join Before' : 'Join Before'} value={tradeBefore} onChange={setTradeBefore} />
 
         {/* Client / Master / Broker */}
         <ClientMasterBrokerFilter

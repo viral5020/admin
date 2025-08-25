@@ -59,6 +59,7 @@ const Billfilter = () => {
     const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
+    const [broker, setBroker] = useState('');
     const [end_date, setEnd_date] = useState('');
     const [start_date, setStart_date] = useState('');
     const [is_updated, setIs_updated] = useState(false);
@@ -197,8 +198,10 @@ const Billfilter = () => {
                         setMarket={setMarket}
                         client={client}
                         master={master}
+                         broker={broker}
                         setClient={setClient}
                         setMaster={setMaster}
+                        setBroker={setBroker}
                         onApply={onFilterApply}
                     />
 
@@ -337,8 +340,10 @@ const Billfilter = () => {
                                     setMarket={setMarket}
                                     client={client}
                                     master={master}
+                                     broker={broker}
                                     setClient={setClient}
                                     setMaster={setMaster}
+                                     setBroker={setBroker}
                                     onApply={onFilterApply}
                                 />
                             </Box>

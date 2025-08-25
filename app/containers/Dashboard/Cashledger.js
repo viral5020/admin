@@ -24,6 +24,9 @@ import {
     Checkbox,
     Drawer,
     IconButton,
+    FormControl,
+    InputLabel,
+    Select,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,12 +35,12 @@ import Pagination from './filters/Pagination';
 import FilterBtn from './filters/FilterBtn';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
-import { ipaddresslogAPI, tradeAutosquareofAPI, tradeEditDeleteLogLogsAPI } from './API/API';
+import { cashledgerAPI, ipaddresslogAPI, tradeAutosquareofAPI, tradeEditDeleteLogLogsAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 
 
 
-const Iplistlog = () => {
+const Cashledger = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -64,10 +67,21 @@ const Iplistlog = () => {
 
     const [end_date, setEnd_date] = useState('');
     const [start_date, setStart_date] = useState('');
+    const [entry_date, setentry_date] = useState('');
+    const [entrybefore_date, setentrybefore_date] = useState('');
 
     const [is_updated, setIs_updated] = useState(false);
     const [is_deleted, setIs_deleted] = useState(false);
     const [isAdminOnly, setIsAdminOnly] = useState(false);
+
+     const [selectedUserRole, setSelectedUserRole] = useState("");
+     const [secondDropdownValue, setSecondDropdownValue] = useState("");
+
+      const secondDropdownOptions = {
+    user: ["User Option 1", "User Option 2"],
+    broker: ["Broker Option 1", "Broker Option 2"],
+    master: ["Master Option 1", "Master Option 2"],
+  };
 
 
    const fetchLogs = async () => {
@@ -76,7 +90,7 @@ const Iplistlog = () => {
 
     const scriptIds = formatScriptIds?.(script);
 
-    const result = await ipaddresslogAPI(
+    const result = await cashledgerAPI(
       currentPage,
       pageSize,
       searchText,
@@ -155,12 +169,62 @@ const Iplistlog = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: 2,              // space between the two dropdowns
+                            flexWrap: "wrap",    // wrap on smaller screens
+                            alignItems: "center",
+                            mb: 3,               // margin-bottom for spacing from next content
+                            width: "100%",       // take full width
+                        }}
+                    >
+                        {/* First dropdown: User Role */}
+                        <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
+                            <InputLabel id="user-role-label">Select User</InputLabel>
+                            <Select
+                                labelId="user-role-label"
+                                value={selectedUserRole}
+                                label="Select User"
+                                onChange={(e) => {
+                                    setSelectedUserRole(e.target.value);
+                                    setSecondDropdownValue(""); // reset second dropdown when first changes
+                                }}
+                            >
+                                <MenuItem value="user">User</MenuItem>
+                                <MenuItem value="broker">Broker</MenuItem>
+                                <MenuItem value="master">Master</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        {/* Second dropdown: Dynamic Label */}
+                        <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
+                            <InputLabel id="second-dropdown-label">
+                                {selectedUserRole ? `Select ${selectedUserRole}` : "Select Option"}
+                            </InputLabel>
+                            <Select
+                                labelId="second-dropdown-label"
+                                value={secondDropdownValue}
+                                label={selectedUserRole ? `Select ${selectedUserRole}` : "Select Option"}
+                                onChange={(e) => setSecondDropdownValue(e.target.value)}
+                                disabled={!selectedUserRole}
+                            >
+                                {(secondDropdownOptions[selectedUserRole] || []).map((opt, idx) => (
+                                    <MenuItem key={idx} value={opt}>
+                                        {opt}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+
                     <TradeEditDeleteLogFilter    
-                                start_date={start_date}
-                                setStart_date={setStart_date}
+                                entry_date={entry_date}
+                                setentry_date={setentry_date} 
+                                entrybefore_date={entrybefore_date}
+                                setentrybefore_date={setentrybefore_date}
                                 onApply={onFilterApply}
                             />
-
 
                     <Box
                         sx={{
@@ -204,28 +268,49 @@ const Iplistlog = () => {
                                 <Table stickyHeader size="small">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Trade Ip Address</TableCell>
-                                            <TableCell>User Count</TableCell>
-                                            <TableCell>Trades</TableCell>
-                                            <TableCell>Start Date</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>Date</TableCell>
+                                            <TableCell>Debit</TableCell>
+                                            <TableCell>Credit</TableCell>
+                                            <TableCell>Remark</TableCell>
+                                            <TableCell>Action</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((log, i) => (
                                             <TableRow key={i}>
-                                                <TableCell>{log?.trade_ip_address ?? "-"}</TableCell>
+                                                <TableCell>{log?.user ?? "-"}</TableCell>
                                                 <TableCell>
-                                                    <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
+                                                    <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
                                                 </TableCell>
-                                                <TableCell>{log?.trades ?? "-"}</TableCell>
-                                                <TableCell>{log?.start_date ?? "-"}</TableCell>
+                                                <TableCell>{log?.debit ?? "-"}</TableCell>
+                                                <TableCell>{log?.credit ?? "-"}</TableCell>
+                                                <TableCell>{log?.remark ?? "-"}</TableCell>
+                                                <TableCell>
+                                                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="error"
+                                                            sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </Box>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-
-
 
                         {/* Pagination Controls */}
                         <Pagination
@@ -258,10 +343,11 @@ const Iplistlog = () => {
                                 <Typography variant="h6">Filters</Typography>
                                 <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                             </Box>
-                            <TradeEditDeleteLogFilter
-                               
-                                start_date={start_date}
-                                setStart_date={setStart_date}
+                            <TradeEditDeleteLogFilter    
+                                entry_date={entry_date}
+                                setentry_date={setentry_date} 
+                                entrybefore_date={entrybefore_date}
+                                setentrybefore_date={setentrybefore_date}
                                 onApply={onFilterApply}
                             />
                         </Box>
@@ -313,26 +399,53 @@ const Iplistlog = () => {
                                       boxShadow: "none",
                                     }}
                                   >
-                                    <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-                                      {/* All in one line */}
-                                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
-                                          {log?.trade_ip_address ?? "-"}
-                                        </Typography>
+                                   <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+  {/* First row */}
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+    <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
+      {log?.user ?? "-"}
+    </Typography>
 
-                                        <Typography variant="body2" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
-                                          User Count: <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
-                                        </Typography>
+    <Typography variant="body2" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
+      <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
+    </Typography>
 
-                                        <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-                                          {log?.trades ?? "-"}
-                                        </Typography>
+    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+      Debit: {log?.debit ?? "-"}
+    </Typography>
 
-                                        <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-                                          {log?.start_date ?? "-"}
-                                        </Typography>
-                                      </Box>
-                                    </CardContent>
+    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+      Credit: {log?.credit ?? "-"}
+    </Typography>
+  </Box>
+
+  {/* Second row */}
+  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 0.5 }}>
+    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+      {log?.remark ?? "-"}
+    </Typography>
+
+    <Box sx={{ display: "flex", gap: 0.5 }}>
+      <Button 
+        size="small" 
+        variant="outlined" 
+        color="primary"
+        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+      >
+        Edit
+      </Button>
+      <Button 
+        size="small" 
+        variant="outlined" 
+        color="error"
+        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+      >
+        Delete
+      </Button>
+    </Box>
+  </Box>
+</CardContent>
+
                                   </Card>
                                 ))}
 
@@ -362,5 +475,4 @@ const Iplistlog = () => {
 };
 
 
-
-export default Iplistlog
+export default Cashledger

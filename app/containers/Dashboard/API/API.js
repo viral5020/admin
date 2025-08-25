@@ -1411,6 +1411,51 @@ export const ipaddresslogAPI = async (
   }
 };
 
+export const cashledgerAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/cash_ledger_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
 
 export const BillfilterAPI = async ({
   valan_id = valanId?.id,

@@ -61,6 +61,8 @@ import Autosquareuplog from '../Dashboard/Autosquareuplog';
 import Usereditlog from '../Dashboard/Usereditlog';
 import Iplistlog from '../Dashboard/Iplistlog';
 import Billfilter from '../Dashboard/Billfilter';
+import Ledgerreport from '../Dashboard/Ledgerreport';
+import Cashledger from '../Dashboard/Cashledger';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -77,6 +79,9 @@ function Application(props) {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<PersonalDashboard />} />
           <Route path="/ledger" element={<Ledger />} />
+          <Route path="/ledger-report" element={<Ledgerreport />} />
+          <Route path="/Cash-ledger" element={<Cashledger />} />
+          
 
           <Route path="dashboard/watchlist" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />
           <Route path="dashboard/favorite-list" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />

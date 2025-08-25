@@ -243,9 +243,11 @@ const fetchPageData = async () => {
                               ({log.type})
                             </span>
                           </Typography>
-                          <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
-                            {log.full_name}
-                          </Typography>
+                          {userType !== 1 && (
+                            <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                              {log.full_name}
+                            </Typography>
+                          )}
                         </Box>
 
                         <Typography
@@ -335,9 +337,10 @@ const fetchPageData = async () => {
 
                     return (
                       <tr key={index}>
-                        <td>
+                        {/* <td>
                           {userType !== 1 ? log.full_name : null}
-                        </td>
+                        </td> */}
+                         {userType !== 1 && <td>{log.full_name}</td>}
                         <td>{log.type}</td>
                         <td>{log.datetime}</td>
                         <td>
