@@ -1318,6 +1318,189 @@ export const tradeEditDeleteLogLogsAPI = async (
   }
 };
 
+export const tradeAutosquareofAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/auto_closed_report", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+
+export const ipaddresslogAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/same_ip_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+
+export const BillfilterAPI = async ({
+  valan_id = valanId?.id,
+  amount = "",
+  start_date = "",
+  end_date = "",
+  market_type_id = "",
+  user_id = "",
+  broker_user_id = "",
+  master_user_id = "",
+  term = "",
+}) => {
+  try {
+    const defaultParams = await getDefaultParams();
+
+    const payload = {
+      ...defaultParams,
+      master_user_id,
+      broker_user_id,
+      valan_id,
+      market_type_id,
+      user_id,
+      start_date,
+      end_date,
+      amount,
+      term,
+    };
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/bill_filter_amount_wise",
+      payload
+    );
+
+    // ✅ Return the actual array of logs
+    return response.data || [];
+  } catch (err) {
+    console.error("Error fetching Valan IDs:", err);
+    return [];
+  }
+};
+
+
+
+
+export const tradeEditLoglistAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/user_edit_log_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
 export const editDeleteLogLogsAPI = async (
   currentPage,
   pageSize,

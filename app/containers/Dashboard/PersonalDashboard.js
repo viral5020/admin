@@ -453,15 +453,18 @@ function PersonalDashboard() {
     }
   };
 
-  const filteredLogs = rejectionLogs.filter((log) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      log.full_name?.toLowerCase().includes(query) ||
-      log.script_name?.toLowerCase().includes(query) ||
-      log.trade_type?.toLowerCase().includes(query) ||
-      log.log_message?.toLowerCase().includes(query)
-    );
-  });
+const filteredLogs = Array.isArray(rejectionLogs)
+  ? rejectionLogs.filter((log) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        log.full_name?.toLowerCase().includes(query) ||
+        log.script_name?.toLowerCase().includes(query) ||
+        log.trade_type?.toLowerCase().includes(query) ||
+        log.log_message?.toLowerCase().includes(query)
+      );
+    })
+  : [];
+
 
 
   const InfoCardHorizontal = ({ title, icon, content, bgcolor }) => (
@@ -1304,10 +1307,13 @@ function PersonalDashboard() {
         </Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
-          <Box onClick={() => setrejectionDialogOpen(true)} sx={{ cursor: 'pointer' }}>
+          <Box
+            onClick={() => setrejectionDialogOpen(true)}
+            sx={{ cursor: "pointer" }}
+          >
             <InfoCardHorizontal
               title="Rejection Logs"
-              icon={<CloseIcon sx={{ color: '#d32f2f', fontSize: 30 }} />}
+              icon={<CloseIcon sx={{ color: "#d32f2f", fontSize: 30 }} />}
               content={[
                 `Today: ${dashboardData.today_rejection}`,
                 `Total: ${dashboardData.total_rejection}`,
@@ -1317,73 +1323,75 @@ function PersonalDashboard() {
           </Box>
         </Grid>
 
-         {/* Dialog with custom header */}
-     <Dialog
-  open={rejectionDialogOpen}
-  onClose={() => setrejectionDialogOpen(false)}
-  maxWidth="md"
-  fullWidth
-  fullScreen={fullScreen} // mobile only
-  PaperProps={{
-    sx: {
-      margin: 0, // remove default margin
-      borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
-      overflow: "hidden", // ensures content fits exactly
-    },
-  }}
->
-  {/* Custom header */}
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      px: 3,
-      py: 1,
-      backdropFilter: "blur(6px)",
-      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-      color: "#fff",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    }}
-  >
-    <Typography
-      variant="h6"
-      fontWeight={800}
-      sx={{
-        textTransform: "uppercase",
-        letterSpacing: 1.5,
-        display: "flex",
-        alignItems: "center",
-        textShadow: "0 0 6px rgba(33,203,243,0.9)",
-      }}
-    >
-      <CloseIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-      Rejection Logs
-    </Typography>
-    <IconButton
-      size="small"
-      sx={{
-        color: "#fff",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderRadius: "50%",
-        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
-      }}
-      onClick={() => setrejectionDialogOpen(false)}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  </Box>
+        {/* Dialog with custom header */}
+        <Dialog
+          open={rejectionDialogOpen}
+          onClose={() => setrejectionDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+          fullScreen={fullScreen} // mobile only
+          PaperProps={{
+            sx: {
+              margin: 0,
+              borderRadius: fullScreen ? 0 : 2,
+              overflow: "hidden",
+            },
+          }}
+        >
+          {/* Custom header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: 3,
+              py: 1,
+              backdropFilter: "blur(6px)",
+              background:
+                "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+              color: "#fff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={800}
+              sx={{
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+                display: "flex",
+                alignItems: "center",
+                textShadow: "0 0 6px rgba(33,203,243,0.9)",
+              }}
+            >
+              <CloseIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+              Rejection Logs
+            </Typography>
+            <IconButton
+              size="small"
+              sx={{
+                color: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+              }}
+              onClick={() => setrejectionDialogOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
-  {/* Dialog content with no spacing */}
-  <DialogContent
-    sx={{
-      p: 0, // remove all padding
-      "&:first-of-type": { paddingTop: 0 }, // remove top padding
-    }}
-  >
-    <RejectionLogs /> {/* Component showing rejection logs */}
-  </DialogContent>
-</Dialog>
+          {/* Dialog content */}
+          <DialogContent
+            sx={{
+              p: 0,
+              "&:first-of-type": { paddingTop: 0 },
+            }}
+          >
+            {/* Render the self-fetching RejectionLogs component */}
+            <RejectionLogs />
+          </DialogContent>
+        </Dialog>
 
         {/* <Box
           sx={{

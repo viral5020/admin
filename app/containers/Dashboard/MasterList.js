@@ -525,15 +525,22 @@ const Userlisting = () => {
         CL
       </Button>,
       <Button
-        key="status"
-        // onClick={() => handleStatusOpen(row)}
-        variant="contained"
-        color={row.user_status === 1 ? "success" : "error"}
-        size="small"
-        sx={{ minWidth: 30, p: "4px", m: "2px" }}
-      >
-        E
-      </Button>,
+             key="status"
+             variant="contained"
+             size="small"
+             sx={{
+               minWidth: 30,
+               p: "4px",
+               m: "2px",
+               backgroundColor: "#ff9800", // orange 500
+               color: "#fff",
+               "&:hover": {
+                 backgroundColor: "#fb8c00", // darker orange
+               },
+             }}
+           >
+             E
+           </Button>
     );
 
     if (dataStored.user_type === 4) {

@@ -57,6 +57,10 @@ import Userlisting from '../Dashboard/Userlisting';
 import MasterList from '../Dashboard/MasterList';
 import BrokerListing from '../Dashboard/BrokerListing';
 import Addacount from '../Dashboard/Addacount';
+import Autosquareuplog from '../Dashboard/Autosquareuplog';
+import Usereditlog from '../Dashboard/Usereditlog';
+import Iplistlog from '../Dashboard/Iplistlog';
+import Billfilter from '../Dashboard/Billfilter';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -99,6 +103,10 @@ function Application(props) {
           <Route path="dashboard/Add-Account" element={<Addacount />} />
 
           <Route path='dashboard/trade-edit-delete-log' element={userType !== 2 && (isForex || isStock) ? <TradeEditDeleteLog /> : <Navigate to="/app" />} />
+          <Route path='dashboard/auto-square-up-log' element={userType === 3 || userType === 4 || userType === 5 && (isForex || isStock) ? <Autosquareuplog /> : <Navigate to="/app" />} />
+          <Route path='dashboard/user-edit-log' element={userType === 3 || userType === 4 || userType === 5 ? <Usereditlog /> : <Navigate to="/app" />} />
+          <Route path='dashboard/ip-address-log' element={userType !== 2 && userType !== 1 ? <Iplistlog /> : <Navigate to="/app" />} />
+          <Route path='dashboard/bill-filter' element={userType !== 2 && userType !== 1 ? <Billfilter /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

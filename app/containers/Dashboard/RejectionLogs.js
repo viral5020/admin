@@ -43,29 +43,32 @@ const RejectionLogs = () => {
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
 
-  const fetchPageData = async () => {
-    setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem('data'));
-    const data = await fetchRejectionLogsAPI(
-      dataStored.user_id,
-      dataStored.auth_key,
-      filterType,
-      searchText,
-      pageSize,
-      currentPage,
-    );
+const fetchPageData = async () => {
+  setLoading(true);
+  const dataStored = JSON.parse(sessionStorage.getItem('data'));
+  const data = await fetchRejectionLogsAPI(
+    dataStored.user_id,
+    dataStored.auth_key,
+    filterType,
+    searchText,
+    pageSize,
+    currentPage,
+  );
 
-    isMobile
-      ? isFilterChange || currentPage === 0
-        ? setLogs(data.aaData || [])
-        : setLogs(prev => [...prev, ...data.aaData])
-      : setLogs(data.aaData || []);
+  const safeData = Array.isArray(data?.aaData) ? data.aaData : [];
 
-    setTotalRecords(data.iTotalRecords || 0);
+  isMobile
+    ? isFilterChange || currentPage === 0
+      ? setLogs(safeData)
+      : setLogs(prev => [...prev, ...safeData])
+    : setLogs(safeData);
 
-    setLoading(false);
-    setIsFilterChange(false);
-  };
+  setTotalRecords(data?.iTotalRecords || 0);
+
+  setLoading(false);
+  setIsFilterChange(false);
+};
+
 
   function onFilterApply() {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
@@ -327,7 +330,7 @@ const RejectionLogs = () => {
                 <tbody>
                   {logs.map((log, index) => {
                     // Split script name and date
-                    const [scriptBase, ...rest] = log.script_name.split(" ");
+                    const [scriptBase, ...rest] = (log.script_name || "").split(" ");
                     const scriptSuffix = rest.join(" ");
 
                     return (

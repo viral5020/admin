@@ -338,7 +338,7 @@ if (userType !== 2) {
         ? [{
           key: 'bill-filter',
           name: 'Bill filter',
-          // link: '/app/dashboard/bill-filter',
+           link: '/app/dashboard/bill-filter',
           icon: 'receipt-outline'
         }]
         : []),
@@ -362,7 +362,7 @@ if (userType !== 2) {
         ? [{
           key: 'user-edit-log',
           name: 'User edit log',
-          // link: '/app/dashboard/user-edit-log',
+           link: '/app/dashboard/user-edit-log',
           icon: 'receipt-outline'
         }]
         : []),
@@ -370,7 +370,7 @@ if (userType !== 2) {
         ? [{
           key: 'ip-address-log',
           name: 'IP address log',
-          // link: '/app/dashboard/ip-address-log',
+          link: '/app/dashboard/ip-address-log',
           icon: 'receipt-outline'
         }]
         : []),
@@ -394,7 +394,7 @@ if (userType !== 2) {
         ? [{
           key: 'auto-square-up-log',
           name: 'Auto Square Up log',
-          // link: '/app/dashboard/auto-square-up-log',
+          link: '/app/dashboard/auto-square-up-log',
           icon: 'receipt-outline'
         }]
         : []),

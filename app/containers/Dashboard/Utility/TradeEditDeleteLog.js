@@ -32,7 +32,7 @@ import FilterBtn from '../filters/FilterBtn';
 import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from '../filters/Pagination';
-import { tradeEditDeleteLogLogsAPI } from '../API/API';
+import { editDeleteLogLogsAPI, tradeEditDeleteLogLogsAPI, tradeEditLoglistAPI } from '../API/API';
 import BackToTop from '../helpers/BackToTop';
 
 
@@ -72,7 +72,7 @@ const TradeEditDeleteLog = () => {
     const fetchLogs = async () => {
         setLoading(true);
         const scriptIds = formatScriptIds(script);
-        const result = await tradeEditDeleteLogLogsAPI(
+        const result = await editDeleteLogLogsAPI(
             currentPage,
             pageSize,
             searchText,
@@ -236,53 +236,68 @@ const TradeEditDeleteLog = () => {
                                         <TableCell>DateTime</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                <TableBody>
-                                    {logs.map((log, i) => {
-                                        const isBuy = log.log_type === 'BUY';
-                                        const isSell = log.log_type === 'SELL';
-                                        const [highlightName, ...rest] = log.script_name.split(' ');
-                                        const remainingScriptName = rest.join(' ');
+                                    <TableBody>
+                                        {logs.map((log, i) => {
+                                            const isBuy = log.log_type === 'BUY';
+                                            const isSell = log.log_type === 'SELL';
 
-                                        return (
-                                            <TableRow key={i}>
-                                                <TableCell sx={{ color: 'black' }}>
-                                                    <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
-                                                        {log.log_type}
-                                                    </span>
-                                                </TableCell>
+                                            // Safe check for script_name
+                                            const scriptName = log?.script_name || '';
+                                            const [highlightName, ...rest] = scriptName.split(' ');
+                                            const remainingScriptName = rest.join(' ');
 
-                                                <TableCell>{log.user_full_name}</TableCell>
+                                            return (
+                                                <TableRow key={i}>
+                                                    <TableCell sx={{ color: 'black' }}>
+                                                        <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
+                                                            {log.log_type}
+                                                        </span>
+                                                    </TableCell>
 
-                                                <TableCell>
-                                                    <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
-                                                    {remainingScriptName && ` ${remainingScriptName}`}
-                                                </TableCell>
+                                                    <TableCell>{log.user_full_name ?? '-'}</TableCell>
 
-                                                <TableCell
-                                                    sx={{
-                                                        color: log.trade_type === 'Buy' ? 'green' : log.trade_type === 'Sell' ? 'red' : 'inherit',
-                                                        fontWeight: '600',
-                                                        textTransform: 'uppercase'
-                                                    }}
-                                                >
-                                                    {log.trade_type}
-                                                </TableCell>
+                                                    <TableCell>
+                                                        {scriptName ? (
+                                                            <>
+                                                                <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
+                                                                {remainingScriptName && ` ${remainingScriptName}`}
+                                                            </>
+                                                        ) : (
+                                                            <span>-</span>
+                                                        )}
+                                                    </TableCell>
 
-                                                <TableCell>
-                                                    <strong>{log.trade_qty}</strong> ({Number(log.trade_lot).toFixed(2)})
-                                                </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            color:
+                                                                log.trade_type === 'Buy'
+                                                                    ? 'green'
+                                                                    : log.trade_type === 'Sell'
+                                                                        ? 'red'
+                                                                        : 'inherit',
+                                                            fontWeight: '600',
+                                                            textTransform: 'uppercase'
+                                                        }}
+                                                    >
+                                                        {log.trade_type ?? '-'}
+                                                    </TableCell>
 
-                                                <TableCell>
-                                                    <strong>{log.trade_rate}</strong>
-                                                </TableCell>
+                                                    <TableCell>
+                                                        <strong>{log.trade_qty ?? '-'}</strong>{' '}
+                                                        {log.trade_lot !== undefined && `(${Number(log.trade_lot).toFixed(2)})`}
+                                                    </TableCell>
 
-                                                <TableCell>{log.added_by}</TableCell>
-                                                <TableCell>{log.added_datetime}</TableCell>
-                                            </TableRow>
+                                                    <TableCell>
+                                                        <strong>{log.trade_rate ?? '-'}</strong>
+                                                    </TableCell>
 
-                                        );
-                                    })}
-                                </TableBody>
+                                                    <TableCell>{log.added_by ?? '-'}</TableCell>
+                                                    <TableCell>{log.added_datetime ?? '-'}</TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+
                             </Table>
 
                         </TableContainer>

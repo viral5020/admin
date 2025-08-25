@@ -580,7 +580,7 @@ const OrderBook = () => {
             <table
               className="table table-striped table-bordered"
               style={{
-                minWidth: "1650px",
+                minWidth: "1850px",
                 fontSize: "12px",
                 margin: 0,
                 backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
