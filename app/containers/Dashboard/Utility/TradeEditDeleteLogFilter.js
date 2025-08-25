@@ -34,7 +34,7 @@ const TradeEditDeleteLogFilter = ({
                 {setIs_deleted && setIs_updated &&
                     <Grid item xs={12} sm={6} md={3} lg={2.4}>
                         <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
-                            <FormControlLabel
+                            {setIs_updated && <FormControlLabel
                                 control={
                                     <Checkbox
                                         size="small"
@@ -44,8 +44,8 @@ const TradeEditDeleteLogFilter = ({
                                 }
                                 label="Update"
                                 sx={{ mr: 2, ml: 0.5 }}
-                            />
-                            <FormControlLabel
+                            />}
+                            {setIs_deleted && <FormControlLabel
                                 control={
                                     <Checkbox
                                         size="small"
@@ -54,21 +54,21 @@ const TradeEditDeleteLogFilter = ({
                                     />
                                 }
                                 label="Delete"
-                            />
+                            />}
                         </FormGroup>
                     </Grid>}
 
-                <DateFilter
+                {setStart_date && <DateFilter
                     label="Trade After"
                     value={start_date}
                     onChange={setStart_date}
-                />
+                />}
 
-                <DateFilter
+                {setEnd_date && <DateFilter
                     label="Trade Before"
                     value={end_date}
                     onChange={setEnd_date}
-                />
+                />}
 
                 <MarketScriptNameFilter
                     market={market}
