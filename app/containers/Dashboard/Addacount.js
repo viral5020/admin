@@ -21,8 +21,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { formatArrPayload, MCXFUT_id } from "./helpers/utilFunc";
 import BrokerFields from "./Add User/BrokerFields";
 import McxScriptFields from "./Add User/McxScriptFields";
-import { addAccountAPI } from "./API/API";
+import { addAccountAPI, getMarketScriptForAddAccountAPI } from "./API/API";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { useLocation, useParams } from "react-router-dom";
 
 // 🔑 Map backend field prefixes
 const marketKeyMap = {
@@ -103,27 +104,24 @@ const userFields = {
   short_trade_minutes: null,
 
   markets: [],
-  userLevel: "",  // ?
-
-  // nseLimit: '',
-  // nsescriptLimit: '',
-  // nseFirstSell: '',
-  // nseUnmatched: '',
-  // nseScripts: [{ script: "all", deliveryComm: 0.001, intraComm: 0.001 }],
-
-  // mcxLimit: '',
-  // mcxscriptLimit: '',
-  // mcxCommissionType: '',
-  // mcxBrokerageType: '',
-  // mcxScripts: [],
-  // mcxFirstSell: false,
-  // mcxUnmatched: false,
+  userLevel: "",
 }
 
 const numOrZero = (v) =>
   v !== "" && v !== null && v !== undefined ? Number(v) : 0;
 
 export default function AddAccountForm() {
+  const { search } = useLocation();
+  const queryParams = new URLSearchParams(search);  // /user?id=123&name=krushang
+
+  const editUserType = queryParams.get("userType"); // "krushang"
+  const editUserId = queryParams.get("userId");     // "123"
+
+  // const { editUserType, editId } = useParams();
+  const [isEditMode, setIsEditMode] = useState(false);
+  // const [editId, setEditId] = useState('');
+  // const [editUserType, setEditUserType] = useState('');
+
   const [userType, setUserType] = useState("")
   const [commonFormData, setCommonFormData] = useState({ password: '', name: '', userType: '', remarks: '' });
 
@@ -155,74 +153,6 @@ export default function AddAccountForm() {
       setCommonFormData(prev => ({ ...prev, password, name, remarks }));
     }
   }, [userType])
-
-  const valiadetCommonFields = () => {
-    let newErrors = {};
-    if (!commonFormData.userType) newErrors.userType = "User type is required";
-    if (!masterFormData.name) newErrors.name = "Name is required";
-    if (!masterFormData.password) newErrors.password = "Password is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // true if no errors
-  }
-
-  const validateMasterForm = () => {
-    let commonFieldError = valiadetCommonFields();
-    let newErrors = {};
-    if (masterFormData.userType == 3) {
-      // if (!masterFormData.userType) newErrors.userType = "User type is required";
-      // if (!masterFormData.name) newErrors.name = "Name is required";
-      // if (!masterFormData.password) newErrors.password = "Password is required";
-      if (!masterFormData.partnership) newErrors.partnership = "Partnership is required";
-      if (!masterFormData.shortTradeAvoid) newErrors.shortTradeAvoid = "Short trade avoid time is required";
-      if (!masterFormData.userLevel || masterFormData.userLevel.length === 0) {
-        newErrors.userLevel = "Please select at least one user level";
-      }
-      if (!masterFormData.freshLimitAllowed || masterFormData.freshLimitAllowed.length === 0) {
-        newErrors.freshLimitAllowed = "Fresh Limit Allowed is required";
-      }
-
-      if (!masterFormData.markets || masterFormData.markets.length === 0) {
-        newErrors.markets = "Please select at least one market type";
-      }
-
-      // 2. Check fields for each selected market
-      masterFormData.markets.forEach((marketId) => {
-        const mkt = marketTypes.find((m) => m.market_type_id === marketId);
-        const opts = masterFormData.marketOptions?.[marketId] || {};
-
-        if (mkt?.market_type_name === "MCXFUT") {
-          ["marginLimit", "nextMarginLimit", "minPctComm", "maxPctComm", "minLotComm", "maxLotComm"].forEach((field) => {
-            if (!opts[field]) {
-              newErrors[`market_${marketId}_${field}`] = `${field} is required`;
-            }
-          });
-        }
-        else if (mkt?.market_type_name === "BINARY") {
-          ["MarginLimit", "NextMarginLimit"].forEach((field) => {
-            if (!opts[field]) {
-              newErrors[`market_${marketId}_${field}`] = `${field} is required`;
-            }
-          });
-        }
-        else if (["NSEFUT", "NSEOPT", "NSEEQT", "NSECDS", "MCXFUT", "GLOBAL FUTURES", "FOREX", "CRICKET", "BINARY", "COMEX"].includes(mkt?.market_type_name)) {
-          ["marginLimit", "nextMarginLimit", "minLotBrokerage", "maxLotBrokerage"].forEach((field) => {
-            if (!opts[field]) {
-              newErrors[`market_${marketId}_${field}`] = `${field} is required`;
-            }
-          });
-        }
-      });
-    }
-    setMasterError(newErrors);
-
-    return Object.keys(newErrors).length === 0 && Object.keys(commonFieldError).length === 0; // true if no errors
-  };
-
-  // useEffect(() => {
-  //   console.log('userFormData', userFormData)
-  //   buildPayload();
-  // }, [userFormData])
 
   useEffect(() => {
     // console.log('userFormData.marketOptions?.MCXFUT', userFormData.marketOptions?.MCXFUT);
@@ -294,12 +224,6 @@ export default function AddAccountForm() {
   useEffect(() => {
     setMcxScriptsDefaultFieldValue('intraBrokerage');
   }, [userFormData?.marketOptions?.[MCXFUT_id]?.intraBrokerage])
-
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setMasterFormData((prev) => ({ ...prev, [name]: value }));
-  // };
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -495,40 +419,36 @@ export default function AddAccountForm() {
     },
   };
 
+  async function getMarketTypesAndMcxScript() {
+    console.log("getMarketTypesAndMcxScript.........")
+    const data = await getMarketScriptForAddAccountAPI();
+    if (data) {
+      setUserLevels(data.user_level || []);
+      setMarketTypes(data.market_type || []);
+      setMcxscript(data.mcx_script || []);
+      setBrokerList(data.broker_list || []);
+    }
+  }
 
   useEffect(() => {
-    if (userType === "3" || userType === "1") {
-      const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-      const payload = {
-        is_app: 1,
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-      };
+    console.log('editUserId', editUserId);
+    console.log('editUserType', editUserType);
+    editUserType != "2" && getMarketTypesAndMcxScript();
 
-      axios
-        .post(
-          "http://128.199.126.171/~goldorg/ajaxfiles/get_mcx_script_type",
-          payload,
-          { headers: { "Content-Type": "application/json" } }
-        )
-        .then((res) => {
-          if (res.data) {
-            setUserLevels(res.data.user_level || []);
-            setMarketTypes(res.data.market_type || []);
-            setMcxscript(res.data.mcx_script || []);
-            setBrokerList(res.data.broker_list || []);
-          }
-        })
-        .catch((err) => console.error("API Error:", err));
-    } else {
-      setUserLevels([]);
-      setMarketTypes([]);
-      setMcxscript([]);
-      setBrokerList([]);
-    }
-  }, [userType]);
+    const pathSegments = location.pathname.split("/");   // ["", "app", "dashboard", "Edit-Account", "1", "234"]
 
+    const pageName = pathSegments[3]; // "Edit-Account" or "Add-Account"
+    pageName.toLowerCase() === 'edit-account' ? setIsEditMode(true) : setIsEditMode(false);
+  }, []);
 
+  useEffect(() => {
+    isEditMode && getUserDataForEdit();
+    setUserType(editUserType);
+  }, [isEditMode])
+
+  async function getUserDataForEdit() {
+
+  }
 
   // ✅ Initialize marketOptions based on mcxscript + defaultOptions
   useEffect(() => {
@@ -698,13 +618,8 @@ export default function AddAccountForm() {
     if (markets?.length) payload.markets = markets.map(String);
 
     payload.accountType = accountTypes ?? userLevel;
-    // payload.accountType = masterFormData.accountTypes?.length
-    //   ? masterFormData.accountTypes
-    //   : masterFormData.userLevel;
-
 
     // ---------- Market Specific Handling ----------
-    // {/* MCX script checkboxes + individual text fields */}
     const mcxScripts = [];
 
     (markets || []).forEach((mktId) => {
@@ -790,13 +705,8 @@ export default function AddAccountForm() {
     return payload;
   }
 
-  // useEffect(() => {
-  //   console.log('@@ commonFormData', commonFormData);
-  // }, [commonFormData])
-
   const buildMasterPayload = (payload) => {
     // ---------- General User Fields ----------
-    // if ("userType" in masterFormData) payload.userType = numOrZero(masterFormData.userType);
     const { name, password, remarks, openingBalance, balanceType, shortTradeAvoid, partnership, partnershipType, markets, userLevel, accountTypes, marketOptions, defaultOptions } = masterFormData;
 
     payload.userType = numOrZero(commonFormData.userType);
@@ -1084,7 +994,7 @@ export default function AddAccountForm() {
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
           {/* User Type */}
-          <Grid item xs={12} sm={4}>
+          {!isEditMode && <Grid item xs={12} sm={4}>
             <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>User Type</Typography>
             <Select
               name="userType"
@@ -1109,7 +1019,7 @@ export default function AddAccountForm() {
                 {errors.userType}
               </Typography>
             )}
-          </Grid>
+          </Grid>}
 
           {/* Name */}
           <Grid item xs={12} sm={4}>
@@ -1132,7 +1042,7 @@ export default function AddAccountForm() {
           </Grid>
 
           {/* Password */}
-          <Grid item xs={12} sm={4}>
+          {!isEditMode && <Grid item xs={12} sm={4}>
             <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Password</Typography>
             <TextField
               required
@@ -1149,7 +1059,7 @@ export default function AddAccountForm() {
               error={!!errors.password}
               helperText={errors.password}
             />
-          </Grid>
+          </Grid>}
         </Grid>
 
       </>
@@ -2065,7 +1975,7 @@ export default function AddAccountForm() {
         >
           Cancel
         </Button>
-        <Button onClick={buildPayload}>Logs</Button>
+        {/* <Button onClick={buildPayload}>Logs</Button> */}
         <Button
           type="submit"
           variant="contained"

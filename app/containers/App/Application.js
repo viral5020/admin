@@ -81,7 +81,7 @@ function Application(props) {
           <Route path="/ledger" element={<Ledger />} />
           <Route path="/ledger-report" element={<Ledgerreport />} />
           <Route path="/Cash-ledger" element={<Cashledger />} />
-          
+
 
           <Route path="dashboard/watchlist" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />
           <Route path="dashboard/favorite-list" element={isStock ? <Watchlist /> : <Navigate to="/app" />} />
@@ -106,6 +106,7 @@ function Application(props) {
           <Route path="dashboard/Master-Listing" element={<MasterList />} />
           <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
           <Route path="dashboard/Add-Account" element={<Addacount />} />
+          <Route path="dashboard/Edit-Account" element={<Addacount />} />
 
           <Route path='dashboard/trade-edit-delete-log' element={userType !== 2 && (isForex || isStock) ? <TradeEditDeleteLog /> : <Navigate to="/app" />} />
           <Route path='dashboard/auto-square-up-log' element={userType === 3 || userType === 4 || userType === 5 && (isForex || isStock) ? <Autosquareuplog /> : <Navigate to="/app" />} />

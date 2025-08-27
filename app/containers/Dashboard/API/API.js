@@ -1604,3 +1604,17 @@ export const addAccountAPI = async (payload) => {
   // "status": "error",
   //   "message": "NCDS Intraday Minimum Upline Brokerage is 1",
 };
+
+export const getMarketScriptForAddAccountAPI = async () => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const { data } = await axiosInstance.post("/ajaxfiles/get_mcx_script_type", { ...defaultParams });
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return error;
+  }
+  // "status": "error",
+  //   "message": "NCDS Intraday Minimum Upline Brokerage is 1",
+};
