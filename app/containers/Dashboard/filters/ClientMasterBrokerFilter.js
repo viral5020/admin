@@ -27,6 +27,7 @@ const ClientMasterBrokerFilter = ({
     const [brokerOptions, setBrokerOptions] = useState([]);
 
     const [inputBoxStyle, setInputBoxStyle] = useState({});
+    const [userType, setUserType] = useState(0)
 
     const data = sessionStorage.getItem("data");
 
@@ -47,7 +48,8 @@ const ClientMasterBrokerFilter = ({
         handleFetch('', 'client');
         handleFetch('', 'master');
         handleFetch('', 'broker');
-
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        setUserType(dataStored.user_type)
         setInputBoxStyle(getInputBoxStyle(isDarkMode));
     }, []);
 
@@ -84,7 +86,7 @@ const ClientMasterBrokerFilter = ({
             {/* WHEN API WORKS, THEN MAKE IT FUNCTIONAL LIKE SCRIPT NAME'S AUTO COMPLETE */}
 
             {/* (7) Client Name */}
-            {showClient && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+            {userType != 1 && showClient && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={clientOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
@@ -115,7 +117,7 @@ const ClientMasterBrokerFilter = ({
             </Grid>}
 
             {/* (8) Master Name */}
-            {showMaster && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+            {userType != 1 && showMaster && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={masterOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}

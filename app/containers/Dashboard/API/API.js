@@ -1589,3 +1589,18 @@ export const editDeleteLogLogsAPI = async (
     throw error;
   }
 };
+
+
+export const addAccountAPI = async (payload) => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const { data } = await axiosInstance.post("/ajaxfiles/create_user", { ...defaultParams, ...payload });
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return error;
+  }
+  // "status": "error",
+  //   "message": "NCDS Intraday Minimum Upline Brokerage is 1",
+};

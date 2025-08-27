@@ -16196,16 +16196,265 @@ const rrrrr = {
 // market script client broker master search api calls on every re-rending onf page
 // api function should run only when its parameter changes otherwise return previous response
 
+const userDataWithAllMarketAndBroker2 = {
+    userType: 1,
+    name: "testanasbid",
+    password: "Abcd1234",
+    remarks: "test",
 
+    openingBalance: 0,
+    balanceType: 0,
 
+    highLow: 0,
+    applySquare: 0,
+    intraSquare: 0,
+    onlyPosition: "0",
+    applySquareForex: "0",
+    mtmLinkedWithLedger: "0",
 
-// datatables/trade_log_view
-// market_type_id
-// script_id
-// user_id
-// master_user_id
-// start_date
-// end_date
-// is_deleted
-// is_updated
-// is_admin
+    lossAlert: "100",
+    closeAlert: "100",
+    lossAlertForex: "100",
+    closeAlertForex: "100",
+    addUserTradeAmount: 100,
+    short_trade_minutes: 2,
+
+    broker: "62263",
+
+    markets: ["5", "2", "8", "9", "1", "4", "6", "3", "7", "13"],
+    accountType: "5",
+
+    nseOLimit: 5,
+    nseOscriptLimit: 5,
+    nseOFirstSell: 1,
+    nseOUnmatched: 0,
+    nseOScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+
+    // 'market_id': {
+    //     nseOLimit: 5,
+    //     nseOscriptLimit: 5,
+    //     deliveryComm: 5,
+    //     intraComm: 5,
+    //     deliveryBrokerage: { 62263: 5 },
+    //     intraBrokerage: { 62263: 5 },
+    // },
+    nseLimit: 5,
+    nsescriptLimit: 5,
+    nseFirstSell: 0,
+    nseUnmatched: 0,
+    nseScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+    nseEqtLimit: 5,
+    nseEqtscriptLimit: 5,
+    nseEqtFirstSell: 0,
+    nseEqtUnmatched: 0,
+    nseEqtScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+    ncdsLimit: 5,
+    ncdsscriptLimit: 5,
+    ncdsFirstSell: 0,
+    ncdsUnmatched: 0,
+    ncdsScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+    mcxLimit: 5,
+    mcxscriptLimit: 5,
+    mcxFirstSell: false,
+    mcxUnmatched: false,
+    mcxCommissionType: 1,
+    mcxBrokerageType: 0,
+    mcxScripts: [
+        {
+            script: "1",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "2",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "146",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "149",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "151",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "154",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "157",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "158",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "161",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "162",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "163",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "1179",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "1180",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "1181",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+        {
+            script: "1182",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+
+    // 'MCX_id': {
+    //     mcxLimit: 5,
+    //     mcxscriptLimit: 5,
+    //     // mcxFirstSell: false,
+    //     // mcxUnmatched: false,
+    //     mcxCommissionType: 1,
+    //     mcxBrokerageType: 0,
+    //     mcxScripts: [
+    //         {
+    //             script: "1",
+    //             deliveryComm: 5,
+    //             deliveryBrokerage: { 62263: 5 },
+    //             intraComm: 5,
+    //             intraBrokerage: { 62263: 5 },
+    //         },
+    //     ],
+    // },
+
+    globalLimit: 5,
+    globalscriptLimit: 5,
+    globalFirstSell: 0,
+    globalUnmatched: 0,
+    globalScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+    forexLimit: 5,
+    forexscriptLimit: 5,
+    forexFirstSell: 0,
+    forexUnmatched: 0,
+    forexScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+    cricketLimit: null,
+    comexLimit: 5,
+    comexscriptLimit: 5,
+    comexFirstSell: 0,
+    comexUnmatched: 0,
+    comexScripts: [
+        {
+            script: "all",
+            deliveryComm: 5,
+            deliveryBrokerage: { 62263: 5 },
+            intraComm: 5,
+            intraBrokerage: { 62263: 5 },
+        },
+    ],
+};
