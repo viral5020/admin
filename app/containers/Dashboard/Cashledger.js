@@ -37,6 +37,7 @@ import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
 import { cashledgerAPI, ipaddresslogAPI, tradeAutosquareofAPI, tradeEditDeleteLogLogsAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
+import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
 
 
 
@@ -64,6 +65,9 @@ const Cashledger = () => {
     const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
+    const [broker, setBroker] = useState('');
+
+    const [selectedUser, setSelectedUser] = useState(null);
 
     const [end_date, setEnd_date] = useState('');
     const [start_date, setStart_date] = useState('');
@@ -74,60 +78,60 @@ const Cashledger = () => {
     const [is_deleted, setIs_deleted] = useState(false);
     const [isAdminOnly, setIsAdminOnly] = useState(false);
 
-     const [selectedUserRole, setSelectedUserRole] = useState("");
-     const [secondDropdownValue, setSecondDropdownValue] = useState("");
+    const [selectedUserRole, setSelectedUserRole] = useState("");
+    const [secondDropdownValue, setSecondDropdownValue] = useState("");
 
-      const secondDropdownOptions = {
-    user: ["User Option 1", "User Option 2"],
-    broker: ["Broker Option 1", "Broker Option 2"],
-    master: ["Master Option 1", "Master Option 2"],
-  };
+    const secondDropdownOptions = {
+        user: client ? [{ text: client, value: client }] : [],
+        broker: broker ? [{ text: broker, value: broker }] : [],
+        master: master ? [{ text: master, value: master }] : [],
+    };
 
 
-   const fetchLogs = async () => {
-  try {
-    setLoading(true);
+    const fetchLogs = async () => {
+        try {
+            setLoading(true);
 
-    const scriptIds = formatScriptIds?.(script);
+            const scriptIds = formatScriptIds?.(script);
 
-    const result = await cashledgerAPI(
-      currentPage,
-      pageSize,
-      searchText,
-      market,
-      scriptIds,
-      master,
-      client,
-      end_date,
-      start_date,
-      is_deleted,
-      is_updated,
-      isAdminOnly,
-    );
+            const result = await cashledgerAPI(
+                currentPage,
+                pageSize,
+                searchText,
+                market,
+                scriptIds,
+                master,
+                client,
+                end_date,
+                start_date,
+                is_deleted,
+                is_updated,
+                isAdminOnly,
+            );
 
-    // Guard shape
-    const data = Array.isArray(result?.aaData) ? result.aaData : [];
+            // Guard shape
+            const data = Array.isArray(result?.aaData) ? result.aaData : [];
 
-    if (isMobile) {
-      if (isFilterChange || currentPage === 0) {
-        setLogs(data);
-      } else {
-        setLogs(prev => [...prev, ...data]);
-      }
-    } else {
-      setLogs(data);
-    }
+            if (isMobile) {
+                if (isFilterChange || currentPage === 0) {
+                    setLogs(data);
+                } else {
+                    setLogs(prev => [...prev, ...data]);
+                }
+            } else {
+                setLogs(data);
+            }
 
-    setTotalRecords(Number(result?.iTotalRecords) || 0);
-    setIsFilterChange(false);
-  } catch (err) {
-    console.error("Failed to fetch logs:", err);
-    setLogs([]);            // keep UI stable
-    setTotalRecords(0);
-  } finally {
-    setLoading(false);
-  }
-};
+            setTotalRecords(Number(result?.iTotalRecords) || 0);
+            setIsFilterChange(false);
+        } catch (err) {
+            console.error("Failed to fetch logs:", err);
+            setLogs([]);            // keep UI stable
+            setTotalRecords(0);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
@@ -169,62 +173,25 @@ const Cashledger = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: 2,              // space between the two dropdowns
-                            flexWrap: "wrap",    // wrap on smaller screens
-                            alignItems: "center",
-                            mb: 3,               // margin-bottom for spacing from next content
-                            width: "100%",       // take full width
-                        }}
-                    >
-                        {/* First dropdown: User Role */}
-                        <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
-                            <InputLabel id="user-role-label">Select User</InputLabel>
-                            <Select
-                                labelId="user-role-label"
-                                value={selectedUserRole}
-                                label="Select User"
-                                onChange={(e) => {
-                                    setSelectedUserRole(e.target.value);
-                                    setSecondDropdownValue(""); // reset second dropdown when first changes
-                                }}
-                            >
-                                <MenuItem value="user">User</MenuItem>
-                                <MenuItem value="broker">Broker</MenuItem>
-                                <MenuItem value="master">Master</MenuItem>
-                            </Select>
-                        </FormControl>
+     <Box sx={{ mb: 3, width: "100%" }}>
+  <ClientMasterBrokerFilter2
+    value={selectedUser}
+    setValue={setSelectedUser}
+    sx={{ width: "100%" }} // proper full width
+  />
+</Box>
 
-                        {/* Second dropdown: Dynamic Label */}
-                        <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
-                            <InputLabel id="second-dropdown-label">
-                                {selectedUserRole ? `Select ${selectedUserRole}` : "Select Option"}
-                            </InputLabel>
-                            <Select
-                                labelId="second-dropdown-label"
-                                value={secondDropdownValue}
-                                label={selectedUserRole ? `Select ${selectedUserRole}` : "Select Option"}
-                                onChange={(e) => setSecondDropdownValue(e.target.value)}
-                                disabled={!selectedUserRole}
-                            >
-                                {(secondDropdownOptions[selectedUserRole] || []).map((opt, idx) => (
-                                    <MenuItem key={idx} value={opt}>
-                                        {opt}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Box>
 
-                    <TradeEditDeleteLogFilter    
-                                entry_date={entry_date}
-                                setentry_date={setentry_date} 
-                                entrybefore_date={entrybefore_date}
-                                setentrybefore_date={setentrybefore_date}
-                                onApply={onFilterApply}
-                            />
+  <Box sx={{ mb: 3, width: "100%" }}>
+    <TradeEditDeleteLogFilter
+      entry_date={entry_date}
+      setentry_date={setentry_date}
+      entrybefore_date={entrybefore_date}
+      setentrybefore_date={setentrybefore_date}
+      onApply={onFilterApply}
+      sx={{ width: "100%" }} // ensures full width
+    />
+  </Box>
 
                     <Box
                         sx={{
@@ -264,53 +231,53 @@ const Cashledger = () => {
                             <CircularProgress />
                         </Box>
                     ) : (<>
-                            <TableContainer>
-                                <Table stickyHeader size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Date</TableCell>
-                                            <TableCell>Debit</TableCell>
-                                            <TableCell>Credit</TableCell>
-                                            <TableCell>Remark</TableCell>
-                                            <TableCell>Action</TableCell>
+                        <TableContainer>
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Date</TableCell>
+                                        <TableCell>Debit</TableCell>
+                                        <TableCell>Credit</TableCell>
+                                        <TableCell>Remark</TableCell>
+                                        <TableCell>Action</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {logs.map((log, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell>{log?.user ?? "-"}</TableCell>
+                                            <TableCell>
+                                                <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
+                                            </TableCell>
+                                            <TableCell>{log?.debit ?? "-"}</TableCell>
+                                            <TableCell>{log?.credit ?? "-"}</TableCell>
+                                            <TableCell>{log?.remark ?? "-"}</TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: "flex", gap: 0.5 }}>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="primary"
+                                                        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </Box>
+                                            </TableCell>
                                         </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {logs.map((log, i) => (
-                                            <TableRow key={i}>
-                                                <TableCell>{log?.user ?? "-"}</TableCell>
-                                                <TableCell>
-                                                    <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
-                                                </TableCell>
-                                                <TableCell>{log?.debit ?? "-"}</TableCell>
-                                                <TableCell>{log?.credit ?? "-"}</TableCell>
-                                                <TableCell>{log?.remark ?? "-"}</TableCell>
-                                                <TableCell>
-                                                    <Box sx={{ display: "flex", gap: 0.5 }}>
-                                                        <Button
-                                                            size="small"
-                                                            variant="outlined"
-                                                            color="primary"
-                                                            sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
-                                                        >
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            size="small"
-                                                            variant="outlined"
-                                                            color="error"
-                                                            sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
-                                                        >
-                                                            Delete
-                                                        </Button>
-                                                    </Box>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
 
                         {/* Pagination Controls */}
                         <Pagination
@@ -339,18 +306,58 @@ const Cashledger = () => {
                 >
                     <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
                         <Box sx={{ width: 280, p: 2 }} role="presentation">
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            {/* Header */}
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2,
+                                }}
+                            >
                                 <Typography variant="h6">Filters</Typography>
-                                <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
+                                <IconButton onClick={() => setFilterDrawer(false)}>
+                                    <CloseIcon />
+                                </IconButton>
                             </Box>
-                            <TradeEditDeleteLogFilter    
+
+                            {/* Optional container for spacing between dropdowns */}
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    gap: 2,
+                                    flexWrap: "wrap",
+                                    alignItems: "center",
+                                    mb: 3,
+                                    width: "100%",
+                                }}
+                            >
+                                {/* Empty for now, but preserves spacing if you add more items */}
+                            </Box>
+
+                            {/* First filter component with full width and spacing */}
+                            <Box sx={{ mb: 3, width: "100%" }}>
+                                <ClientMasterBrokerFilter2
+                                    value={selectedUser}
+                                    setValue={setSelectedUser}
+                                    sx={{ width: "100%" }} // ensure the component itself takes full width
+                                />
+                            </Box>
+
+                            {/* Second filter component */}
+                            <TradeEditDeleteLogFilter
                                 entry_date={entry_date}
-                                setentry_date={setentry_date} 
+                                setentry_date={setentry_date}
                                 entrybefore_date={entrybefore_date}
                                 setentrybefore_date={setentrybefore_date}
+                                client={client}
+                                master={master}
+                                setClient={setClient}
+                                setMaster={setMaster}
                                 onApply={onFilterApply}
                             />
                         </Box>
+
                     </Drawer>
 
                     <FilterBtn setFilterOpen={setFilterDrawer} />
@@ -382,72 +389,72 @@ const Cashledger = () => {
                     </Box>
                 ) : (
                     <>
-                                {logs.map((log, index) => (
-                                  <Card
-                                    key={index}
-                                    sx={{
-                                      mb: 0.5,
-                                      mx: 0.5,
-                                      borderRadius: 1,
-                                      border: "1px solid transparent", // important
-                                      backgroundImage: `
+                        {logs.map((log, index) => (
+                            <Card
+                                key={index}
+                                sx={{
+                                    mb: 0.5,
+                                    mx: 0.5,
+                                    borderRadius: 1,
+                                    border: "1px solid transparent", // important
+                                    backgroundImage: `
       linear-gradient(#fff, #fff), 
       linear-gradient(to right, #2196f3, #21cbf3)
     `,
-                                      backgroundOrigin: "border-box",
-                                      backgroundClip: "content-box, border-box",
-                                      boxShadow: "none",
-                                    }}
-                                  >
-                                   <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-  {/* First row */}
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-    <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
-      {log?.user ?? "-"}
-    </Typography>
+                                    backgroundOrigin: "border-box",
+                                    backgroundClip: "content-box, border-box",
+                                    boxShadow: "none",
+                                }}
+                            >
+                                <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+                                    {/* First row */}
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
+                                            {log?.user ?? "-"}
+                                        </Typography>
 
-    <Typography variant="body2" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
-      <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
-    </Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
+                                            <strong>{log?.account_date_time?.toLocaleString() ?? "0"}</strong>
+                                        </Typography>
 
-    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-      Debit: {log?.debit ?? "-"}
-    </Typography>
+                                        <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+                                            Debit: {log?.debit ?? "-"}
+                                        </Typography>
 
-    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-      Credit: {log?.credit ?? "-"}
-    </Typography>
-  </Box>
+                                        <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+                                            Credit: {log?.credit ?? "-"}
+                                        </Typography>
+                                    </Box>
 
-  {/* Second row */}
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 0.5 }}>
-    <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-      {log?.remark ?? "-"}
-    </Typography>
+                                    {/* Second row */}
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 0.5 }}>
+                                        <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+                                            {log?.remark ?? "-"}
+                                        </Typography>
 
-    <Box sx={{ display: "flex", gap: 0.5 }}>
-      <Button 
-        size="small" 
-        variant="outlined" 
-        color="primary"
-        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
-      >
-        Edit
-      </Button>
-      <Button 
-        size="small" 
-        variant="outlined" 
-        color="error"
-        sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
-      >
-        Delete
-      </Button>
-    </Box>
-  </Box>
-</CardContent>
+                                        <Box sx={{ display: "flex", gap: 0.5 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                color="primary"
+                                                sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                color="error"
+                                                sx={{ minWidth: 0, padding: "2px 6px", fontSize: "0.65rem" }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
 
-                                  </Card>
-                                ))}
+                            </Card>
+                        ))}
 
 
                         {/* LOAD MORE */}
