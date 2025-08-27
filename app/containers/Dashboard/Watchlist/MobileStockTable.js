@@ -99,6 +99,7 @@ const MobileStockTable = ({
     // isStockOpen,
     setIsStockOpen,
     dummyData,
+    marketName,
     isDarkMode,
     onToggleFavorite,
     favorites,
@@ -282,7 +283,7 @@ const MobileStockTable = ({
                     const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
                     const time = new Date(stock?.time)?.toLocaleString();
 
-                    if (stock?.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                    if (stock?.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1 || stock.market_type_name !== marketName) {
                         return <></>;
                     }
 

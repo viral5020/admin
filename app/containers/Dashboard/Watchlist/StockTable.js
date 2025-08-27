@@ -153,7 +153,7 @@ const logoCss = {
   // width: '1.7rem',
 }
 
-function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handleBidAskClick, showToast, handleStar, setRemoveMarket }) {
+function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handleBidAskClick, showToast, handleStar, setRemoveMarket, marketName, }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   const isDarkMode = theme.palette.mode === 'dark';
@@ -460,7 +460,11 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
             <TableHeader columnData={columnData} />
             <TableBody>
               {dummyData?.map((stock, idx) => {
-                if (stock.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                // console.log('QQQ stock marketName', stock, marketName);
+                // if (stock.market_type_name !== marketName)
+                //   return false;
+
+                if (stock.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1 || stock.market_type_name !== marketName) {
                   return false;
                 }
                 return (

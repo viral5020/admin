@@ -7,6 +7,7 @@ import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 import { clone } from 'lodash';
 import axiosInstance from '../API/axiosconfig';
+import { fetchOptionsAPI } from '../API/API';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -33,15 +34,17 @@ const ClientMasterBrokerFilter = ({
 
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
-        try {
-            const { data } = await axiosInstance.post(url, params);
-            const results = data.results;
-            // console.log('TTT results', results);
-            setter(Array.isArray(results) ? results : []);
-        } catch (err) {
-            console.error(`Error fetching from ${url}`, err);
-            setter([]);
-        }
+        // try {
+        //     const { data } = await axiosInstance.post(url, params);
+        //     const results = data.results;
+        //     // console.log('TTT results', results);
+        //     setter(Array.isArray(results) ? results : []);
+        // } catch (err) {
+        //     console.error(`Error fetching from ${url}`, err);
+        //     setter([]);
+        // }
+        const data = await fetchOptionsAPI(url, params);
+        setter(Array.isArray(data) ? data : []);
     };
 
     useEffect(() => {

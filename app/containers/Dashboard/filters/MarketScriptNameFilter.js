@@ -6,6 +6,7 @@ import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 import { forex_comex_market } from '../helpers/utilFunc';
 import axiosInstance from '../API/axiosconfig';
+import { fetchOptionsAPI } from '../API/API';
 
 
 const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScriptMultiSelect = false, isForex, showMarket = true, showScript = true }) => {
@@ -54,14 +55,16 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
   };
 
   async function fetchOptions(url, params, setter) {
-    try {
-      const { data } = await axiosInstance.post(url, params); // POST request with body
-      const results = data.results;
-      setter(Array.isArray(results) ? results : []);
-    } catch (err) {
-      console.error(`Error fetching from ${url}`, err);
-      setter([]);
-    }
+    // try {
+    //   const { data } = await axiosInstance.post(url, params); // POST request with body
+    //   const results = data.results;
+    //   setter(Array.isArray(results) ? results : []);
+    // } catch (err) {
+    //   console.error(`Error fetching from ${url}`, err);
+    //   setter([]);
+    // }
+    const data = await fetchOptionsAPI(url, params);
+    setter(Array.isArray(data) ? data : []);
   };
 
 

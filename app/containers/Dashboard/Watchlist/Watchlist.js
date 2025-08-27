@@ -452,6 +452,8 @@ function Watchlist() {
   const [buySellPopup, setBuySellPopup] = useState(null);
   const [tabIndex, setTabIndex] = useState(null);
 
+  const [marketNames, setMarketNames] = useState([]);
+
   useEffect(() => {
     // console.log('!!! dummyData', dummyData);
     if (Boolean(buySellPopup)) {
@@ -478,7 +480,11 @@ function Watchlist() {
   ];
 
   // Manage expanded state for all sections
-  const [expanded, setExpanded] = useState(() => new Set(sections.map(s => s.key)));
+  const [expanded, setExpanded] = useState(() => new Set(marketNames));
+
+  useEffect(() => {
+    setExpanded(() => new Set(marketNames));
+  }, [marketNames])
 
   const toggleExpand = (key) => {
     setExpanded(prev => {
@@ -593,6 +599,7 @@ function Watchlist() {
         ltp: dataItem.LastTradePrice != undefined ? dataItem.LastTradePrice : "0",
         quantity: coinItem.quantity != undefined ? coinItem.quantity : "0",
         market_watch_id: coinItem.market_watch_id,
+        market_type_name: coinItem.market_type_name,
         script_expiry_id: coinItem.script_expiry_id,
         script_id: coinItem.script_id,
         market_type_id: coinItem.market_type_id,
@@ -624,12 +631,16 @@ function Watchlist() {
       const dd = isFavoritePage ? aa.filter(item => item.isFavorite) : aa;
       // console.log('WWW dd', dd);
       setDummyData(dd);
+      let arr = []
       data.scripts.forEach(script => {
         // console.log('QQQ script', script);
         socket.emit("addMarketWatch", {
           product: getScriptKey(script), // Assuming script_name is the key you want to emit
         });
+        arr.push(script.market_type_name);
       });
+      const withOutDuplicates = [...new Set(arr)];
+      setMarketNames(withOutDuplicates)
     } catch (error) {
       console.log('error', error);
     }
@@ -789,11 +800,11 @@ function Watchlist() {
       />}
       {/* <StockTable /> */}
       <Box>
-        {sections.map((section, index) => (
-          <Box key={section.key} mb={2} mt={setisFavoritePage ? 2 : 0}>
+        {marketNames.map((marketName, index) => (
+          <Box key={marketName} mb={2} mt={setisFavoritePage ? 2 : 0}>
             <Accordion
-              expanded={expanded.has(section.key)}
-              onChange={() => toggleExpand(section.key)}
+              expanded={expanded.has(marketName)}
+              onChange={() => toggleExpand(marketName)}
               sx={{
                 // border: '2px solid red',
                 // '& .MuiAccordionSummary-root': {
@@ -809,7 +820,7 @@ function Watchlist() {
                 <Box display="flex" alignItems="center" gap={1}>
                   {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {section.title}
+                    {marketName}
                   </Typography>
                 </Box>
               </AccordionSummary>
@@ -821,6 +832,7 @@ function Watchlist() {
                     // isStockOpen={isStockOpenInMobile}
                     dummyData={dummyData}
                     setDummyData={setDummyData}
+                    marketName={marketName}
                     isDarkMode={isDarkMode}
                     handleBidAskClick={handleBidAskClick}
                     // setBuySellPopup={setBuySellPopup}
@@ -836,6 +848,7 @@ function Watchlist() {
                     setIsStockOpen={setIsStockOpen}
                     setDummyData={setDummyData}
                     dummyData={dummyData}
+                    marketName={marketName}
                     handleBidAskClick={handleBidAskClick}
                     // setBuySellPopup={setBuySellPopup}
                     // buySellPopup={buySellPopup}

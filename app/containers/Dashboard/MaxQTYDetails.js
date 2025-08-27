@@ -20,9 +20,10 @@ import {
   Chip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useIsFirstRender } from '@uidotdev/usehooks';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import AddIcon from '@mui/icons-material/Add';
 import { addPosition } from './API/API';
+import Pagination from './filters/Pagination';
 
 const marketChipStyles = {
   NSEEQT: { backgroundColor: "#1976d2", color: "#fff" }, // Blue
@@ -44,10 +45,15 @@ const EditDeleteLogs = () => {
   const [loading, setLoading] = useState(false);
 
   const [searchText, setSearchText] = useState('');
+  const debouncedSearchText = useDebounce(searchText, 800);
+  const [isFilterChange, setIsFilterChange] = useState(false);
 
+  // # Pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
 
   const [userLevels, setUserLevels] = useState([]);
   const [selectedUserLevel, setSelectedUserLevel] = useState('');
@@ -66,9 +72,9 @@ const EditDeleteLogs = () => {
 
   const userType = JSON.parse(sessionStorage.getItem("data"))?.user_type || '';
 
-  const totalPages = Math.ceil(totalRecords / pageSize);
+  // const totalPages = Math.ceil(totalRecords / pageSize);
 
-  const fetchPageData = async (search = '', append = false) => {
+  const fetchPageData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
@@ -81,7 +87,7 @@ const EditDeleteLogs = () => {
           sEcho: 1,
           iDisplayStart: currentPage * pageSize,
           iDisplayLength: pageSize,
-          sSearch: search,
+          sSearch: searchText,
           user_level: selectedUserLevel,
           market_name: marketName,
           script_name: scriptName,
@@ -94,12 +100,13 @@ const EditDeleteLogs = () => {
       );
 
       const newData = response.data.aaData || [];
-      setLogs(prev => append ? [...prev, ...newData] : newData);
+      setLogs(newData);
       setTotalRecords(response.data.iTotalRecords || 0);
     } catch (err) {
       console.error('Failed to fetch logs:', err);
     } finally {
       setLoading(false);
+      setIsFilterChange(false);
     }
   };
 
@@ -158,23 +165,35 @@ const EditDeleteLogs = () => {
   }, [marketName]);
 
   useEffect(() => {
-    !isMobile ? fetchPageData(searchText) : fetchPageData(searchText, true);
+    if (!isFirstRender) {
+      setCurrentPage(0);
+      fetchPageData();
+    }
+  }, [selectedUserLevel]);
+
+
+  // # Pagination useEffects
+  useEffect(() => {
+    fetchPageData();
+  }, []);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
+
+  useEffect(() => {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+  }, [userLevels, debouncedSearchText]);
+
+  useEffect(() => {
+    !isFirstRender && fetchPageData();
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      setCurrentPage(0);
-      if (!isFirstRender) fetchPageData(searchText);
-    }, 500);
-    return () => clearTimeout(delay);
-  }, [searchText]);
+    isFilterChange && !isFirstRender && fetchPageData();
+  }, [isFilterChange])
 
-  useEffect(() => {
-    if (!isFirstRender) {
-      setCurrentPage(0);
-      fetchPageData(searchText);
-    }
-  }, [selectedUserLevel]);
 
   const handleSubmit = async () => {
     // validation & payload building
@@ -497,83 +516,14 @@ const EditDeleteLogs = () => {
 
             )}
 
-            {/* Pagination */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                gap: 1,
-                pt: 2,
-                flexWrap: 'wrap',
-              }}
-            >
-              <Button
-                size="small"
-                disabled={currentPage === 0}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                color="secondary"
-                variant="outlined"
-              >
-                Prev
-              </Button>
-
-              {[...Array(totalPages)].map((_, i) => {
-                if (
-                  i === 0 ||
-                  i === totalPages - 1 ||
-                  (i >= currentPage - 1 && i <= currentPage + 1)
-                ) {
-                  return (
-                    <Button
-                      key={i}
-                      size="small"
-                      variant={i === currentPage ? 'contained' : 'outlined'}
-                      onClick={() => setCurrentPage(i)}
-                      color="secondary"
-                    >
-                      {i + 1}
-                    </Button>
-                  );
-                }
-                if (
-                  (i === 1 && currentPage > 2) ||
-                  (i === totalPages - 2 && currentPage < totalPages - 3)
-                ) {
-                  return (
-                    <Typography key={i} sx={{ color: 'secondary.main' }}>
-                      ...
-                    </Typography>
-                  );
-                }
-                return null;
-              })}
-
-              <Button
-                size="small"
-                disabled={currentPage + 1 >= totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                color="secondary"
-                variant="outlined"
-              >
-                Next
-              </Button>
-              <TextField
-                label="Go to page"
-                type="number"
-                size="small"
-                InputProps={{ inputProps: { min: 1, max: totalPages } }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const page = parseInt(e.target.value, 10) - 1;
-                    if (!isNaN(page) && page >= 0 && page < totalPages) {
-                      setCurrentPage(page);
-                    }
-                  }
-                }}
-                sx={{ width: 100 }}
-              />
-            </Box>
-
+            {/* 🔽 Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
+              setPageSize={setPageSize}
+              pageSize={pageSize}
+            />
 
           </>
         )}
