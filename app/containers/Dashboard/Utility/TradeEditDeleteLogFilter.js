@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react'
 import DateFilter from '../filters/DateFilter'
 import MarketScriptNameFilter from '../filters/MarketScriptNameFilter'
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter'
 import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material'
 
-
 const TradeEditDeleteLogFilter = ({
     setEnd_date,
     setStart_date,
-    setentry_date,
-    setentrybefore_date,
     end_date,
     start_date,
     entry_date,
     entrybefore_date,
+    setentry_date,
+    setentrybefore_date,
     setIs_deleted,
     is_deleted,
     is_updated,
@@ -33,14 +32,6 @@ const TradeEditDeleteLogFilter = ({
     onApply
 }) => {
     const theme = useTheme();
-    const [userType, setUserType] = useState(null);
-
-     useEffect(() => {
-        const rawData = JSON.parse(sessionStorage.getItem("data"));
-        const userTypeValue = parseInt(rawData.user_type, 10);
-        setUserType(userTypeValue);
-      }, []);
-
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
@@ -76,20 +67,20 @@ const TradeEditDeleteLogFilter = ({
                     value={start_date}
                     onChange={setStart_date}
                 />}
-                
+
                 {setentry_date && <DateFilter
                     label="Entry After"
                     value={entry_date}
                     onChange={setentry_date}
                 />}
 
-            
+
                 {setEnd_date && <DateFilter
                     label="To Date"
                     value={end_date}
                     onChange={setEnd_date}
-                />} 
-                
+                />}
+
                 {setentrybefore_date && <DateFilter
                     label="Entry Before"
                     value={entrybefore_date}
@@ -106,16 +97,16 @@ const TradeEditDeleteLogFilter = ({
                 />
 
                 <ClientMasterBrokerFilter
-                    client={userType !== 1 ? client : null}
-                    master={userType !== 1 ? master : null}
+                    client={client}
+                    master={master}
                     broker={broker}
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
 
-                     showClient={userType !== 1 }
+                    showClient={Boolean(setClient)}
                     showBroker={Boolean(setBroker)}
-                     showMaster={userType !== 1}
+                    showMaster={Boolean(setMaster)}
                 />
 
                 {setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
