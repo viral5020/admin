@@ -63,6 +63,7 @@ import Iplistlog from '../Dashboard/Iplistlog';
 import Billfilter from '../Dashboard/Billfilter';
 import Ledgerreport from '../Dashboard/Ledgerreport';
 import Cashledger from '../Dashboard/Cashledger';
+import Bulktrading from '../Dashboard/Utility/Bulktrading';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -113,6 +114,7 @@ function Application(props) {
           <Route path='dashboard/user-edit-log' element={userType === 3 || userType === 4 || userType === 5 ? <Usereditlog /> : <Navigate to="/app" />} />
           <Route path='dashboard/ip-address-log' element={userType !== 2 && userType !== 1 ? <Iplistlog /> : <Navigate to="/app" />} />
           <Route path='dashboard/bill-filter' element={userType !== 2 && userType !== 1 ? <Billfilter /> : <Navigate to="/app" />} />
+          <Route path='dashboard/bulk-trading' element={userType !== 1 && (isForex || isStock) ? <Bulktrading /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

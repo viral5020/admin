@@ -326,23 +326,23 @@ if (userType !== 2) {
     name: 'Utility',
     // icon: 'ion-ios-swap-outline',
     child: [
-      ...(userType !== 1 && (isForex || isStock) 
+      ...(userType !== 1 && (isForex || isStock)
         ? [{
           key: 'bulk-trading',
           name: 'Bulk trading',
-          // link: '/app/dashboard/bulk-trading',
+          link: '/app/dashboard/bulk-trading',
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && userType !== 1 
+      ...(userType !== 2 && userType !== 1
         ? [{
           key: 'bill-filter',
           name: 'Bill filter',
-           link: '/app/dashboard/bill-filter',
+          link: '/app/dashboard/bill-filter',
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && (isForex || isStock) 
+      ...(userType !== 2 && (isForex || isStock)
         ? [{
           key: 'trade-edit-delete-log',
           name: 'Trade edit delete log',
@@ -350,7 +350,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...((userType === 4 || userType === 5) && (isForex || isStock) 
+      ...((userType === 4 || userType === 5) && (isForex || isStock)
         ? [{
           key: 'trade-edit-delete-log-old',
           name: 'Trade edit delete log old',
@@ -358,15 +358,15 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 3 || userType === 4 || userType === 5 
+      ...(userType === 3 || userType === 4 || userType === 5
         ? [{
           key: 'user-edit-log',
           name: 'User edit log',
-           link: '/app/dashboard/user-edit-log',
+          link: '/app/dashboard/user-edit-log',
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && userType !== 1 
+      ...(userType !== 2 && userType !== 1
         ? [{
           key: 'ip-address-log',
           name: 'IP address log',
@@ -374,7 +374,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 4 && userType === 5 
+      ...(userType === 4 && userType === 5
         ? [{
           key: 'admin-login-list',
           name: 'Admin login list',
@@ -382,7 +382,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...( userType === 4 || userType === 5 
+      ...(userType === 4 || userType === 5
         ? [{
           key: 'cash-edit-delete-log',
           name: 'Cash edit delete log',
@@ -398,7 +398,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) 
+      ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
         ? [{
           key: 'cross-trade-log',
           name: 'Cross trade log',
@@ -406,7 +406,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType !== 2 && (isForex || isStock) 
+      ...(userType !== 2 && (isForex || isStock)
         ? [{
           key: 'rejection-log',
           name: 'Rejection log',
@@ -414,7 +414,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-      ...(userType === 4 || userType === 5 
+      ...(userType === 4 || userType === 5
         ? [{
           key: 'valan',
           name: 'Valan',
@@ -422,7 +422,7 @@ if (userType !== 2) {
           icon: 'receipt-outline'
         }]
         : []),
-           ...(userType === 1 
+      ...(userType === 1
         ? [{
           key: 'ledger',
           name: 'Ledger',
@@ -430,7 +430,7 @@ if (userType !== 2) {
           icon: 'time-outline'
         }]
         : []),
-             ...(userType === 3 
+      ...(userType === 3
         ? [{
           key: 'ledger',
           name: 'Ledger Report',
@@ -438,7 +438,7 @@ if (userType !== 2) {
           icon: 'time-outline'
         }]
         : []),
-             ...(userType !== 2 && userType !== 1  
+      ...(userType !== 2 && userType !== 1
         ? [{
           key: 'ledger',
           name: 'Cash Ledger',

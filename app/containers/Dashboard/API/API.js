@@ -170,6 +170,38 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
     return [];
   }
 };
+export const fetchOrders1API = async ({
+  userId,
+  authKey,
+
+  start_end = "",
+  end_date = "",
+  script_full_name = "",
+  tradeType = ""
+}) => {
+  const formData = {
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10,
+    is_app: 1,
+    login_user_id: userId,
+    auth_key: authKey,
+
+    start_end,
+    end_date,
+    script_full_name,
+    tradeType
+  };
+
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
+    return data.aaData || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
+};
+
 
 export const fetchforexOrdersAPI = async ({
   userId,
@@ -1590,6 +1622,45 @@ export const editDeleteLogLogsAPI = async (
   }
 };
 
+export const bulktradingAPI = async ({
+  master_user_id = '',
+  broker_user_id = '',
+  market_type_id = '',
+  script_id = '',
+  user_id = '',
+  start_date = '',
+  end_date = '',
+  noOfTrades = '',
+}) => {
+  const defaultParams = await getDefaultParams();
+
+  const payload = {
+    ...defaultParams,
+    master_user_id,
+    broker_user_id,
+    market_type_id,
+    script_id,
+    user_id,
+    start_date,
+    end_date,
+    noOfTrades
+  };
+
+  try {
+    const response = await axiosInstance.post('ajaxfiles/bulk_trading_report', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch logs:', error);
+    return {
+      status: 'error',
+      data: [],
+      minimum: 0,
+      message: error.message || 'Something went wrong',
+    };
+  }
+};
+
+
 
 export const addAccountAPI = async (payload) => {
   const defaultParams = await getDefaultParams();
@@ -1617,4 +1688,29 @@ export const getMarketScriptForAddAccountAPI = async () => {
   }
   // "status": "error",
   //   "message": "NCDS Intraday Minimum Upline Brokerage is 1",
+};
+
+console.log("API.js runn.......");
+const apiCache = new Map();
+export const fetchOptionsAPI = async (url, params) => {
+  const key = `${url}:${JSON.stringify(params)}`;
+
+  // If we already have cached response, return it
+  if (apiCache.has(key)) {
+    console.log("Returning cached response for:", key);
+    return apiCache.get(key);
+  }
+
+  // Otherwise, call the API
+  try {
+    const { data } = await axiosInstance.post(url, params);
+
+    // Save response in cache
+    apiCache.set(key, data.results);
+
+    return data.results;
+  } catch (err) {
+    console.error(`Error fetching from ${url}`, err);
+    setter([]);
+  }
 };

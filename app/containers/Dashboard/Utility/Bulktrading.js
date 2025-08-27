@@ -1,0 +1,281 @@
+import React, { useEffect, useState } from 'react';
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CircularProgress,
+    InputAdornment,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
+    useTheme,
+    Dialog, DialogTitle, DialogContent, DialogActions
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import TradeEditDeleteLogFilter from './TradeEditDeleteLogFilter';
+import Pagination from '../filters/Pagination';
+import BackToTop from '../helpers/BackToTop';
+import { formatScriptIds } from '../helpers/utilFunc';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
+import { bulktradingAPI, fetchOrders1API } from '../API/API';
+
+const Bulktrading = () => {
+    const theme = useTheme();
+
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 800);
+    const [isFilterChange, setIsFilterChange] = useState(false);
+    const isFirstRender = useIsFirstRender();
+
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    const [market, setMarket] = useState('');
+    const [script, setScript] = useState([]);
+    const [client, setClient] = useState('');
+    const [master, setMaster] = useState('');
+    const [broker, setBroker] = useState('');
+    const [after_date, setafter_date] = useState('');
+    const [before_date, setbefore_date] = useState('');
+
+    const [start_date, setStart_date] = useState('');
+    const [end_date, setEnd_date] = useState('');
+
+    const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
+    const [orders, setOrders] = useState([]);
+    const [tradeLoading, setTradeLoading] = useState(false);
+    const [minimum, setMinimum] = useState('-');
+
+    const rawData = sessionStorage.getItem("data");
+    const parsedData = JSON.parse(rawData);
+    const userType = parseInt(parsedData.user_type, 10);
+
+    const fetchTradeDetails = async (log) => {
+        try {
+            setTradeLoading(true);
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            const result = await fetchOrders1API({
+                userId: dataStored.user_id,
+                authKey: dataStored.auth_key,
+                start_date: log.end_datetime,
+                end_date: log.start_datetime,
+                script_full_name: log.script_name,
+                tradeType: log.trade_type
+            });
+            setOrders(result?.aaData || []);
+            setTradeDialogOpen(true);
+        } catch (error) {
+            console.error("Error fetching trades:", error);
+        } finally {
+            setTradeLoading(false);
+        }
+    };
+
+    const fetchLogs = async () => {
+        try {
+            setLoading(true);
+            const scriptIds = formatScriptIds(script);
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
+            const payload = {
+                is_app: '1',
+                login_user_id: dataStored?.user_id,
+                auth_key: dataStored?.auth_key,
+                master_user_id: master?.id || '',
+                broker_user_id: client?.id || '',
+                market_type_id: market?.id || '',
+                script_id: scriptIds || '',
+                user_id: client?.id || '',
+                start_date: start_date || '',
+                end_date: end_date || '',
+                noOfTrades: '2',
+            };
+            const result = await bulktradingAPI(payload);
+
+            const data = result.data || [];
+            const minimumValue = result.minimum || '-';
+
+            setLogs(data);
+            setTotalRecords(data.length);
+            setMinimum(minimumValue);
+            setIsFilterChange(false);
+        } catch (error) {
+            console.error('Error fetching logs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onFilterApply = () => {
+        setIsFilterChange(true);
+        setCurrentPage(0);
+    };
+
+    useEffect(() => { fetchLogs(); }, []);
+    useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
+    useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
+    useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
+    useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
+
+    return (
+        <Paper sx={{ p: 2, borderRadius: 2 }}>
+            <TradeEditDeleteLogFilter
+                after_date_date={after_date}
+                before_date={before_date}
+                setbefore_date={setbefore_date}
+                setafter_date={setafter_date}
+                market={market}
+                script={script}
+                broker={broker}
+                setScript={setScript}
+                setMarket={setMarket}
+                setBroker={setBroker}
+                client={client}
+                master={master}
+                setClient={setClient}
+                setMaster={setMaster}
+                // isAdminOnly={isAdminOnly}
+                // setIsAdminOnly={setIsAdminOnly}
+                onApply={onFilterApply}
+            />
+
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
+                <TextField
+                    variant="outlined"
+                    placeholder="Search logs..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    size="small"
+                    sx={{ flex: 1, minWidth: 200 }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </Box>
+
+            {logs.length === 0 && !loading && (
+                <Typography textAlign='center'>No Logs Found</Typography>
+            )}
+
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <>
+                    <Box sx={{ maxHeight: '90vh', overflowX: 'auto' }}>
+                        <TableContainer sx={{ maxHeight: '90vh' }}>
+                            <Table stickyHeader size="small" sx={{ minWidth: 1200 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Script Name</TableCell>
+                                        <TableCell>Trade type</TableCell>
+                                        <TableCell>Start date&Time</TableCell>
+                                        <TableCell>End Date&Time</TableCell>
+                                        <TableCell>Trades IDs</TableCell>
+                                        <TableCell>No of Trades</TableCell>
+                                        <TableCell>Minimum</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {logs.map((log, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>
+                                                {log.script_name ?? '-'}
+                                            </TableCell>
+                                            <TableCell sx={{ color: 'black' }}>{log.trade_type ?? '-'}</TableCell>
+                                            <TableCell sx={{ color: 'black', textTransform: 'uppercase' }}>
+                                                {log.start_datetime ?? '-'}
+                                            </TableCell>
+                                            <TableCell sx={{ color: 'black' }}>{log.end_datetime ?? '-'}</TableCell>
+                                            <TableCell sx={{ color: 'black' }}>
+                                                {log.trade_ids?.join(', ') ?? '-'}
+                                            </TableCell>
+                                            <TableCell sx={{ color: 'black', fontWeight: 'bold', cursor: 'pointer' }}
+                                                onClick={() => fetchTradeDetails(log)}>
+                                                {log.no_of_trade ?? '-'}
+                                            </TableCell>
+                                            <TableCell sx={{ color: 'black' }}>{minimum}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+
+                        {/* --- Dialog --- */}
+                        <Dialog open={tradeDialogOpen} onClose={() => setTradeDialogOpen(false)} maxWidth="md" fullWidth>
+                            <DialogTitle>Trades Details</DialogTitle>
+                            <DialogContent>
+                                {tradeLoading ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                        <CircularProgress />
+                                    </Box>
+                                ) : Array.isArray(orders) && orders.length > 0 ? (
+                                    <table style={{ minWidth: "1850px", fontSize: "12px", margin: 0 }}>
+                                        <thead>
+                                            <tr>
+                                                {["Device", "Time", ...(userType !== 1 ? ["Client"] : []), "Script", "B/S", "Order Type", "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
+                                                    <th key={header}>{header}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {orders.map((item, index) => (
+                                                <tr key={item.trd_id || index}>
+                                                    <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                                    <td>{item.trd_matchedtime}</td>
+                                                    {userType !== 1 && <td>{item.client_full_name}</td>}
+                                                    <td>{item.scrp_name}</td>
+                                                    <td>{item.trd_type}</td>
+                                                    <td>{item.trd_type2}</td>
+                                                    <td>{item.trd_qty} ({item.trd_lot})</td>
+                                                    <td>{item.trd_rate}</td>
+                                                    <td>{item.trd_status}</td>
+                                                    <td>{item.trd_time}</td>
+                                                    <td>{item.trd_comm_amnt}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <Typography>No trades found.</Typography>
+                                )}
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => setTradeDialogOpen(false)}>Close</Button>
+                            </DialogActions>
+                        </Dialog>
+                    </Box>
+
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        setCurrentPage={setCurrentPage}
+                        setPageSize={setPageSize}
+                        pageSize={pageSize}
+                    />
+
+                    <BackToTop />
+                </>
+            )}
+        </Paper>
+    );
+};
+
+export default Bulktrading;
