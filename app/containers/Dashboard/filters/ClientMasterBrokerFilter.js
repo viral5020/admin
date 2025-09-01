@@ -16,9 +16,7 @@ const ClientMasterBrokerFilter = ({
     setClient,
     setMaster,
     setBroker,
-    showClient = true,
-    showMaster = true,
-    showBroker = true,
+    isMultipleBroker = false,
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
@@ -31,6 +29,10 @@ const ClientMasterBrokerFilter = ({
     const [userType, setUserType] = useState(0)
 
     const data = sessionStorage.getItem("data");
+
+    useEffect(() => {
+        console.log('broker', broker);
+    }, [broker])
 
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
@@ -89,7 +91,7 @@ const ClientMasterBrokerFilter = ({
             {/* WHEN API WORKS, THEN MAKE IT FUNCTIONAL LIKE SCRIPT NAME'S AUTO COMPLETE */}
 
             {/* (7) Client Name */}
-            {userType != 1 && showClient && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+            {userType != 1 && setClient && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={clientOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
@@ -120,7 +122,7 @@ const ClientMasterBrokerFilter = ({
             </Grid>}
 
             {/* (8) Master Name */}
-            {userType != 1 && showMaster && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+            {userType != 1 && setMaster && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={masterOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
@@ -149,26 +151,57 @@ const ClientMasterBrokerFilter = ({
             </Grid>}
 
             {/* (9) Broker Name */}
-            {showBroker && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+            {setBroker && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
+                    multiple={isMultipleBroker}
                     options={brokerOptions}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                    value={broker || null}
+                    // value={broker || null}
+                    value={Array.isArray(broker) ? broker : (broker || null)}
                     // isOptionEqualToValue={(option, value) => {
                     //     if (!value || Object.keys(value).length === 0) return false; // empty object case
                     //     return option?.text === value?.text;
                     // }}
-                    inputValue={broker?.text || ''}
+                    filterSelectedOptions={isMultipleBroker}
+                    // inputValue={broker?.text || ''}
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
-                            setBroker({ text: val });
+                            // setBroker({ text: val });
                             handleFetch(val, 'broker');
                         }
                     }}
                     onChange={(e, val) => setBroker(val)}
-                    onBlur={() => {
-                        const matched = brokerOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === broker?.text);
-                        (!matched) && setBroker(null);
+                    // onBlur={() => {
+                    //     const matched = brokerOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === broker?.text);
+                    //     (!matched) && setBroker(null);
+                    // }}
+                    renderOption={(props, option) => {
+                        const optionText = typeof option === 'string' ? option : option.text;
+                        const isSelected = Array.isArray(broker)
+                            ? broker.some(
+                                (item) =>
+                                    (typeof item === 'string' ? item : item.text) === optionText
+                            )
+                            : (typeof broker === 'string' ? broker : broker?.text) === optionText;
+
+                        return (
+                            <li
+                                {...props}
+                                style={{
+                                    backgroundColor: isSelected
+                                        ? isDarkMode
+                                            ? '#333'
+                                            : '#e0f7fa'
+                                        : 'inherit',
+                                    color: isSelected ? '#999' : 'inherit',
+                                    pointerEvents: isSelected ? 'none' : 'auto',
+                                    opacity: isSelected ? 0.6 : 1,
+                                }}
+                                aria-disabled={isSelected}
+                            >
+                                {optionText}
+                            </li>
+                        );
                     }}
                     renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Broker" size="small" sx={inputBoxStyle} />}
                     noOptionsText="No Broker found"

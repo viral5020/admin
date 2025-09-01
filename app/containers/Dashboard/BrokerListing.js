@@ -26,11 +26,13 @@ import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const BrokerListing = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isFirstRender = useIsFirstRender();
+  const navigate = useNavigate();
 
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -565,6 +567,10 @@ const BrokerListing = () => {
           "&:hover": {
             backgroundColor: "#fb8c00", // darker orange
           },
+        }}
+        onClick={() => {
+          console.log('row', row);
+          navigate("/app/dashboard/Edit-Account", { state: { userId: row.fetch_user_id } })
         }}
       >
         E

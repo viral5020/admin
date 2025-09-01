@@ -91,6 +91,10 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
     }
   };
 
+  useEffect(() => {
+    console.log('script', script);
+  }, [script])
+
   return (
     <>
       {/* (5) Market Name */}
@@ -151,6 +155,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
         <Autocomplete
           multiple={isScriptMultiSelect}
           // disabled={isScriptNameDisable}
+          disableCloseOnSelect={isScriptMultiSelect}
           options={scriptOptions}
           getOptionLabel={(option) =>
             typeof option === 'string' ? option : option?.text || ''

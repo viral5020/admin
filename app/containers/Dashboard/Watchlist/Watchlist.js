@@ -465,10 +465,10 @@ function Watchlist() {
   function handleBidAskClick(dataArray, columnName) {
     if (columnName === 'bidRate') {
       setBuySellPopup({ ...dataArray });
-      setTabIndex(0);
+      setTabIndex(1);
     } else if (columnName === 'askRate') {
       setBuySellPopup({ ...dataArray });
-      setTabIndex(1);
+      setTabIndex(0);
     }
   }
 

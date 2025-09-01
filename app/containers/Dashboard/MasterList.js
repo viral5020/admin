@@ -26,11 +26,13 @@ import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const Userlisting = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isFirstRender = useIsFirstRender();
+  const navigate = useNavigate();
 
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -525,22 +527,26 @@ const Userlisting = () => {
         CL
       </Button>,
       <Button
-             key="status"
-             variant="contained"
-             size="small"
-             sx={{
-               minWidth: 30,
-               p: "4px",
-               m: "2px",
-               backgroundColor: "#ff9800", // orange 500
-               color: "#fff",
-               "&:hover": {
-                 backgroundColor: "#fb8c00", // darker orange
-               },
-             }}
-           >
-             E
-           </Button>
+        key="status"
+        variant="contained"
+        size="small"
+        sx={{
+          minWidth: 30,
+          p: "4px",
+          m: "2px",
+          backgroundColor: "#ff9800", // orange 500
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#fb8c00", // darker orange
+          },
+        }}
+        onClick={() => {
+          console.log('row', row);
+          navigate("/app/dashboard/Edit-Account", { state: { userId: row.user_id } })
+        }}
+      >
+        E
+      </Button>
     );
 
     if (dataStored.user_type === 4) {

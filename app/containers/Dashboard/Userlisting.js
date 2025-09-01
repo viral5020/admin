@@ -34,8 +34,10 @@ import { Divider } from "@mui/material";
 import { RadioGroup } from "@mui/material";
 import { FormControlLabel } from "@mui/material";
 import { Radio } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Userlisting = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isFirstRender = useIsFirstRender();
@@ -92,21 +94,21 @@ const Userlisting = () => {
   const [investorDialogOpen, setInvestorDialogOpen] = useState(false);
   const [investorData, setInvestorData] = useState(null);
   const [loginPassword, setLoginPassword] = useState("");
-  const [investorPassword, setInvestorPassword] = useState(""); 
+  const [investorPassword, setInvestorPassword] = useState("");
   const [passwordErrors, setPasswordErrors] = useState({});
 
   const [removeInvestorDialogOpen, setRemoveInvestorDialogOpen] = useState(false);
 
-   const [open2, setOpen2] = useState(false);
+  const [open2, setOpen2] = useState(false);
   const [userDetails2, setUserDetails2] = useState(null);
   const [loading2, setLoading2] = useState(false);
 
-  const [userLevels, setUserLevels] = useState([]); 
-    const [marketTypes, setMarketTypes] = useState([]); 
-    const [Mcxscript, setMcxscript] = useState([]);
-    const [BrokerList, setBrokerList] = useState([]);
+  const [userLevels, setUserLevels] = useState([]);
+  const [marketTypes, setMarketTypes] = useState([]);
+  const [Mcxscript, setMcxscript] = useState([]);
+  const [BrokerList, setBrokerList] = useState([]);
 
-   const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     userType: "1",          // example initial value
     orderOutsideHighLow: "",
     applyAutoSquare: "",
@@ -494,37 +496,37 @@ const Userlisting = () => {
     setLedgerDetails([]);
   };
 
-const handleClickOpen2 = async (row) => {
+  const handleClickOpen2 = async (row) => {
     setOpen2(true);
     setLoading2(true);
 
     try {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        console.log("Stored data:", dataStored);
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      console.log("Stored data:", dataStored);
 
-        const response = await axios.post(
-            "http://128.199.126.171/~goldorg/ajaxfiles/view_user_details",
-            {
-                is_app: "1",
-                login_user_id: dataStored?.user_id,
-                auth_key: dataStored?.auth_key,
-                user_id: row.user_id,
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+      const response = await axios.post(
+        "http://128.199.126.171/~goldorg/ajaxfiles/view_user_details",
+        {
+          is_app: "1",
+          login_user_id: dataStored?.user_id,
+          auth_key: dataStored?.auth_key,
+          user_id: row.user_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-        console.log("API response:", response.data);
-        setUserDetails2(response.data);
+      console.log("API response:", response.data);
+      setUserDetails2(response.data);
     } catch (error) {
-        console.error("Failed to fetch user details", error);
+      console.error("Failed to fetch user details", error);
     } finally {
-        setLoading2(false);
+      setLoading2(false);
     }
-};
+  };
 
 
   const handleClose2 = () => {
@@ -594,24 +596,25 @@ const handleClickOpen2 = async (row) => {
       >
         CL
       </Button>,
-       <Button
-              key="status"
-              variant="contained"
-              size="small"
-              sx={{
-                minWidth: 30,
-                p: "4px",
-                m: "2px",
-                backgroundColor: "#ff9800", // orange 500
-                color: "#fff",
-                "&:hover": {
-                  backgroundColor: "#fb8c00", // darker orange
-                },
-              }}
-              onClick={() => handleClickOpen2 (row)}
-            >
-              E
-            </Button>
+      <Button
+        key="status"
+        variant="contained"
+        size="small"
+        sx={{
+          minWidth: 30,
+          p: "4px",
+          m: "2px",
+          backgroundColor: "#ff9800", // orange 500
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#fb8c00", // darker orange
+          },
+        }}
+        // onClick={() => handleClickOpen2 (row)}
+        onClick={() => navigate("/app/dashboard/Edit-Account", { state: { userId: row.user_id } })}
+      >
+        E
+      </Button>
 
     );
 
@@ -1020,376 +1023,269 @@ const handleClickOpen2 = async (row) => {
         </DialogActions>
       </Dialog>
 
- <Dialog open={open2} onClose={handleClose2} maxWidth="lg" fullWidth>
-      <DialogTitle>Account / Additional Details</DialogTitle>
-      <DialogContent>
-        {formData.userType === "1" && (
-          <>
-            <Divider sx={{ mb: 2 }} />
+      <Dialog open={open2} onClose={handleClose2} maxWidth="lg" fullWidth>
+        <DialogTitle>Account / Additional Details</DialogTitle>
+        <DialogContent>
+          {formData.userType === "1" && (
+            <>
+              <Divider sx={{ mb: 2 }} />
 
-            {/* ================= ACCOUNT DETAILS ================= */}
-            <div style={{ padding: 12 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                ACCOUNT DETAILS
-              </Typography>
+              {/* ================= ACCOUNT DETAILS ================= */}
+              <div style={{ padding: 12 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  ACCOUNT DETAILS
+                </Typography>
 
-              <Grid container spacing={2}>
-                {/* Order Outside of High Low */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>Order Outside of High Low</Typography>
-                    <RadioGroup
-                      row
-                      value={formData.orderOutsideHighLow}
-                      onChange={(e) =>
-                        handleChange("orderOutsideHighLow", e.target.value)
-                      }
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
+                <Grid container spacing={2}>
+                  {/* Order Outside of High Low */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>Order Outside of High Low</Typography>
+                      <RadioGroup
+                        row
+                        value={formData.orderOutsideHighLow}
+                        onChange={(e) =>
+                          handleChange("orderOutsideHighLow", e.target.value)
+                        }
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Apply Auto Square */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>Apply Auto Square</Typography>
+                      <RadioGroup
+                        row
+                        value={formData.applyAutoSquare}
+                        onChange={(e) => handleChange("applyAutoSquare", e.target.value)}
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Intra Day Auto Square */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>Intra Day Auto Square</Typography>
+                      <RadioGroup
+                        row
+                        value={formData.intradayAutoSquare}
+                        onChange={(e) => handleChange("intradayAutoSquare", e.target.value)}
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Only Position Squareoff */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>Only Position Squareoff</Typography>
+                      <RadioGroup
+                        row
+                        value={formData.onlyPositionSquareoff}
+                        onChange={(e) =>
+                          handleChange("onlyPositionSquareoff", e.target.value)
+                        }
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* MTM Linked with Ledger */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>MTM Linked with Ledger (Stock)</Typography>
+                      <RadioGroup
+                        row
+                        value={FormData.mtmLinkedLedger}
+                        onChange={(e) => handleChange("mtmLinkedLedger", e.target.value)}
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Apply Auto Square Forex/Comex */}
+                  <Grid item xs={4}>
+                    <FormControl fullWidth>
+                      <Typography>Apply Auto Square (Forex/Comex)</Typography>
+                      <RadioGroup
+                        row
+                        value={formData.applyAutoSquareForex}
+                        onChange={(e) =>
+                          handleChange("applyAutoSquareForex", e.target.value)
+                        }
+                      >
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Other TextFields */}
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Close Alert Margin (Forex/Comex)"
+                      value={formData.closeAlertMarginForex}
+                      onChange={(e) => handleChange("closeAlertMarginForex", e.target.value)}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Broker Name</InputLabel>
+                      <Select
+                        multiple
+                        value={formData.brokerName || []}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, brokerName: e.target.value }))
+                        }
+                        MenuProps={{
+                          disablePortal: true,
+                          anchorOrigin: { vertical: "bottom", horizontal: "left" },
+                          transformOrigin: { vertical: "top", horizontal: "left" },
+                          PaperProps: { style: { maxHeight: 200 } },
+                        }}
+                      >
+                        {BrokerList.map((broker) => (
+                          <MenuItem key={broker.broker_id} value={broker.broker_id}>
+                            {broker.broker_name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Loss Alert Percentage (Forex/Comex)"
+                      value={formData.lossAlertPercentageForex}
+                      onChange={(e) => handleChange("lossAlertPercentageForex", e.target.value)}
+                    />
+                  </Grid>
+
+                  {/* Row 2 */}
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Loss Alert Percentage"
+                      value={formData.lossAlertPercentage}
+                      onChange={(e) => handleChange("lossAlertPercentage", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Close Alert Margin"
+                      value={formData.closeAlertMargin}
+                      onChange={(e) => handleChange("closeAlertMargin", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Min Rate Stop Amount"
+                      value={formData.minRateStopAmount}
+                      onChange={(e) => handleChange("minRateStopAmount", e.target.value)}
+                    />
+                  </Grid>
+
+                  {/* Row 3 */}
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Short Trade Avoid"
+                      value={formData.shortTradeAvoid}
+                      onChange={(e) => handleChange("shortTradeAvoid", e.target.value)}
+                    />
+                  </Grid>
                 </Grid>
+              </div>
 
-                {/* Apply Auto Square */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>Apply Auto Square</Typography>
-                    <RadioGroup
-                      row
-                      value={formData.applyAutoSquare}
-                      onChange={(e) => handleChange("applyAutoSquare", e.target.value)}
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+              <Divider sx={{ my: 2 }} />
 
-                {/* Intra Day Auto Square */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>Intra Day Auto Square</Typography>
-                    <RadioGroup
-                      row
-                      value={formData.intradayAutoSquare}
-                      onChange={(e) => handleChange("intradayAutoSquare", e.target.value)}
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+              {/* ================= ADDITIONAL DETAILS ================= */}
+              <div style={{ padding: 12 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  ADDITIONAL DETAILS
+                </Typography>
 
-                {/* Only Position Squareoff */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>Only Position Squareoff</Typography>
-                    <RadioGroup
-                      row
-                      value={formData.onlyPositionSquareoff}
-                      onChange={(e) =>
-                        handleChange("onlyPositionSquareoff", e.target.value)
-                      }
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+                <Grid container spacing={2}>
+                  {/* User Level */}
+                  <Grid item xs={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>User Level</InputLabel>
+                      <Select
+                        value={FormData.userLevel || ""}
+                        onChange={(e) => setFormData({ ...formData, userLevel: e.target.value })}
+                      >
+                        {userLevels.map((lvl) => (
+                          <MenuItem key={lvl.user_level_id} value={lvl.user_level_id}>
+                            {lvl.user_level_name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
 
-                {/* MTM Linked with Ledger */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>MTM Linked with Ledger (Stock)</Typography>
-                    <RadioGroup
-                      row
-                      value={FormData.mtmLinkedLedger}
-                      onChange={(e) => handleChange("mtmLinkedLedger", e.target.value)}
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+                  {/* Market Type Section */}
+                  <Grid item xs={12}>
+                    <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
+                      Market Type
+                    </Typography>
 
-                {/* Apply Auto Square Forex/Comex */}
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <Typography>Apply Auto Square (Forex/Comex)</Typography>
-                    <RadioGroup
-                      row
-                      value={formData.applyAutoSquareForex}
-                      onChange={(e) =>
-                        handleChange("applyAutoSquareForex", e.target.value)
-                      }
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+                    {marketTypes.map((mkt) => {
+                      const isChecked = formData.marketType.includes(mkt.market_type_id);
+                      const config = marketConfig[mkt.market_type_name];
+                      const selectedBrokers = formData.brokerName || [];
 
-                {/* Other TextFields */}
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Close Alert Margin (Forex/Comex)"
-                    value={formData.closeAlertMarginForex}
-                    onChange={(e) => handleChange("closeAlertMarginForex", e.target.value)}
-                  />
-                </Grid>
+                      return (
+                        <div key={mkt.market_type_id} style={{ marginBottom: "16px" }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={isChecked}
+                                onChange={() =>
+                                  handleCheckboxChange("marketType", mkt.market_type_id)
+                                }
+                              />
+                            }
+                            label={mkt.market_type_name}
+                          />
 
-                <Grid item xs={12} md={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Broker Name</InputLabel>
-                    <Select
-                      multiple
-                      value={formData.brokerName || []}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, brokerName: e.target.value }))
-                      }
-                      MenuProps={{
-                        disablePortal: true,
-                        anchorOrigin: { vertical: "bottom", horizontal: "left" },
-                        transformOrigin: { vertical: "top", horizontal: "left" },
-                        PaperProps: { style: { maxHeight: 200 } },
-                      }}
-                    >
-                      {BrokerList.map((broker) => (
-                        <MenuItem key={broker.broker_id} value={broker.broker_id}>
-                          {broker.broker_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Loss Alert Percentage (Forex/Comex)"
-                    value={formData.lossAlertPercentageForex}
-                    onChange={(e) => handleChange("lossAlertPercentageForex", e.target.value)}
-                  />
-                </Grid>
-
-                {/* Row 2 */}
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Loss Alert Percentage"
-                    value={formData.lossAlertPercentage}
-                    onChange={(e) => handleChange("lossAlertPercentage", e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Close Alert Margin"
-                    value={formData.closeAlertMargin}
-                    onChange={(e) => handleChange("closeAlertMargin", e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Min Rate Stop Amount"
-                    value={formData.minRateStopAmount}
-                    onChange={(e) => handleChange("minRateStopAmount", e.target.value)}
-                  />
-                </Grid>
-
-                {/* Row 3 */}
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Short Trade Avoid"
-                    value={formData.shortTradeAvoid}
-                    onChange={(e) => handleChange("shortTradeAvoid", e.target.value)}
-                  />
-                </Grid>
-              </Grid>
-            </div>
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* ================= ADDITIONAL DETAILS ================= */}
-            <div style={{ padding: 12 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                ADDITIONAL DETAILS
-              </Typography>
-
-              <Grid container spacing={2}>
-                {/* User Level */}
-                <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>User Level</InputLabel>
-                    <Select
-                      value={FormData.userLevel || ""}
-                      onChange={(e) => setFormData({ ...formData, userLevel: e.target.value })}
-                    >
-                      {userLevels.map((lvl) => (
-                        <MenuItem key={lvl.user_level_id} value={lvl.user_level_id}>
-                          {lvl.user_level_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Market Type Section */}
-                <Grid item xs={12}>
-                  <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
-                    Market Type
-                  </Typography>
-
-                  {marketTypes.map((mkt) => {
-                    const isChecked = formData.marketType.includes(mkt.market_type_id);
-                    const config = marketConfig[mkt.market_type_name];
-                    const selectedBrokers = formData.brokerName || [];
-
-                    return (
-                      <div key={mkt.market_type_id} style={{ marginBottom: "16px" }}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              size="small"
-                              checked={isChecked}
-                              onChange={() =>
-                                handleCheckboxChange("marketType", mkt.market_type_id)
-                              }
-                            />
-                          }
-                          label={mkt.market_type_name}
-                        />
-
-                        {isChecked && config && (
-                          <div style={{ marginLeft: "32px", marginTop: "12px" }}>
-                            {/* MCXFUT Specific Section */}
-                            {mkt.market_type_name === "MCXFUT" && (
-                              <Grid container spacing={2}>
-                                {/* Margin Limit */}
-                                <Grid item xs={6}>
-                                  <TextField
-                                    label="Margin Limit"
-                                    size="small"
-                                    type="number"
-                                    fullWidth
-                                    value={formData.marketOptions?.MCXFUT?.marginLimit || ""}
-                                    onChange={(e) =>
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        marketOptions: {
-                                          ...prev.marketOptions,
-                                          MCXFUT: {
-                                            ...prev.marketOptions?.MCXFUT,
-                                            marginLimit: e.target.value,
-                                          },
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </Grid>
-
-                                {/* Script Limit */}
-                                <Grid item xs={6}>
-                                  <TextField
-                                    label="Script Limit"
-                                    size="small"
-                                    type="number"
-                                    fullWidth
-                                    value={formData.marketOptions?.MCXFUT?.scriptLimit || ""}
-                                    onChange={(e) =>
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        marketOptions: {
-                                          ...prev.marketOptions,
-                                          MCXFUT: {
-                                            ...prev.marketOptions?.MCXFUT,
-                                            scriptLimit: e.target.value,
-                                          },
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </Grid>
-
-                                {/* Commission Type */}
-                                <Grid item xs={6}>
-                                  <FormControl fullWidth size="small">
-                                    <InputLabel>Commission Type</InputLabel>
-                                    <Select
-                                      value={formData.marketOptions?.MCXFUT?.commissionType || ""}
-                                      onChange={(e) =>
-                                        setFormData((prev) => ({
-                                          ...prev,
-                                          marketOptions: {
-                                            ...prev.marketOptions,
-                                            MCXFUT: {
-                                              ...prev.marketOptions?.MCXFUT,
-                                              commissionType: e.target.value,
-                                            },
-                                          },
-                                        }))
-                                      }
-                                    >
-                                      <MenuItem value={1}>Script Wise (1)</MenuItem>
-                                      <MenuItem value={0}>Same for All (0)</MenuItem>
-                                    </Select>
-                                  </FormControl>
-                                </Grid>
-
-                                {/* Brokerage Type */}
-                                <Grid item xs={6}>
-                                  <FormControl fullWidth size="small">
-                                    <InputLabel>Brokerage Type</InputLabel>
-                                    <Select
-                                      value={formData.marketOptions?.MCXFUT?.brokerageType || ""}
-                                      onChange={(e) =>
-                                        setFormData((prev) => ({
-                                          ...prev,
-                                          marketOptions: {
-                                            ...prev.marketOptions,
-                                            MCXFUT: {
-                                              ...prev.marketOptions?.MCXFUT,
-                                              brokerageType: e.target.value,
-                                            },
-                                          },
-                                        }))
-                                      }
-                                    >
-                                      <MenuItem value={2}>Percentage Wise</MenuItem>
-                                      <MenuItem value={0}>MCX Lot Wise</MenuItem>
-                                    </Select>
-                                  </FormControl>
-                                </Grid>
-
-                                {/* Global Commission Fields */}
-                                {[
-                                  "deliveryCommission",
-                                  "intradayCommission",
-                                  "deliveryBrokerCommission",
-                                  "intradayBrokerCommission",
-                                ].map((key) => (
-                                  <Grid item xs={6} key={key}>
+                          {isChecked && config && (
+                            <div style={{ marginLeft: "32px", marginTop: "12px" }}>
+                              {/* MCXFUT Specific Section */}
+                              {mkt.market_type_name === "MCXFUT" && (
+                                <Grid container spacing={2}>
+                                  {/* Margin Limit */}
+                                  <Grid item xs={6}>
                                     <TextField
-                                      label={{
-                                        deliveryCommission: "Delivery Commission",
-                                        intradayCommission: "Intraday Commission",
-                                        deliveryBrokerCommission: "Delivery Broker Commission",
-                                        intradayBrokerCommission: "Intraday Broker Commission",
-                                      }[key]}
+                                      label="Margin Limit"
                                       size="small"
                                       type="number"
                                       fullWidth
-                                      value={formData.marketOptions?.MCXFUT?.[key] || ""}
+                                      value={formData.marketOptions?.MCXFUT?.marginLimit || ""}
                                       onChange={(e) =>
                                         setFormData((prev) => ({
                                           ...prev,
@@ -1397,58 +1293,165 @@ const handleClickOpen2 = async (row) => {
                                             ...prev.marketOptions,
                                             MCXFUT: {
                                               ...prev.marketOptions?.MCXFUT,
-                                              [key]: e.target.value,
+                                              marginLimit: e.target.value,
                                             },
                                           },
                                         }))
                                       }
                                     />
                                   </Grid>
-                                ))}
 
-                                {/* Script-wise MCX */}
-                                {formData.marketOptions?.MCXFUT?.commissionType === 1 &&
-                                  config.hasMcxScripts &&
-                                  Mcxscript.map((script) => (
-                                    <Grid
-                                      item
-                                      xs={12}
-                                      key={script.script_id}
-                                      style={{ marginBottom: "12px" }}
-                                    >
-                                      <FormControlLabel
-                                        control={<Checkbox size="small" checked disabled />}
-                                        label={script.script_name}
+                                  {/* Script Limit */}
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      label="Script Limit"
+                                      size="small"
+                                      type="number"
+                                      fullWidth
+                                      value={formData.marketOptions?.MCXFUT?.scriptLimit || ""}
+                                      onChange={(e) =>
+                                        setFormData((prev) => ({
+                                          ...prev,
+                                          marketOptions: {
+                                            ...prev.marketOptions,
+                                            MCXFUT: {
+                                              ...prev.marketOptions?.MCXFUT,
+                                              scriptLimit: e.target.value,
+                                            },
+                                          },
+                                        }))
+                                      }
+                                    />
+                                  </Grid>
+
+                                  {/* Commission Type */}
+                                  <Grid item xs={6}>
+                                    <FormControl fullWidth size="small">
+                                      <InputLabel>Commission Type</InputLabel>
+                                      <Select
+                                        value={formData.marketOptions?.MCXFUT?.commissionType || ""}
+                                        onChange={(e) =>
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            marketOptions: {
+                                              ...prev.marketOptions,
+                                              MCXFUT: {
+                                                ...prev.marketOptions?.MCXFUT,
+                                                commissionType: e.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
+                                      >
+                                        <MenuItem value={1}>Script Wise (1)</MenuItem>
+                                        <MenuItem value={0}>Same for All (0)</MenuItem>
+                                      </Select>
+                                    </FormControl>
+                                  </Grid>
+
+                                  {/* Brokerage Type */}
+                                  <Grid item xs={6}>
+                                    <FormControl fullWidth size="small">
+                                      <InputLabel>Brokerage Type</InputLabel>
+                                      <Select
+                                        value={formData.marketOptions?.MCXFUT?.brokerageType || ""}
+                                        onChange={(e) =>
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            marketOptions: {
+                                              ...prev.marketOptions,
+                                              MCXFUT: {
+                                                ...prev.marketOptions?.MCXFUT,
+                                                brokerageType: e.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
+                                      >
+                                        <MenuItem value={2}>Percentage Wise</MenuItem>
+                                        <MenuItem value={0}>MCX Lot Wise</MenuItem>
+                                      </Select>
+                                    </FormControl>
+                                  </Grid>
+
+                                  {/* Global Commission Fields */}
+                                  {[
+                                    "deliveryCommission",
+                                    "intradayCommission",
+                                    "deliveryBrokerCommission",
+                                    "intradayBrokerCommission",
+                                  ].map((key) => (
+                                    <Grid item xs={6} key={key}>
+                                      <TextField
+                                        label={{
+                                          deliveryCommission: "Delivery Commission",
+                                          intradayCommission: "Intraday Commission",
+                                          deliveryBrokerCommission: "Delivery Broker Commission",
+                                          intradayBrokerCommission: "Intraday Broker Commission",
+                                        }[key]}
+                                        size="small"
+                                        type="number"
+                                        fullWidth
+                                        value={formData.marketOptions?.MCXFUT?.[key] || ""}
+                                        onChange={(e) =>
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            marketOptions: {
+                                              ...prev.marketOptions,
+                                              MCXFUT: {
+                                                ...prev.marketOptions?.MCXFUT,
+                                                [key]: e.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
                                       />
                                     </Grid>
                                   ))}
-                              </Grid>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </Grid>
-              </Grid>
-            </div>
-          </>
-        )}
-      </DialogContent>
 
-      <DialogActions>
-        <Button onClick={handleClose2}>Cancel</Button>
-        <Button
-          onClick={() => {
-            console.log(formData);
-            handleClose2();
-          }}
-          variant="contained"
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+                                  {/* Script-wise MCX */}
+                                  {formData.marketOptions?.MCXFUT?.commissionType === 1 &&
+                                    config.hasMcxScripts &&
+                                    Mcxscript.map((script) => (
+                                      <Grid
+                                        item
+                                        xs={12}
+                                        key={script.script_id}
+                                        style={{ marginBottom: "12px" }}
+                                      >
+                                        <FormControlLabel
+                                          control={<Checkbox size="small" checked disabled />}
+                                          label={script.script_name}
+                                        />
+                                      </Grid>
+                                    ))}
+                                </Grid>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </Grid>
+                </Grid>
+              </div>
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleClose2}>Cancel</Button>
+          <Button
+            onClick={() => {
+              console.log(formData);
+              handleClose2();
+            }}
+            variant="contained"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

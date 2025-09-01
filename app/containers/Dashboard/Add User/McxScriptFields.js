@@ -55,7 +55,7 @@ const McxScriptFields = ({
                     >
                         {["deliveryComm", "intraComm"].map((key) => {
                             const value =
-                                userFormData.marketOptions?.[mkt.market_type_id]?.scripts?.[script.script_id]?.[key] || "";
+                                userFormData.marketOptions?.[mkt.market_type_id]?.scripts?.[script.script_id]?.[key] ?? "";
 
                             return (
                                 <Grid item xs={6} key={key}>
