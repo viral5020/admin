@@ -154,25 +154,26 @@ const TradeEditDeleteLogFilter = ({
                 </Grid>
                 }
                 {/* Apply Button */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <Button
-                        fullWidth
-                        onClick={() => onApply()}
-                        sx={{
-                            backgroundColor: theme.palette.secondary.main,
-                            color: theme.palette.secondary.contrastText,
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
-                        }}
-                    >
-                        Apply
-                    </Button>
-                </Grid>
-
+                {onApply &&
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <Button
+                            fullWidth
+                            onClick={() => onApply()}
+                            sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                color: theme.palette.secondary.contrastText,
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                textTransform: 'none',
+                                '&:hover': {
+                                    backgroundColor: theme.palette.secondary.dark,
+                                },
+                            }}
+                        >
+                            Apply
+                        </Button>
+                    </Grid>
+                }
             </Grid >
         </>
     )
