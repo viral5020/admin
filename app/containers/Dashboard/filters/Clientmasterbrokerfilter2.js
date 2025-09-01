@@ -16,20 +16,23 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
     const userTypes = [
         { label: 'Client', value: 'client' },
         { label: 'Master', value: 'master' },
-        { label: 'Broker', value: 'broker' }
+        { label: 'Broker', value: 'broker' },
     ];
 
     const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
 
-    // Fetch options based on selected user type
-    const fetchOptions = async (type) => {
+    // Fetch options based on selected user type & search text
+    const fetchOptions = async (type, searchText = "") => {
         if (!type) return;
+
         const url = 'http://128.199.126.171/~goldorg/ajaxfiles';
         const params = {
             is_app: 1,
             login_user_id: dataStored.user_id,
             auth_key: dataStored.auth_key,
+            term: searchText,
         };
+
         let endpoint = '';
         switch (type) {
             case 'client':
@@ -45,6 +48,7 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
             default:
                 return;
         }
+
         try {
             const { data } = await axiosInstance.post(url + endpoint, params);
             setOptions(Array.isArray(data.results) ? data.results : []);
@@ -54,8 +58,10 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
         }
     };
 
+    // fetch initial options when userType changes
     useEffect(() => {
-        if (userType) fetchOptions(userType.value);
+        if (userType) fetchOptions(userType.value, ""); // empty string initially
+        setSelectedOption(null);
     }, [userType]);
 
     return (
@@ -66,10 +72,7 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
                     options={userTypes}
                     getOptionLabel={(option) => option.label}
                     value={userType}
-                    onChange={(e, val) => {
-                        setUserType(val);
-                        setSelectedOption(null); // reset dependent dropdown
-                    }}
+                    onChange={(e, val) => setUserType(val)}
                     renderInput={(params) => (
                         <TextField {...params} label="Select User Type" size="small" sx={inputBoxStyle} />
                     )}
@@ -81,17 +84,22 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
             <Grid item xs={12} sm={6} md={3}>
                 <Autocomplete
                     options={options}
-                    getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
+                    getOptionLabel={(option) => typeof option === "string" ? option : option?.text || ""}
                     value={selectedOption}
                     onChange={(e, val) => {
                         setSelectedOption(val);
-                        setValue(val); // pass selected option to parent if needed
+                        setValue(val);
+                    }}
+                    onInputChange={(e, newInputValue, reason) => {
+                        if (userType && reason === 'input') {
+                            fetchOptions(userType.value, newInputValue); // 🔥 pass typed text
+                        }
                     }}
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label={userType ? userType.label : 'Select Option'}
-                            placeholder={userType ? `Start typing ${userType.label}` : 'Select User Type first'}
+                            label={userType ? userType.label : "Select Option"}
+                            placeholder={userType ? `Start typing ${userType.label}` : "Select User Type first"}
                             size="small"
                             sx={inputBoxStyle}
                         />

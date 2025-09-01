@@ -408,10 +408,10 @@ if (userType !== 2) {
         : []),
       ...(userType !== 2 && (isForex || isStock)
         ? [{
-          key: 'rejection-log',
-          name: 'Rejection log',
-          // link: '/app/dashboard/rejection-log',
-          icon: 'receipt-outline'
+          key: 'Rejection Logs',
+          name: 'Rejection Logs',
+          link: '/app/dashboard/rejection-logs',
+          icon: 'close-circle-outline'
         }]
         : []),
       ...(userType === 4 || userType === 5
@@ -420,6 +420,59 @@ if (userType !== 2) {
           name: 'Valan',
           // link: '/app/dashboard/valan',
           icon: 'receipt-outline'
+        }]
+        : []),
+      // ...(userType !== 2 && userType !== 1
+      //   ? [{
+      //     key: 'ledger',
+      //     name: 'Cash Ledger',
+      //     link: '/app/Cash-ledger',
+      //     icon: 'time-outline'
+      //   }]
+      //   : []),
+    ]
+  });
+}
+
+if (userType === 1 || userType === 3 || userType === 2 || userType === 4 || userType === 5) {
+  menu.push({
+    key: 'Accounts',
+    name: 'Accounts',
+    // icon: 'ion-ios-swap-outline',
+    child: [
+      ...(userType !== 2 && userType !== 1
+        ? [{
+          key: 'ledger',
+          name: 'Cash Ledger',
+          link: '/app/Cash-ledger',
+          icon: 'time-outline'
+        }]
+        : []),
+
+      // ...(userType !== 2 && userType !== 1
+      //   ? [{
+      //     key: 'master_listing',
+      //     name: 'Cash Entry',
+      //     link: '/app/dashboard/Cash-Entry',
+      //     icon: 'receipt-outline'
+      //   }]
+      //   : []),
+
+      ...(userType !== 2 && userType !== 1
+        ? [{
+          key: 'forexpositions',
+          name: 'Cash Entry',
+          link: '/app/dashboard/Cash-Entry',
+          icon: 'cube-outline'
+        }]
+        : []),
+
+      ...(userType === 3   //pdf link for 4 and 5 user type
+        ? [{
+          key: 'add_account',
+          name: 'Trial Balance',
+          link: '/app/dashboard/Trial-balance',
+          icon: 'add-circle-outline'
         }]
         : []),
       ...(userType === 1
@@ -438,17 +491,145 @@ if (userType !== 2) {
           icon: 'time-outline'
         }]
         : []),
-      ...(userType !== 2 && userType !== 1
-        ? [{
-          key: 'ledger',
-          name: 'Cash Ledger',
-          link: '/app/Cash-ledger',
-          icon: 'time-outline'
-        }]
-        : []),
     ]
   });
 }
+
+
+
+
+
+
+
+
+
+
+
+if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
+  menu.push({
+    key: 'Setting',
+    name: 'Setting',
+    child: [
+      // visible if userType !== 3
+      ...(userType !== 3 ? [{
+        key: 'ledger',
+        name: 'Script Setting',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'Add Script',
+        name: 'Add Script',
+        icon: 'receipt-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'Add Expiry',
+        name: 'Add Expiry',
+        icon: 'cube-outline'
+      }] : []),
+
+      // only userType === 3
+      ...(userType === 3 ? [{
+        key: 'Edit Expiry',
+        name: 'Edit Expiry',
+        icon: 'add-circle-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'Edit Script',
+        name: 'Edit Script',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'Banned Scripts',
+        name: 'Banned Scripts',
+        link: '/app/dashboard/Banned-scripts',
+        icon: 'ban-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'CNBD Awaaz',
+        name: 'CNBD Awaaz',
+        icon: 'time-outline'
+      }] : []),
+
+      // always visible
+      {
+        key: 'order limit',
+        name: 'order limit',
+        link: '/app/dashboard/Order-Limit',
+        icon: 'time-outline'
+      },
+
+      // visible if forex/stock enabled
+      ...((isForex || isStock) ? [{
+        key: 'block/allowed',
+        name: 'block/allowed  Script',
+        link: '/app/dashboard/Blocket-Allowed-Script',
+        icon: 'time-outline'
+      }] : []),
+
+      // only userType === 4
+      ...(userType === 4 && (isForex || isStock) ? [{
+        key: 'stop future trading',
+        name: 'stop future trading',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 && (isForex || isStock) ? [{
+        key: 'split script',
+        name: 'split script',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'NSEOPT management',
+        name: 'NSEOPT management',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 4 ? [{
+        key: 'MARQUEE',
+        name: 'MARQUEE',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'expiry validation',
+        name: 'expiry validation',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType === 4 || userType === 5 ? [{
+        key: 'notifcation',
+        name: 'notifcation',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType === 4 || userType === 5 ? [{
+        key: 'level import',
+        name: 'level import',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType === 3 ? [{
+        key: 'master qty setting',
+        name: 'master qty setting',
+        icon: 'time-outline'
+      }] : []),
+
+      ...(userType !== 3 ? [{
+        key: 'time setting',
+        name: 'time setting',
+        icon: 'time-outline'
+      }] : []),
+    ]
+  });
+}
+
+
 
 
 // bulk tradind 1 na ho to dekhega and is stock or is forex
@@ -479,20 +660,9 @@ if (userType !== 2) {
 //   icon: 'create-outline'
 // });
 
-userType !== 2 && menu.push({
-  key: 'Banned Scripts',
-  name: 'Banned Scripts',
-  link: '/app/dashboard/Banned-scripts',
-  icon: 'ban-outline'
-});
 
 
-menu.push({
-  key: 'Rejection Logs',
-  name: 'Rejection Logs',
-  link: '/app/dashboard/rejection-logs',
-  icon: 'close-circle-outline'
-});
+
 
 
 module.exports = menu;

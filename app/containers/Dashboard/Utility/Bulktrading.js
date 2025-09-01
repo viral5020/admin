@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
     Box,
     Button,
-    Card,
-    CardContent,
     CircularProgress,
     InputAdornment,
     Paper,
@@ -16,7 +14,10 @@ import {
     TextField,
     Typography,
     useTheme,
-    Dialog, DialogTitle, DialogContent, DialogActions
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TradeEditDeleteLogFilter from './TradeEditDeleteLogFilter';
@@ -25,13 +26,14 @@ import BackToTop from '../helpers/BackToTop';
 import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import { bulktradingAPI, fetchOrders1API } from '../API/API';
+import axios from 'axios';
 
 const Bulktrading = () => {
     const theme = useTheme();
 
+    // Main table states
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
-
     const [searchText, setSearchText] = useState('');
     const debouncedSearchText = useDebounce(searchText, 800);
     const [isFilterChange, setIsFilterChange] = useState(false);
@@ -42,6 +44,7 @@ const Bulktrading = () => {
     const [totalRecords, setTotalRecords] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    // Filter states
     const [market, setMarket] = useState('');
     const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
@@ -49,19 +52,29 @@ const Bulktrading = () => {
     const [broker, setBroker] = useState('');
     const [after_date, setafter_date] = useState('');
     const [before_date, setbefore_date] = useState('');
-
     const [start_date, setStart_date] = useState('');
     const [end_date, setEnd_date] = useState('');
 
+    // Trade dialog states
     const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
     const [orders, setOrders] = useState([]);
     const [tradeLoading, setTradeLoading] = useState(false);
     const [minimum, setMinimum] = useState('-');
 
+    // Bulk trade list states
+    const [noOfTrades, setNoOfTrades] = useState(2); // default value
+    const [bulkTrades, setBulkTrades] = useState([]);
+    const [bulkLoading, setBulkLoading] = useState(false);
+
     const rawData = sessionStorage.getItem("data");
     const parsedData = JSON.parse(rawData);
     const userType = parseInt(parsedData.user_type, 10);
 
+    useEffect(() => {
+        console.log('QQQQ orders', orders);
+    }, [orders])
+
+    // --- Fetch trades for dialog ---
     const fetchTradeDetails = async (log) => {
         try {
             setTradeLoading(true);
@@ -74,7 +87,7 @@ const Bulktrading = () => {
                 script_full_name: log.script_name,
                 tradeType: log.trade_type
             });
-            setOrders(result?.aaData || []);
+            setOrders(result || []);
             setTradeDialogOpen(true);
         } catch (error) {
             console.error("Error fetching trades:", error);
@@ -83,6 +96,7 @@ const Bulktrading = () => {
         }
     };
 
+    // --- Fetch main logs ---
     const fetchLogs = async () => {
         try {
             setLoading(true);
@@ -100,7 +114,7 @@ const Bulktrading = () => {
                 user_id: client?.id || '',
                 start_date: start_date || '',
                 end_date: end_date || '',
-                noOfTrades: '2',
+                noOfTrades: noOfTrades || '',
             };
             const result = await bulktradingAPI(payload);
 
@@ -118,12 +132,67 @@ const Bulktrading = () => {
         }
     };
 
-    const onFilterApply = () => {
-        setIsFilterChange(true);
-        setCurrentPage(0);
+    // --- Fetch bulk trade list ---
+    const fetchBulkTradeList = async () => {
+        if (!noOfTrades || parseInt(noOfTrades, 10) <= 0) {
+            alert("Number of orders is required and must be positive");
+            return;
+        }
+        try {
+            setBulkLoading(true);
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            const payload = {
+                user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                noOfTrades: noOfTrades
+            };
+            const result = await axios.post(
+                `http://128.199.126.171/~goldorg/datatables/bulk_trade_list`,
+                payload
+            );
+            setBulkTrades(result.data?.data || []);
+        } catch (error) {
+            console.error("Error fetching bulk trade list:", error);
+        } finally {
+            setBulkLoading(false);
+        }
     };
 
-    useEffect(() => { fetchLogs(); }, []);
+    const onFilterApply = () => {
+        if (!noOfTrades || parseInt(noOfTrades, 10) <= 0) {
+            alert("Please enter a valid number of orders before applying filter.");
+            return;
+        }
+        setIsFilterChange(true);
+        setCurrentPage(0);
+
+        // Call API to save/update bulk trading settings
+        const saveBulkSettings = async () => {
+            try {
+                const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                await axios.post(
+                    `http://128.199.126.171/~goldorg/ajaxfiles/setting/set_bulk_trading`,
+                    {
+                        user_id: dataStored.user_id,
+                        auth_key: dataStored.auth_key,
+                        no_of_trade: noOfTrades
+                    }
+                );
+                // Fetch bulk trade list after saving settings
+                fetchBulkTradeList();
+            } catch (err) {
+                console.error("Error saving bulk trading settings:", err);
+            }
+        };
+        saveBulkSettings();
+    };
+
+    // --- Effects ---
+    useEffect(() => {
+        fetchLogs();          // main logs
+        fetchBulkTradeList(); // bulk trade list with default noOfTrades
+    }, []);
+
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
     useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
@@ -131,6 +200,20 @@ const Bulktrading = () => {
 
     return (
         <Paper sx={{ p: 2, borderRadius: 2 }}>
+
+            {/* Bulk trade list input */}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+                <TextField
+                    type="number"
+                    label="Number of Orders"
+                    value={noOfTrades}
+                    onChange={(e) => setNoOfTrades(e.target.value)}
+                    size="small"
+                    InputProps={{ inputProps: { min: 1 } }}
+                />
+            </Box>
+
+            {/* Filter */}
             <TradeEditDeleteLogFilter
                 after_date_date={after_date}
                 before_date={before_date}
@@ -146,11 +229,10 @@ const Bulktrading = () => {
                 master={master}
                 setClient={setClient}
                 setMaster={setMaster}
-                // isAdminOnly={isAdminOnly}
-                // setIsAdminOnly={setIsAdminOnly}
                 onApply={onFilterApply}
             />
 
+            {/* Search */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
                 <TextField
                     variant="outlined"
@@ -169,10 +251,8 @@ const Bulktrading = () => {
                 />
             </Box>
 
-            {logs.length === 0 && !loading && (
-                <Typography textAlign='center'>No Logs Found</Typography>
-            )}
-
+            {/* Main logs table */}
+            {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                     <CircularProgress />
@@ -196,17 +276,11 @@ const Bulktrading = () => {
                                 <TableBody>
                                     {logs.map((log, i) => (
                                         <TableRow key={i}>
-                                            <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>
-                                                {log.script_name ?? '-'}
-                                            </TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>{log.script_name ?? '-'}</TableCell>
                                             <TableCell sx={{ color: 'black' }}>{log.trade_type ?? '-'}</TableCell>
-                                            <TableCell sx={{ color: 'black', textTransform: 'uppercase' }}>
-                                                {log.start_datetime ?? '-'}
-                                            </TableCell>
+                                            <TableCell sx={{ color: 'black', textTransform: 'uppercase' }}>{log.start_datetime ?? '-'}</TableCell>
                                             <TableCell sx={{ color: 'black' }}>{log.end_datetime ?? '-'}</TableCell>
-                                            <TableCell sx={{ color: 'black' }}>
-                                                {log.trade_ids?.join(', ') ?? '-'}
-                                            </TableCell>
+                                            <TableCell sx={{ color: 'black' }}>{log.trade_ids?.join(', ') ?? '-'}</TableCell>
                                             <TableCell sx={{ color: 'black', fontWeight: 'bold', cursor: 'pointer' }}
                                                 onClick={() => fetchTradeDetails(log)}>
                                                 {log.no_of_trade ?? '-'}
@@ -218,7 +292,7 @@ const Bulktrading = () => {
                             </Table>
                         </TableContainer>
 
-                        {/* --- Dialog --- */}
+                        {/* Trade dialog */}
                         <Dialog open={tradeDialogOpen} onClose={() => setTradeDialogOpen(false)} maxWidth="md" fullWidth>
                             <DialogTitle>Trades Details</DialogTitle>
                             <DialogContent>
@@ -236,19 +310,20 @@ const Bulktrading = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {orders.map((item, index) => (
-                                                <tr key={item.trd_id || index}>
-                                                    <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                                    <td>{item.trd_matchedtime}</td>
-                                                    {userType !== 1 && <td>{item.client_full_name}</td>}
-                                                    <td>{item.scrp_name}</td>
-                                                    <td>{item.trd_type}</td>
-                                                    <td>{item.trd_type2}</td>
-                                                    <td>{item.trd_qty} ({item.trd_lot})</td>
-                                                    <td>{item.trd_rate}</td>
-                                                    <td>{item.trd_status}</td>
-                                                    <td>{item.trd_time}</td>
-                                                    <td>{item.trd_comm_amnt}</td>
+                                            {orders.map((log, i) => (
+                                                <tr key={log.trd_id || i}>
+                                                    <td dangerouslySetInnerHTML={{ __html: log.device_type_html }} />
+                                                    <td>{log.trd_matchedtime}</td>
+                                                    {userType !== 1 && <td>{log.client_full_name}</td>}
+                                                    <td>{log.scrp_name}</td>
+                                                    <td>{log.trd_type}</td>
+                                                    <td>{log.trd_type2}</td>
+                                                    {/* <td>{log.trd_qty} ({item.trd_lot})</td> */}
+                                                    <td>{log.trd_qty}</td>
+                                                    <td>{log.trd_rate}</td>
+                                                    <td>{log.trd_status}</td>
+                                                    <td>{log.trd_time}</td>
+                                                    <td>{log.trd_comm_amnt}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -263,6 +338,7 @@ const Bulktrading = () => {
                         </Dialog>
                     </Box>
 
+                    {/* Pagination */}
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}

@@ -170,6 +170,8 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
     return [];
   }
 };
+
+
 export const fetchOrders1API = async ({
   userId,
   authKey,
@@ -294,6 +296,93 @@ export const fetchRejectionLogsAPI = async (
 ) => {
   try {
     const response = await axiosInstance.post("/datatables/rejection_log_view", {
+      is_app: "1",
+      login_user_id: userId,
+      auth_key: authKey,
+      sEcho: 1,
+
+      isTodayTrade: filterType,
+      sSearch: searchQuery,
+
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
+
+      // market_type_id: marketId,
+      // script_id: scriptId,
+      // user_id: clientId,
+      // master_user_id: masterId,
+
+      // end_date: end_date,
+      // start_date: start_date,
+    });
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching rejection logs:", error);
+    return [];
+  }
+};
+
+
+export const fetchOrderlimitAPI = async (
+  userId,
+  authKey,
+  filterType = "",
+  searchQuery = "",
+  pageSize,
+  currentPage,
+  marketId,
+  scriptId,
+  clientId,
+  masterId,
+  end_date,
+  start_date,
+) => {
+  try {
+    const response = await axiosInstance.post("datatables/client_order_limit_list", {
+      is_app: "1",
+      login_user_id: userId,
+      auth_key: authKey,
+      sEcho: 1,
+
+      isTodayTrade: filterType,
+      sSearch: searchQuery,
+
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
+
+      // market_type_id: marketId,
+      // script_id: scriptId,
+      // user_id: clientId,
+      // master_user_id: masterId,
+
+      // end_date: end_date,
+      // start_date: start_date,
+    });
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching rejection logs:", error);
+    return [];
+  }
+};
+
+export const fetchBlockedAllowedAPI = async (
+  userId,
+  authKey,
+  filterType = "",
+  searchQuery = "",
+  pageSize,
+  currentPage,
+  marketId,
+  scriptId,
+  clientId,
+  masterId,
+  end_date,
+  start_date,
+) => {
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/list_client_block_script_list", {
       is_app: "1",
       login_user_id: userId,
       auth_key: authKey,
@@ -1489,6 +1578,103 @@ export const cashledgerAPI = async (
   }
 };
 
+export const cashEntryAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+  cash_add
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+    cash_add,
+  };
+
+  try {
+    const response = await axiosInstance.post("datatables/cash_ledger_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const JVEntryAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  date,       // must match backend
+  date_to,    // must match backend
+  is_deleted,
+  is_updated,
+  is_admin,
+  cash_add
+) => {
+  const defaultParams = await getDefaultParams(); // should include is_app, login_user_id, auth_key
+
+  const formData = {
+    ...defaultParams,   // contains: is_app, login_user_id, auth_key
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    date,      // ✅ correct key
+    date_to,   // ✅ correct key
+
+    is_deleted,
+    is_updated,
+    is_admin,
+    cash_add,
+  };
+
+  try {
+    const response = await axiosInstance.post("ajaxfiles/fetch_jv_entries", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch JV entries:", error);
+    throw error;
+  }
+};
+
+
+
 export const BillfilterAPI = async ({
   valan_id = valanId?.id,
   amount = "",
@@ -1712,5 +1898,29 @@ export const fetchOptionsAPI = async (url, params) => {
   } catch (err) {
     console.error(`Error fetching from ${url}`, err);
     setter([]);
+  }
+};
+
+export const editAccountAPI = async (payload) => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const { data } = await axiosInstance.post("/ajaxfiles/edit_user", { ...defaultParams, ...payload });
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return error;
+  }
+};
+
+export const getUserDetailsAPI = async (user_id) => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const { data } = await axiosInstance.post("/ajaxfiles/view_user_details", { ...defaultParams, user_id });
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching getUserDetails:", error);
+    return error;
   }
 };

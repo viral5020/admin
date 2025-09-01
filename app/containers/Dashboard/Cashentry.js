@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import "react-toastify/dist/ReactToastify.css";
+import AddIcon from "@mui/icons-material/Add";
+
 import {
     Box,
     Button,
@@ -42,8 +44,9 @@ import BackToTop from './helpers/BackToTop';
 import { cashEntryAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
+import { Tooltip } from '@mui/material';
 
-const Cashledger = () => {
+const Cashentry = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -89,6 +92,10 @@ const Cashledger = () => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [logToDelete, setLogToDelete] = useState(null);
 
+    const [entryUserBalance, setEntryUserBalance] = useState(null);
+    const [balanceLoading, setBalanceLoading] = useState(false);
+    const [userBalance, setuserBalance] = useState(false);
+
     const [editingLog, setEditingLog] = useState(null);
     const [editValue, setEditValue] = useState({
         user: null,
@@ -131,6 +138,7 @@ const Cashledger = () => {
                 is_deleted,
                 is_updated,
                 isAdminOnly,
+                "cash_add"
             );
 
             const data = Array.isArray(result?.aaData) ? result.aaData : [];
@@ -150,6 +158,52 @@ const Cashledger = () => {
             console.error("Failed to fetch logs:", err);
             setLogs([]);
             setTotalRecords(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEntrySubmit = async () => {
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored) return toast.error("Session expired. Please log in again.");
+        if (!entryUser?.id || !entryDate || entryType === "" || !entryAmount) {
+            return toast.error("Please fill all required fields!");
+        }
+
+        const payload = {
+            is_app: "1",
+            login_user_id: dataStored.user_id,
+            auth_key: dataStored.auth_key,
+            user_id: entryUser.id,
+            type: entryType,
+            date1: entryDate,
+            amount: entryAmount,
+            remarks: entryRemark || "",
+        };
+
+        try {
+            setLoading(true);
+            const response = await axios.post(
+                'http://128.199.126.171/~goldorg/ajaxfiles/add_receipt',
+                payload
+            );
+
+            if (response.data?.success) {
+                toast.success("Entry added successfully!");
+                // Reset form and close
+                setFormOpen(false);
+                setEntryUser(null);
+                setEntryDate("");
+                setEntryType("");
+                setEntryAmount("");
+                setEntryRemark("");
+                fetchLogs(); // Refresh table
+            } else {
+                toast.error(response.data?.message || "Failed to add entry.");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong while adding the entry.");
         } finally {
             setLoading(false);
         }
@@ -247,6 +301,35 @@ const Cashledger = () => {
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 
+    useEffect(() => {
+        if (!entryUser?.id) {
+            setEntryUserBalance(null);
+            return;
+        }
+
+        const fetchBalance = async () => {
+            setBalanceLoading(true);
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            if (!dataStored) return toast.error("Session expired. Please log in again.");
+            try {
+                const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", {
+                    is_app: "1",
+                    login_user_id: dataStored.user_id,
+                    auth_key: dataStored.auth_key,
+                    user_id: entryUser.id,
+                });
+                setEntryUserBalance(response.data?.balance ?? 0);
+            } catch (err) {
+                console.error("Error fetching balance:", err);
+                setEntryUserBalance(0);
+            } finally {
+                setBalanceLoading(false);
+            }
+        };
+
+        fetchBalance();
+    }, [entryUser]);
+
     return (
         <>
             {/* Desktop */}
@@ -256,14 +339,122 @@ const Cashledger = () => {
                         <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
                     </Box>
                     <Box sx={{ mb: 3 }}>
-                        <TradeEditDeleteLogFilter
-                            entry_date={entry_date}
-                            setentry_date={setentry_date}
-                            entrybefore_date={entrybefore_date}
-                            setentrybefore_date={setentrybefore_date}
-                            onApply={onFilterApply}
-                        />
+                        {/* Filter + Add Cash Entry icon button together */}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <TradeEditDeleteLogFilter
+                                entry_date={entry_date}
+                                setentry_date={setentry_date}
+                                entrybefore_date={entrybefore_date}
+                                setentrybefore_date={setentrybefore_date}
+                                onApply={onFilterApply}
+                            />
+
+                            {/* Add Cash Entry Button directly after Apply */}
+                            <Tooltip title={formOpen ? "Close Form" : "Add Cash Entry"}>
+                                <IconButton
+                                    onClick={() => setFormOpen((prev) => !prev)}
+                                    sx={{
+                                        ml: 0.5, // very small margin to avoid sticking visually
+                                        bgcolor: "secondary.main",
+                                        color: "white",
+                                        "&:hover": { bgcolor: "secondary.dark" },
+                                        borderRadius: 1.5,
+                                    }}
+                                >
+                                    <AddIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+
+                        <Collapse in={formOpen}>
+                            <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
+                                {/* Filter and Current Balance side by side */}
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                    <ClientMasterBrokerFilter2
+                                        value={entryUser}
+                                        setValue={setEntryUser}
+                                        sx={{ flex: 1 }}
+                                    />
+                                    <Box
+                                        sx={{
+                                            px: 3,
+                                            py: 1,
+                                            borderRadius: 1,
+                                            fontWeight: 600,
+                                            bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
+                                            color: "common.white",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 0.5,
+                                            width: "fit-content",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                                            Balance:
+                                        </Typography>
+                                        <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
+                                    </Box>
+                                </Box>
+
+                                {/* Form fields */}
+                                <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                                    <Grid item xs={12} sm={3}>
+                                        <TextField
+                                            type="date"
+                                            label="Date"
+                                            InputLabelProps={{ shrink: true }}
+                                            value={entryDate}
+                                            onChange={(e) => setEntryDate(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <TextField
+                                            select
+                                            label="Type"
+                                            value={entryType}
+                                            onChange={(e) => setEntryType(e.target.value)}
+                                            fullWidth
+                                        >
+                                            <MenuItem value={1}>Receipt</MenuItem>
+                                            <MenuItem value={0}>Payment</MenuItem>
+                                        </TextField>
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <TextField
+                                            type="number"
+                                            label="Amount"
+                                            value={entryAmount}
+                                            onChange={(e) => setEntryAmount(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <TextField
+                                            label="Remark"
+                                            value={entryRemark}
+                                            onChange={(e) => setEntryRemark(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
+
+                                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        size="small"
+                                        sx={{ borderRadius: 1 }}
+                                        onClick={handleEntrySubmit}
+                                    >
+                                        Submit
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Collapse>
                     </Box>
+
 
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
                         <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
@@ -363,6 +554,54 @@ const Cashledger = () => {
                                     <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
                                 </Box>
                                 <TradeEditDeleteLogFilter entry_date={entry_date} setentry_date={setentry_date} entrybefore_date={entrybefore_date} setentrybefore_date={setentrybefore_date} onApply={onFilterApply} />
+                                <Box sx={{ mb: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={() => setFormOpen(prev => !prev)}
+                                        fullWidth
+                                        sx={{ borderRadius: 1 }}
+                                    >
+                                        {formOpen ? "Close Form" : "Add Cash Entry"}
+                                    </Button>
+                                    <Collapse in={formOpen}>
+                                        <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
+                                            <ClientMasterBrokerFilter2 value={entryUser} setValue={setEntryUser} sx={{ width: "100%" }} />
+                                            {/* Current Balance on the left */}
+                                            <Box
+                                                sx={{
+                                                    px: 3,               // horizontal padding
+                                                    py: 1,            // vertical padding
+                                                    mb: 1,
+                                                    borderRadius: 1,
+                                                    fontWeight: 600,
+                                                    bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
+                                                    color: "common.white",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 0.5,
+                                                    width: "fit-content",
+                                                    whiteSpace: "nowrap",  // prevent wrapping
+                                                }}
+                                            >
+                                                <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                                                    Balance:
+                                                </Typography>
+                                                <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
+                                            </Box>
+                                            <TextField type="date" label="Date" InputLabelProps={{ shrink: true }} value={entryDate} onChange={e => setEntryDate(e.target.value)} fullWidth />
+                                            <TextField select label="Type" value={entryType} onChange={e => setEntryType(e.target.value)} fullWidth>
+                                                <MenuItem value={1}>Receipt</MenuItem>
+                                                <MenuItem value={0}>Payment</MenuItem>
+                                            </TextField>
+                                            <TextField type="number" label="Amount" value={entryAmount} onChange={e => setEntryAmount(e.target.value)} fullWidth />
+                                            <TextField label="Remark" value={entryRemark} onChange={e => setEntryRemark(e.target.value)} fullWidth />
+                                            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+                                                <Button variant="contained" color="secondary" size="small" onClick={handleEntrySubmit}>Submit</Button>
+                                            </Box>
+                                        </Box>
+                                    </Collapse>
+                                </Box>
                             </Box>
                         </Drawer>
 
@@ -453,6 +692,7 @@ const Cashledger = () => {
                         );
                     })}
 
+
                     <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
                         <DialogTitle>Confirm Delete</DialogTitle>
                         <DialogContent>
@@ -491,4 +731,4 @@ const Cashledger = () => {
     );
 };
 
-export default Cashledger
+export default Cashentry;

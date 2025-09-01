@@ -56,7 +56,7 @@ import BannedBlockedScript from '../Dashboard/BannedBlockedScript';
 import Userlisting from '../Dashboard/Userlisting';
 import MasterList from '../Dashboard/MasterList';
 import BrokerListing from '../Dashboard/BrokerListing';
-import Addacount from '../Dashboard/Addacount';
+import Addacount from '../Dashboard/Add User/Addacount';
 import Autosquareuplog from '../Dashboard/Autosquareuplog';
 import Usereditlog from '../Dashboard/Usereditlog';
 import Iplistlog from '../Dashboard/Iplistlog';
@@ -64,6 +64,11 @@ import Billfilter from '../Dashboard/Billfilter';
 import Ledgerreport from '../Dashboard/Ledgerreport';
 import Cashledger from '../Dashboard/Cashledger';
 import Bulktrading from '../Dashboard/Utility/Bulktrading';
+import Cashentry from '../Dashboard/Cashentry';
+import JV from '../Dashboard/JV';
+import Trialbalance from '../Dashboard/Trialbalance';
+import Orderlimit from '../Dashboard/Orderlimit';
+import Blockedallowedscript from '../Dashboard/Blockedallowedscript';
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -115,6 +120,13 @@ function Application(props) {
           <Route path='dashboard/ip-address-log' element={userType !== 2 && userType !== 1 ? <Iplistlog /> : <Navigate to="/app" />} />
           <Route path='dashboard/bill-filter' element={userType !== 2 && userType !== 1 ? <Billfilter /> : <Navigate to="/app" />} />
           <Route path='dashboard/bulk-trading' element={userType !== 1 && (isForex || isStock) ? <Bulktrading /> : <Navigate to="/app" />} />
+
+
+          {/* <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <Cashentry /> : <Navigate to="/app" />} /> */}
+          <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <JV /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Trial-balance' element={userType === 3 ? <Trialbalance /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Order-Limit' element={userType === 3 ? <Orderlimit /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Blocket-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

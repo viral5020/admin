@@ -17,6 +17,7 @@ import {
 import { fetchRejectionLogsAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
+import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 
 
 const RejectionLogs = () => {
@@ -35,6 +36,17 @@ const RejectionLogs = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
+  // Filter states
+  const [market, setMarket] = useState('');
+  const [script, setScript] = useState([]);
+  const [client, setClient] = useState('');
+  const [master, setMaster] = useState('');
+  const [broker, setBroker] = useState('');
+  const [after_date, setafter_date] = useState('');
+  const [before_date, setbefore_date] = useState('');
+  const [End_date, setEnd_date] = useState('');
+  const [Start_date, setStart_date] = useState('');
+
 
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -43,31 +55,31 @@ const RejectionLogs = () => {
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
 
-const fetchPageData = async () => {
-  setLoading(true);
-  const dataStored = JSON.parse(sessionStorage.getItem('data'));
-  const data = await fetchRejectionLogsAPI(
-    dataStored.user_id,
-    dataStored.auth_key,
-    filterType,
-    searchText,
-    pageSize,
-    currentPage,
-  );
+  const fetchPageData = async () => {
+    setLoading(true);
+    const dataStored = JSON.parse(sessionStorage.getItem('data'));
+    const data = await fetchRejectionLogsAPI(
+      dataStored.user_id,
+      dataStored.auth_key,
+      filterType,
+      searchText,
+      pageSize,
+      currentPage,
+    );
 
-  const safeData = Array.isArray(data?.aaData) ? data.aaData : [];
+    const safeData = Array.isArray(data?.aaData) ? data.aaData : [];
 
-  isMobile
-    ? isFilterChange || currentPage === 0
-      ? setLogs(safeData)
-      : setLogs(prev => [...prev, ...safeData])
-    : setLogs(safeData);
+    isMobile
+      ? isFilterChange || currentPage === 0
+        ? setLogs(safeData)
+        : setLogs(prev => [...prev, ...safeData])
+      : setLogs(safeData);
 
-  setTotalRecords(data?.iTotalRecords || 0);
+    setTotalRecords(data?.iTotalRecords || 0);
 
-  setLoading(false);
-  setIsFilterChange(false);
-};
+    setLoading(false);
+    setIsFilterChange(false);
+  };
 
 
   function onFilterApply() {
@@ -116,6 +128,22 @@ const fetchPageData = async () => {
         backgroundColor: theme.palette.background.default,
       }}
     >
+
+      <TradeEditDeleteLogFilter
+        End_date={End_date}
+        Start_date={Start_date}
+        setEnd_date={setEnd_date}
+        setStart_date={setStart_date}
+        market={market}
+        script={script}
+        setScript={setScript}
+        setMarket={setMarket}
+        client={client}
+        master={master}
+        setClient={setClient}
+        setMaster={setMaster}
+        onApply={onFilterApply}
+      />
       {/* Filter + Search */}
       <Box
         sx={{
@@ -340,7 +368,7 @@ const fetchPageData = async () => {
                         {/* <td>
                           {userType !== 1 ? log.full_name : null}
                         </td> */}
-                         {userType !== 1 && <td>{log.full_name}</td>}
+                        {userType !== 1 && <td>{log.full_name}</td>}
                         <td>{log.type}</td>
                         <td>{log.datetime}</td>
                         <td>
