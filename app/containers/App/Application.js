@@ -126,7 +126,7 @@ function Application(props) {
           <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <JV /> : <Navigate to="/app" />} />
           <Route path='dashboard/Trial-balance' element={userType === 3 ? <Trialbalance /> : <Navigate to="/app" />} />
           <Route path='dashboard/Order-Limit' element={userType === 3 ? <Orderlimit /> : <Navigate to="/app" />} />
-          <Route path='dashboard/Blocket-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Blocked-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

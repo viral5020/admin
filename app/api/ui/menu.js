@@ -567,7 +567,7 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
       ...((isForex || isStock) ? [{
         key: 'block/allowed',
         name: 'block/allowed  Script',
-        link: '/app/dashboard/Blocket-Allowed-Script',
+        link: '/app/dashboard/Blocked-Allowed-Script',
         icon: 'time-outline'
       }] : []),
 
