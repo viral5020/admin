@@ -71,6 +71,9 @@ const EditDeleteLogs = () => {
   const [maxBet, setMaxBet] = useState('');
 
   const userType = JSON.parse(sessionStorage.getItem("data"))?.user_type || '';
+  useEffect(() => {
+    console.log('marketName', marketName);
+  }, [marketName]);
 
   // const totalPages = Math.ceil(totalRecords / pageSize);
 
@@ -136,8 +139,8 @@ const EditDeleteLogs = () => {
           auth_key: dataStored?.auth_key,
         });
 
-        const staticMarket = { value: "3", label: "Cricket" };
-        const marketList = Array.isArray(res.data?.market_list) ? res.data.market_list : [];
+        const staticMarket = { value: "3", label: "Cricket", market_type_id: 3, market_type_name: "Cricket" };
+        const marketList = Array.isArray(res.data?.market_type) ? res.data.market_type : [];
         const scriptList = Array.isArray(res.data?.script_list) ? res.data.script_list : [];
 
         const updatedMarkets = [...marketList, staticMarket];
@@ -365,8 +368,8 @@ const EditDeleteLogs = () => {
             <TextField select label="Market" value={marketName}
               onChange={e => setMarketName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
               {marketOptions.map(m =>
-                <MenuItem key={m.value || m.market_name} value={m.value || m.market_name}>
-                  {m.label || m.market_name}
+                <MenuItem key={m.market_type_id} value={m.market_type_id}>
+                  {m.market_type_name}
                 </MenuItem>
               )}
             </TextField>
@@ -380,11 +383,13 @@ const EditDeleteLogs = () => {
               )}
             </TextField>
 
-            {[{ label: 'Position', val: positionLimit, set: setPositionLimit },
-            { label: 'Min Order', val: minOrder, set: setMinOrder },
-            { label: 'Max Order', val: maxOrder, set: setMaxOrder },
-            { label: 'Min Bet', val: minBet, set: setMinBet },
-            { label: 'Max Bet', val: maxBet, set: setMaxBet }].map(({ label, val, set }) => (
+            {[
+              { label: 'Position', val: positionLimit, set: setPositionLimit, isHidden: marketName === 3 },
+              { label: 'Min Order', val: minOrder, set: setMinOrder },
+              { label: 'Max Order', val: maxOrder, set: setMaxOrder },
+              { label: 'Min Bet', val: minBet, set: setMinBet, isHidden: marketName === 3 },
+              { label: 'Max Bet', val: maxBet, set: setMaxBet, isHidden: marketName === 3 }
+            ].map(({ label, val, set, isHidden }) => (
               <TextField
                 key={label}
                 label={label}
@@ -393,7 +398,7 @@ const EditDeleteLogs = () => {
                 onChange={(e) => set(e.target.value)}
                 size="small"
                 fullWidth={isMobile}
-                sx={{ width: isMobile ? '100%' : 150 }}
+                sx={{ width: isMobile ? '100%' : 150, display: Boolean(isHidden) && 'none' }}
               />
             ))}
 
