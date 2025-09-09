@@ -28,12 +28,6 @@ const ClientMasterBrokerFilter = ({
     const [inputBoxStyle, setInputBoxStyle] = useState({});
     const [userType, setUserType] = useState(0)
 
-    const data = sessionStorage.getItem("data");
-
-    useEffect(() => {
-        console.log('broker', broker);
-    }, [broker])
-
     // Utility fetcher
     async function fetchOptions(url, params, setter) {
         // try {
