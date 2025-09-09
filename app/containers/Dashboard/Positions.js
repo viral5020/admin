@@ -70,7 +70,7 @@ const OrderPage1 = ({
     filterShow1 = true,
     setFilterShow1 = () => { }
 }) => {
-    console.log("filterShow=", filterShow);
+    // console.log("filterShow=", filterShow);
     const theme = useTheme();
     // const isDarkMode = theme.palette.mode === 'dark';
     const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
@@ -575,8 +575,8 @@ const OrderPage1 = ({
                         if (args.data.InstrumentIdentifier == "GOLD-I") {
 
                             if (old_rate != args.data.LastTradePrice) {
-                                console.log("args=", args.data.LastTradePrice);
-                                console.log("total old=", totals.totalMTM);
+                                // console.log("args=", args.data.LastTradePrice);
+                                // console.log("total old=", totals.totalMTM);
                             }
                         }
 
@@ -653,7 +653,7 @@ const OrderPage1 = ({
             let selectExpiryTrade = data['script_expiry_id'];
             let selectTradeId = "";
             var str = data['client_script_id'].split("-");
-            let positionUserId = str[str.length - 2];
+            let positionUserId = str[str.length - 1];
 
             setClosetradeData(prvValue => ({
                 ...prvValue,
@@ -1773,6 +1773,9 @@ const OrderPage1 = ({
                                                 fullWidth
                                                 onClick={async () => {
                                                     const payload = {
+                                                        is_app: "1",
+                                                        login_user_id: dataStored?.user_id,
+                                                        auth_key: dataStored?.auth_key,
                                                         market_type_id: selectedRow?.market_type_id ?? 1,
                                                         script_id: selectedRow?.script_id,
                                                         script_expiry_id: selectedRow?.script_expiry_id,
@@ -1831,6 +1834,9 @@ const OrderPage1 = ({
                                                 onClick={async () => {
 
                                                     const payload = {
+                                                        is_app: "1",
+                                                        login_user_id: dataStored?.user_id,
+                                                        auth_key: dataStored?.auth_key,
                                                         market_type_id: selectedRow?.market_type_id ?? 1,
                                                         script_id: selectedRow?.script_id,
                                                         script_expiry_id: selectedRow?.script_expiry_id,
@@ -2260,6 +2266,9 @@ const OrderPage1 = ({
                                                                         fullWidth
                                                                         onClick={async () => {
                                                                             const payload = {
+                                                                                is_app: "1",
+                                                                                login_user_id: dataStored?.user_id,
+                                                                                auth_key: dataStored?.auth_key,
                                                                                 market_type_id: selectedRow?.market_type_id ?? 1,
                                                                                 script_id: selectedRow?.script_id,
                                                                                 script_expiry_id: selectedRow?.script_expiry_id,
@@ -2318,6 +2327,9 @@ const OrderPage1 = ({
                                                                         onClick={async () => {
 
                                                                             const payload = {
+                                                                                is_app: "1",
+                                                                                login_user_id: dataStored?.user_id,
+                                                                                auth_key: dataStored?.auth_key,
                                                                                 market_type_id: selectedRow?.market_type_id ?? 1,
                                                                                 script_id: selectedRow?.script_id,
                                                                                 script_expiry_id: selectedRow?.script_expiry_id,
@@ -2918,6 +2930,9 @@ const OrderPage1 = ({
                                                     fullWidth
                                                     onClick={async () => {
                                                         const payload = {
+                                                            is_app: "1",
+                                                            login_user_id: dataStored?.user_id,
+                                                            auth_key: dataStored?.auth_key,
                                                             market_type_id: selectedRow?.market_type_id ?? 1,
                                                             script_id: selectedRow?.script_id,
                                                             script_expiry_id: selectedRow?.script_expiry_id,
@@ -2976,6 +2991,9 @@ const OrderPage1 = ({
                                                     onClick={async () => {
 
                                                         const payload = {
+                                                            is_app: "1",
+                                                            login_user_id: dataStored?.user_id,
+                                                            auth_key: dataStored?.auth_key,
                                                             market_type_id: selectedRow?.market_type_id ?? 1,
                                                             script_id: selectedRow?.script_id,
                                                             script_expiry_id: selectedRow?.script_expiry_id,
