@@ -105,20 +105,6 @@ const OrderPage1 = ({
         limit1: "0",
     });
 
-    const [closetradeData, setClosetradeData] = useState({
-        market_type_id: "",
-        script_id: "",
-        script_expiry_id: "",
-        trade_type: "",
-        trade_rate: 0,
-        trade_qty: "",
-        trade_lot: "",
-        trade_type_x: "",
-        check_script_name: "",
-        user_id: "",
-        trade_id: "",
-        device_type: 0,
-    });
 
     const rawData = JSON.parse(sessionStorage.getItem("data"));
     const userType = parseInt(rawData?.user_type, 10);
@@ -138,7 +124,25 @@ const OrderPage1 = ({
         return JSON.parse(sessionStorage.getItem("data")) || [];
     });
 
-    const [dataTrade, setdataTrade] = useState(undefined);
+    const [closetradeData, setClosetradeData] = useState({
+        market_type_id: "",
+        script_id: "",
+        script_expiry_id: "",
+        trade_type: "",
+        trade_rate: 0,
+        trade_qty: "",
+        trade_lot: "",
+        trade_type_x: "",
+        check_script_name: "",
+        user_id: "",
+        trade_id: "",
+        device_type: 0,
+        is_app: "1",
+        login_user_id: dataStored?.user_id,
+        auth_key: dataStored?.auth_key,
+    });
+
+    const [dataTrade, SetdataTrade] = useState(undefined);
     const [liveRates, setliveRates] = useState({});
     const selectedOrderSet = useRef();
     const selectTradeTypeSet = useRef("0");
@@ -1772,25 +1776,25 @@ const OrderPage1 = ({
                                             <Button
                                                 fullWidth
                                                 onClick={async () => {
-                                                    const payload = {
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                        market_type_id: selectedRow?.market_type_id ?? 1,
-                                                        script_id: selectedRow?.script_id,
-                                                        script_expiry_id: selectedRow?.script_expiry_id,
-                                                        trade_type: tradeTypeMap[orderType],
-                                                        trade_rate: price,
-                                                        trade_qty: qty,
-                                                        trade_lot: lot,
-                                                        trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                        check_script_name: selectedRow?.script_name,
-                                                        user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                        device_type: 0,
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                    };
+                                                    // const payload = {
+                                                    //     is_app: "1",
+                                                    //     login_user_id: dataStored?.user_id,
+                                                    //     auth_key: dataStored?.auth_key,
+                                                    //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                    //     script_id: selectedRow?.script_id,
+                                                    //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                    //     trade_type: tradeTypeMap[orderType],
+                                                    //     trade_rate: price,
+                                                    //     trade_qty: qty,
+                                                    //     trade_lot: lot,
+                                                    //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                    //     check_script_name: selectedRow?.script_name,
+                                                    //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                    //     device_type: 0,
+                                                    //     is_app: "1",
+                                                    //     login_user_id: dataStored?.user_id,
+                                                    //     auth_key: dataStored?.auth_key,
+                                                    // };
 
                                                     try {
                                                         const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -1798,7 +1802,7 @@ const OrderPage1 = ({
                                                             headers: {
                                                                 "Content-Type": "application/json",
                                                             },
-                                                            body: JSON.stringify(payload),
+                                                            body: JSON.stringify(closetradeData),
                                                         });
 
                                                         const data = await response.json();
@@ -1833,25 +1837,25 @@ const OrderPage1 = ({
                                                 fullWidth
                                                 onClick={async () => {
 
-                                                    const payload = {
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                        market_type_id: selectedRow?.market_type_id ?? 1,
-                                                        script_id: selectedRow?.script_id,
-                                                        script_expiry_id: selectedRow?.script_expiry_id,
-                                                        trade_type: tradeTypeMap[orderType],
-                                                        trade_rate: price,
-                                                        trade_qty: qty,
-                                                        trade_lot: lot,
-                                                        trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                        check_script_name: selectedRow?.script_name,
-                                                        user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                        device_type: 0,
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                    };
+                                                    // const payload = {
+                                                    //     is_app: "1",
+                                                    //     login_user_id: dataStored?.user_id,
+                                                    //     auth_key: dataStored?.auth_key,
+                                                    //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                    //     script_id: selectedRow?.script_id,
+                                                    //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                    //     trade_type: tradeTypeMap[orderType],
+                                                    //     trade_rate: price,
+                                                    //     trade_qty: qty,
+                                                    //     trade_lot: lot,
+                                                    //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                    //     check_script_name: selectedRow?.script_name,
+                                                    //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                    //     device_type: 0,
+                                                    //     is_app: "1",
+                                                    //     login_user_id: dataStored?.user_id,
+                                                    //     auth_key: dataStored?.auth_key,
+                                                    // };
 
                                                     try {
                                                         const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -1859,7 +1863,7 @@ const OrderPage1 = ({
                                                             headers: {
                                                                 "Content-Type": "application/json",
                                                             },
-                                                            body: JSON.stringify(payload),
+                                                            body: JSON.stringify(closetradeData),
                                                         });
 
                                                         const data = await response.json();
@@ -2265,25 +2269,25 @@ const OrderPage1 = ({
                                                                     <Button
                                                                         fullWidth
                                                                         onClick={async () => {
-                                                                            const payload = {
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
-                                                                                script_id: selectedRow?.script_id,
-                                                                                script_expiry_id: selectedRow?.script_expiry_id,
-                                                                                trade_type: tradeTypeMap[orderType],
-                                                                                trade_rate: price,
-                                                                                trade_qty: qty,
-                                                                                trade_lot: lot,
-                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                                                check_script_name: selectedRow?.script_name,
-                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                                                device_type: 0,
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                            };
+                                                                            // const payload = {
+                                                                            //     is_app: "1",
+                                                                            //     login_user_id: dataStored?.user_id,
+                                                                            //     auth_key: dataStored?.auth_key,
+                                                                            //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                                            //     script_id: selectedRow?.script_id,
+                                                                            //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                                            //     trade_type: tradeTypeMap[orderType],
+                                                                            //     trade_rate: price,
+                                                                            //     trade_qty: qty,
+                                                                            //     trade_lot: lot,
+                                                                            //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                                            //     check_script_name: selectedRow?.script_name,
+                                                                            //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                                            //     device_type: 0,
+                                                                            //     is_app: "1",
+                                                                            //     login_user_id: dataStored?.user_id,
+                                                                            //     auth_key: dataStored?.auth_key,
+                                                                            // };
 
                                                                             try {
                                                                                 const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -2291,7 +2295,7 @@ const OrderPage1 = ({
                                                                                     headers: {
                                                                                         "Content-Type": "application/json",
                                                                                     },
-                                                                                    body: JSON.stringify(payload),
+                                                                                    body: JSON.stringify(closetradeData),
                                                                                 });
 
                                                                                 const data = await response.json();
@@ -2326,25 +2330,25 @@ const OrderPage1 = ({
                                                                         fullWidth
                                                                         onClick={async () => {
 
-                                                                            const payload = {
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
-                                                                                script_id: selectedRow?.script_id,
-                                                                                script_expiry_id: selectedRow?.script_expiry_id,
-                                                                                trade_type: tradeTypeMap[orderType],
-                                                                                trade_rate: price,
-                                                                                trade_qty: qty,
-                                                                                trade_lot: lot,
-                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                                                check_script_name: selectedRow?.script_name,
-                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                                                device_type: 0,
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                            };
+                                                                            // const payload = {
+                                                                            //     is_app: "1",
+                                                                            //     login_user_id: dataStored?.user_id,
+                                                                            //     auth_key: dataStored?.auth_key,
+                                                                            //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                                            //     script_id: selectedRow?.script_id,
+                                                                            //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                                            //     trade_type: tradeTypeMap[orderType],
+                                                                            //     trade_rate: price,
+                                                                            //     trade_qty: qty,
+                                                                            //     trade_lot: lot,
+                                                                            //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                                            //     check_script_name: selectedRow?.script_name,
+                                                                            //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                                            //     device_type: 0,
+                                                                            //     is_app: "1",
+                                                                            //     login_user_id: dataStored?.user_id,
+                                                                            //     auth_key: dataStored?.auth_key,
+                                                                            // };
 
                                                                             try {
                                                                                 const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -2352,7 +2356,7 @@ const OrderPage1 = ({
                                                                                     headers: {
                                                                                         "Content-Type": "application/json",
                                                                                     },
-                                                                                    body: JSON.stringify(payload),
+                                                                                    body: JSON.stringify(closetradeData),
                                                                                 });
 
                                                                                 const data = await response.json();
@@ -2929,25 +2933,25 @@ const OrderPage1 = ({
                                                 <Button
                                                     fullWidth
                                                     onClick={async () => {
-                                                        const payload = {
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
+                                                        // const payload = {
+                                                        //     is_app: "1",
+                                                        //     login_user_id: dataStored?.user_id,
+                                                        //     auth_key: dataStored?.auth_key,
+                                                        //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                        //     script_id: selectedRow?.script_id,
+                                                        //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                        //     trade_type: tradeTypeMap[orderType],
+                                                        //     trade_rate: price,
+                                                        //     trade_qty: qty,
+                                                        //     trade_lot: lot,
+                                                        //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                        //     check_script_name: selectedRow?.script_name,
+                                                        //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                        //     device_type: 0,
+                                                        //     is_app: "1",
+                                                        //     login_user_id: dataStored?.user_id,
+                                                        //     auth_key: dataStored?.auth_key,
+                                                        // };
 
                                                         try {
                                                             const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -2955,7 +2959,7 @@ const OrderPage1 = ({
                                                                 headers: {
                                                                     "Content-Type": "application/json",
                                                                 },
-                                                                body: JSON.stringify(payload),
+                                                                body: JSON.stringify(closetradeData),
                                                             });
 
                                                             const data = await response.json();
@@ -2990,25 +2994,25 @@ const OrderPage1 = ({
                                                     fullWidth
                                                     onClick={async () => {
 
-                                                        const payload = {
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
+                                                        // const payload = {
+                                                        //     is_app: "1",
+                                                        //     login_user_id: dataStored?.user_id,
+                                                        //     auth_key: dataStored?.auth_key,
+                                                        //     market_type_id: selectedRow?.market_type_id ?? 1,
+                                                        //     script_id: selectedRow?.script_id,
+                                                        //     script_expiry_id: selectedRow?.script_expiry_id,
+                                                        //     trade_type: tradeTypeMap[orderType],
+                                                        //     trade_rate: price,
+                                                        //     trade_qty: qty,
+                                                        //     trade_lot: lot,
+                                                        //     trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
+                                                        //     check_script_name: selectedRow?.script_name,
+                                                        //     user_id: selectedRow?.user_id || dataStored?.user_id,
+                                                        //     device_type: 0,
+                                                        //     is_app: "1",
+                                                        //     login_user_id: dataStored?.user_id,
+                                                        //     auth_key: dataStored?.auth_key,
+                                                        // };
 
                                                         try {
                                                             const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
@@ -3016,7 +3020,7 @@ const OrderPage1 = ({
                                                                 headers: {
                                                                     "Content-Type": "application/json",
                                                                 },
-                                                                body: JSON.stringify(payload),
+                                                                body: JSON.stringify(closetradeData),
                                                             });
 
                                                             const data = await response.json();
