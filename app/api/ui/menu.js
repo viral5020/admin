@@ -1,76 +1,20 @@
 
-// {
-//   key: 'Dashboard',
-//   name: 'Dashboard',
-//   link: '/app',
-//   icon: 'grid-outline'
-// },
-// {
-//   key: 'crypto',
-//   name: 'Watchlist',
-//   link: '/app/dashboard/watchlist',
-//   icon: 'list-outline'
-// },
-// {
-//   key: 'ledger',
-//   name: 'Ledger',
-//   link: '/app/ledger',
-//   icon: 'time-outline'
-// },
-// {
-//   key: 'editDeleteLogs',
-//   name: 'Edit Delete',
-//   link: '/app/dashboard/edit-Delete-Logs',
-//   icon: 'create-outline'
-// },
-// {
-//   key: 'orderBook',
-//   name: 'Order Book',
-//   link: '/app/dashboard/order-Book',
-//   icon: 'receipt-outline'
-// },
-// {
-//   key: 'positions',
-//   name: 'Positions',
-//   link: '/app/dashboard/positions',
-//   icon: 'cube-outline'
-// },
-// {
-//   key: 'Banned Scripts',
-//   name: 'Banned Scripts',
-//   link: '/app/dashboard/Banned-scripts',
-//   icon: 'ban-outline'
-// },
-// {
-//   key: 'Max QTY details',
-//   name: 'Max QTY details',
-//   link: '/app/dashboard/max-qty-details',
-//   icon: 'reader-outline'
-// },
-// {
-//   key: 'Rejection Logs',
-//   name: 'Rejection Logs',
-//   link: '/app/dashboard/rejection-logs',
-//   icon: 'close-circle-outline'
-// },
-// {
-//   key: 'login2',
-//   name: 'Login',
-//   link: '/login',
-//   icon: 'person-outline'
-// },
-// {
-//   key: 'crypto',
-//   name: 'StockDetailMobile',
-//   link: '/app/dashboard/stock-details',
-//   icon: 'ion-ios-medal-outline',
-//   hideInSidebar: true,
-// },
+const rawData = sessionStorage.getItem("data");
+let userType = null;
 
+if (rawData) {
+  try {
+    const parsedData = JSON.parse(rawData);
+    userType = parseInt(parsedData.user_type, 10);
+  } catch (err) {
+    console.error("Error parsing session storage data:", err);
+  }
+} else {
+  console.warn("No sessionStorage data found for key 'data'");
+}
 
+console.log('userType:', userType);
 
-const rawData = JSON.parse(sessionStorage.getItem("data"));
-const userType = parseInt(rawData?.user_type, 10);
 
 const notificationData = JSON.parse(sessionStorage.getItem("notification"));
 const isStock = notificationData?.isStock;
@@ -78,12 +22,23 @@ const isForex = notificationData?.isForex;
 
 const menu = []
 
-menu.push({
-  key: 'Dashboard',
-  name: 'Dashboard',
-  link: '/app',
-  icon: 'grid-outline'
-});
+if (userType === 1) {
+  menu.push({
+    key: 'Dashboard',
+    name: 'Dashboard',
+    link: '/app',
+    icon: 'grid-outline'
+  });
+}
+
+if (userType === 3 || userType === 4) {
+  menu.push({
+    key: 'Master Dashboard',
+    name: 'Master Dashboard',
+    link: '/app/dashboard/Master-Dashboard',
+    icon: 'grid-outline'
+  });
+}
 
 // ---------- Stock Trading Menu ----------
 if (isStock) {
@@ -120,9 +75,9 @@ if (isStock) {
 
       ...(userType === 4 || userType === 5
         ? [{
-          key: 'positions',
+          key: 'previous',
           name: 'previous valan trade',
-          // link: '/app/dashboard/positions',
+          link: '/app/dashboard/previous-valan-trade',
           icon: 'cube-outline'
         }]
         : []),
@@ -133,15 +88,6 @@ if (isStock) {
           name: 'Banned/Blocked script',
           link: '/app/dashboard/Banned-Blocked-Scripts',
           icon: 'create-outline'
-        }]
-        : []),
-
-      ...(userType !== 2 && userType !== 4 && userType !== 5
-        ? [{
-          key: 'Max QTY details',
-          name: 'Max QTY details',
-          link: '/app/dashboard/max-qty-details',
-          icon: 'reader-outline'
         }]
         : []),
 
@@ -158,7 +104,7 @@ if (isStock) {
         ? [{
           key: 'Max QTY details',
           name: 'manual trade',
-          // link: '/app/dashboard/max-qty-details',
+          link: '/app/dashboard/manual-trade',
           icon: 'reader-outline'
         }]
         : []),
@@ -176,16 +122,16 @@ if (isStock) {
         ? [{
           key: 'Max QTY details',
           name: 'self p&l',
-          // link: '/app/dashboard/max-qty-details',
+          link: '/app/dashboard/Self-P&L',
           icon: 'reader-outline'
         }]
         : []),
 
       ...(userType === 4 || userType === 5
         ? [{
-          key: 'Max QTY details',
-          name: 'brokrage refresh',
-          // link: '/app/dashboard/max-qty-details',
+          key: 'Brokrage refresh',
+          name: 'Brokrage refresh',
+          link: '/app/dashboard/Brokrage-refresh',
           icon: 'reader-outline'
         }]
         : []),
@@ -264,13 +210,20 @@ if (userType !== 1) {
     name: 'User',
     // icon: 'ion-ios-swap-outline',
     child: [
+      ...(userType === 3 || userType === 4
+        ? [{
+          key: 'User Profile',
+          name: 'User Profile',
+          link: '/app/dashboard/User-Profile',
+          icon: 'people-outline'
+        }]
+        : []),
       {
         key: 'user_listing',
         name: 'User Listing',
         link: '/app/dashboard/User-listing',
         icon: 'list-outline'
       },
-
       ...(userType !== 2 && userType !== 1
         ? [{
           key: 'master_listing',
@@ -402,7 +355,7 @@ if (userType !== 2) {
         ? [{
           key: 'cross-trade-log',
           name: 'Cross trade log',
-          // link: '/app/dashboard/cross-trade-log',
+          link: '/app/dashboard/cross-trade-log',
           icon: 'receipt-outline'
         }]
         : []),
@@ -530,7 +483,7 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
       }] : []),
 
       // only userType === 3
-      ...(userType === 3 ? [{
+      ...(userType !== 3 ? [{
         key: 'Edit Expiry',
         name: 'Edit Expiry',
         icon: 'add-circle-outline'
@@ -590,7 +543,7 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
         icon: 'time-outline'
       }] : []),
 
-      ...(userType !== 4 ? [{
+      ...(userType === 4 ? [{
         key: 'MARQUEE',
         name: 'MARQUEE',
         icon: 'time-outline'
@@ -617,6 +570,7 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
       ...(userType === 3 ? [{
         key: 'master qty setting',
         name: 'master qty setting',
+        link: '/app/dashboard/Master-QTY-Setting',
         icon: 'time-outline'
       }] : []),
 
@@ -625,6 +579,15 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
         name: 'time setting',
         icon: 'time-outline'
       }] : []),
+
+      ...(userType !== 2 && userType !== 4 && userType !== 5
+        ? [{
+          key: 'Max QTY details',
+          name: 'Max QTY details',
+          link: '/app/dashboard/max-qty-details',
+          icon: 'reader-outline'
+        }]
+        : []),
     ]
   });
 }

@@ -28,7 +28,11 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import { bulktradingAPI, fetchOrders1API } from '../API/API';
 import axios from 'axios';
 
-const Bulktrading = () => {
+const Bulktrading = ({
+    filterShow = true,
+    setfilterShow = () => { } // default no-op function
+}) => {
+    console.log("filterShow=", filterShow);
     const theme = useTheme();
 
     // Main table states
@@ -214,24 +218,27 @@ const Bulktrading = () => {
             </Box>
 
             {/* Filter */}
-            <TradeEditDeleteLogFilter
-                after_date_date={after_date}
-                before_date={before_date}
-                setbefore_date={setbefore_date}
-                setafter_date={setafter_date}
-                market={market}
-                script={script}
-                broker={broker}
-                setScript={setScript}
-                setMarket={setMarket}
-                setBroker={setBroker}
-                client={client}
-                master={master}
-                setClient={setClient}
-                setMaster={setMaster}
-                onApply={onFilterApply}
-            />
-
+            {filterShow && (
+                <Box>
+                    <TradeEditDeleteLogFilter
+                        after_date_date={after_date}
+                        before_date={before_date}
+                        setbefore_date={setbefore_date}
+                        setafter_date={setafter_date}
+                        market={market}
+                        script={script}
+                        broker={broker}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                        setBroker={setBroker}
+                        client={client}
+                        master={master}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        onApply={onFilterApply}
+                    />
+                </Box>
+            )}
             {/* Search */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
                 <TextField
@@ -261,31 +268,31 @@ const Bulktrading = () => {
                 <>
                     <Box sx={{ maxHeight: '90vh', overflowX: 'auto' }}>
                         <TableContainer sx={{ maxHeight: '90vh' }}>
-                            <Table stickyHeader size="small" sx={{ minWidth: 1200 }}>
+                            <Table stickyHeader size="small" sx={{ minWidth: 600 }}>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Script Name</TableCell>
-                                        <TableCell>Trade type</TableCell>
+                                        {/* <TableCell>Trade type</TableCell> */}
                                         <TableCell>Start date&Time</TableCell>
                                         <TableCell>End Date&Time</TableCell>
-                                        <TableCell>Trades IDs</TableCell>
+                                        {/* <TableCell>Trades IDs</TableCell> */}
                                         <TableCell>No of Trades</TableCell>
-                                        <TableCell>Minimum</TableCell>
+                                        {/* <TableCell>Minimum</TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {logs.map((log, i) => (
                                         <TableRow key={i}>
                                             <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>{log.script_name ?? '-'}</TableCell>
-                                            <TableCell sx={{ color: 'black' }}>{log.trade_type ?? '-'}</TableCell>
+                                            {/* <TableCell sx={{ color: 'black' }}>{log.trade_type ?? '-'}</TableCell> */}
                                             <TableCell sx={{ color: 'black', textTransform: 'uppercase' }}>{log.start_datetime ?? '-'}</TableCell>
                                             <TableCell sx={{ color: 'black' }}>{log.end_datetime ?? '-'}</TableCell>
-                                            <TableCell sx={{ color: 'black' }}>{log.trade_ids?.join(', ') ?? '-'}</TableCell>
+                                            {/* <TableCell sx={{ color: 'black' }}>{log.trade_ids?.join(', ') ?? '-'}</TableCell> */}
                                             <TableCell sx={{ color: 'black', fontWeight: 'bold', cursor: 'pointer' }}
                                                 onClick={() => fetchTradeDetails(log)}>
                                                 {log.no_of_trade ?? '-'}
                                             </TableCell>
-                                            <TableCell sx={{ color: 'black' }}>{minimum}</TableCell>
+                                            {/* <TableCell sx={{ color: 'black' }}>{minimum}</TableCell> */}
                                         </TableRow>
                                     ))}
                                 </TableBody>

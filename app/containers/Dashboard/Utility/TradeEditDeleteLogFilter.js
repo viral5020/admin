@@ -18,9 +18,11 @@ const TradeEditDeleteLogFilter = ({
     end1_date,
     start1_date,
     entry_date,
+    trade_date,
     entrybefore_date,
     setentry_date,
     setentrybefore_date,
+    settrade_date,
     setIs_deleted,
     is_deleted,
     is_updated,
@@ -115,6 +117,12 @@ const TradeEditDeleteLogFilter = ({
                     label="Entry Before"
                     value={entrybefore_date}
                     onChange={setentrybefore_date}
+                />}
+
+                {settrade_date && <DateFilter
+                    label="Trade Date"
+                    value={trade_date}
+                    onChange={settrade_date}
                 />}
 
                 <MarketScriptNameFilter

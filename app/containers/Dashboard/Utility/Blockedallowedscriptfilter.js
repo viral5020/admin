@@ -13,6 +13,8 @@ const Blockedallowedscriptfilter = ({
     setbefore_date,
     setEnd1_date,
     setStart1_date,
+    settrade_date,
+    trade_date,
     end_date,
     before_date,
     start_date,
@@ -117,6 +119,12 @@ const Blockedallowedscriptfilter = ({
                     label="Entry Before"
                     value={entrybefore_date}
                     onChange={setentrybefore_date}
+                />}
+
+                {settrade_date && <DateFilter
+                    label="Trade Date"
+                    value={trade_date}
+                    onChange={settrade_date}
                 />}
 
                 <Marketscriptfilterall

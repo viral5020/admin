@@ -69,6 +69,26 @@ import JV from '../Dashboard/JV';
 import Trialbalance from '../Dashboard/Trialbalance';
 import Orderlimit from '../Dashboard/Orderlimit';
 import Blockedallowedscript from '../Dashboard/Blockedallowedscript';
+import Masterqtysetting from '../Dashboard/Masterqtysetting';
+import Crosstradelog from '../Dashboard/Crosstradelog';
+import Userprofile from '../Dashboard/Userprofile';
+import Masterdashboard from '../Dashboard/Masterdashboard';
+import Previousvalan from '../Dashboard/Previousvalan';
+import Selfpl from '../Dashboard/Selfpl';
+import Manualtrade from '../Dashboard/Manualtrade';
+
+import Brokrageref from '../Dashboard/Brokrageref';
+
+// Patch sessionStorage.getItem to never return "undefined" or "null" as strings
+(function () {
+  const originalGetItem = sessionStorage.getItem;
+  sessionStorage.getItem = function (key) {
+    let value = originalGetItem.call(this, key);
+    if (value === 'undefined' || value === 'null') return null;
+    return value;
+  };
+})();
+
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
@@ -113,6 +133,9 @@ function Application(props) {
           <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
           <Route path="dashboard/Add-Account" element={<Addacount />} />
           <Route path="dashboard/Edit-Account" element={<Addacount />} />
+          <Route path="dashboard/User-Profile" element={<Userprofile />} />
+
+          <Route path="dashboard/Master-Dashboard" element={<Masterdashboard />} />
 
           <Route path='dashboard/trade-edit-delete-log' element={userType !== 2 && (isForex || isStock) ? <TradeEditDeleteLog /> : <Navigate to="/app" />} />
           <Route path='dashboard/auto-square-up-log' element={userType === 3 || userType === 4 || userType === 5 && (isForex || isStock) ? <Autosquareuplog /> : <Navigate to="/app" />} />
@@ -120,6 +143,12 @@ function Application(props) {
           <Route path='dashboard/ip-address-log' element={userType !== 2 && userType !== 1 ? <Iplistlog /> : <Navigate to="/app" />} />
           <Route path='dashboard/bill-filter' element={userType !== 2 && userType !== 1 ? <Billfilter /> : <Navigate to="/app" />} />
           <Route path='dashboard/bulk-trading' element={userType !== 1 && (isForex || isStock) ? <Bulktrading /> : <Navigate to="/app" />} />
+          <Route path='dashboard/cross-trade-log' element={(userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) ? <Crosstradelog /> : <Navigate to="/app" />} />
+
+          <Route path='dashboard/previous-valan-trade' element={<Previousvalan />} />
+          <Route path='dashboard/Self-P&L' element={<Selfpl />} />
+          <Route path='dashboard/manual-trade' element={<Manualtrade />} />
+          <Route path='dashboard/Brokrage-refresh' element={<Brokrageref />} />
 
 
           {/* <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <Cashentry /> : <Navigate to="/app" />} /> */}
@@ -127,6 +156,7 @@ function Application(props) {
           <Route path='dashboard/Trial-balance' element={userType === 3 ? <Trialbalance /> : <Navigate to="/app" />} />
           <Route path='dashboard/Order-Limit' element={userType === 3 ? <Orderlimit /> : <Navigate to="/app" />} />
           <Route path='dashboard/Blocked-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

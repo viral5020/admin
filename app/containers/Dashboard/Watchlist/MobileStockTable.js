@@ -210,7 +210,7 @@ const MobileStockTable = ({
                             }}
                         >
                             {/* Star */}
-                            {item.isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
+                            {item.isFavorite ? <StarSharpIcon sx={{ fontSize: '2rem', color: "grey" }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
                         </Button>
                     </ThemeProvider>
                 </SwipeAction >

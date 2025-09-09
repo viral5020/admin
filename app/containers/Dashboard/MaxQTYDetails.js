@@ -303,10 +303,12 @@ const EditDeleteLogs = () => {
               />
               <Button
                 style={{ display: (userType == 3 || userType == 4) ? 'inline-flex' : 'none' }}
-                variant="outlined"
+                variant="contained"
                 size="small"
+                color="secondary"
                 startIcon={<AddIcon />}
                 onClick={handleFilterToggle} // replace this
+                sx={{ borderRadius: 1 }}
               >
                 {showFilters ? 'CANCEL' : 'ADD POSITION'}
               </Button>
@@ -333,10 +335,13 @@ const EditDeleteLogs = () => {
                 ))}
               </TextField>
               <Button
-                variant="outlined"
+                style={{ display: (userType == 3 || userType == 4) ? 'inline-flex' : 'none' }}
+                variant="contained"
                 size="small"
+                color="secondary"
                 startIcon={<AddIcon />}
                 onClick={handleFilterToggle} // replace this
+                sx={{ borderRadius: 1 }}
               >
                 {showFilters ? 'CANCEL' : 'ADD POSITION'}
               </Button>
@@ -404,18 +409,18 @@ const EditDeleteLogs = () => {
 
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="secondary"
                 onClick={handleSubmit}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, borderRadius: 1 }}
               >
                 ADD
               </Button>
               <Button
-                variant="outlined"
+                variant="contained"
                 color="error"
                 onClick={handleCancel}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, borderRadius: 1 }}
               >
                 CANCEL
               </Button>
@@ -438,6 +443,7 @@ const EditDeleteLogs = () => {
                 <Table stickyHeader size="small" sx={{ minWidth: 400 }}>
                   <TableHead>
                     <TableRow>
+                      <TableCell sx={{ width: "15%" }}>User Level</TableCell>
                       <TableCell sx={{ width: "40%" }}>Script</TableCell>
                       <TableCell sx={{ width: "30%" }}>Position</TableCell>
                       <TableCell sx={{ width: "30%" }}>Max Order</TableCell>
@@ -446,6 +452,7 @@ const EditDeleteLogs = () => {
                   <TableBody>
                     {logs.map((log, i) => (
                       <TableRow key={i}>
+                        <TableCell>{log.level_name}</TableCell>
                         <TableCell>
                           <span>{log.script_name || "-"}</span>{" "}
                           {log.market_name && (

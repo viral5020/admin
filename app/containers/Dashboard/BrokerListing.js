@@ -28,7 +28,11 @@ import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
 
-const BrokerListing = () => {
+const BrokerListing = ({
+  filterShow = true,
+  setFilterShow = () => { }
+}) => {
+  console.log("filterShow=", filterShow);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isFirstRender = useIsFirstRender();
@@ -636,7 +640,7 @@ const BrokerListing = () => {
   return (
     <div style={{ overflowX: "auto", padding: 16 }}>
       {/* Filters */}
-      {isMobile ? (
+      {isMobile && filterShow ? (
         <Drawer
           anchor="left"
           open={drawerOpen}
@@ -676,35 +680,37 @@ const BrokerListing = () => {
           </Box>
         </Drawer>
       ) : (
-        <Box sx={{ mb: 2, p: 1 }}>
-          <UserListFilter
-            isDarkMode={theme.palette.mode === "dark"}
-            databroker={databroker}
-            setDatabroker={setDatabroker}
-            master={master}
-            setMaster={setMaster}
-            user={user}
-            setUser={setUser}
-            status={status}
-            setStatus={setStatus}
-            segment={segment}
-            setSegment={setSegment}
-            loginBefore={loginBefore}
-            setLoginBefore={setLoginBefore}
-            loginAfter={loginAfter}
-            setLoginAfter={setLoginAfter}
-            tradeBefore={tradeBefore}
-            setTradeBefore={setTradeBefore}
-            tradeAfter={tradeAfter}
-            setTradeAfter={setTradeAfter}
-            type={type}
-            setType={setType}
-            onApply={() => {
-              currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
-            }}
-            forBroker={true}
-          />
-        </Box>
+        filterShow && (
+          <Box sx={{ mb: 2, p: 1 }}>
+            <UserListFilter
+              isDarkMode={theme.palette.mode === "dark"}
+              databroker={databroker}
+              setDatabroker={setDatabroker}
+              master={master}
+              setMaster={setMaster}
+              user={user}
+              setUser={setUser}
+              status={status}
+              setStatus={setStatus}
+              segment={segment}
+              setSegment={setSegment}
+              loginBefore={loginBefore}
+              setLoginBefore={setLoginBefore}
+              loginAfter={loginAfter}
+              setLoginAfter={setLoginAfter}
+              tradeBefore={tradeBefore}
+              setTradeBefore={setTradeBefore}
+              tradeAfter={tradeAfter}
+              setTradeAfter={setTradeAfter}
+              type={type}
+              setType={setType}
+              onApply={() => {
+                currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
+              }}
+              forBroker={true}
+            />
+          </Box>
+        )
       )}
 
       {/* Search */}

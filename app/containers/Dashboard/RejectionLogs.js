@@ -20,7 +20,11 @@ import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 
 
-const RejectionLogs = () => {
+const RejectionLogs = ({
+  filterShow = true,
+  setFilterShow = () => { }
+}) => {
+  console.log("filterShow=", filterShow);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isFirstRender = useIsFirstRender();
@@ -128,22 +132,23 @@ const RejectionLogs = () => {
         backgroundColor: theme.palette.background.default,
       }}
     >
-
-      <TradeEditDeleteLogFilter
-        End_date={End_date}
-        Start_date={Start_date}
-        setEnd_date={setEnd_date}
-        setStart_date={setStart_date}
-        market={market}
-        script={script}
-        setScript={setScript}
-        setMarket={setMarket}
-        client={client}
-        master={master}
-        setClient={setClient}
-        setMaster={setMaster}
-        onApply={onFilterApply}
-      />
+      {filterShow && (
+        <TradeEditDeleteLogFilter
+          End_date={End_date}
+          Start_date={Start_date}
+          setEnd_date={setEnd_date}
+          setStart_date={setStart_date}
+          market={market}
+          script={script}
+          setScript={setScript}
+          setMarket={setMarket}
+          client={client}
+          master={master}
+          setClient={setClient}
+          setMaster={setMaster}
+          onApply={onFilterApply}
+        />
+      )}
       {/* Filter + Search */}
       <Box
         sx={{

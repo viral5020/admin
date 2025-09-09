@@ -61,9 +61,9 @@ import OrderPage1 from './Positions';
 import { Fullscreen } from 'dan-vendor/@mui/icons-material';
 import RejectionLogs from './RejectionLogs';
 
-  const rawData = sessionStorage.getItem("data");
-  const parsedData = JSON.parse(rawData);
-  const userType = parseInt(parsedData.user_type, 10);
+const rawData = sessionStorage.getItem("data");
+const parsedData = JSON.parse(rawData);
+const userType = parseInt(parsedData.user_type, 10);
 
 const animationVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -273,11 +273,11 @@ function PersonalDashboard() {
   const [price, setPrice] = useState(0);
 
   const [selectedItem, setSelectedItem] = useState(null);
-    const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-    const [cancelItem, setCancelItem] = useState(null);
-      const [quantity, setQuantity] = useState('');
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelItem, setCancelItem] = useState(null);
+  const [quantity, setQuantity] = useState('');
 
-      const needsPassword = userType === 4 && deletePopup;
+  // const needsPassword = userType === 4 && deletePopup;
 
   const [dashboardData, setDashboardData] = useState({
     today_rejection: '0',
@@ -358,49 +358,49 @@ function PersonalDashboard() {
   };
 
 
-    const handleModify = (item) => {
-      setSelectedItem(item);
-      setLot(item.trd_lot);
-      setQuantity(item.trd_qty);
-      setPrice(item.trd_rate);
-      setOpen(true);
-    };
-  
-    const handleClose = () => {
-      setOpen(false);
-    };
-  
-    const handleSave = async () => {
-      if (!item?.trade_id) {
-        alert('Trade ID is missing.');
-        return;
+  const handleModify = (item) => {
+    setSelectedItem(item);
+    setLot(item.trd_lot);
+    setQuantity(item.trd_qty);
+    setPrice(item.trd_rate);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSave = async () => {
+    if (!item?.trade_id) {
+      alert('Trade ID is missing.');
+      return;
+    }
+
+    try {
+      const payload = {
+        trade_id: item.trade_id,
+        trade_rate: price,
+        trade_lot: lot,
+        trade_qty: quantity,
+        device_type: 0,
+      };
+
+      console.log('Sending payload:', payload);
+
+      const response = await updateTrade(payload);
+
+      if (response.success) {
+        alert('Trade updated successfully.');
+        handleClose(); // Close the dialog
+        // Optionally refresh data or state here
+      } else {
+        alert(response.message || 'Failed to update trade.');
       }
-  
-      try {
-        const payload = {
-          trade_id: item.trade_id,
-          trade_rate: price,
-          trade_lot: lot,
-          trade_qty: quantity,
-          device_type: 0,
-        };
-  
-        console.log('Sending payload:', payload);
-  
-        const response = await updateTrade(payload);
-  
-        if (response.success) {
-          alert('Trade updated successfully.');
-          handleClose(); // Close the dialog
-          // Optionally refresh data or state here
-        } else {
-          alert(response.message || 'Failed to update trade.');
-        }
-      } catch (error) {
-        console.error('Error updating trade:', error);
-        alert('Something went wrong while updating the trade.');
-      }
-    };
+    } catch (error) {
+      console.error('Error updating trade:', error);
+      alert('Something went wrong while updating the trade.');
+    }
+  };
 
 
   // Refs for each list item
@@ -453,8 +453,8 @@ function PersonalDashboard() {
     }
   };
 
-const filteredLogs = Array.isArray(rejectionLogs)
-  ? rejectionLogs.filter((log) => {
+  const filteredLogs = Array.isArray(rejectionLogs)
+    ? rejectionLogs.filter((log) => {
       const query = searchQuery.toLowerCase();
       return (
         log.full_name?.toLowerCase().includes(query) ||
@@ -463,7 +463,7 @@ const filteredLogs = Array.isArray(rejectionLogs)
         log.log_message?.toLowerCase().includes(query)
       );
     })
-  : [];
+    : [];
 
 
 
@@ -767,72 +767,72 @@ const filteredLogs = Array.isArray(rejectionLogs)
             />
           </Box>
         </Grid>
-<Dialog
-  open={ordersDialogOpen}
-  onClose={() => setOrdersDialogOpen(false)}
-  maxWidth="md"
-  fullWidth
-  fullScreen={Fullscreen}
-  PaperProps={{
-    sx: {
-      margin: 0, // remove default margin
-      // borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
-      overflow: "hidden", // ensures content fits exactly
-    },
-  }}
->
-  {/* Custom header */}
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      px: 2,
-      py: 1.5,
-      backdropFilter: "blur(6px)",
-      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-      color: "#fff",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    }}
-  >
-    <Typography
-      variant="h6"
-      fontWeight={800}
-      sx={{
-        textTransform: "uppercase",
-        letterSpacing: 1.5,
-        display: "flex",
-        alignItems: "center",
-        textShadow: "0 0 6px rgba(33,203,243,0.9)",
-      }}
-    >
-      <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-      Orders
-    </Typography>
-    <IconButton
-      size="small"
-      sx={{
-        color: "#fff",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderRadius: "50%",
-        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
-      }}
-      onClick={() => setOrdersDialogOpen(false)}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  </Box>
+        <Dialog
+          open={ordersDialogOpen}
+          onClose={() => setOrdersDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+          fullScreen={Fullscreen}
+          PaperProps={{
+            sx: {
+              margin: 0, // remove default margin
+              // borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
+              overflow: "hidden", // ensures content fits exactly
+            },
+          }}
+        >
+          {/* Custom header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: 2,
+              py: 1.5,
+              backdropFilter: "blur(6px)",
+              background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+              color: "#fff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={800}
+              sx={{
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+                display: "flex",
+                alignItems: "center",
+                textShadow: "0 0 6px rgba(33,203,243,0.9)",
+              }}
+            >
+              <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+              Orders
+            </Typography>
+            <IconButton
+              size="small"
+              sx={{
+                color: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+              }}
+              onClick={() => setOrdersDialogOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
-  {/* Dialog content with no extra padding */}
-  <DialogContent
-    sx={{
-      p: 0.5, // remove default padding
-      "&:first-of-type": { paddingTop: 0.5 }, // ensures top padding removed
-    }}
-  >
-    <OrderBook />
-  </DialogContent>
-</Dialog>
+          {/* Dialog content with no extra padding */}
+          <DialogContent
+            sx={{
+              p: 0.5, // remove default padding
+              "&:first-of-type": { paddingTop: 0.5 }, // ensures top padding removed
+            }}
+          >
+            <OrderBook filterShow={false} />
+          </DialogContent>
+        </Dialog>
 
 
         <Grid item xs={6} sm={6} md={3}>
@@ -846,74 +846,75 @@ const filteredLogs = Array.isArray(rejectionLogs)
           </Box>
         </Grid>
 
-          {/* Dialog with custom header */}
-     <Dialog
-  open={positionDialogOpen}
-  onClose={() => setPositionDialogOpen(false)}
-  maxWidth="md"
-  fullWidth
-  fullScreen={fullScreen} // mobile only
-  PaperProps={{
-    sx: {
-      margin: 0, // remove default margin
-      borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
-      overflow: "hidden", // ensures content fits exactly
-    },
-  }}
->
-  {/* Custom header */}
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      px: 2,
-      py: 1.5,
-      backdropFilter: "blur(6px)",
-      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
-      color: "#fff",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-    }}
-  >
-    <Typography
-      variant="h6"
-      fontWeight={800}
-      sx={{
-        textTransform: "uppercase",
-        letterSpacing: 1.5,
-        display: "flex",
-        alignItems: "center",
-        textShadow: "0 0 6px rgba(33,203,243,0.9)",
-      }}
-    >
-      <TrendingUpIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
-      Positions
-    </Typography>
-    <IconButton
-      size="small"
-      sx={{
-        color: "#fff",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderRadius: "50%",
-        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
-      }}
-      onClick={() => setpositionDialogOpen(false)}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  </Box>
+        {/* Dialog with custom header */}
+        <Dialog
+          open={positionDialogOpen}
+          onClose={() => setPositionDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+          fullScreen={fullScreen} // mobile only
+          PaperProps={{
+            sx: {
+              margin: 0, // remove default margin
+              borderRadius: fullScreen ? 0 : 2, // optional: no rounding on mobile
+              overflow: "hidden", // ensures content fits exactly
+            },
+          }}
+        >
+          {/* Custom header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: 2,
+              py: 1.5,
+              backdropFilter: "blur(6px)",
+              background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+              color: "#fff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={800}
+              sx={{
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+                display: "flex",
+                alignItems: "center",
+                textShadow: "0 0 6px rgba(33,203,243,0.9)",
+              }}
+            >
+              <TrendingUpIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+              Positions
+            </Typography>
+            <IconButton
+              size="small"
+              sx={{
+                color: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+              }}
+              onClick={() => setpositionDialogOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
-  {/* Dialog content with no extra spacing */}
-  <DialogContent
-  sx={{
-    p: 0, // remove all padding
-    pl: 0, // add little left padding (theme spacing 2 → 16px)
-    "&:first-of-type": { paddingTop: 0 }, // ensure top padding removed
-  }}
->
-  <OrderPage1 />
-</DialogContent>
-</Dialog>
+          {/* Dialog content with no extra spacing */}
+          <DialogContent
+            sx={{
+              p: 0, // remove all padding
+              px: 1,
+              pl: 1, // add little left padding (theme spacing 2 → 16px)
+              "&:first-of-type": { paddingTop: 0 }, // ensure top padding removed
+            }}
+          >
+            <OrderPage1 filterShow={false} />
+          </DialogContent>
+        </Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
           <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
@@ -1389,7 +1390,7 @@ const filteredLogs = Array.isArray(rejectionLogs)
             }}
           >
             {/* Render the self-fetching RejectionLogs component */}
-            <RejectionLogs />
+            <RejectionLogs filterShow={false} />
           </DialogContent>
         </Dialog>
 

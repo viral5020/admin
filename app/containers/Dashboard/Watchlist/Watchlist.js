@@ -801,7 +801,7 @@ function Watchlist() {
       {/* <StockTable /> */}
       <Box>
         {marketNames.map((marketName, index) => (
-          <Box key={marketName} mb={2} mt={setisFavoritePage ? 2 : 0}>
+          <Box key={marketName} mb={1} mt={setisFavoritePage ? 1 : 0}>
             <Accordion
               expanded={expanded.has(marketName)}
               onChange={() => toggleExpand(marketName)}
@@ -811,19 +811,33 @@ function Watchlist() {
                 //   px: 1,
                 // },
                 '& .MuiAccordionDetails-root': {
-                  px: 1,
+                  px: 0,
                 }
               }}
               disableGutters
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} >
-                <Box display="flex" alignItems="center" gap={1}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  minHeight: 0, // remove default tall height
+                  padding: '0 4px', // tighter horizontal padding
+                  '&.Mui-expanded': {
+                    minHeight: 0, // keep compact when expanded
+                  },
+                  '& .MuiAccordionSummary-content': {
+                    margin: 0, // remove extra margin
+                    ml: 1,
+                  },
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={0.5}>
                   {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
                   <Typography variant="subtitle1" fontWeight="bold">
                     {marketName}
                   </Typography>
                 </Box>
               </AccordionSummary>
+
               <AccordionDetails>
                 {isMobile ?
                   <MobileStockTable
@@ -860,7 +874,7 @@ function Watchlist() {
             </Accordion>
           </Box>
         ))}
-      </Box>
+      </Box >
 
       <BackToTop />
 
@@ -939,7 +953,6 @@ function Watchlist() {
         </DialogActions>
       </Dialog>
 
-      <Toaster limit={3} />
 
       <BottomTradePopup
         open={Boolean(buySellPopup)}
@@ -953,6 +966,7 @@ function Watchlist() {
         tabIndex={tabIndex}
         setTabIndex={setTabIndex}
       />
+      <Toaster limit={3} containerStyle={{ zIndex: 999999999 }} />
     </>
   );
 }

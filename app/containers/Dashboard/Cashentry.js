@@ -46,7 +46,12 @@ import { formatScriptIds } from './helpers/utilFunc';
 import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
 import { Tooltip } from '@mui/material';
 
-const Cashentry = () => {
+const Cashentry = ({
+    filterShow = true,
+    setfilterShow = () => { } // default no-op function
+}) => {
+    console.log("filterShow=", filterShow);
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -335,126 +340,133 @@ const Cashentry = () => {
             {/* Desktop */}
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Box sx={{ mb: 3 }}>
-                        <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
-                    </Box>
-                    <Box sx={{ mb: 3 }}>
-                        {/* Filter + Add Cash Entry icon button together */}
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <TradeEditDeleteLogFilter
-                                entry_date={entry_date}
-                                setentry_date={setentry_date}
-                                entrybefore_date={entrybefore_date}
-                                setentrybefore_date={setentrybefore_date}
-                                onApply={onFilterApply}
+                    {filterShow && (
+                        <Box sx={{ mb: 3 }}>
+                            <ClientMasterBrokerFilter2
+                                value={selectedUser}
+                                setValue={setSelectedUser}
+                                sx={{ width: "100%" }}
                             />
-
-                            {/* Add Cash Entry Button directly after Apply */}
-                            <Tooltip title={formOpen ? "Close Form" : "Add Cash Entry"}>
-                                <IconButton
-                                    onClick={() => setFormOpen((prev) => !prev)}
-                                    sx={{
-                                        ml: 0.5, // very small margin to avoid sticking visually
-                                        bgcolor: "secondary.main",
-                                        color: "white",
-                                        "&:hover": { bgcolor: "secondary.dark" },
-                                        borderRadius: 1.5,
-                                    }}
-                                >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
                         </Box>
+                    )}
+                    {filterShow && (
+                        <Box sx={{ mb: 3 }}>
+                            {/* Filter + Add Cash Entry icon button together */}
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <TradeEditDeleteLogFilter
+                                    entry_date={entry_date}
+                                    setentry_date={setentry_date}
+                                    entrybefore_date={entrybefore_date}
+                                    setentrybefore_date={setentrybefore_date}
+                                    onApply={onFilterApply}
+                                />
 
-                        <Collapse in={formOpen}>
-                            <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
-                                {/* Filter and Current Balance side by side */}
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                                    <ClientMasterBrokerFilter2
-                                        value={entryUser}
-                                        setValue={setEntryUser}
-                                        sx={{ flex: 1 }}
-                                    />
-                                    <Box
+                                {/* Add Cash Entry Button directly after Apply */}
+                                <Tooltip title={formOpen ? "Close Form" : "Add Cash Entry"}>
+                                    <IconButton
+                                        onClick={() => setFormOpen((prev) => !prev)}
                                         sx={{
-                                            px: 3,
-                                            py: 1,
-                                            borderRadius: 1,
-                                            fontWeight: 600,
-                                            bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
-                                            color: "common.white",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: 0.5,
-                                            width: "fit-content",
-                                            whiteSpace: "nowrap",
+                                            ml: 0.5, // very small margin to avoid sticking visually
+                                            bgcolor: "secondary.main",
+                                            color: "white",
+                                            "&:hover": { bgcolor: "secondary.dark" },
+                                            borderRadius: 1.5,
                                         }}
                                     >
-                                        <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
-                                            Balance:
-                                        </Typography>
-                                        <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+
+                            <Collapse in={formOpen}>
+                                <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
+                                    {/* Filter and Current Balance side by side */}
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                        <ClientMasterBrokerFilter2
+                                            value={entryUser}
+                                            setValue={setEntryUser}
+                                            sx={{ flex: 1 }}
+                                        />
+                                        <Box
+                                            sx={{
+                                                px: 3,
+                                                py: 1,
+                                                borderRadius: 1,
+                                                fontWeight: 600,
+                                                bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
+                                                color: "common.white",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 0.5,
+                                                width: "fit-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                                                Balance:
+                                            </Typography>
+                                            <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Form fields */}
+                                    <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                                        <Grid item xs={12} sm={3}>
+                                            <TextField
+                                                type="date"
+                                                label="Date"
+                                                InputLabelProps={{ shrink: true }}
+                                                value={entryDate}
+                                                onChange={(e) => setEntryDate(e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+                                            <TextField
+                                                select
+                                                label="Type"
+                                                value={entryType}
+                                                onChange={(e) => setEntryType(e.target.value)}
+                                                fullWidth
+                                            >
+                                                <MenuItem value={1}>Receipt</MenuItem>
+                                                <MenuItem value={0}>Payment</MenuItem>
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+                                            <TextField
+                                                type="number"
+                                                label="Amount"
+                                                value={entryAmount}
+                                                onChange={(e) => setEntryAmount(e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+                                            <TextField
+                                                label="Remark"
+                                                value={entryRemark}
+                                                onChange={(e) => setEntryRemark(e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                    </Grid>
+
+                                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            size="small"
+                                            sx={{ borderRadius: 1 }}
+                                            onClick={handleEntrySubmit}
+                                        >
+                                            Submit
+                                        </Button>
                                     </Box>
                                 </Box>
-
-                                {/* Form fields */}
-                                <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            type="date"
-                                            label="Date"
-                                            InputLabelProps={{ shrink: true }}
-                                            value={entryDate}
-                                            onChange={(e) => setEntryDate(e.target.value)}
-                                            fullWidth
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            select
-                                            label="Type"
-                                            value={entryType}
-                                            onChange={(e) => setEntryType(e.target.value)}
-                                            fullWidth
-                                        >
-                                            <MenuItem value={1}>Receipt</MenuItem>
-                                            <MenuItem value={0}>Payment</MenuItem>
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            type="number"
-                                            label="Amount"
-                                            value={entryAmount}
-                                            onChange={(e) => setEntryAmount(e.target.value)}
-                                            fullWidth
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Remark"
-                                            value={entryRemark}
-                                            onChange={(e) => setEntryRemark(e.target.value)}
-                                            fullWidth
-                                        />
-                                    </Grid>
-                                </Grid>
-
-                                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        size="small"
-                                        sx={{ borderRadius: 1 }}
-                                        onClick={handleEntrySubmit}
-                                    >
-                                        Submit
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Collapse>
-                    </Box>
-
+                            </Collapse>
+                        </Box>
+                    )}
 
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
                         <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{

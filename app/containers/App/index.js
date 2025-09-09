@@ -16,6 +16,7 @@ import {
   NotFoundDedicated
 } from '../pageListAsync';
 import SocketApp from '../Dashboard/Socket/SocketApp';
+import MainAdminlogin from '../Pages/Users/MainAdminlogin';
 
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 
@@ -27,14 +28,15 @@ function App(props) {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="app/*" element={
-              <SocketApp history={history}>
-                {/* <Application history={history} /> */}
-              </SocketApp>
-            } />
+            <SocketApp history={history}>
+              {/* <Application history={history} /> */}
+            </SocketApp>
+          } />
           <Route path="app/*" element={<Application history={history} />} />
           <Route element={<Outer />}>
             {/* <Route path="login" element={<Login />} /> */}
             <Route path="login" element={<LoginV2 />} />
+            <Route path="mainadminlogin" element={<MainAdminlogin />} />
             <Route path="login-v3" element={<LoginV3 />} />
             <Route path="register" element={<Register />} />
             <Route path="register-v2" element={<RegisterV2 />} />

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import "react-toastify/dist/ReactToastify.css";
+import AddIcon from "@mui/icons-material/Add";
+
 import {
     Box,
     Button,
@@ -41,13 +43,10 @@ import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
 import { cashEntryAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
-import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
 
-const Cashledger = ({
-    filterShow = true,
-    setfilterShow = () => { } // default no-op function
-}) => {
-    console.log("filterShow=", filterShow);
+import { Tooltip } from '@mui/material';
+
+const Cashentrytable = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -93,6 +92,10 @@ const Cashledger = ({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [logToDelete, setLogToDelete] = useState(null);
 
+    const [entryUserBalance, setEntryUserBalance] = useState(null);
+    const [balanceLoading, setBalanceLoading] = useState(false);
+    const [userBalance, setuserBalance] = useState(false);
+
     const [editingLog, setEditingLog] = useState(null);
     const [editValue, setEditValue] = useState({
         user: null,
@@ -135,6 +138,7 @@ const Cashledger = ({
                 is_deleted,
                 is_updated,
                 isAdminOnly,
+                "cash_add"
             );
 
             const data = Array.isArray(result?.aaData) ? result.aaData : [];
@@ -154,6 +158,52 @@ const Cashledger = ({
             console.error("Failed to fetch logs:", err);
             setLogs([]);
             setTotalRecords(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEntrySubmit = async () => {
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored) return toast.error("Session expired. Please log in again.");
+        if (!entryUser?.id || !entryDate || entryType === "" || !entryAmount) {
+            return toast.error("Please fill all required fields!");
+        }
+
+        const payload = {
+            is_app: "1",
+            login_user_id: dataStored.user_id,
+            auth_key: dataStored.auth_key,
+            user_id: entryUser.id,
+            type: entryType,
+            date1: entryDate,
+            amount: entryAmount,
+            remarks: entryRemark || "",
+        };
+
+        try {
+            setLoading(true);
+            const response = await axios.post(
+                'http://128.199.126.171/~goldorg/ajaxfiles/add_receipt',
+                payload
+            );
+
+            if (response.data?.success) {
+                toast.success("Entry added successfully!");
+                // Reset form and close
+                setFormOpen(false);
+                setEntryUser(null);
+                setEntryDate("");
+                setEntryType("");
+                setEntryAmount("");
+                setEntryRemark("");
+                fetchLogs(); // Refresh table
+            } else {
+                toast.error(response.data?.message || "Failed to add entry.");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong while adding the entry.");
         } finally {
             setLoading(false);
         }
@@ -251,31 +301,44 @@ const Cashledger = ({
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 
+    useEffect(() => {
+        if (!entryUser?.id) {
+            setEntryUserBalance(null);
+            return;
+        }
+
+        const fetchBalance = async () => {
+            setBalanceLoading(true);
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            if (!dataStored) return toast.error("Session expired. Please log in again.");
+            try {
+                const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", {
+                    is_app: "1",
+                    login_user_id: dataStored.user_id,
+                    auth_key: dataStored.auth_key,
+                    user_id: entryUser.id,
+                });
+                setEntryUserBalance(response.data?.balance ?? 0);
+            } catch (err) {
+                console.error("Error fetching balance:", err);
+                setEntryUserBalance(0);
+            } finally {
+                setBalanceLoading(false);
+            }
+        };
+
+        fetchBalance();
+    }, [entryUser]);
+
     return (
         <>
             {/* Desktop */}
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    {filterShow && (
-                        <Box sx={{ mb: 3 }}>
-                            <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
-                        </Box>
-                    )}
-                    {filterShow && (
-                        <Box sx={{ mb: 3 }}>
-                            <TradeEditDeleteLogFilter
-                                entry_date={entry_date}
-                                setentry_date={setentry_date}
-                                entrybefore_date={entrybefore_date}
-                                setentrybefore_date={setentrybefore_date}
-                                onApply={onFilterApply}
-                            />
-                        </Box>
-                    )}
 
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-                        <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
-                            startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: theme.palette.text.secondary }} /></InputAdornment>
+                        <TextField variant="outlined" placeholder="Search Entries..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
+                            startAdornment: <InputAdornment position="start"></InputAdornment>
                         }} />
                     </Box>
 
@@ -360,26 +423,7 @@ const Cashledger = ({
             ) : (
                 <>
                     {/* Mobile version */}
-
-
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 1.5, mt: 0.5 }}>
-                        <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
-                            {filterShow && (
-                                <Box sx={{ width: 280, p: 2 }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                        <Typography variant="h6">Filters</Typography>
-                                        <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
-                                    </Box>
-                                    <Box sx={{ mb: 3, width: "100%" }}>
-                                        <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
-                                    </Box>
-                                    <TradeEditDeleteLogFilter entry_date={entry_date} setentry_date={setentry_date} entrybefore_date={entrybefore_date} setentrybefore_date={setentrybefore_date} onApply={onFilterApply} />
-                                </Box>
-                            )}
-                        </Drawer>
-
-                        <FilterBtn setFilterOpen={setFilterDrawer} />
-
                         <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
                             startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: theme.palette.text.secondary }} /></InputAdornment>
                         }} />
@@ -465,6 +509,7 @@ const Cashledger = ({
                         );
                     })}
 
+
                     <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
                         <DialogTitle>Confirm Delete</DialogTitle>
                         <DialogContent>
@@ -503,4 +548,5 @@ const Cashledger = ({
     );
 };
 
-export default Cashledger
+
+export default Cashentrytable

@@ -4,10 +4,11 @@ import axiosInstance from "./axiosconfig";
 
 import { constant, forex_market_type_id } from "../Watchlist/constant";
 
+const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
 async function getDefaultParams() {
   const { ip_address, user_agent } = await getUserInfo();
-  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  // const dataStored = JSON.parse(sessionStorage.getItem("data"));
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
@@ -164,6 +165,28 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
 
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
+    return data.aaData || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
+};
+
+
+export const fetcholdOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+  const formData = {
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10000,
+    sSearch: searchValue,
+    is_app: 1,
+    login_user_id: userId,
+    auth_key: authKey,
+    isTodayTrade: type === "today" ? "today" : "",
+  };
+
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_old", formData);
     return data.aaData || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -1049,6 +1072,30 @@ export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, 
   }
 };
 
+export const fetchSelfplAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/self_profit_and_loss_report", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
 export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
   const defaultParams = await getDefaultParams();
 
@@ -1162,7 +1209,7 @@ export const tradePlaceAPI = async (dataObj) => {
     trade_type: dataObj.market, // market, lot ,stock loss.. > market price has value and disablabled
     trade_type_x: dataObj.tradeType, // buy sell
     check_script_name: dataObj.script_expiry_type ? `${dataObj.script_name}-${dataObj.script_expiry_type}` : dataObj.script_name, // HOW THIS SHOULD BE SET
-    user_id: dataObj.client.id
+    user_id: (dataStored?.user_type != 1 && dataStored?.user_type != 2) ? dataObj.client.id : undefined,
   };
   console.log('payload', payload);
 
@@ -1485,6 +1532,51 @@ export const tradeAutosquareofAPI = async (
   }
 };
 
+export const MtmalertsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/mtm_alert_top20", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
 
 export const ipaddresslogAPI = async (
   currentPage,
@@ -1715,8 +1807,45 @@ export const BillfilterAPI = async ({
   }
 };
 
+export const CrosstradelogAPI = async ({
+  valan_id = valanId?.id,
+  amount = "",
+  start_date = "",
+  end_date = "",
+  market_type_id = "",
+  user_id = "",
+  broker_user_id = "",
+  master_user_id = "",
+  term = "",
+}) => {
+  try {
+    const defaultParams = await getDefaultParams();
+
+    const payload = {
+      ...defaultParams,
+      master_user_id,
+      broker_user_id,
+      valan_id,
+      market_type_id,
+      user_id,
+      start_date,
+      end_date,
+      amount,
+      term,
+    };
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/cross_trade_data",
+      payload
+    );
 
 
+    return response.data || [];
+  } catch (err) {
+    console.error("Error fetching Valan IDs:", err);
+    return [];
+  }
+};
 
 export const tradeEditLoglistAPI = async (
   currentPage,
@@ -1800,6 +1929,50 @@ export const editDeleteLogLogsAPI = async (
 
   try {
     const response = await axiosInstance.post("datatables/trade_log_view.php", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const manualtradesAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/order_book_manual", formData);
 
     return response.data;
   } catch (error) {
@@ -1895,6 +2068,50 @@ export const fetchOptionsAPI = async (url, params) => {
     apiCache.set(key, data.results);
 
     return data.results;
+  } catch (err) {
+    console.error(`Error fetching from ${url}`, err);
+    setter([]);
+  }
+};
+export const fetchOptionsPriceOptionAPI = async (url, params) => {
+  const key = `${url}:${JSON.stringify(params)}`;
+
+  // If we already have cached response, return it
+  if (apiCache.has(key)) {
+    console.log("Returning cached response for:", key);
+    return apiCache.get(key);
+  }
+
+  // Otherwise, call the API
+  try {
+    const { data } = await axiosInstance.post(url, params);
+
+    // Save response in cache
+    apiCache.set(key, data);
+
+    return data;
+  } catch (err) {
+    console.error(`Error fetching from ${url}`, err);
+    setter([]);
+  }
+};
+
+export const fetchOptionsAPIManualScript = async (url, params) => {
+  const key = `${url}:${JSON.stringify(params)}`;
+
+  // If we already have cached response, return it
+  if (apiCache.has(key)) {
+    console.log("Returning cached response for:", key);
+    return apiCache.get(key);
+  }
+
+  // Otherwise, call the API
+  try {
+    const { data } = await axiosInstance.post(url, params);
+    console.log("datadata=", data);
+    // Save response in cache
+    apiCache.set(key, data);
+    return data;
   } catch (err) {
     console.error(`Error fetching from ${url}`, err);
     setter([]);

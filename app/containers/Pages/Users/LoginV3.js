@@ -1,13 +1,18 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import brand from 'dan-api/dummy/brand';
-import { LoginFormV3 } from 'dan-components';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { LoginFormV2 } from 'dan-components';
 import useStyles from 'dan-components/Forms/user-jss';
+import LoginFormV3 from 'dan-components/Forms/LoginFormV3';
 
 function LoginV3() {
-  const title = brand.name + ' - Login Version 3';
+  const title = brand.name + ' - Login Version 2';
   const description = brand.desc;
   const { classes } = useStyles();
+  const mdDown = useMediaQuery(theme => theme.breakpoints.down('md'));
+
   return (
     <div className={classes.rootFull}>
       <Helmet>
@@ -18,13 +23,23 @@ function LoginV3() {
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
       </Helmet>
-      <div className={classes.container}>
-        <div className={classes.fullFormWrap}>
+      <div className={classes.containerSide}>
+        {!mdDown && (
+          <div className={classes.opening}>
+            <Typography variant="h3" component="h1" className={classes.opening} gutterBottom>
+              Welcome to&nbsp;
+              {brand.name}
+            </Typography>
+            <Typography variant="h6" component="p" className={classes.subpening}>Please sign in to continue</Typography>
+          </div>
+        )}
+        <div className={classes.sideFormWrap}>
           <LoginFormV3 />
         </div>
       </div>
     </div>
   );
 }
+
 
 export default LoginV3;

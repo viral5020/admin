@@ -36,7 +36,11 @@ import { FormControlLabel } from "@mui/material";
 import { Radio } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const Userlisting = () => {
+const Userlisting = ({
+  filterShow = true,
+  setFilterShow = () => { }
+}) => {
+  console.log("filterShow=", filterShow);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -686,7 +690,7 @@ const Userlisting = () => {
           mb: 2,
         }}
       >
-        {isMobile ? (
+        {isMobile && filterShow ? (
           <Drawer
             anchor="left"
             open={drawerOpen}
@@ -725,34 +729,37 @@ const Userlisting = () => {
             </Box>
           </Drawer>
         ) : (
-          <UserListFilter
-            isDarkMode={theme.palette.mode === "dark"}
-            databroker={databroker}
-            setDatabroker={setDatabroker}
-            master={master}
-            setMaster={setMaster}
-            user={user}
-            setUser={setUser}
-            status={status}
-            setStatus={setStatus}
-            segment={segment}
-            setSegment={setSegment}
-            loginBefore={loginBefore}
-            setLoginBefore={setLoginBefore}
-            loginAfter={loginAfter}
-            setLoginAfter={setLoginAfter}
-            tradeBefore={tradeBefore}
-            setTradeBefore={setTradeBefore}
-            tradeAfter={tradeAfter}
-            setTradeAfter={setTradeAfter}
-            type={type}
-            setType={setType}
-            onApply={() => {
-              currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
-            }}
-          />
+          filterShow && (
+            <UserListFilter
+              isDarkMode={theme.palette.mode === "dark"}
+              databroker={databroker}
+              setDatabroker={setDatabroker}
+              master={master}
+              setMaster={setMaster}
+              user={user}
+              setUser={setUser}
+              status={status}
+              setStatus={setStatus}
+              segment={segment}
+              setSegment={setSegment}
+              loginBefore={loginBefore}
+              setLoginBefore={setLoginBefore}
+              loginAfter={loginAfter}
+              setLoginAfter={setLoginAfter}
+              tradeBefore={tradeBefore}
+              setTradeBefore={setTradeBefore}
+              tradeAfter={tradeAfter}
+              setTradeAfter={setTradeAfter}
+              type={type}
+              setType={setType}
+              onApply={() => {
+                currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
+              }}
+            />
+          )
         )}
       </Box>
+
 
       {/* Search */}
       <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>

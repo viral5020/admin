@@ -29,11 +29,16 @@ import OrderFilter from './OrderFilter';
 import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
-import { deleteTrade, updateTrade } from './API/API';
+import { deleteTrade, fetchOrdersAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import Pagination from './filters/Pagination';
 
-const OrderBook = () => {
+const OrderBook = ({
+  filterShow = true,
+  setFilterShow = () => { }
+}) => {
+  console.log("filterShow=", filterShow);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isDarkMode = theme.palette.mode === 'dark';
@@ -62,6 +67,8 @@ const OrderBook = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelItem, setCancelItem] = useState(null);
   const [password, setPassword] = useState('');
+
+
 
   const handleCancel = async (itemToCancel, enteredPassword = '') => {
     try {
@@ -93,57 +100,51 @@ const OrderBook = () => {
   const [master, setMaster] = useState({});
   const [broker, setBroker] = useState({});
 
+  // 1. Retrieve the raw data from sessionStorage
   const rawData = sessionStorage.getItem("data");
-  const parsedData = JSON.parse(rawData);
-  const userType = parseInt(parsedData.user_type, 10);
+
+  // 2. Initialize parsedData safely
+  let parsedData = null;
+  if (rawData) {
+    try {
+      parsedData = JSON.parse(rawData);
+    } catch (error) {
+      console.error("Failed to parse session data:", error);
+    }
+  }
+
+  // 3. Extract user_type and deletePopup safely
+  let userType = null;
+  let deletePopup = 0; // default to 0 if not set
+
+  if (parsedData) {
+    // Convert user_type to integer if available
+    if (parsedData.user_type !== undefined) {
+      userType = parseInt(parsedData.user_type, 10);
+      if (isNaN(userType)) {
+        console.warn("user_type is not a valid number");
+        userType = null;
+      }
+    }
+
+    // Convert deletePopup to integer if available
+    if (parsedData.deletePopup !== undefined) {
+      deletePopup = parseInt(parsedData.deletePopup, 10);
+      if (isNaN(deletePopup)) {
+        console.warn("deletePopup is not a valid number");
+        deletePopup = 0;
+      }
+    }
+  }
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchPageData = async () => {
+  const fetchOrders = async (type = "today", searchValue = "") => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const formData = {
-      sEcho: 1,
-      iDisplayStart: (currentPage * pageSize),
-      iDisplayLength: pageSize,
-      sSearch: searchText,
-      is_app: 1,
-      login_user_id: dataStored?.user_id,
-      auth_key: dataStored?.auth_key,
-      isTodayTrade: filterType,
-      end_date: end_date,
-      start_end: start_end, //2025-07-30
-      market_type_id: market?.id,
-      script_id: formatScriptIds(script),
-      broker_id: broker?.id,
-      master_user_id: master?.id,
-      user_id: client?.id,
-      is_pending: status === 'is_pending' || '',
-      is_executed: status === 'is_executed' || '',
-      trade_type: orderType,
-    };
-
-    try {
-      const response = await fetch("http://128.199.126.171/~goldorg/datatables/order_book_new", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-
-      isMobile
-        ? isFilterChange || currentPage === 0
-          ? setOrders(data.aaData || [])
-          : setOrders(prev => [...prev, ...data.aaData])
-        : setOrders(data.aaData || []);
-
-      setTotalRecords(data?.iTotalRecords || 0);
-      setIsFilterChange(false);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
+    const result = await fetchOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
+    setOrders(result);
+    setLoading(false);
   };
 
   function onFilterApply() {
@@ -157,7 +158,7 @@ const OrderBook = () => {
   }, [orders])
   // # Pagination useEffects
   useEffect(() => {
-    fetchPageData();
+    fetchOrders();
   }, []);
 
   useEffect(() => {
@@ -228,7 +229,7 @@ const OrderBook = () => {
     }
   };
 
-  const needsPassword = userType === 4 && deletePopup;
+  const needsPassword = userType === 4 && deletePopup === 1;
 
   const renderActions = (item, idx, isQty) => ({
     // leading: (
@@ -305,12 +306,43 @@ const OrderBook = () => {
     <Box sx={{ p: 0, mt: 2 }}>
 
       {/* Filter Drawer for Mobile */}
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <Box sx={{ width: 280, p: 2 }} role="presentation">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Filters</Typography>
-            <IconButton onClick={toggleDrawer(false)}><CloseIcon /></IconButton>
+      {filterShow && (
+        <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+          <Box sx={{ width: 280, p: 2 }} role="presentation">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">Filters</Typography>
+              <IconButton onClick={toggleDrawer(false)}><CloseIcon /></IconButton>
+            </Box>
+            <OrderFilter
+              isDarkMode={isDarkMode}
+              setStatus={setStatus}
+              setEnd_date={setEnd_date}
+              setStart_end={setStart_end}
+              setOrderType={setOrderType}
+              status={status}
+              end_date={end_date}
+              start_end={start_end}
+              orderType={orderType}
+              setMarket={setMarket}
+              setScript={setScript}
+              setClient={setClient}
+              setMaster={setMaster}
+              setBroker={setBroker}
+              market={market}
+              script={script}
+              client={client}
+              master={master}
+              broker={broker}
+              userType={userType}
+              onApply={onFilterApply}
+            />
           </Box>
+        </Drawer>
+      )}
+      {/* Desktop Filter Display */}
+
+      {!isMobile && filterShow && (
+        <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
           <OrderFilter
             isDarkMode={isDarkMode}
             setStatus={setStatus}
@@ -331,37 +363,12 @@ const OrderBook = () => {
             client={client}
             master={master}
             broker={broker}
-            userType={userType}
             onApply={onFilterApply}
           />
         </Box>
-      </Drawer>
-
-      {/* Desktop Filter Display */}
-      {!isMobile && (
-        <OrderFilter
-          isDarkMode={isDarkMode}
-          setStatus={setStatus}
-          setEnd_date={setEnd_date}
-          setStart_end={setStart_end}
-          setOrderType={setOrderType}
-          status={status}
-          end_date={end_date}
-          start_end={start_end}
-          orderType={orderType}
-          setMarket={setMarket}
-          setScript={setScript}
-          setClient={setClient}
-          setMaster={setMaster}
-          setBroker={setBroker}
-          market={market}
-          script={script}
-          client={client}
-          master={master}
-          broker={broker}
-          onApply={onFilterApply}
-        />
       )}
+
+
 
       {/* Filter Options Row */}
       <Box sx={{

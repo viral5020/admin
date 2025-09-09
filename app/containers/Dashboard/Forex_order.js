@@ -100,9 +100,42 @@ const Forex_order = () => {
   const [master, setMaster] = useState({});
   const [broker, setBroker] = useState({});
 
+  // 1. Retrieve the raw data from sessionStorage
   const rawData = sessionStorage.getItem("data");
-  const parsedData = JSON.parse(rawData);
-  const userType = parseInt(parsedData.user_type, 10);
+
+  // 2. Initialize parsedData safely
+  let parsedData = null;
+  if (rawData) {
+    try {
+      parsedData = JSON.parse(rawData);
+    } catch (error) {
+      console.error("Failed to parse session data:", error);
+    }
+  }
+
+  // 3. Extract user_type and deletePopup safely
+  let userType = null;
+  let deletePopup = 0; // default to 0 if not set
+
+  if (parsedData) {
+    // Convert user_type to integer if available
+    if (parsedData.user_type !== undefined) {
+      userType = parseInt(parsedData.user_type, 10);
+      if (isNaN(userType)) {
+        console.warn("user_type is not a valid number");
+        userType = null;
+      }
+    }
+
+    // Convert deletePopup to integer if available
+    if (parsedData.deletePopup !== undefined) {
+      deletePopup = parseInt(parsedData.deletePopup, 10);
+      if (isNaN(deletePopup)) {
+        console.warn("deletePopup is not a valid number");
+        deletePopup = 0;
+      }
+    }
+  }
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 

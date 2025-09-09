@@ -23,11 +23,15 @@ const marketOptions = [
 const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, setTabIndex }) => {
     const [tradeType, setTradeType] = useState('BUY');
     const [market, setMarket] = useState(marketOptions[0].value);
-    const [lot, setLot] = useState('');
-    const [qty, setQty] = useState('');
+    const [lot, setLot] = useState('1');
+    const [qty, setQty] = useState(stockData?.script_lot_qty);
     const [price, setPrice] = useState('');
     const [isAllRequired, setIsAllRequired] = useState();
     const [client, setClient] = useState();
+
+    // useEffect(() => {
+
+    // },[lot])
 
 
     const [userType, setUserType] = useState('');
@@ -38,8 +42,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
 
     function resetAllState() {
         setMarket(marketOptions[0].value);
-        setLot('');
-        setQty('');
+        setLot('1');
+        setQty(stockData?.script_lot_qty);
         setPrice('');
         setIsAllRequired();
     }
@@ -107,9 +111,11 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                     mb: 0,
                     maxHeight: isMobile ? '90vh' : '80vh', // make sure mobile view fits screen
                     overflowY: 'auto',
+                    zIndex: 10
                 }
             }}
         >
+            {/* <Toaster limit={3} zIndex={999998999998} /> */}
             <Box p={isMobile ? 2 : 3} pb={0}>
                 {/* Header */}
                 <Box
@@ -318,8 +324,12 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                                 <TextField
                                     label="Lot"
                                     type="number"
-                                    value={lot}
-                                    onChange={(e) => setLot(e.target.value)}
+                                    value={Number(lot)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setLot(val);
+                                        setQty((val * Number(stockData?.script_lot_qty)).toFixed(3))
+                                    }}
                                     fullWidth
                                     size="small"
                                     required
@@ -329,8 +339,12 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                                 <TextField
                                     label="Qty"
                                     type="number"
-                                    value={qty}
-                                    onChange={(e) => setQty(e.target.value)}
+                                    value={Number(qty)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setQty(val);
+                                        setLot(val / Number(stockData?.script_lot_qty))
+                                    }}
                                     fullWidth
                                     size="small"
                                     required

@@ -161,8 +161,6 @@ const TradeEditDeleteLog = () => {
                         setIsAdminOnly={setIsAdminOnly}
                         onApply={onFilterApply}
                     />
-
-
                     <Box
                         sx={{
                             display: 'flex',
@@ -236,67 +234,67 @@ const TradeEditDeleteLog = () => {
                                         <TableCell>DateTime</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                    <TableBody>
-                                        {logs.map((log, i) => {
-                                            const isBuy = log.log_type === 'BUY';
-                                            const isSell = log.log_type === 'SELL';
+                                <TableBody>
+                                    {logs.map((log, i) => {
+                                        const isBuy = log.log_type === 'BUY';
+                                        const isSell = log.log_type === 'SELL';
 
-                                            // Safe check for script_name
-                                            const scriptName = log?.script_name || '';
-                                            const [highlightName, ...rest] = scriptName.split(' ');
-                                            const remainingScriptName = rest.join(' ');
+                                        // Safe check for script_name
+                                        const scriptName = log?.script_name || '';
+                                        const [highlightName, ...rest] = scriptName.split(' ');
+                                        const remainingScriptName = rest.join(' ');
 
-                                            return (
-                                                <TableRow key={i}>
-                                                    <TableCell sx={{ color: 'black' }}>
-                                                        <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
-                                                            {log.log_type}
-                                                        </span>
-                                                    </TableCell>
+                                        return (
+                                            <TableRow key={i}>
+                                                <TableCell sx={{ color: 'black' }}>
+                                                    <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
+                                                        {log.log_type}
+                                                    </span>
+                                                </TableCell>
 
-                                                    <TableCell>{log.user_full_name ?? '-'}</TableCell>
+                                                <TableCell>{log.user_full_name ?? '-'}</TableCell>
 
-                                                    <TableCell>
-                                                        {scriptName ? (
-                                                            <>
-                                                                <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
-                                                                {remainingScriptName && ` ${remainingScriptName}`}
-                                                            </>
-                                                        ) : (
-                                                            <span>-</span>
-                                                        )}
-                                                    </TableCell>
+                                                <TableCell>
+                                                    {scriptName ? (
+                                                        <>
+                                                            <span style={{ fontWeight: 'bold' }}>{highlightName}</span>
+                                                            {remainingScriptName && ` ${remainingScriptName}`}
+                                                        </>
+                                                    ) : (
+                                                        <span>-</span>
+                                                    )}
+                                                </TableCell>
 
-                                                    <TableCell
-                                                        sx={{
-                                                            color:
-                                                                log.trade_type === 'Buy'
-                                                                    ? 'green'
-                                                                    : log.trade_type === 'Sell'
-                                                                        ? 'red'
-                                                                        : 'inherit',
-                                                            fontWeight: '600',
-                                                            textTransform: 'uppercase'
-                                                        }}
-                                                    >
-                                                        {log.trade_type ?? '-'}
-                                                    </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        color:
+                                                            log.trade_type === 'Buy'
+                                                                ? 'green'
+                                                                : log.trade_type === 'Sell'
+                                                                    ? 'red'
+                                                                    : 'inherit',
+                                                        fontWeight: '600',
+                                                        textTransform: 'uppercase'
+                                                    }}
+                                                >
+                                                    {log.trade_type ?? '-'}
+                                                </TableCell>
 
-                                                    <TableCell>
-                                                        <strong>{log.trade_qty ?? '-'}</strong>{' '}
-                                                        {log.trade_lot !== undefined && `(${Number(log.trade_lot).toFixed(2)})`}
-                                                    </TableCell>
+                                                <TableCell>
+                                                    <strong>{log.trade_qty ?? '-'}</strong>{' '}
+                                                    {log.trade_lot !== undefined && `(${Number(log.trade_lot).toFixed(2)})`}
+                                                </TableCell>
 
-                                                    <TableCell>
-                                                        <strong>{log.trade_rate ?? '-'}</strong>
-                                                    </TableCell>
+                                                <TableCell>
+                                                    <strong>{log.trade_rate ?? '-'}</strong>
+                                                </TableCell>
 
-                                                    <TableCell>{log.added_by ?? '-'}</TableCell>
-                                                    <TableCell>{log.added_datetime ?? '-'}</TableCell>
-                                                </TableRow>
-                                            );
-                                        })}
-                                    </TableBody>
+                                                <TableCell>{log.added_by ?? '-'}</TableCell>
+                                                <TableCell>{log.added_datetime ?? '-'}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
 
                             </Table>
 

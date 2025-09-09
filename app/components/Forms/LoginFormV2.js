@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -8,31 +8,18 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import AllInclusive from '@mui/icons-material/AllInclusive';
-import Brightness5 from '@mui/icons-material/Brightness5';
-import People from '@mui/icons-material/People';
-import ArrowForward from '@mui/icons-material/ArrowForward';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
-import Checkbox from '@mui/material/Checkbox';
-import Icon from '@mui/material/Icon';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import brand from 'dan-api/dummy/brand';
 import logo from 'dan-images/logo.svg';
 import useStyles from './user-jss';
-import { ContentDivider } from '../Divider';
 // import { fetchNotificationAPI } from 'app/containers/Dashboard/API/API';
-import { fetchNotificationAPI } from '../../containers/Dashboard/API/API';
+// import { fetchNotificationAPI } from '../../containers/Dashboard/API/API';
 
-// validation functions
-/// validation functions
 const validationSchema = yup.object({
-  // email: yup
-  //   .string('Enter your email')
-  //   .email('Enter a valid email')
-  //   .required('Email is required'),
   password: yup
     .string('Enter your password')
     .required('Password is required'),
@@ -45,6 +32,7 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 function LoginFormV2() {
   const deco = useSelector((state) => state.ui.decoration);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -61,17 +49,34 @@ function LoginFormV2() {
           },
           body: JSON.stringify(values),
         });
-        // await fetchNotificationAPI();
 
         const data = await response.json();
-        console.log('API Response:', data); // <-- Debug this
+        console.log('API Response:', data); // Debug the API response
 
         const isLoginSuccessful = data.success || data.message?.toLowerCase().includes('success');
 
         if (isLoginSuccessful) {
           sessionStorage.setItem('data', JSON.stringify(data));
-          // setTimeout(() => navigate('/app'), 400)
-          setTimeout(() => window.location.href = '/app', 1000);
+
+          // Adjust this property name to match the API response exactly
+          const userType = data.userType;
+
+          // If you want a short delay before redirecting, keep setTimeout
+          setTimeout(() => {
+            const rawData = sessionStorage.getItem("data");
+            const parsedData = JSON.parse(rawData);
+            const userType = parseInt(parsedData.user_type, 10);
+
+            console.log('Redirecting based on userType:', userType);
+
+            if (userType === 3 || userType === 4) {
+              navigate('/app/dashboard/Master-Dashboard', { replace: true });
+            } else {
+              navigate('/app', { replace: true });
+            }
+          }, 500);
+
+
         } else {
           alert('Login failed: ' + (data.message || 'Invalid credentials'));
         }
@@ -84,8 +89,6 @@ function LoginFormV2() {
     }
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-
   const handleClickShowPassword = () => {
     setShowPassword(show => !show);
   };
@@ -95,6 +98,7 @@ function LoginFormV2() {
   };
 
   const { classes, cx } = useStyles();
+
   return (
     <Paper className={cx(classes.sideWrap, deco && classes.petal)}>
       <div className={classes.topBar}>
@@ -102,35 +106,11 @@ function LoginFormV2() {
           <img src={logo} alt={brand.name} />
           {brand.name}
         </NavLink>
-        {/* <Button size="small" className={classes.buttonLink} component={LinkBtn} to="/register-v2">
-          <Icon className={classes.icon}>arrow_forward</Icon>
-          Create new account
-        </Button> */}
       </div>
       <Typography variant="h4" sx={{ mt: 17 }} gutterBottom>
         Sign In
       </Typography>
 
-      {/* <Typography variant="caption" className={classes.subtitle} gutterBottom align="center">
-        Lorem ipsum dolor sit amet
-      </Typography> */}
-      {/* <section className={classes.socmedSideLogin}>
-        <div className={classes.btnArea}>
-          <Button variant="outlined" size="small" className={classes.redBtn} type="button">
-            <AllInclusive className={cx(classes.leftIcon, classes.iconSmall)} />
-            Socmed 1
-          </Button>
-          <Button variant="outlined" size="small" className={classes.blueBtn} type="button">
-            <Brightness5 className={cx(classes.leftIcon, classes.iconSmall)} />
-            Socmed 2
-          </Button>
-          <Button variant="outlined" size="small" className={classes.cyanBtn} type="button">
-            <People className={cx(classes.leftIcon, classes.iconSmall)} />
-            Socmed 3
-          </Button>
-        </div>
-        <ContentDivider content="Or sign in with email" />
-      </section> */}
       <section className={classes.pageFormSideWrap}>
         <form onSubmit={formik.handleSubmit}>
           <div>
@@ -177,12 +157,15 @@ function LoginFormV2() {
               />
             </FormControl>
           </div>
-          <div className={classes.optArea}>
-            {/* <FormControlLabel className={classes.label} control={<Checkbox name="checkbox" />} label="Remember" /> */}
-            {/* <Button size="small" component={LinkBtn} to="/reset-password" className={classes.buttonLink}>Forgot Password</Button> */}
-          </div>
+          <div className={classes.optArea} />
           <div className={classes.btnArea}>
-            <Button variant="contained" color="primary" size="large" type="submit" disabled={formik.isSubmitting}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              type="submit"
+              disabled={formik.isSubmitting}
+            >
               Continue
               <ArrowForward className={cx(classes.rightIcon, classes.iconSmall)} />
             </Button>
@@ -191,7 +174,6 @@ function LoginFormV2() {
       </section>
     </Paper>
   );
-
 }
 
 export default LoginFormV2;

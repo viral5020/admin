@@ -198,7 +198,7 @@ const Billfilter = () => {
                         setMarket={setMarket}
                         client={client}
                         master={master}
-                         broker={broker}
+                        broker={broker}
                         setClient={setClient}
                         setMaster={setMaster}
                         setBroker={setBroker}
@@ -340,10 +340,10 @@ const Billfilter = () => {
                                     setMarket={setMarket}
                                     client={client}
                                     master={master}
-                                     broker={broker}
+                                    broker={broker}
                                     setClient={setClient}
                                     setMaster={setMaster}
-                                     setBroker={setBroker}
+                                    setBroker={setBroker}
                                     onApply={onFilterApply}
                                 />
                             </Box>
