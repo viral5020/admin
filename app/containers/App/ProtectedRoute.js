@@ -16,6 +16,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   async function isProtected() {
+    console.log("ASSSSSSSSSSSSCFF")
     // const userData = JSON.parse(sessionStorage.getItem("data"));
 
     await fetchNotificationAPI();
