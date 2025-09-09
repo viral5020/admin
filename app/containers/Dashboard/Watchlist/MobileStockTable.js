@@ -252,28 +252,6 @@ const MobileStockTable = ({
         <>
             <SwipeableList type={ListType.IOS}>
                 {dummyData?.map((stock, idx) => {
-                    const obj = {
-                        "script_expiry_orginal_format": "",
-                        "priceChange": "0",
-                        "priceChangePercent": "0",
-                        "ltp": "0",
-                        "market_watch_id": "7026858",
-                        "script_expiry_id": "0",
-                        "script_id": "813",
-                        "market_type_id": "8",
-                        "script_expiry_type": "",
-                        "script_lot_qty": "1",
-                        "askRate": "0",
-                        "bidRate": "0",
-                        "colorBuyPrice": "black",
-                        "colorSellPrice": "black",
-                        "colorLtpPrice": "black",
-                        "socket_data": {},
-                        "high": "0",
-                        "low": "0",
-                        "open": "0",
-                        "close": "0"
-                    }
                     // console.log('RRR stock', stock);
                     const isUp = stock?.priceChange > 0;
                     const color = isDarkMode
