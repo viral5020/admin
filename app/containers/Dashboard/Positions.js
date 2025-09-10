@@ -47,6 +47,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import { fetchTradesDataAPI } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import { formatScriptIds } from "./helpers/utilFunc";
+import { toast, ToastContainer } from "dan-vendor/react-toastify/dist";
 
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -1407,7 +1408,7 @@ const OrderPage1 = ({
                                                         variant="subtitle2"
                                                         sx={{
                                                             fontWeight: 700,
-                                                            color: todaysPL > 0 ? "success.main" : "error.main",
+
                                                         }}
                                                     >
                                                         {row.sell_avg_rate.toLocaleString("en-IN", {
@@ -1424,7 +1425,7 @@ const OrderPage1 = ({
                                                         variant="subtitle2"
                                                         sx={{
                                                             fontWeight: 700,
-                                                            color: unrealizedPL > 0 ? "success.main" : "error.main",
+
                                                         }}
                                                     >
                                                         <span
@@ -1870,13 +1871,13 @@ const OrderPage1 = ({
                                                         const data = await response.json();
 
                                                         if (response.ok) {
-                                                            // console.log("Trade placed successfully", data);
                                                             setCloseDialogOpen(false);
+                                                            toast.success("Trade placed successfully!");  // ✅ Success toast
                                                         } else {
-                                                            // console.error("Trade placement failed", data);
+                                                            toast.error(`Trade placement failed: ${data?.message || "Unknown error"}`); // ❌ Error toast
                                                         }
                                                     } catch (error) {
-                                                        // console.error("Network error:", error);
+                                                        toast.error(`Network error: ${error.message}`); // ❌ Network error toast
                                                     }
                                                 }}
                                                 variant="contained"
@@ -3291,6 +3292,7 @@ const OrderPage1 = ({
                             zIndex: 1200,
                         }}
                     />
+                    <ToastContainer position="top-right" autoClose={3000} />
                 </>
             )}
         </Box>

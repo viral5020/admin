@@ -160,7 +160,7 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
     is_app: 1,
     login_user_id: userId,
     auth_key: authKey,
-    isTodayTrade: type === "today" ? "today" : "",
+    isTodayTrade: type,
   };
 
   try {

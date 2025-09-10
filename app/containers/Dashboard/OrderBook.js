@@ -181,6 +181,7 @@ const OrderBook = ({
     setLoading(false);
   };
 
+
   function onFilterApply() {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
@@ -205,12 +206,16 @@ const OrderBook = ({
   }, [filterType, debouncedSearchText]);
 
   useEffect(() => {
-    !isFirstRender && fetchPageData();
+    !isFirstRender && fetchOrders();
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    isFilterChange && !isFirstRender && fetchPageData();
+    isFilterChange && !isFirstRender && fetchOrders();
   }, [isFilterChange])
+
+  useEffect(() => {
+    fetchOrders(filterType, debouncedSearchText);
+  }, [filterType, debouncedSearchText]);
 
 
   const [open, setOpen] = useState(false);
@@ -449,7 +454,11 @@ const OrderBook = ({
 
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Filter</InputLabel>
-          <Select value={filterType} label="Filter" onChange={(e) => setFilterType(e.target.value)}>
+          <Select
+            value={filterType}
+            label="Filter"
+            onChange={(e) => setFilterType(e.target.value)}
+          >
             <MenuItem value="today">Today</MenuItem>
             <MenuItem value="all">This Week</MenuItem>
           </Select>
