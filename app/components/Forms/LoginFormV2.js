@@ -70,9 +70,9 @@ function LoginFormV2() {
             console.log('Redirecting based on userType:', userType);
 
             if (userType === 3 || userType === 4) {
-              navigate('/app/dashboard/Master-Dashboard', { replace: true });
+              navigate("/app/dashboard/Master-Dashboard", { state: { flag: true }, replace: true });
             } else {
-              navigate('/app', { replace: true });
+              navigate('/app', { state: { flag: true }, replace: true });
             }
           }, 500);
 

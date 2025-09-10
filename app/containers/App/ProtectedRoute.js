@@ -1,48 +1,58 @@
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = () => {
   const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
-  const location = useLocation(); // track path changes
+  const location = useLocation();
   const navigate = useNavigate();
-  const [isPageShown, setIsPageShown] = useState(false)
+  const [isPageShown, setIsPageShown] = useState(false);
+
+  const flag = location.state?.flag;
+  console.log('XXX flag', flag);
 
   if (!isLoggedIn) {
-    // setIsPageShown(false);
     alert('Please, login first.');
     navigate("/login", { replace: true });
-    return;
+    return null;
   }
 
   async function isProtected() {
-    console.log("ASSSSSSSSSSSSCFF")
-    // const userData = JSON.parse(sessionStorage.getItem("data"));
+    console.log("ASSSSSSSSSSSSCFF");
 
     await fetchNotificationAPI();
+    console.log("await fetchNotificationAPI();");
 
     const response = await checkLoginAPI();
+    console.log("const response = await checkLoginAPI();", response);
 
     if (response.status !== 'ok') {
       setIsPageShown(false);
       alert("Session expired. Please login.");
       navigate("/login", { replace: true });
-      return;
     } else if (response.first_password_changed == 0) {
       setIsPageShown(false);
       alert("Please change your password first.");
-      navigate("/app/pages/user-profile", { replace: true, state: { isChangePassword: true }, });
-      return;
+      navigate("/app/pages/user-profile", {
+        replace: true,
+        state: { isChangePassword: true },
+      });
     } else {
       setIsPageShown(true);
     }
   }
 
   useEffect(() => {
-    isProtected();  // chagpt : does this run on every time when path
-  }, [location.pathname])
+    if (flag) {
+      // 🔹 Skip API checks if flag is set, but still allow rendering
+      setIsPageShown(true);
+      return;
+    }
+    console.log('location.pathname', location.pathname);
+    isProtected();
+  }, [location.pathname, flag]);
 
-  return isPageShown && <Outlet />;
+  return isPageShown ? <Outlet /> : null;
 };
 
 export default ProtectedRoute;
