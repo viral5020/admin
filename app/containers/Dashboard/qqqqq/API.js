@@ -865,17 +865,17 @@ function isChanged(apiData) {
 
 export const checkLoginAPI = async (isJustLogin, user_id, auth_key) => {
   let defaultParams = await getDefaultParams();
-  // console.log("fetchNotificationAPI.........");
+  console.log("fetchNotificationAPI.........");
   if (isJustLogin) {
     defaultParams = { ...defaultParams, login_user_id: user_id, auth_key }
-    // console.log('defaultParams', defaultParams);
+    console.log('defaultParams', defaultParams);
   }
-  // console.log('defaultParams', defaultParams);
+  console.log('defaultParams', defaultParams);
   if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;
-  // console.log("if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;")
+  console.log("if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;")
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
-    // console.log('check_login==', response.data);
+    console.log('check_login==', response.data);
     return response.data;
   } catch (error) {
     console.error("Error in checkLogin:", error);

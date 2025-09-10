@@ -116,7 +116,7 @@ function changeFormat(arr) {
 }
 
 
-const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isForex, setDummyData, socket, getScriptKey, setKeysOfScriptData }) => {
+const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isForex, setDummyData, socket, getScriptKey, marketNames, setMarketNames, setKeysOfScriptData }) => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [dataObj, setDataObj] = useState(false);
 
@@ -379,9 +379,16 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
             })
             console.log('Added scripts:', response);
             if (response.status == "ok") {
+                // response.scripts[0].market_type_name,included in marketNames?
+                const market_name = response.scripts[0].market_type_name;
+                const isMarketInWatchList = marketNames.includes(market_name)
+                if (!isMarketInWatchList) {
+                    setMarketNames(p => [...p, market_name])
+                }
                 const newStock = response.scripts[0];
                 const setKeys = setKeysOfScriptData(newStock);
                 setDummyData(prevData => [...prevData, setKeys]);
+                setFilterOpen(false);
 
                 if (socket) {
                     socket.emit("addMarketWatch", {
@@ -461,7 +468,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
 
             {/* Filter dialog for mobile */}
             <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth>
-                <DialogTitle sx={{ mb: 1, pt: 2, pb: 1 }}>Filter</DialogTitle>
+                <DialogTitle sx={{ mb: 1, pt: 2, pb: 1 }}>Add Market</DialogTitle>
 
                 <DialogContent dividers>
                     {renderFilterFields()}
@@ -470,7 +477,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 <DialogActions sx={{ px: 3, pb: 2 }}>
                     <Button
                         variant="contained"
-                        color="primary"
+                        color="secondary"
                         onClick={() => {
                             // your apply logic
                             // setFilterOpen(false);

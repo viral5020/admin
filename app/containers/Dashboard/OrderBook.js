@@ -449,7 +449,7 @@ const OrderBook = ({
         gap: 1,
       }}>
         {/* IconButton LEFT of filter dropdown on mobile */}
-        {isMobile && <FilterBtn setFilterOpen={setDrawerOpen} />}
+        {isMobile && filterShow && <FilterBtn setFilterOpen={setDrawerOpen} />}
 
 
         <FormControl size="small" sx={{ minWidth: 120 }}>

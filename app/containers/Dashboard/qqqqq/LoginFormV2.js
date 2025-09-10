@@ -70,6 +70,7 @@ function LoginFormV2() {
             console.log('Redirecting based on userType:', userType);
 
             if (userType === 3 || userType === 4) {
+              console.log('data', data);
               navigate("/app/dashboard/Master-Dashboard", { state: { user_id, auth_key }, replace: true });
             } else {
               navigate('/app', { state: { user_id, auth_key }, replace: true });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
@@ -28,6 +28,7 @@ import { Typography } from 'dan-vendor/@mui/material';
 
 function UserMenu(props) {
   const { classes, cx } = useStyles();
+  const navigate = useNavigate();
 
   const [menuState, setMenuState] = useState({ anchorEl: null, openMenu: null });
   const [profileData, setProfileData] = useState();
@@ -298,9 +299,10 @@ function UserMenu(props) {
             handleClose();
             sessionStorage.removeItem('data');
             sessionStorage.removeItem('notification');
+            navigate('/login');
           }}
           component={Link}
-          to="http://localhost:3000/login"
+        // to="http://localhost:3000/login"
         >
           <ListItemIcon><ExitToApp /></ListItemIcon>
           Log Out

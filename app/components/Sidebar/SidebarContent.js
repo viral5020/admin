@@ -61,35 +61,37 @@ function SidebarContent(props) {
 
   async function viewUserProfile() {
     const data = JSON.parse(sessionStorage.getItem('data'));
-    const formData = {
-      is_app: 1,
-      login_user_id: data.user_id,
-      auth_key: data.auth_key
-    };
+    if (data) {
+      const formData = {
+        is_app: 1,
+        login_user_id: data.user_id,
+        auth_key: data.auth_key
+      };
 
-    try {
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-      });
+      try {
+        const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (result.status !== 'ok') {
-        throw new Error(result.message || 'Failed to fetch profile');
+        if (result.status !== 'ok') {
+          throw new Error(result.message || 'Failed to fetch profile');
+        }
+
+        setProfileData(result.data);
+        // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
+        return result.data;
+
+      } catch (error) {
+        // if (error.message === 'Unauthorised Access') {
+        //   alert('Session expired, please login again.');
+        //   return <Navigate to="/login" replace />;
+        // }
+        console.error('❌ from sidebarContent.js\nError fetching profile:', error);
+        throw error;
       }
-
-      setProfileData(result.data);
-      // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
-      return result.data;
-
-    } catch (error) {
-      // if (error.message === 'Unauthorised Access') {
-      //   alert('Session expired, please login again.');
-      //   return <Navigate to="/login" replace />;
-      // }
-      console.error('❌ from sidebarContent.js\nError fetching profile:', error);
-      throw error;
     }
   }
 

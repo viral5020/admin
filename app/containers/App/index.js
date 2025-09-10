@@ -17,6 +17,7 @@ import {
 } from '../pageListAsync';
 import SocketApp from '../Dashboard/Socket/SocketApp';
 import MainAdminlogin from '../Pages/Users/MainAdminlogin';
+import { Toaster } from 'react-hot-toast';
 
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 
@@ -53,6 +54,8 @@ function App(props) {
           <Route path="*" element={<NotFoundDedicated />} />
         </Routes>
       </BrowserRouter>
+
+      <Toaster limit={3} containerStyle={{ zIndex: 9999999999999 }} /> {/* Above drawer, below dialogs */}
     </ThemeWrapper>
   );
 }

@@ -21,6 +21,8 @@ import { fetchRejectionLogsAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
+import CloseIcon from '@mui/icons-material/Close';
+
 
 const RejectionLogs = ({
   filterShow = true,
@@ -133,6 +135,10 @@ const RejectionLogs = ({
         onClose={() => setDrawerOpen(false)}
       >
         <Box sx={{ width: 250, p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Filters</Typography>
+            <IconButton onClick={() => setDrawerOpen(false)}><CloseIcon /></IconButton>
+          </Box>
           <TradeEditDeleteLogFilter
             End_date={End_date}
             Start_date={Start_date}
@@ -183,7 +189,7 @@ const RejectionLogs = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-          {isMobile && (
+          {isMobile && filterShow && (
             <IconButton
               color="primary"
               onClick={() => setDrawerOpen(true)}
@@ -206,7 +212,7 @@ const RejectionLogs = ({
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             fullWidth
-          // sx={{ ml: 1 }}
+            sx={{ ml: 1 }}
           />
         </Box>
       </Box>

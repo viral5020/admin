@@ -3,18 +3,33 @@ import React, { useEffect, useState } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
 
 const ProtectedRoute = () => {
+  const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
   const location = useLocation();
   const navigate = useNavigate();
   const [isPageShown, setIsPageShown] = useState(false);
-  const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
 
+  console.log('location.state.user_id', location.state?.user_id);
+  console.log('location.state.auth_key', location.state?.auth_key);
   const { user_id = null, auth_key = null } = location.state ?? {};
   const isJustLogin = Boolean(user_id) && Boolean(auth_key)
 
-  async function isProtected() {
-    !isJustLogin ? await fetchNotificationAPI() : await fetchNotificationAPI(isJustLogin, user_id, auth_key);
+  if (!isLoggedIn) {
+    alert('Please, login first.');
+    navigate("/login", { replace: true });
+    return null;
+  }
 
-    const response = !isJustLogin ? await checkLoginAPI() : await checkLoginAPI(isJustLogin, user_id, auth_key);
+  async function isProtected() {
+    console.log("ync function isProtected() {");
+    isJustLogin ? await fetchNotificationAPI() : await fetchNotificationAPI(isJustLogin, user_id, auth_key);
+
+    let response;
+    if (isJustLogin) {
+      response = await checkLoginAPI(); // no args
+    } else {
+      response = await checkLoginAPI(isJustLogin, user_id, auth_key); // args
+    }
+
 
     if (response.status !== 'ok') {
       setIsPageShown(false);
@@ -38,13 +53,6 @@ const ProtectedRoute = () => {
     //   setIsPageShown(true);
     //   return;
     // }
-    const isLoggedIn = !!sessionStorage.getItem('data'); // your auth check
-
-    if (!isLoggedIn) {
-      alert('Please, login first.');
-      navigate("/login", { replace: true });
-      return;
-    }
     console.log('location.pathname', location.pathname);
     isProtected();
   }, [location.pathname]);

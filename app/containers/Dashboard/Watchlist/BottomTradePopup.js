@@ -5,19 +5,20 @@ import {
     Avatar, IconButton,
     Tabs,
     Tab,
+    CircularProgress,
 } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { tradePlaceAPI } from '../API/API';
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { roundToTwoIN } from '../helpers/utilFunc';
 
 const marketOptions = [
-    { label: "market", value: 0 },
-    { label: "lot", value: 1 },
-    { label: "Stock Loss", value: 2 }
+    { label: "Market", value: 0 },
+    { label: "Limit", value: 1 },
+    { label: "Stop Loss", value: 2 }
 ]
 
 const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, setTabIndex }) => {
@@ -28,6 +29,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
     const [price, setPrice] = useState('');
     const [isAllRequired, setIsAllRequired] = useState();
     const [client, setClient] = useState();
+    const [loading, setLoading] = useState(false);
 
     // useEffect(() => {
 
@@ -81,14 +83,18 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
     async function handleSubmit() {
         if (!isValuesValidate()) return;
         try {
+            setLoading(true);
             const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex, client });
+            response.status === 'ok' && onClose();
             response.status === 'ok'
-                ? toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 })
-                : toast.error(`${response.message}.`, { duration: 15000 });
+                ? toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 }, { id: "trade-toaster" })
+                : toast.error(`${response.message}.`, { duration: 15000 }, { id: "trade-toaster" });
             resetAllState();
         } catch (error) {
             console.log('error', error)
-            toast.error(error.message || "Some error occured.");
+            toast.error(error.message || "Some error occured.", { id: "trade-toaster" });
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -102,20 +108,22 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
             anchor="bottom"
             open={open}
             onClose={onClose}
+            ModalProps={{
+                sx: { zIndex: 1000 }, // affects both backdrop + root
+            }}
             PaperProps={{
                 sx: {
                     borderTopLeftRadius: 16,
                     borderTopRightRadius: 16,
-                    width: isMobile ? '100%' : 600, // full width on mobile
+                    width: isMobile ? '100%' : 600,
                     mx: isMobile ? 0 : 'auto',
                     mb: 0,
-                    maxHeight: isMobile ? '90vh' : '80vh', // make sure mobile view fits screen
+                    maxHeight: isMobile ? '90vh' : '80vh',
                     overflowY: 'auto',
-                    zIndex: 10
-                }
+                },
             }}
         >
-            {/* <Toaster limit={3} zIndex={999998999998} /> */}
+            <Toaster limit={3} zIndex={999998999998} id="trade-toaster" />
             <Box p={isMobile ? 2 : 3} pb={0}>
                 {/* Header */}
                 <Box
@@ -378,14 +386,19 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                                 <Button
                                     variant="contained"
                                     fullWidth
-                                    color={isBuy ? 'success' : 'error'}
-                                    onClick={() => handleSubmit()}
+                                    color={isBuy ? "success" : "error"}
+                                    onClick={handleSubmit}
+                                    disabled={loading} // disable while loading
                                 // sx={{
                                 //     borderBottomLeftRadius: 0,
                                 //     borderBottomRightRadius: 0,
                                 // }}
                                 >
-                                    {isBuy ? 'Buy' : 'Sell'}
+                                    {loading ? (
+                                        <CircularProgress size={20} color="inherit" />
+                                    ) : (
+                                        isBuy ? "Buy" : "Sell"
+                                    )}
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>

@@ -21,6 +21,7 @@ import {
   IconButton,
   Slide,
   useMediaQuery as useMUIQuery,
+  CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'; // LHS icon
@@ -44,6 +45,7 @@ import RemoveCircleSharpIcon from '@mui/icons-material/RemoveCircleSharp';
 import ReportIcon from '@mui/icons-material/Report';
 import Star from '@mui/icons-material/Star';
 import StarBorder from '@mui/icons-material/StarBorder';
+import Loader from '../Components/Loader';
 
 
 const generateCandleData = () => {
@@ -454,6 +456,8 @@ function Watchlist() {
 
   const [marketNames, setMarketNames] = useState([]);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     // console.log('!!! dummyData', dummyData);
     if (Boolean(buySellPopup)) {
@@ -620,6 +624,7 @@ function Watchlist() {
   };
 
   async function getWatchListData() {
+    setIsLoading(true);
     try {
       const data = isForex ? await getForexWatchListDataAPI() : await getWatchListDataAPI();
 
@@ -643,6 +648,8 @@ function Watchlist() {
       setMarketNames(withOutDuplicates)
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -650,7 +657,7 @@ function Watchlist() {
     // window.location.reload();
     const path = location.pathname;
     const lastPart = path.split("/").pop();
-    // console.log('lastPart', lastPart);
+    console.log('lastPart', lastPart);
 
     if (lastPart === 'forex-watchlist') {
       setIsForex(true);
@@ -749,6 +756,11 @@ function Watchlist() {
     ) : null;
   }
 
+  // useEffect(() => {
+  //   console.log('dummyData', dummyData);
+  // }, [dummyData]);
+
+
   function handleRemove(stock, idx) {
     setRemoveMarket(false);
     if (stock.quantity > 0) {
@@ -786,95 +798,100 @@ function Watchlist() {
         <meta property="twitter:description" content={description} />
       </Helmet>
       {/* <MarketPlaceWIdget /> */}
-      {!isFavoritePage && <FilterComponent
-        searchText={searchText}
-        setSearchText={setSearchText}
-        isDarkMode={isDarkMode}
-        isMobile={isMobile}
-        isForex={isForex}
-        setDummyData={setDummyData}
-        socket={socket}
-        getScriptKey={getScriptKey}
-        addSocketDataToDummyData={addSocketDataToDummyData}
-        setKeysOfScriptData={setKeysOfScriptData}
-      />}
+      {!isFavoritePage &&
+        <FilterComponent
+          searchText={searchText}
+          setSearchText={setSearchText}
+          isDarkMode={isDarkMode}
+          isMobile={isMobile}
+          isForex={isForex}
+          setDummyData={setDummyData}
+          socket={socket}
+          getScriptKey={getScriptKey}
+          addSocketDataToDummyData={addSocketDataToDummyData}
+          setKeysOfScriptData={setKeysOfScriptData}
+          setMarketNames={setMarketNames}
+          marketNames={marketNames}
+        />}
       {/* <StockTable /> */}
-      <Box>
-        {marketNames.map((marketName, index) => (
-          <Box key={marketName} mb={1} mt={setisFavoritePage ? 1 : 0}>
-            <Accordion
-              expanded={expanded.has(marketName)}
-              onChange={() => toggleExpand(marketName)}
-              sx={{
-                // border: '2px solid red',
-                // '& .MuiAccordionSummary-root': {
-                //   px: 1,
-                // },
-                '& .MuiAccordionDetails-root': {
-                  px: 0,
-                }
-              }}
-              disableGutters
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
+      {isLoading ?
+        <Loader />
+        : <Box>
+          {marketNames.map((marketName, index) => (
+            <Box key={marketName} mb={1} mt={setisFavoritePage ? 1 : 0}>
+              <Accordion
+                expanded={expanded.has(marketName)}
+                onChange={() => toggleExpand(marketName)}
                 sx={{
-                  minHeight: 0, // remove default tall height
-                  padding: '0 4px', // tighter horizontal padding
-                  '&.Mui-expanded': {
-                    minHeight: 0, // keep compact when expanded
-                  },
-                  '& .MuiAccordionSummary-content': {
-                    margin: 0, // remove extra margin
-                    ml: 1,
-                  },
+                  // border: '2px solid red',
+                  // '& .MuiAccordionSummary-root': {
+                  //   px: 1,
+                  // },
+                  '& .MuiAccordionDetails-root': {
+                    px: 0,
+                  }
                 }}
+                disableGutters
               >
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {marketName}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{
+                    minHeight: 0, // remove default tall height
+                    padding: '0 4px', // tighter horizontal padding
+                    '&.Mui-expanded': {
+                      minHeight: 0, // keep compact when expanded
+                    },
+                    '& .MuiAccordionSummary-content': {
+                      margin: 0, // remove extra margin
+                      ml: 1,
+                    },
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {marketName}
+                    </Typography>
+                  </Box>
+                </AccordionSummary>
 
-              <AccordionDetails>
-                {isMobile ?
-                  <MobileStockTable
-                    searchText={searchText}
-                    setIsStockOpen={setIsStockOpen}
-                    // isStockOpen={isStockOpenInMobile}
-                    dummyData={dummyData}
-                    setDummyData={setDummyData}
-                    marketName={marketName}
-                    isDarkMode={isDarkMode}
-                    handleBidAskClick={handleBidAskClick}
-                    // setBuySellPopup={setBuySellPopup}
-                    // buySellPopup={buySellPopup}
-                    showToast={showToast}
-                    handleStar={handleStar}
-                    setRemoveMarket={setRemoveMarket}
-                  />
+                <AccordionDetails>
+                  {isMobile ?
+                    <MobileStockTable
+                      searchText={searchText}
+                      setIsStockOpen={setIsStockOpen}
+                      // isStockOpen={isStockOpenInMobile}
+                      dummyData={dummyData}
+                      setDummyData={setDummyData}
+                      marketName={marketName}
+                      isDarkMode={isDarkMode}
+                      handleBidAskClick={handleBidAskClick}
+                      // setBuySellPopup={setBuySellPopup}
+                      // buySellPopup={buySellPopup}
+                      showToast={showToast}
+                      handleStar={handleStar}
+                      setRemoveMarket={setRemoveMarket}
+                    />
 
-                  :
-                  <StockTable
-                    searchText={searchText}
-                    setIsStockOpen={setIsStockOpen}
-                    setDummyData={setDummyData}
-                    dummyData={dummyData}
-                    marketName={marketName}
-                    handleBidAskClick={handleBidAskClick}
-                    // setBuySellPopup={setBuySellPopup}
-                    // buySellPopup={buySellPopup}
-                    showToast={showToast}
-                    handleStar={handleStar}
-                    setRemoveMarket={setRemoveMarket}
-                  />}
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-        ))}
-      </Box >
+                    :
+                    <StockTable
+                      searchText={searchText}
+                      setIsStockOpen={setIsStockOpen}
+                      setDummyData={setDummyData}
+                      dummyData={dummyData}
+                      marketName={marketName}
+                      handleBidAskClick={handleBidAskClick}
+                      // setBuySellPopup={setBuySellPopup}
+                      // buySellPopup={buySellPopup}
+                      showToast={showToast}
+                      handleStar={handleStar}
+                      setRemoveMarket={setRemoveMarket}
+                    />}
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          ))}
+        </Box >}
 
       <BackToTop />
 
@@ -966,7 +983,7 @@ function Watchlist() {
         tabIndex={tabIndex}
         setTabIndex={setTabIndex}
       />
-      <Toaster limit={3} containerStyle={{ zIndex: 999999999 }} />
+      {/* <Toaster limit={3} containerStyle={{ zIndex: 999999999 }} /> */}
     </>
   );
 }
