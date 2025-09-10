@@ -13,21 +13,24 @@ import {
   CircularProgress,
   useTheme,
   useMediaQuery,
+  Drawer,
+  IconButton,
 } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList'; // <-- added
 import { fetchRejectionLogsAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 
-
 const RejectionLogs = ({
   filterShow = true,
   setFilterShow = () => { }
 }) => {
-  console.log("filterShow=", filterShow);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isFirstRender = useIsFirstRender();
+
+  const [drawerOpen, setDrawerOpen] = useState(false); // <-- added
 
   const [filterType, setFilterType] = useState('today');
   const [searchText, setSearchText] = useState('');
@@ -46,11 +49,8 @@ const RejectionLogs = ({
   const [client, setClient] = useState('');
   const [master, setMaster] = useState('');
   const [broker, setBroker] = useState('');
-  const [after_date, setafter_date] = useState('');
-  const [before_date, setbefore_date] = useState('');
   const [End_date, setEnd_date] = useState('');
   const [Start_date, setStart_date] = useState('');
-
 
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -85,18 +85,12 @@ const RejectionLogs = ({
     setIsFilterChange(false);
   };
 
-
   function onFilterApply() {
     !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
     setCurrentPage(0);
-    toggleDrawer(false)();
+    setDrawerOpen(false); // <-- close drawer after applying filter
   }
 
-  useEffect(() => {
-    console.log('logs.length', logs.length);
-  }, [logs])
-
-  // # Pagination useEffects
   useEffect(() => {
     fetchPageData();
   }, []);
@@ -132,7 +126,33 @@ const RejectionLogs = ({
         backgroundColor: theme.palette.background.default,
       }}
     >
-      {filterShow && (
+      {/* Drawer for mobile filter */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box sx={{ width: 250, p: 2 }}>
+          <TradeEditDeleteLogFilter
+            End_date={End_date}
+            Start_date={Start_date}
+            setEnd_date={setEnd_date}
+            setStart_date={setStart_date}
+            market={market}
+            script={script}
+            setScript={setScript}
+            setMarket={setMarket}
+            client={client}
+            master={master}
+            setClient={setClient}
+            setMaster={setMaster}
+            onApply={onFilterApply}
+          />
+        </Box>
+      </Drawer>
+
+      {/* For desktop, keep filter inline */}
+      {!isMobile && filterShow && (
         <TradeEditDeleteLogFilter
           End_date={End_date}
           Start_date={Start_date}
@@ -149,7 +169,8 @@ const RejectionLogs = ({
           onApply={onFilterApply}
         />
       )}
-      {/* Filter + Search */}
+
+      {/* Filter + Search Bar */}
       <Box
         sx={{
           display: 'flex',
@@ -162,47 +183,30 @@ const RejectionLogs = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-          <FormControl
-            size="small"
-            sx={{
-              minWidth: 120,
-              '& .MuiOutlinedInput-root': {
-                height: 26,
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'black',
-                },
-              },
-            }}
-          >
-            <InputLabel>Filter</InputLabel>
-            <Select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              label="Filter"
+          {isMobile && (
+            <IconButton
+              color="primary"
+              onClick={() => setDrawerOpen(true)}
+              sx={{ mr: 1 }}
             >
+              <FilterListIcon />
+            </IconButton>
+          )}
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Filter</InputLabel>
+            <Select value={filterType} label="Filter" onChange={(e) => setFilterType(e.target.value)}>
               <MenuItem value="today">Today</MenuItem>
-              <MenuItem value="total">Total</MenuItem>
+              <MenuItem value="all">This Week</MenuItem>
             </Select>
           </FormControl>
 
           <TextField
             size="small"
-            placeholder="Search logs"
+            placeholder="Search orders"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             fullWidth
-            sx={{
-              ml: 1,
-              '& .MuiOutlinedInput-root': {
-                height: 26,
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'black',
-                },
-              },
-              '& input': {
-                padding: '0 8px',
-              },
-            }}
+          // sx={{ ml: 1 }}
           />
         </Box>
       </Box>

@@ -6,7 +6,8 @@ import {
   Dialog,
   DialogTitle
 } from '@mui/material';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -70,28 +71,61 @@ const OrderBook = ({
 
 
 
+  const showToast = (message, type = 'info') => {
+    switch (type) {
+      case 'success':
+        toast.success(message);
+        break;
+      case 'error':
+        toast.error(message);
+        break;
+      case 'warning':
+        toast.warn(message);
+        break;
+      default:
+        toast.info(message);
+    }
+  };
+
+
+
   const handleCancel = async (itemToCancel, enteredPassword = '') => {
     try {
+      // Get stored user data
+      const dataStored = JSON.parse(sessionStorage.getItem("data"));
+      if (!dataStored) {
+        showToast('User data not found in session.', 'error');
+        return;
+      }
+
+      // Construct payload
       const payload = {
-        trade_id: itemToCancel.trade_id,
+        trade_id: itemToCancel.trd_id,
         password: enteredPassword,
         device_type: 0,
+        is_app: "1",
+        login_user_id: dataStored.user_id,
+        auth_key: dataStored.auth_key,
       };
 
       console.log('Sending cancel payload:', payload);
 
+      // Call deleteTrade API
       const response = await deleteTrade(payload);
 
       if (response.success) {
-        alert('Trade cancelled successfully');
-        // TODO: refresh data or update UI as needed
+        showToast.success('Trade cancelled successfully', 'success');
+        // Refresh orders after cancel
+        await fetchOrders(filterType, debouncedSearchText);
       } else {
-        alert(response.message || 'Failed to cancel trade');
+        showToast(response.message || 'Failed to cancel trade', 'error');
       }
     } catch (error) {
-      alert('An error occurred while cancelling the trade.');
+      console.error('Cancel trade error:', error);
+      showToast('An error occurred while cancelling the trade.', 'error');
     }
   };
+
 
 
   const [market, setMarket] = useState({});
@@ -197,37 +231,47 @@ const OrderBook = ({
     setOpen(false);
   };
 
+
   const handleSave = async () => {
-    if (!item?.trade_id) {
-      alert('Trade ID is missing.');
+    if (!selectedItem?.trd_id) {
+      showToast('Trade ID is missing.', 'error');
+      return;
+    }
+
+    if (!lot || !quantity || !price) {
+      showToast('Lot, Quantity, and Price are required.');
       return;
     }
 
     try {
       const payload = {
-        trade_id: item.trade_id,
+        trade_id: selectedItem.trd_id,  // ✅ use trd_id from your data
         trade_rate: price,
         trade_lot: lot,
         trade_qty: quantity,
         device_type: 0,
       };
 
-      console.log('Sending payload:', payload);
+      console.log('Sending payload to update trade:', payload);
 
+      setLoading(true);
       const response = await updateTrade(payload);
+      setLoading(false);
 
-      if (response.success) {
-        alert('Trade updated successfully.');
-        handleClose(); // Close the dialog
-        // Optionally refresh data or state here
+      if (response?.success) {
+        showToast('Trade updated successfully.');
+        handleClose();
+        await fetchOrders(filterType, debouncedSearchText);
       } else {
-        alert(response.message || 'Failed to update trade.');
+        showToast(response?.message || 'Failed to update trade.');
       }
     } catch (error) {
       console.error('Error updating trade:', error);
-      alert('Something went wrong while updating the trade.');
+      setLoading(false);
+      showToast('Something went wrong while updating the trade.');
     }
   };
+
 
   const needsPassword = userType === 4 && deletePopup === 1;
 
@@ -260,45 +304,64 @@ const OrderBook = ({
     // ),
     trailing: (
       <TrailingActions>
-        <SwipeAction
-          // destructive={isQty ? false : true}  
-          destructive={false}
-          onClick={() => handleModify(item)}  // chatgpt: is it ok ?
-        >
-          <button
-            style={{
-              marginRight: '4px',
-              padding: '4px 8px',
-              backgroundColor: '#1976d2',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+        {item.modify === true && (
+          <SwipeAction
+            destructive={false}
+            onClick={() => handleModify(item)}
           >
-            <ModeIcon />
-          </button>
-        </SwipeAction>
+            <button
+              style={{
+                marginRight: '4px',
+                padding: '4px 8px',
+                backgroundColor: '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              <ModeIcon />
+            </button>
+          </SwipeAction>
+        )}
 
-        <SwipeAction
-          onClick={() => {
-            setCancelItem(item);
-            setCancelDialogOpen(true); // Always show confirmation
-          }}>
-          <button
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#d32f2f',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
+        {item.cancel === true && (
+          <SwipeAction
+            onClick={() => {
+              setCancelItem(item);
+              setCancelDialogOpen(true);
             }}
           >
-            <CancelIcon />
-          </button>
-        </SwipeAction>
-      </TrailingActions >
+            <button
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#d32f2f',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              <CancelIcon />
+            </button>
+          </SwipeAction>
+        )}
+
+        {item.modify !== true && item.cancel !== true && (
+          <SwipeAction>
+            <div
+              style={{
+                padding: '4px 8px',
+                color: '#888',
+                fontStyle: 'italic',
+              }}
+            >
+
+            </div>
+          </SwipeAction>
+        )}
+      </TrailingActions>
+
     )
   });
 
@@ -709,37 +772,47 @@ const OrderBook = ({
                       {[3, 4, 5].includes(userType) && <td>{item.trade_ip_address}</td>}
                       {userType !== 2 && (
                         <td>
-                          <button
-                            style={{
-                              marginRight: '8px',
-                              padding: '4px 8px',
-                              backgroundColor: '#1976d2',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                            }}
-                            onClick={() => handleModify(item)}
-                          >
-                            Modify
-                          </button>
+                          {item.modify === true || item.cancel === true ? (
+                            <>
+                              {item.modify === true ? (
+                                <button
+                                  style={{
+                                    marginRight: '8px',
+                                    padding: '4px 8px',
+                                    backgroundColor: '#1976d2',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => handleModify(item)}
+                                >
+                                  Modify
+                                </button>
+                              ) : null}
 
-                          <button
-                            style={{
-                              padding: '4px 8px',
-                              backgroundColor: '#d32f2f',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                            }}
-                            onClick={() => {
-                              setCancelItem(item);
-                              setCancelDialogOpen(true); // Always show confirmation
-                            }}
-                          >
-                            Cancel
-                          </button>
+                              {item.cancel === true ? (
+                                <button
+                                  style={{
+                                    padding: '4px 8px',
+                                    backgroundColor: '#d32f2f',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => {
+                                    setCancelItem(item);
+                                    setCancelDialogOpen(true); // Always show confirmation
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              ) : null}
+                            </>
+                          ) : (
+                            <span style={{ color: '#888', fontStyle: 'italic' }}>N.A</span>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -842,7 +915,7 @@ const OrderBook = ({
           <Button
             onClick={() => {
               if (needsPassword && !password) {
-                alert('Please enter your password.');
+                showToast('Please enter your password.');
                 return;
               }
 
@@ -857,6 +930,20 @@ const OrderBook = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={isDarkMode ? "dark" : "light"}
+      />
 
     </Box>
   );

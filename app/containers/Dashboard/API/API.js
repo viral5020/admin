@@ -869,7 +869,7 @@ export const checkLoginAPI = async () => {
   if (!(defaultParams.auth_key || defaultParams.login_user_id)) return;
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
-    // console.log('response.data', response.data);
+    console.log('check_login==', response.data);
     return response.data;
   } catch (error) {
     console.error("Error in checkLogin:", error);
@@ -986,7 +986,30 @@ export const updateTrade = async ({ trade_id, trade_rate, trade_lot, trade_qty, 
 
 export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) => {
   try {
+    // Retrieve user credentials from sessionStorage
+    const rawData = sessionStorage.getItem("data");
+    if (!rawData) {
+      throw new Error("User data not found in sessionStorage.");
+    }
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(rawData);
+    } catch (err) {
+      throw new Error("Failed to parse user data from sessionStorage.");
+    }
+
+    const userId = parsedData.user_id;
+    const authKey = parsedData.auth_key;
+
+    if (!userId || !authKey) {
+      throw new Error("User credentials are missing.");
+    }
+
     const response = await axiosInstance.post('ajaxfiles/trade_delete', {
+      is_app: "1",
+      login_user_id: userId,
+      auth_key: authKey,
       trade_id,
       password,
       device_type,
@@ -998,6 +1021,8 @@ export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) 
     throw error;
   }
 };
+
+
 
 
 export const getForexOrders = async (userId, authKey) => {
