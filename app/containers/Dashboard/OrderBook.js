@@ -100,7 +100,7 @@ const OrderBook = ({
 
       // Construct payload
       const payload = {
-        trade_id: itemToCancel.trade_id,
+        trade_id: itemToCancel.trd_id,
         password: enteredPassword,
         device_type: 0,
         is_app: "1",
@@ -114,7 +114,7 @@ const OrderBook = ({
       const response = await deleteTrade(payload);
 
       if (response.success) {
-        showToast('Trade cancelled successfully', 'success');
+        showToast.success('Trade cancelled successfully', 'success');
         // Refresh orders after cancel
         await fetchOrders(filterType, debouncedSearchText);
       } else {

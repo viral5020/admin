@@ -869,7 +869,7 @@ export const checkLoginAPI = async () => {
   if (!(defaultParams.auth_key || defaultParams.login_user_id)) return;
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
-    // console.log('response.data', response.data);
+    console.log('check_login==', response.data);
     return response.data;
   } catch (error) {
     console.error("Error in checkLogin:", error);
