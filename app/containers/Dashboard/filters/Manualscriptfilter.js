@@ -223,22 +223,25 @@ const Manualscriptfilter = ({
             )}
 
             {/* Lot & Quantity Inputs */}
-            <Grid item>
-                <TextField
-                    label="Lot"
-                    size="small"
-                    value={prefilledLot}
-                    onChange={(e) => {
-                        const rawVal = e.target.value;
-                        setPrefilledLot(rawVal);
-                        const newLot = parseInt(rawVal, 10);
-                        if (!isNaN(newLot) && baseLotQty > 0) {
-                            setPrefilledQty(newLot * baseLotQty);
-                        }
-                    }}
-                    sx={{ width: 100 }}
-                />
-            </Grid>
+            {market?.text?.toUpperCase() !== 'NSEEQT' && (
+                <Grid item>
+                    <TextField
+                        label="Lot"
+                        size="small"
+                        value={prefilledLot}
+                        onChange={(e) => {
+                            const rawVal = e.target.value;
+                            setPrefilledLot(rawVal);
+                            const newLot = parseInt(rawVal, 10);
+                            if (!isNaN(newLot) && baseLotQty > 0) {
+                                setPrefilledQty(newLot * baseLotQty);
+                            }
+                        }}
+                        sx={{ width: 100 }}
+                    />
+                </Grid>
+            )}
+
             <Grid item>
                 <TextField
                     label="Quantity"
@@ -246,7 +249,10 @@ const Manualscriptfilter = ({
                     value={prefilledQty}
                     onChange={(e) => setPrefilledQty(e.target.value)}
                     sx={{ width: 120 }}
-                    disabled={market?.id === 1}
+                    disabled={
+                        market?.id === 1 ||
+                        ['MCXFUT', 'NSEOPT', 'NSECDS'].includes(market?.text?.toUpperCase())
+                    }
                 />
             </Grid>
 

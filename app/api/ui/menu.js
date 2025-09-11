@@ -263,7 +263,7 @@ if (userType !== 1) {
         ? [{
           key: 'add_employee',
           name: 'Add Employee',
-          // link: '/app/dashboard/forex-Margin-management',
+          link: '/app/dashboard/add-employee',
           icon: 'reader-outline'
         }]
         : []),
