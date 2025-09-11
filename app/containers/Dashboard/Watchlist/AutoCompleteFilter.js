@@ -4,7 +4,7 @@ import { Autocomplete, TextField, Grid } from '@mui/material';
 const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
     return (
         <Grid container spacing={2}>
-            {configs.map(({ label, value, onChange, options, getOptionLabel, hidden, isOptionEqualToValue, disabled }) => {
+            {configs.map(({ label, value, onChange, options, getOptionLabel, hidden, isOptionEqualToValue, disabled, errorMsg }) => {
                 const [inputValue, setInputValue] = useState(getOptionLabel(value));
 
                 useEffect(() => {
@@ -60,7 +60,13 @@ const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
                                 );
                             }}
                             renderInput={(params) => (
-                                <TextField {...params} label={label} size="small" />
+                                <TextField
+                                    {...params}
+                                    label={label}
+                                    size="small"
+                                    error={Boolean(errorMsg)}
+                                    helperText={errorMsg}
+                                />
                             )}
                             fullWidth
                             slotProps={{

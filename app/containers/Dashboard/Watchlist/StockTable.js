@@ -235,6 +235,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
 
   const getCondition = (val, showIcon, showPR, changeVal) => {
     const roundedVal = roundToTwoIN(val);
+    // const isBidAsk = 
     return (
       <Box
         component="span"
@@ -266,7 +267,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
     )
   };
 
-  const renderCell = (dataArray, keyArray, idx) => keyArray.map((itemCell, index) => {
+  const renderCell = (dataArray, columnData, idx) => columnData.map((column, index) => {
     const rowVal = dataArray?.priceChangePercent; // ✅ main field to decide color
     // const rowBgColor = getCellBgColor(rowVal);
     // const rowBgColorFirstCol = getCellBgColorFisrtCol(rowVal);
@@ -274,93 +275,93 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
     const rowBgColorFirstCol = 'inherit';
     // console.log('WWWWW dataArray', dataArray);
 
-    if (itemCell.id === 'scriptName') {
-      const val = dataArray[itemCell.id];
+    if (column.id === 'scriptName') {
+      const val = dataArray[column.id];
       // console.log('!!! dataArray[itemCell.id]', dataArray[itemCell.id]);
       return (
-        <>
-          <TableCell
-            key={dataArray?.id + index.toString()}
-            sx={{
-              ...firstColumnStyle,
-              // backgroundColor: rowBgColorFirstCol,
-              backgroundColor: geFisrtColBgColor(idx),
-              opacity: 1,
-              cursor: 'pointer',
+        <TableCell
+          key={dataArray?.market_watch_id + index.toString() + column.id}
+          sx={{
+            ...firstColumnStyle,
+            // backgroundColor: rowBgColorFirstCol,
+            backgroundColor: geFisrtColBgColor(idx),
+            opacity: 1,
+            cursor: 'pointer',
+          }}
+          onClick={() => setIsStockOpen(dataArray)}
+        // sortDirection={'desc'}
+        >
+          <Box sx={{ position: 'relative' }}>
+            <Box sx={{
+              ...logoCss,
+              backgroundColor: isDarkMode ? '#777' : '#ccc',
+              color: isDarkMode ? '#fff' : '#000'
             }}
-            onClick={() => setIsStockOpen(dataArray)}
-          // sortDirection={'desc'}
-          >
-            <Box sx={{ position: 'relative' }}>
-              <Box sx={{
-                ...logoCss,
-                backgroundColor: isDarkMode ? '#777' : '#ccc',
-                color: isDarkMode ? '#fff' : '#000'
-              }}
-              >
-                {dataArray?.scriptName ? dataArray?.scriptName[0] : ''}
-              </Box>
-
-              <Typography variant="body1" sx={{ fontWeight: 500, display: 'inline' }} noWrap>
-                {dataArray?.scriptName}
-              </Typography>
-              {Boolean(dataArray?.quantity) && <Chip
-                label={dataArray?.quantity}
-                color="primary"
-                variant="outlined"
-                size="small"
-                sx={{
-                  fontWeight: '600',
-                  ml: '6px',
-                  padding: '0px',
-                  height: 18,
-                  fontSize: '0.7rem',
-                  // minWidth: 'unset',
-                  lineHeight: 1,
-                  borderWidth: 2,
-                }}
-              />}
+            >
+              {dataArray?.scriptName ? dataArray?.scriptName[0] : ''}
             </Box>
-            <Box
+
+            <Typography variant="body1" sx={{ fontWeight: 500, display: 'inline' }} noWrap>
+              {dataArray?.scriptName}
+            </Typography>
+            {Boolean(dataArray?.quantity) && <Chip
+              label={dataArray?.quantity}
+              color="primary"
+              variant="outlined"
+              size="small"
               sx={{
-                position: 'absolute',
-                top: 0,
-                height: '100%',
-                right: '-36px',
-                width: '36px',
-                pointerEvents: 'none',
-                background: showShadow
-                  ? isDarkMode
-                    ? 'linear-gradient(to right, rgba(255,255,255,0.2), transparent)'
-                    : 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)'
-                  : isDarkMode
-                    ? 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)'
-                    : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
-                zIndex: 10,
+                fontWeight: '600',
+                ml: '6px',
+                padding: '0px',
+                height: 18,
+                fontSize: '0.7rem',
+                // minWidth: 'unset',
+                lineHeight: 1,
+                borderWidth: 2,
               }}
-            />
-          </TableCell>
-        </>
+            />}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              height: '100%',
+              right: '-36px',
+              width: '36px',
+              pointerEvents: 'none',
+              background: showShadow
+                ? isDarkMode
+                  ? 'linear-gradient(to right, rgba(255,255,255,0.2), transparent)'
+                  : 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)'
+                : isDarkMode
+                  ? 'linear-gradient(to right, rgba(255,255,255,0.1), transparent)'
+                  : 'linear-gradient(to right, rgba(0,0,0,0.03), transparent)',
+              zIndex: 10,
+            }}
+          />
+        </TableCell>
       );
     }
 
     return (
       <TableCell
         padding="normal"
-        align={itemCell.numeric ? 'right' : 'left'}
-        key={dataArray?.id + index.toString()}
+        align={column.numeric ? 'right' : 'left'}
+        key={dataArray?.market_watch_id + index.toString() + column.id}
         sx={{
           ...tableCellStyle,
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
-          fontWeight: itemCell.id === 'ltp' ? 700 : null,
-          cursor: (itemCell.id === 'askRate' || itemCell.id === 'bidRate') ? 'pointer' : '',
+          fontWeight: column.id === 'ltp' ? 700 : null,
+          cursor: (column.id === 'askRate' || column.id === 'bidRate') ? 'pointer' : '',
         }}
-        onClick={() => handleBidAskClick(dataArray, itemCell.id)}
+        onClick={() => handleBidAskClick(dataArray, column.id)}
+
       >
-        {itemCell.id === 'priceChangePercent' ? getCondition(dataArray[itemCell.id], true, true, dataArray?.priceChange)
-          : (itemCell.id === 'priceChange' || itemCell.id === 'askRate' || itemCell.id === 'bidRate')
-            ? getCondition(dataArray[itemCell.id], false, false, dataArray?.priceChange)
-            : roundToTwoIN(dataArray[itemCell.id])}
+        {column.id === 'priceChangePercent'
+          ? getCondition(dataArray[column.id], true, true, dataArray?.priceChange)
+          : (column.id === 'priceChange' || column.id === 'askRate' || column.id === 'bidRate')
+            ? getCondition(dataArray[column.id], false, false, dataArray?.priceChange)
+            : roundToTwoIN(dataArray[column.id])}
       </TableCell>
     );
   });
@@ -425,8 +426,8 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
               {/* </TableSortLabel> */}
             </TableCell>
           ))}
-          <TableCell></TableCell>
-          <TableCell></TableCell>
+          <TableCell key={'star12334'}></TableCell>
+          <TableCell key={'remove433'}></TableCell>
         </TableRow>
       </TableHead >
     );
@@ -470,7 +471,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
                 return (
                   <TableRow
                     tabIndex={-1}
-                    key={stock.id}
+                    key={stock.market_watch_id}
                   // key={idx}
                   // sx={{ cursor: 'pointer' }}
                   // onClick={() => setIsStockOpen(stock)}
@@ -478,7 +479,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
                     {renderCell(stock, columnData, idx)}
 
                     {/* Star Icon */}
-                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star' + stock.id}>
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star' + stock.market_watch_id}>
                       <IconButton onClick={(e) => handleStar(stock, e)} sx={{ pl: 2 }}>
                         {stock.isFavorite ? (
                           <Star sx={{ color: 'gold' }} />
@@ -489,7 +490,7 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
                     </TableCell>
 
                     {/* Delete Icon */}
-                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete' + stock.id}>
+                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'delete' + stock.market_watch_id}>
                       <IconButton
                         // onClick={() => handleRemove(stock, idx)}
                         onClick={() => setRemoveMarket({ ...stock, idx })}

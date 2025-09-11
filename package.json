@@ -192,6 +192,7 @@
     "react-draft-wysiwyg": "^1.15.0",
     "react-dropzone": "^10.2.1",
     "react-helmet": "6.1.0",
+    "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.5.2",
     "react-imask": "^6.4.0",
     "react-intl": "^6.2.5",

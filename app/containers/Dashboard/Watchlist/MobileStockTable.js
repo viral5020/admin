@@ -193,7 +193,7 @@ const MobileStockTable = ({
             <LeadingActions>
                 <SwipeAction
                     // destructive={true}
-                    onClick={() => handleStar(item)}
+                    // onClick={() => handleStar(item)}
                     swipeActionThreshold={0.5} // 50% swipe threshold
                 >
                     <ThemeProvider theme={theme}>
@@ -208,6 +208,7 @@ const MobileStockTable = ({
                                 fontSize: '0.85rem',
                                 color: '#fff',
                             }}
+                            onClick={(e) => handleStar(item, e)}
                         >
                             {/* Star */}
                             {item.isFavorite ? <StarSharpIcon sx={{ fontSize: '2rem', color: "grey" }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
@@ -246,6 +247,8 @@ const MobileStockTable = ({
         )
     });
 
+    // console.log('dummyData', dummyData);
+
     const formatNum = (value) => parseFloat(value ?? 0).toFixed(2);
 
     return (
@@ -254,12 +257,22 @@ const MobileStockTable = ({
                 {dummyData?.map((stock, idx) => {
                     // console.log('RRR stock', stock);
                     const isUp = stock?.priceChange > 0;
+
                     const color = isDarkMode
-                        ? isUp ? '#26a69a' : '#ef6d61'
-                        : isUp ? '#388055' : '#BB3536';
+                        ? isUp ? '#1e88e5' : '#ef6d61'   // dark mode → blue / red
+                        : isUp ? '#1565c0' : '#BB3536';  // light mode → blue / red
+
+                    const bidColor = isDarkMode
+                        ? stock?.isBidUp ? '#1e88e5' : '#ef6d61'   // dark mode → blue / red
+                        : stock?.isBidUp ? '#1565c0' : '#BB3536';  // light mode → blue / red
+
+                    const askColor = isDarkMode
+                        ? stock?.isAskUp ? '#1e88e5' : '#ef6d61'   // dark mode → blue / red
+                        : stock?.isAskUp ? '#1565c0' : '#BB3536';  // light mode → blue / red
+
 
                     const Icon = isUp ? ArrowDropUpIcon : ArrowDropDownIcon;
-                    const time = new Date(stock?.time)?.toLocaleString();
+                    // const time = new Date(stock?.time)?.toLocaleString();
 
                     if (stock?.scriptName?.toLowerCase().indexOf(searchText.toLowerCase()) === -1 || stock.market_type_name !== marketName) {
                         return <></>;
@@ -269,9 +282,13 @@ const MobileStockTable = ({
                     const isFavorite = idx % 3 == 0 ? true : false;
                     const { leading, trailing } = renderActions(stock, idx, isQty, isFavorite);
 
+                    if (stock.market_type_name === "GLOBAL FUTURES") {
+                        // console.log('stock', stock);
+                    }
+
                     return (
                         <SwipeableListItem
-                            key={stock?.id}
+                            key={stock?.market_watch_id}
                             leadingActions={leading}
                             trailingActions={trailing}
                         // fullSwipe={false}
@@ -308,11 +325,12 @@ const MobileStockTable = ({
                                     >
                                         {isSmallMobile ? 'Q : ' : 'Qty : '} {stock?.quantity}
                                     </Typography>
-
-                                    <Typography sx={{ fontSize: '0.84rem' }}>{time}</Typography>
-                                    <Typography sx={{ fontSize: '0.84rem' }}
-                                        onClick={() => setIsStockOpen(stock)}
-                                    ><CandlestickChartIcon /></Typography>
+                                    <Box>
+                                        <Typography sx={{ fontSize: '0.84rem', display: 'inline', mr: 2 }}>{stock?.serverTime}</Typography>
+                                        <Typography sx={{ fontSize: '0.84rem', display: 'inline' }}
+                                            onClick={() => setIsStockOpen(stock)}
+                                        ><CandlestickChartIcon /></Typography>
+                                    </Box>
                                 </Stack>
 
                                 {/* Below Header */}
@@ -442,26 +460,29 @@ const MobileStockTable = ({
                                             onClick={() => handleBidAskClick(stock, 'bidRate')}
                                         >
                                             <Box
-                                                sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                                sx={{
+                                                    ...boxStyle,
+                                                    backgroundColor: bidColor,
+                                                    textAlign: 'center',
+                                                    animation: stock?.isBidChanged ? "blinkAnim 0.5s" : "none",
+                                                    "@keyframes blinkAnim": {
+                                                        "0%": { opacity: 1 },
+                                                        "5%": { opacity: 0.7 },   // blink quickly within 0.1s
+                                                        "50%": { opacity: 1 },    // restore quickly
+                                                        "100%": { opacity: 1 },   // stay normal until next blink
+                                                    },
+                                                }}
                                             >
-                                                <Typography
-                                                    sx={{ fontWeight: 700, fontSize: spacing.fontSize }}
-                                                    pt={0.6}
-                                                >
-                                                    {/* {stock?.bidRate?.toLocaleString('en-IN')} */}
+                                                <Typography sx={{ fontWeight: 700, fontSize: spacing.fontSize }} pt={0.6}>
                                                     {roundToTwoIN(stock?.bidRate)}
                                                 </Typography>
 
-                                                <Typography
-                                                    fontSize='0.71rem'
-                                                    fontWeight='600'
-                                                    pt={0.5}
-                                                >
-                                                    {/* H: {stock?.high?.toLocaleString('en-IN')} */}
+                                                <Typography fontSize="0.71rem" fontWeight="600" pt={0.5}>
                                                     {roundToTwoIN(stock?.high)}
                                                 </Typography>
                                             </Box>
                                         </Stack>
+
 
                                         {/* Ask Box */}
                                         <Stack
@@ -471,7 +492,18 @@ const MobileStockTable = ({
                                             onClick={() => handleBidAskClick(stock, 'askRate')}
                                         >
                                             <Box
-                                                sx={{ ...boxStyle, backgroundColor: color, textAlign: 'center' }}
+                                                sx={{
+                                                    ...boxStyle,
+                                                    backgroundColor: askColor,
+                                                    textAlign: 'center',
+                                                    animation: stock?.isAskChanged ? "blinkAnim 0.5s" : "none",
+                                                    "@keyframes blinkAnim": {
+                                                        "0%": { opacity: 1 },
+                                                        "5%": { opacity: 0.7 },   // blink quickly within 0.1s
+                                                        "50%": { opacity: 1 },    // restore quickly
+                                                        "100%": { opacity: 1 },   // stay normal until next blink
+                                                    },
+                                                }}
                                             >
                                                 <Typography
                                                     sx={{ fontWeight: 700, fontSize: spacing.fontSize }}

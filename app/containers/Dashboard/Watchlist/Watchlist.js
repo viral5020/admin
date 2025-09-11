@@ -79,302 +79,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const dummyWatchlistData = [
-  {
-    id: '1',
-    scriptName: 'RELIANCE 31 JUL 2025',
-    exchange: 'NSE',
-    open: 284511.51,
-    close: 281219.10,
-    high: 285110.01,
-    low: 281101.25,
-    bidRate: 211828.91,
-    askRate: 281129.32,
-    ltp: 282119.10,
-    priceChange: -16.40,
-    priceChangePercent: -0.58,
-    qty: 150,
-    time: new Date().getTime(),
-    maxOrder: 1000,
-    position: 'Buy',
-    isFavorite: true,
-    lastChangedAt: '2025-07-01 09:42:11'
-  },
-  {
-    id: '2',
-    scriptName: 'HDFCBANK 31 JUL 2025',
-    exchange: 'BSE',
-    open: 167225.2,
-    close: 161182.2,
-    high: 169110.1,
-    low: 133660.7,
-    bidRate: 163382.3,
-    askRate: 162282.3,
-    ltp: 164482.1,
-    priceChange: +70.21,
-    priceChangePercent: +10.43,
-    qty: 0,
-    time: new Date().getTime(),
-    maxOrder: 801,
-    isFavorite: true,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:43:08'
-  },
-  {
-    id: '3',
-    scriptName: 'INFY  31 JUL 2025',
-    exchange: 'NSE',
-    open: 1530.00,
-    close: 1525.10,
-    high: 1540.00,
-    low: 1518.00,
-    bidRate: 1524.90,
-    askRate: 1525.20,
-    ltp: 1525.10,
-    priceChange: -4.90,
-    priceChangePercent: -0.32,
-    qty: 100,
-    time: new Date().getTime(),
-    maxOrder: 900,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:44:22'
-  },
-  {
-    id: '4',
-    scriptName: 'ITC 31 JUL 2025',
-    exchange: 'MCX',
-    open: 435.60,
-    close: 438.00,
-    high: 439.10,
-    low: 433.50,
-    bidRate: 437.90,
-    askRate: 438.10,
-    ltp: 438.00,
-    priceChange: +2.40,
-    priceChangePercent: +0.55,
-    qty: 0,
-    time: new Date().getTime(),
-    maxOrder: 2000,
-    isFavorite: true,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:45:01'
-  },
-  {
-    id: '5',
-    scriptName: 'TCS 31 JUL 2025',
-    exchange: 'NSE',
-    open: 3830.00,
-    close: 3825.75,
-    high: 3845.00,
-    low: 3800.00,
-    bidRate: 3825.60,
-    askRate: 3826.00,
-    ltp: 3825.75,
-    priceChange: -4.25,
-    priceChangePercent: -0.11,
-    qty: 0,
-    time: new Date().getTime(),
-    maxOrder: 600,
-    isFavorite: true,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:46:17'
-  },
-  {
-    id: '6',
-    scriptName: 'COALINDIA 31 JUL 2025',
-    exchange: 'BSE',
-    open: 392.00,
-    close: 390.10,
-    high: 394.50,
-    low: 388.75,
-    bidRate: 390.00,
-    askRate: 390.20,
-    ltp: 390.10,
-    priceChange: -1.90,
-    priceChangePercent: -0.48,
-    qty: 500,
-    time: new Date().getTime(),
-    maxOrder: 2500,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:47:33'
-  },
-  {
-    id: '7',
-    scriptName: 'SBIN 31 JUL 2025',
-    exchange: 'NSE',
-    open: 865.30,
-    close: 868.20,
-    high: 870.00,
-    low: 862.50,
-    bidRate: 868.10,
-    askRate: 868.30,
-    ltp: 868.20,
-    priceChange: +2.90,
-    priceChangePercent: +0.34,
-    qty: 320,
-    time: new Date().getTime(),
-    maxOrder: 1500,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:48:41'
-  },
-  {
-    id: '8',
-    scriptName: 'WIPRO 31 JUL 2025',
-    exchange: 'MCX',
-    open: 475.00,
-    close: 477.65,
-    high: 479.00,
-    low: 470.00,
-    bidRate: 477.55,
-    askRate: 477.75,
-    ltp: 477.65,
-    priceChange: +2.65,
-    priceChangePercent: +0.56,
-    qty: 0,
-    time: new Date().getTime(),
-    maxOrder: 1200,
-    isFavorite: true,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:49:30'
-  },
-  {
-    id: '9',
-    scriptName: 'JSWSTEEL 31 JUL 2025',
-    exchange: 'BSE',
-    open: 840.00,
-    close: 838.20,
-    high: 845.00,
-    low: 832.50,
-    bidRate: 838.00,
-    askRate: 838.40,
-    ltp: 838.20,
-    priceChange: -1.80,
-    priceChangePercent: -0.21,
-    qty: 0,
-    time: new Date().getTime(),
-    maxOrder: 1100,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:50:20'
-  },
-  {
-    id: '10',
-    scriptName: 'HINDALCO 31 JUL 2025',
-    exchange: 'NSE',
-    open: 570.00,
-    close: 573.40,
-    high: 575.60,
-    low: 567.10,
-    bidRate: 573.30,
-    askRate: 573.50,
-    ltp: 573.40,
-    priceChange: +3.40,
-    priceChangePercent: +0.60,
-    qty: 180,
-    time: new Date().getTime(),
-    maxOrder: 1400,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:51:07'
-  },
-  {
-    id: '11',
-    scriptName: 'ONGC 31 JUL 2025',
-    exchange: 'MCX',
-    open: 220.00,
-    close: 219.20,
-    high: 222.30,
-    low: 217.50,
-    bidRate: 219.10,
-    askRate: 219.30,
-    ltp: 219.20,
-    priceChange: -0.80,
-    priceChangePercent: -0.36,
-    qty: 600,
-    time: new Date().getTime(),
-    maxOrder: 3000,
-    isFavorite: true,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:51:59'
-  },
-  {
-    id: '12',
-    scriptName: 'HCLTECH 31 JUL 2025',
-    exchange: 'NSE',
-    open: 1465.00,
-    close: 1472.80,
-    high: 1480.00,
-    low: 1458.50,
-    bidRate: 1472.70,
-    askRate: 1472.90,
-    ltp: 1472.80,
-    priceChange: +7.80,
-    priceChangePercent: +0.53,
-    qty: 95,
-    time: new Date().getTime(),
-    maxOrder: 850,
-    isFavorite: true,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:52:45'
-  },
-  {
-    id: '13',
-    scriptName: 'NTPC 31 JUL 2025',
-    exchange: 'BSE',
-    open: 320.40,
-    close: 318.90,
-    high: 321.50,
-    low: 316.00,
-    bidRate: 318.80,
-    askRate: 319.00,
-    ltp: 318.90,
-    priceChange: -1.50,
-    priceChangePercent: -0.47,
-    qty: 200,
-    time: new Date().getTime(),
-    maxOrder: 1700,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:53:32'
-  },
-  {
-    id: '14',
-    scriptName: 'ASIANPAINT 31 JUL 2025',
-    exchange: 'MCX',
-    open: 3100.00,
-    close: 3106.50,
-    high: 3115.00,
-    low: 3080.00,
-    bidRate: 3106.30,
-    askRate: 3106.70,
-    ltp: 3106.50,
-    priceChange: +6.50,
-    priceChangePercent: +0.21,
-    qty: 55,
-    time: new Date().getTime(),
-    maxOrder: 500,
-    isFavorite: true,
-    position: 'Sell',
-    lastChangedAt: '2025-07-01 09:54:12'
-  },
-  {
-    id: '15',
-    scriptName: 'MARUTI 31 JUL 2025',
-    exchange: 'NSE',
-    open: 10850.00,
-    close: 10825.00,
-    high: 10900.00,
-    low: 10770.00,
-    bidRate: 10824.80,
-    askRate: 10825.20,
-    ltp: 10825.00,
-    priceChange: -25.00,
-    priceChangePercent: -0.23,
-    qty: 30,
-    time: new Date().getTime(),
-    maxOrder: 400,
-    position: 'Buy',
-    lastChangedAt: '2025-07-01 09:54:55'
-  }
-];
-
 function getRandomPrice(min, max) {
   return parseFloat((Math.random() * (max - min) + min).toFixed(2));
 }
@@ -443,6 +147,7 @@ function Watchlist() {
   const [isStockOpen, setIsStockOpen] = useState(null);
   const [isStockOpenInMobile, setIsStockOpenInMobile] = useState();
   const [dummyData, setDummyData] = useState();
+  const [oldDummyData, setOldDummyData] = useState();
 
   const [removeMarket, setRemoveMarket] = useState(false);
 
@@ -518,8 +223,9 @@ function Watchlist() {
     // Listen for messages from the server
     socket.on("marketWatch", data => {
       // Assuming InstrumentIdentifier is directly inside data
-      // console.log("AAAAAAAAA data.data ", data.data);
-      const rawInstrumentId = data.InstrumentIdentifier || data.data?.InstrumentIdentifier;
+      // console.log(" data.data ", data.data);
+      // console.log(" data ", data);
+      const rawInstrumentId = data.InstrumentIdentifier ?? data.data?.InstrumentIdentifier;
       if (!rawInstrumentId) {
         console.error("InstrumentIdentifier not found in socket data");
         return;
@@ -570,7 +276,8 @@ function Watchlist() {
       // console.log('sss', sss);
       return sss;
     });
-    setDummyData(updatedData);
+    hasChanges(updatedData);
+    // setDummyData(updatedData);
     // setDummyData(numWithCommasData);
   }
 
@@ -582,6 +289,22 @@ function Watchlist() {
     // console.log('dummyData', dummyData); // chatgpt : this is not logging with data
   }, [dummyData])
 
+  function getTime(serverTime) {
+    const date = new Date(serverTime * 1000); // convert to ms
+
+    const timeOnly = date.toLocaleString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    // console.log(timeOnly); // 👉 "11:58:26"
+    return timeOnly;
+  }
+
   const getStockData = coinItem => {
     var scriptNameData = getScriptKey(coinItem)
     var coinItemFilter = scriptNameData;
@@ -592,6 +315,9 @@ function Watchlist() {
     const dataItem = socketData[coinItemFilter] || {};
     // console.log('@@@ coinItem', coinItem);
     // console.log('@@@ dataItem', dataItem);
+    const time = getTime(dataItem.ServerTime);
+    // console.log('time', time);
+
     if (dataItem != undefined) {
       return {
         isFavorite: coinItem.isFavorite,
@@ -619,6 +345,9 @@ function Watchlist() {
         low: dataItem.Low != undefined ? dataItem.Low : "0",
         open: dataItem.Open != undefined ? dataItem.Open : "0",
         close: dataItem.Close != undefined ? dataItem.Close : "0",
+        serverTime: time,
+        isBidUp: coinItem.isBidUp,
+        isAskUp: coinItem.isAskUp,
       };
     };
   };
@@ -637,7 +366,7 @@ function Watchlist() {
       // console.log('WWW dd', dd);
       setDummyData(dd);
       let arr = []
-      data.scripts.forEach(script => {
+      dd.forEach(script => {
         // console.log('QQQ script', script);
         socket.emit("addMarketWatch", {
           product: getScriptKey(script), // Assuming script_name is the key you want to emit
@@ -721,12 +450,13 @@ function Watchlist() {
   };
 
   async function handleStar(stockData, e) {
+    let starBtn;
     if (!!e) {
-      let starBtn = e.currentTarget;
+      starBtn = e?.currentTarget;
       starBtn.disabled = true; // chatgpt : this is not working
-      setTimeout(() => {
-        starBtn.disabled = false; // re-enable after 2 seconds
-      }, 1500);
+      // setTimeout(() => {
+      //   starBtn.disabled = false; // re-enable after 2 seconds
+      // }, 1500);
     }
     let isError = false;
     if (stockData.isFavorite) {
@@ -746,6 +476,7 @@ function Watchlist() {
         showToast(`${response.message}.`, false, 'error');
       }
     }
+    starBtn.disabled = false;
     console.log('isError', isError);
     !isError ? setDummyData(prevData =>
       prevData.map(stock => {
@@ -762,29 +493,124 @@ function Watchlist() {
 
 
   function handleRemove(stock, idx) {
+    let marketIndex;
+    console.log('stock', stock);
     setRemoveMarket(false);
     if (stock.quantity > 0) {
       showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
     } else {
+      let isNotLastScript = false; //it is not last script in its market in watchlist
       let isUndo = false;
+
       function onUndo() {
-        setDummyData(prev => [
-          ...prev.slice(0, idx),
-          stock,
-          ...prev.slice(idx)
-        ]);
         isUndo = true;
+        setDummyData(prev => prev.toSpliced(idx, 0, stock));
+        !isNotLastScript && setMarketNames(prev => prev.toSpliced(marketIndex, 0, stock.market_type_name));
       }
+
       setTimeout(() => {
         console.log('setTimeout isUndo', isUndo);
         if (!isUndo) {
           removeMarketWatchAPI(stock.market_watch_id);
         }
       }, [toastTime + 500])
+
+      dummyData.forEach(val => {
+        if (val.market_type_name === stock.market_type_name && val.market_watch_id !== stock.market_watch_id) {
+          // IF MARKET NAME IS SAME AND SCRIPT IS DIFFERENT 
+          isNotLastScript = true;
+        }
+      })
+      console.log('isNotLastScript', isNotLastScript);
+      if (!isNotLastScript) {
+        const market_names = marketNames.filter((val, index) => {
+          if (val === stock.market_type_name) {
+            marketIndex = index;
+          }
+          return val !== stock.market_type_name
+        });
+        setMarketNames(market_names);
+      }
+
       setDummyData(prevData => prevData.filter(data => data.market_watch_id !== stock.market_watch_id));
       showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
     }
   }
+  // useEffect(() => {
+  //   console.log('marketNames', marketNames);
+  // }, [marketNames]);
+
+
+  const keysToCheck = ["askRate", "bidRate", "ltp", "priceChange", "high", "low"];
+
+  function hasChanges(newData) {
+    if (!dummyData) {
+      setDummyData(newData);
+      return; // length changed = change
+    }
+
+    newData.forEach((newItem, i) => {
+      const oldItem = dummyData[i];
+      if (!oldItem) {
+        newData[i].isChanged = true;
+      }; // new item added
+
+      if (newItem['bidRate'] !== oldItem['bidRate']) {
+        newData[i].isBidChanged = true;
+      } else {
+        newData[i].isBidChanged = false;
+      }
+
+      if (newItem['askRate'] !== oldItem['askRate']) {
+        newData[i].isAskChanged = true;
+      } else {
+        newData[i].isAskChanged = false;
+      }
+
+      if (newItem['bidRate'] > oldItem['bidRate']) {
+        newData[i].isAskUp = true;
+      } else if ((newItem['bidRate'] < oldItem['bidRate'])) {
+        newData[i].isAskUp = false;
+      }
+
+      if (newItem['askRate'] > oldItem['askRate']) {
+        newData[i].isBidUp = true;
+      } else if (newItem['askRate'] < oldItem['askRate']) {
+        newData[i].isBidUp = false;
+      }
+
+
+    });
+
+    setDummyData(newData);
+  }
+
+
+  // function hasChanges(newData) {
+  //   if (!oldDummyData || oldDummyData.length !== newData.length) {
+  //     // Mark all as changed
+  //     const updated = newData?.map(item => ({ ...item, isChanged: true }));
+  //     setDummyData(updated);
+  //     return;
+  //   }
+
+  //   const updated = newData.map((newItem, i) => {
+  //     const oldItem = oldDummyData[i];
+  //     if (!oldItem) {
+  //       return { ...newItem, isChanged: true }; // New item
+  //     }
+
+  //     const changed = keysToCheck.some(
+  //       (key) => newItem[key] !== oldItem[key]
+  //     );
+
+  //     return { ...newItem, isChanged: changed };
+  //   });
+
+  //   setDummyData(updated);
+  // }
+
+
 
 
   return (

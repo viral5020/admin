@@ -475,6 +475,7 @@ function PersonalDashboard() {
       elevation={0}
       sx={{
         ...glassStyles,
+        height: '100%',
         minHeight: 110,
         borderRadius: 2,
         p: 1,
@@ -939,7 +940,7 @@ function PersonalDashboard() {
         </Dialog>
 
         <Grid item xs={6} sm={6} md={3}>
-          <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer" }}>
+          <Box onClick={() => setPendingOrdersDialogOpen(true)} sx={{ cursor: "pointer", height: '100%' }}>
             <InfoCardHorizontal
               title="Pending Orders"
               icon={<AccessTimeIcon sx={{ color: "#ff9800", fontSize: 30 }} />}
@@ -2386,7 +2387,9 @@ function PersonalDashboard() {
             {tabValue === 1 && selectedStock && (
               <>
                 {loadingTrades ? (
-                  <Typography sx={{ p: 2 }}>Loading...</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <CircularProgress size={28} color="secondary" />
+                  </Box>
                 ) : tradesError ? (
                   <Typography color="error" sx={{ p: 2 }}>{tradesError}</Typography>
                 ) : tradesData.length === 0 ? (
@@ -2713,8 +2716,8 @@ function PersonalDashboard() {
               <>
                 {/* Content */}
                 {loading ? (
-                  <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-                    <CircularProgress />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <CircularProgress size={28} color="secondary" />
                   </Box>
                 ) : filteredPositions.length === 0 ? (
                   <Typography sx={{ p: 2 }}>No position data found.</Typography>

@@ -62,19 +62,19 @@ function LoginFormV2() {
           const { user_id, auth_key } = data;
 
           // If you want a short delay before redirecting, keep setTimeout
-          setTimeout(() => {
-            const rawData = sessionStorage.getItem("data");
-            const parsedData = JSON.parse(rawData);
-            const userType = parseInt(parsedData.user_type, 10);
+          // setTimeout(() => {
+          const rawData = sessionStorage.getItem("data");
+          const parsedData = JSON.parse(rawData);
+          const userType = parseInt(parsedData.user_type, 10);
 
-            console.log('Redirecting based on userType:', userType);
+          console.log('Redirecting based on userType:', userType);
 
-            if (userType === 3 || userType === 4) {
-              navigate("/app/dashboard/Master-Dashboard", { state: { user_id, auth_key }, replace: true });
-            } else {
-              navigate('/app', { state: { user_id, auth_key }, replace: true });
-            }
-          }, 500);
+          if (userType === 3 || userType === 4) {
+            navigate("/app/dashboard/Master-Dashboard", { state: { user_id, auth_key }, replace: true });
+          } else {
+            navigate('/app', { state: { user_id, auth_key }, replace: true });
+          }
+          // }, 500);
 
 
         } else {

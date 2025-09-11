@@ -41,7 +41,7 @@ const Autosquareuplogcard = ({
     filterShow = true,
     setfilterShow = () => { } // default no-op function
 }) => {
-    console.log("filterShow=", filterShow);
+    // console.log("filterShow=", filterShow);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 

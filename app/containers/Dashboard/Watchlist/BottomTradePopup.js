@@ -57,7 +57,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
     }, [Boolean(stockData)])
 
     useEffect(() => {
-        // console.log('&&& stockData', stockData);
+        console.log('&&& stockData', stockData);
         // setPrice(tabIndex)
     }, [stockData])
 
@@ -70,9 +70,21 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
 
     const Icon = stockData?.priceChange > 0 ? ArrowDropUpIcon : ArrowDropDownIcon;
 
+    const m = stockData?.market_type_name;
+    const isQtyDisabled = m === 'MCXFUT' || m === 'NSEOPT' || m === 'NSECDS';
+
     function isValuesValidate() {
-        if (market === '' || lot === '' || qty === '' || (market != 0 && price === '')) {
-            setIsAllRequired(true);
+        if (market === '' || lot === '' || (market != 0 && price === '')) {
+            if (isQtyDisabled) {
+                setIsAllRequired(true);
+            } else {
+                if (qty === '') {
+                    setIsAllRequired(true);
+                }
+                if (m === 'NSEEQT' && lot === '') {
+                    setIsAllRequired(true);
+                }
+            }
             return false;
         } else {
             setIsAllRequired(false);
@@ -87,7 +99,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
             const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex, client });
             response.status === 'ok' && onClose();
             response.status === 'ok'
-                ? toast.success(`Trade added successfullt for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 }, { id: "trade-toaster" })
+                ? toast.success(`Trade added successfully for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 }, { id: "trade-toaster" })
                 : toast.error(`${response.message}.`, { duration: 15000 }, { id: "trade-toaster" });
             resetAllState();
         } catch (error) {
@@ -328,21 +340,22 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
 
                         {/* Inputs: Lot, Qty, Price */}
                         <Grid container spacing={2} mt={0}>
-                            <Grid item xs={4}>
-                                <TextField
-                                    label="Lot"
-                                    type="number"
-                                    value={Number(lot)}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setLot(val);
-                                        setQty((val * Number(stockData?.script_lot_qty)).toFixed(3))
-                                    }}
-                                    fullWidth
-                                    size="small"
-                                    required
-                                />
-                            </Grid>
+                            {m !== 'NSEEQT' &&
+                                <Grid item xs={4}>
+                                    <TextField
+                                        label="Lot"
+                                        type="number"
+                                        value={Number(lot)}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setLot(val);
+                                            setQty((val * Number(stockData?.script_lot_qty)).toFixed(3))
+                                        }}
+                                        fullWidth
+                                        size="small"
+                                        required
+                                    />
+                                </Grid>}
                             <Grid item xs={4}>
                                 <TextField
                                     label="Qty"
@@ -355,6 +368,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                                     }}
                                     fullWidth
                                     size="small"
+                                    disabled={isQtyDisabled}
                                     required
                                 />
                             </Grid>

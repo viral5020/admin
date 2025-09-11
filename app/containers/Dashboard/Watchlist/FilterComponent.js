@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
     Box, Grid, Autocomplete, TextField, Button, InputAdornment, IconButton,
-    DialogActions
+    DialogActions,
+    CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTheme } from '@mui/material/styles';
@@ -18,6 +19,16 @@ import { constant, forex_market_type_id } from './constant';
 import { Toaster, toast } from 'react-hot-toast';
 import { functionsIn } from 'lodash';
 import { forex_comex_market } from '../helpers/utilFunc';
+import { useForm, Controller } from "react-hook-form";
+import AutocompleteFilter from './WWwwwwwwwww';
+
+const defaultValues = {
+    segment: null,
+    script: null,
+    expiry: null,
+    type: null,
+    strike: null,
+};
 
 const dummyOptions = {
     Equity: {
@@ -128,10 +139,72 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
     const [strike, setStrike] = useState('');
     const [expiryTerm, setExpiryTerm] = useState('')
 
+    const [segmentError, setSegmentError] = useState('');
+    const [scriptError, setScriptError] = useState('');
+    const [expiryError, setExpiryError] = useState('');
+    const [typeError, setTypeError] = useState('');
+    const [strikeError, setStrikeError] = useState('');
+
     const [segmentOptions, setSegmentOptions] = useState([]);
     const [scriptOptions, setScriptOptions] = useState([]);
     const [expiryOptions, setExpiryOptions] = useState([]);
     const [strikeOptions, setStrikeOptions] = useState([]);
+
+    const [isAddMarketLoading, setIsAddMarketLoading] = useState(false);
+
+    // const [isvalidate, Isvalidate] = useState(true);
+
+    function isValidate() {
+        let isValid = true;
+
+        // console.log('segment', segment);
+        if (!segment?.market_type_name) {
+            setSegmentError("Segment is required");
+            isValid = false;
+        } else {
+            setSegmentError("");
+        }
+
+        // console.log('script', script)
+        if (!script?.script_name) {
+            setScriptError("At least one script is required");
+            isValid = false;
+        } else {
+            setScriptError("");
+        }
+
+        // console.log('expiry', expiry);
+        if (!expiry?.expiry_date) {
+            setExpiryError("Expiry is required");
+            console.log("Expiry is required");
+            isValid = false;
+        } else {
+            setExpiryError("");
+        }
+
+        if (segment?.market_type_name === 'NSEOPT') {
+            // console.log('type', type);
+            if (!type) {
+                setTypeError("Type is required");
+                console.log("Type is required");
+                isValid = false;
+            } else {
+                setTypeError("");
+            }
+
+            // console.log('strike', strike);
+            if (!strike?.rate) {
+                setStrikeError("Strike is required");
+                console.log("Strike is required");
+                isValid = false;
+            } else {
+                setStrikeError("");
+            }
+        }
+
+        return isValid; // ✅ true if all fields valid
+    }
+
 
     async function getFilterData() {
         try {
@@ -281,7 +354,8 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 onChange: setSegment,
                 options: isForex ? forex_comex_market : segmentOptions,  // FOREX 2 OPTIONS : ID 6 FOREX 2 PARAMETER, ID 7 COMEX SHOW EXPIRY 4 PARAMETER
                 getOptionLabel: (opt) => opt?.market_type_name || '',
-                isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id
+                isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id,
+                errorMsg: segmentError,
             },
             {
                 label: 'Script',
@@ -289,7 +363,8 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 onChange: setScript,
                 options: scriptOptions,
                 getOptionLabel: (opt) => opt?.script_name || '',
-                isOptionEqualToValue: (opt, val) => opt?.script_id === val?.script_id
+                isOptionEqualToValue: (opt, val) => opt?.script_id === val?.script_id,
+                errorMsg: scriptError,
             },
             {
                 label: 'Expiry',
@@ -299,6 +374,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 getOptionLabel: (opt) => opt?.expiry_date || '',
                 isOptionEqualToValue: (opt, val) => opt?.script_expiry_id === val?.script_expiry_id,
                 hidden: isForex && segment?.market_type_id == 6,
+                errorMsg: expiryError,
             }
         ];
 
@@ -311,6 +387,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 getOptionLabel: (opt) => opt,
                 disabled: segment?.market_type_id != constant || !expiry,
                 hidden: segment?.market_type_id != constant || isForex,
+                errorMsg: typeError,
             },
             {
                 label: 'Strike',
@@ -321,6 +398,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 isOptionEqualToValue: (opt, val) => opt?.rate_id === val?.rate_id,
                 disabled: segment?.market_type_id != constant || !type,
                 hidden: segment?.market_type_id != constant || isForex,
+                errorMsg: strikeError,
             },
         ];
 
@@ -331,6 +409,73 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
             />
         );
     };
+
+    // const MyForm = () => {
+    //     const { control, watch, handleSubmit, setValue } = useForm({ defaultValues });
+
+    //     const segment = watch("segment");
+    //     const expiry = watch("expiry");
+    //     const type = watch("type");
+    //     const isForex = false; // your condition
+    //     const constant = 5; // your condition
+
+    //     const onSubmit = (data) => {
+    //         console.log("Form Data:", data);
+    //     };
+
+    //     const baseFields = [
+    //         {
+    //             name: "segment",
+    //             label: "Segment",
+    //             options: isForex ? forex_comex_market : segmentOptions,
+    //             getOptionLabel: (opt) => opt?.market_type_name || "",
+    //             isOptionEqualToValue: (opt, val) => opt?.market_type_id === val?.market_type_id,
+    //         },
+    //         {
+    //             name: "script",
+    //             label: "Script",
+    //             options: scriptOptions,
+    //             getOptionLabel: (opt) => opt?.script_name || "",
+    //             isOptionEqualToValue: (opt, val) => opt?.script_id === val?.script_id,
+    //         },
+    //         {
+    //             name: "expiry",
+    //             label: "Expiry",
+    //             options: expiryOptions,
+    //             getOptionLabel: (opt) => opt?.expiry_date || "",
+    //             isOptionEqualToValue: (opt, val) => opt?.script_expiry_id === val?.script_expiry_id,
+    //             hidden: isForex && segment?.market_type_id == 6,
+    //         },
+    //     ];
+
+    //     const additionalFields = [
+    //         {
+    //             name: "type",
+    //             label: "Type",
+    //             options: ["CE", "PE"],
+    //             getOptionLabel: (opt) => opt,
+    //             disabled: segment?.market_type_id != constant || !expiry,
+    //             hidden: segment?.market_type_id != constant || isForex,
+    //         },
+    //         {
+    //             name: "strike",
+    //             label: "Strike",
+    //             options: strikeOptions,
+    //             getOptionLabel: (opt) => opt?.rate || "",
+    //             isOptionEqualToValue: (opt, val) => opt?.rate_id === val?.rate_id,
+    //             disabled: segment?.market_type_id != constant || !type,
+    //             hidden: segment?.market_type_id != constant || isForex,
+    //         },
+    //     ];
+
+    //     return (
+    //         <form onSubmit={handleSubmit(onSubmit)}>
+    //             <AutocompleteFilter configs={[...baseFields, ...additionalFields]} control={control} />
+    //             <button type="submit">Submit</button>
+    //         </form>
+    //     );
+    // };
+
 
     const handleReset = () => {
         //     setSegment('');
@@ -353,19 +498,23 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
     };
 
     async function handleAdd() {
+        const isValid = isValidate();
+        if (!isValid) return;
+
         if (!expiry.script_expiry_id && segment.market_type_id != forex_market_type_id) {
-            toast(() => <span>⚠️ Please select <b>Expiry</b> first</span>)
+            toast(() => <span>⚠️ Please select <b>Expiry</b> first</span>, { id: "mobile_add_market" })
             return;
         } else if (segment.market_type_id == constant) {
             if (!type) {
-                toast(() => <span>⚠️ Please select <b>Type</b> first</span>)
+                toast(() => <span>⚠️ Please select <b>Type</b> first</span>, { id: "mobile_add_market" })
                 return;
             } else if (!strike) {
-                toast(() => <span>⚠️ Please select <b>Strike</b> first</span>)
+                toast(() => <span>⚠️ Please select <b>Strike</b> first</span>, { id: "mobile_add_market" })
                 return;
             }
         }
 
+        setIsAddMarketLoading(true);
         try {
             const response = await addMarketScriptAPI({
                 market_type_id: segment.market_type_id,
@@ -400,18 +549,23 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
         } catch (err) {
             showToast(err.message);
             console.error('Add Market Failed:', err.message);
+        } finally {
+            setIsAddMarketLoading(false);
         }
     }
 
     return (
         <Box sx={{ p: 1.5, py: !isMobile ? 2 : null, pb: isMobile ? 2 : null }}>
             {!isMobile && renderFilterFields()}
+            {/* {!isMobile && MyForm()} */}
 
             <Grid container alignItems="center" sx={{ mt: isMobile ? 0 : 1.4, flexWrap: 'wrap', gap: { xs: 2, sm: 0 } }}>
                 {!isMobile && (
                     <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
                         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-                            <Button variant="contained" onClick={handleAdd} size="small">Add</Button>
+                            <Button variant="contained" onClick={handleAdd} size="small" disabled={isAddMarketLoading}>
+                                {isAddMarketLoading ? <CircularProgress size={18} /> : 'Add'}
+                            </Button>
                             <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
                         </Box>
                     </Grid>
@@ -469,9 +623,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
             {/* Filter dialog for mobile */}
             <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth>
                 <DialogTitle sx={{ mb: 1, pt: 2, pb: 1 }}>Add Market</DialogTitle>
+                <Toaster id="mobile_add_market" position="top-center" toastOptions={{ duration: 4000, }} />
 
                 <DialogContent dividers>
                     {renderFilterFields()}
+                    {/* {MyForm()} */}
                 </DialogContent>
 
                 <DialogActions sx={{ px: 3, pb: 2 }}>
