@@ -80,6 +80,7 @@ import Manualtrade from '../Dashboard/Manualtrade';
 import Brokrageref from '../Dashboard/Brokrageref';
 import Forexvaln from '../Dashboard/Forexvaln';
 import Employeelisting from '../Dashboard/Employeelisting';
+import Addemployee from '../Dashboard/Addemployee';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -153,6 +154,7 @@ function Application(props) {
           <Route path='dashboard/Brokrage-refresh' element={<Brokrageref />} />
           <Route path='dashboard/forex-previous-valan-trade' element={<Forexvaln />} />
           <Route path='dashboard/Employe-Listing' element={<Employeelisting />} />
+          <Route path='dashboard/add-employee' element={<Addemployee />} />
 
 
           {/* <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <Cashentry /> : <Navigate to="/app" />} /> */}

@@ -2272,3 +2272,28 @@ export const getUserDetailsAPI = async (user_id) => {
     return error;
   }
 };
+
+export const fetchPermissionsAPI = async () => {
+  try {
+    const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
+    const payload = {
+      is_app: 1,
+      login_user_id: dataStored?.user_id || '',
+      auth_key: dataStored?.auth_key || ''
+    };
+
+    const res = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_emp_permission",
+      payload
+    );
+
+    if (res.data && Array.isArray(res.data.emp_per)) {
+      return res.data.emp_per;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.error("Error fetching permissions:", err);
+    throw err;
+  }
+};

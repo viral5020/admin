@@ -218,9 +218,10 @@ const Manualtrade = () => {
                             price={price} setPrice={setPrice}
                             pair={pair} setPair={setPair}
                             brokerage={brokerage} setBrokerage={setBrokerage}
-                            onSubmit={handleSubmit} quantityDisabled={addMarket === '1'}
+                            onSubmit={handleSubmit}
                         />
                     </Box>
+
                 )}
 
                 {/* Filter Drawer for Mobile */}
