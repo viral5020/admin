@@ -19,8 +19,6 @@ import { constant, forex_market_type_id } from './constant';
 import { Toaster, toast } from 'react-hot-toast';
 import { functionsIn } from 'lodash';
 import { forex_comex_market } from '../helpers/utilFunc';
-import { useForm, Controller } from "react-hook-form";
-import AutocompleteFilter from './WWwwwwwwwww';
 
 const defaultValues = {
     segment: null,
