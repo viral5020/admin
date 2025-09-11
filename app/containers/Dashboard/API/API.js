@@ -173,7 +173,7 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
 };
 
 
-export const fetcholdOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
@@ -182,11 +182,32 @@ export const fetcholdOrdersAPI = async (userId, authKey, type = "today", searchV
     is_app: 1,
     login_user_id: userId,
     auth_key: authKey,
-    isTodayTrade: type === "today" ? "today" : "",
+
   };
 
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_old", formData);
+    return data.aaData || [];
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
+};
+
+
+export const fetcholdforexOrdersAPI = async (userId, authKey, searchValue = "") => {
+  const formData = {
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10000,
+    sSearch: searchValue,
+    is_app: 1,
+    login_user_id: userId,
+    auth_key: authKey,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_forex_old", formData);
     return data.aaData || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -624,6 +645,36 @@ export const fetchTradesAPI = async (userId, authKey, scriptId) => {
   } catch (error) {
     console.error("Failed to fetch trades:", error);
     return [];
+  }
+};
+
+
+export const fetchTopGainersLosersAPI = async (userId, authKey) => {
+  if (!userId || !authKey) return { topGainers: [], topLosers: [] };
+
+  const formData = {
+    is_app: "1",
+    login_user_id: userId,
+    auth_key: authKey,
+  };
+
+  try {
+    const { data } = await axiosInstance.post(
+      "/ajaxfiles/top_gainers_losers.php",
+      formData
+    );
+
+    if (data?.status === "ok") {
+      return {
+        topGainers: data.topGainers || [],
+        topLosers: data.topLosers || [],
+      };
+    }
+
+    return { topGainers: [], topLosers: [] };
+  } catch (error) {
+    console.error("❌ Failed to fetch top gainers/losers:", error);
+    return { topGainers: [], topLosers: [] };
   }
 };
 
@@ -1402,6 +1453,33 @@ export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, 
 
   try {
     const { data } = await axiosInstance.post("datatables/user_list_key", formData);
+
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch  list:", error);
+    return [];
+  }
+};
+
+export const fetchEmployeelistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, broker, master, user, status, searchText) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * rowsPerPage,
+    iDisplayLength: rowsPerPage,
+    sSearch: searchText || "",
+    tradeBefore,
+    tradeAfter,
+    broker,
+    master,
+    user,
+    status,
+  };
+
+  try {
+    const { data } = await axiosInstance.post("datatables/employee_list_key", formData);
 
     return data || [];
   } catch (error) {

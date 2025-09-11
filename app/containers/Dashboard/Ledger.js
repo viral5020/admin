@@ -11,6 +11,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { CircularProgress } from '@mui/material';
 
 const LedgerPage = () => {
   const [tab, setTab] = useState(0);
@@ -158,7 +159,9 @@ const LedgerPage = () => {
 
       <Box sx={{ p: 1 }}>
         {loading ? (
-          <Typography variant="body2" sx={{ mt: 2 }}>Loading...</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+            <CircularProgress size={28} color="secondary" />
+          </Box>
         ) : tab === 0 ? (
           <>
             {/* Net Balance */}
@@ -481,7 +484,9 @@ const LedgerPage = () => {
 
             {/* Ledger Cards */}
             {loading ? (
-              <Typography variant="body2" sx={{ mt: 2 }}>Loading...</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                <CircularProgress size={28} color="secondary" />
+              </Box>
             ) : filteredLedgerData.length === 0 ? (
               <Typography variant="body2" sx={{ mt: 2 }}>No entries found.</Typography>
             ) : (

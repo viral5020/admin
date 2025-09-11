@@ -36,18 +36,24 @@ const UserListFilter = ({
   const [userType, setUserType] = useState(null);
 
   useEffect(() => {
-    const rawData = JSON.parse(sessionStorage.getItem("data"));
-    if (rawData && rawData.user_type) {
+    const rawData = JSON.parse(sessionStorage.getItem('data'));
+    if (rawData?.user_type) {
       setUserType(parseInt(rawData.user_type, 10));
     }
   }, []);
 
   return (
-    <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
+    <Box sx={{ pt: 1, mb: 1, overflowX: 'auto' }}>
       <Grid container spacing={1}>
-
         {/* Status */}
-        <Grid item xs={12} sm={6} md={4} lg={3.6}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+          lg={3}
+          sx={{ pr: 0 }}
+        >
           <RadioFilter
             label="Status"
             options={statusOptions}
@@ -57,11 +63,24 @@ const UserListFilter = ({
           />
         </Grid>
 
+
         {/* Login & Trade Dates */}
-        <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />
-        <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />
-        <DateFilter label={forMaster || forBroker ? 'Join After' : 'Join After'} value={tradeAfter} onChange={setTradeAfter} />
-        <DateFilter label={forMaster || forBroker ? 'Join Before' : 'Join Before'} value={tradeBefore} onChange={setTradeBefore} />
+        {setLoginAfter && (
+          <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />
+        )}
+        {setLoginBefore && (
+          <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />
+        )}
+        <DateFilter
+          label="Join After"
+          value={tradeAfter}
+          onChange={setTradeAfter}
+        />
+        <DateFilter
+          label="Join Before"
+          value={tradeBefore}
+          onChange={setTradeBefore}
+        />
 
         {/* Client / Master / Broker */}
         <ClientMasterBrokerFilter
@@ -77,23 +96,23 @@ const UserListFilter = ({
         />
 
         {/* Apply Button */}
-        <Grid item xs={12} sm={6} md={3} lg={2.4} sx={{ display: 'flex', gap: 1 }}>
+        <Grid item xs={12} sm={6} md={3} lg={2.4}>
           <Button
             onClick={onApply}
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
-              borderRadius: '4px',
+              px: 2,
+              py: 0.75,
+              borderRadius: 1,
               textTransform: 'none',
-              flex: 1,
+              width: '100%',
               '&:hover': { backgroundColor: theme.palette.secondary.dark },
             }}
           >
             Apply
           </Button>
         </Grid>
-
       </Grid>
     </Box>
   );

@@ -175,7 +175,7 @@ if (isForex) {
         ? [{
           key: 'positions',
           name: 'previous valan trade',
-          // link: '/app/dashboard/positions',
+          link: '/app/dashboard/forex-previous-valan-trade',
           icon: 'cube-outline'
         }]
         : []),
@@ -254,7 +254,7 @@ if (userType !== 1) {
         ? [{
           key: 'employee_listing',
           name: 'Employe Listing',
-          // link: '/app/dashboard/positions',
+          link: '/app/dashboard/Employe-Listing',
           icon: 'cube-outline'
         }]
         : []),

@@ -78,6 +78,8 @@ import Selfpl from '../Dashboard/Selfpl';
 import Manualtrade from '../Dashboard/Manualtrade';
 
 import Brokrageref from '../Dashboard/Brokrageref';
+import Forexvaln from '../Dashboard/Forexvaln';
+import Employeelisting from '../Dashboard/Employeelisting';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -149,6 +151,8 @@ function Application(props) {
           <Route path='dashboard/Self-P&L' element={<Selfpl />} />
           <Route path='dashboard/manual-trade' element={<Manualtrade />} />
           <Route path='dashboard/Brokrage-refresh' element={<Brokrageref />} />
+          <Route path='dashboard/forex-previous-valan-trade' element={<Forexvaln />} />
+          <Route path='dashboard/Employe-Listing' element={<Employeelisting />} />
 
 
           {/* <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <Cashentry /> : <Navigate to="/app" />} /> */}

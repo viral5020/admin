@@ -51,7 +51,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
-import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
+import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTopGainersLosersAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -276,6 +276,9 @@ function PersonalDashboard() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelItem, setCancelItem] = useState(null);
   const [quantity, setQuantity] = useState('');
+
+  const [topGainers, setTopGainers] = useState([]);
+  const [topLosers, setTopLosers] = useState([]);
 
   // const needsPassword = userType === 4 && deletePopup;
 
@@ -560,6 +563,8 @@ function PersonalDashboard() {
     setLoadingTrades(false);
   };
 
+
+
   const handleViewTradesClick = () => {
     if (!expanded) fetchTradesData();
     setExpanded((prev) => !prev);
@@ -626,6 +631,7 @@ function PersonalDashboard() {
     }
   }, [rejectionDialogOpen, filterType, searchQuery]);
 
+
   useEffect(() => {
     const fetchTrendStocks = async () => {
       const dataStored = JSON.parse(sessionStorage.getItem("data"));
@@ -657,6 +663,22 @@ function PersonalDashboard() {
 
     fetchTrades();
   }, [tabValue, selectedStock]);
+
+  useEffect(() => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    if (!dataStored) return;
+
+    const loadData = async () => {
+      const { topGainers, topLosers } = await fetchTopGainersLosersAPI(
+        dataStored.user_id,
+        dataStored.auth_key
+      );
+      setTopGainers(topGainers);
+      setTopLosers(topLosers);
+    };
+
+    loadData();
+  }, []);
 
   useEffect(() => {
     const fetchPositions = async () => {
@@ -2028,154 +2050,180 @@ function PersonalDashboard() {
         {/*--------------------- LAST 3 CARDS ---------------------*/}
         <Grid item xs={12}>
           <Grid container spacing={0.5}>
-            {['Scripts in Trends', 'Top Gainers', 'Top Losers'].map((title, index) => {
-              const headerColor = '#fff';
-              const gradientBg =
-                index === 1
-                  ? 'linear-gradient(to right,rgb(11, 122, 43), #d0f0d2)'
-                  : index === 2
-                    ? 'linear-gradient(to right,rgb(189, 29, 11),rgb(219, 182, 185))'
-                    : 'linear-gradient(to right,rgb(10, 57, 90),rgb(184, 207, 226))';
+            {["Scripts in Trends", "Top Gainers", "Top Losers"].map(
+              (title, index) => {
+                const headerColor = "#fff";
+                const gradientBg =
+                  index === 1
+                    ? "linear-gradient(to right,rgb(11, 122, 43), #d0f0d2)"
+                    : index === 2
+                      ? "linear-gradient(to right,rgb(189, 29, 11),rgb(219, 182, 185))"
+                      : "linear-gradient(to right,rgb(10, 57, 90),rgb(184, 207, 226))";
 
-              const shadowColor =
-                index === 1
-                  ? 'rgba(76, 175, 80, 0.5)' // green shadow
-                  : index === 2
-                    ? 'rgba(244, 67, 54, 0.5)' // red shadow
-                    : 'rgba(33, 150, 243, 0.5)'; // blue shadow
+                const shadowColor =
+                  index === 1
+                    ? "rgba(76, 175, 80, 0.5)"
+                    : index === 2
+                      ? "rgba(244, 67, 54, 0.5)"
+                      : "rgba(33, 150, 243, 0.5)";
 
-              const stocks = index === 0
-                ? trendStocks
-                : index === 1
-                  ? [
-                    { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%', qty: 75, rate: '830.00', id: '#31452391', time: '12-07-2025 05:35:10', commission: 0 },
-                  ]
-                  : [
-                    { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50', qty: 100, rate: '425.00', id: '#31452392', time: '12-07-2025 06:01:23', commission: 0 },
-                  ];
+                const stocks =
+                  index === 0 ? trendStocks : index === 1 ? topGainers : topLosers;
 
-              return (
-                <Grid key={index} item xs={12} md={4}>
-                  <Paper
-                    elevation={3}
-                    sx={{
-                      height: boxHeight,
-                      overflowY: 'auto',
-                      scrollbarWidth: 'none',
-                      '&::-webkit-scrollbar': { display: 'none' },
-                      borderRadius: 2,
-                      boxShadow: `0 0 10px ${shadowColor}`,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      fontWeight={700}
+                return (
+                  <Grid key={index} item xs={12} md={4}>
+                    <Paper
+                      elevation={3}
                       sx={{
-                        position: 'sticky',
-                        top: 0,
-                        background: gradientBg,
-                        backdropFilter: 'blur(6px)',
-                        zIndex: 1,
-                        py: 0.5,
-                        px: 1,
-                        borderTopLeftRadius: 8,
-                        borderTopRightRadius: 8,
-                        borderBottom: `1px solid ${theme.palette.divider}`,
-                        color: headerColor,
-                        fontSize: '1rem',
-                        letterSpacing: '0.3px',
+                        height: boxHeight,
+                        overflowY: "auto",
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": { display: "none" },
+                        borderRadius: 2,
+                        boxShadow: `0 0 10px ${shadowColor}`,
                       }}
                     >
-                      {title}
-                    </Typography>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        sx={{
+                          position: "sticky",
+                          top: 0,
+                          background: gradientBg,
+                          backdropFilter: "blur(6px)",
+                          zIndex: 1,
+                          py: 0.5,
+                          px: 1,
+                          borderTopLeftRadius: 8,
+                          borderTopRightRadius: 8,
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          color: headerColor,
+                          fontSize: "1rem",
+                          letterSpacing: "0.3px",
+                        }}
+                      >
+                        {title}
+                      </Typography>
 
-                    {stocks.map((stock, idx) => {
-                      const isPositive = stock.per >= 0;
-                      const changeColor = isPositive ? '#2196f3' : '#f44336';
-
-                      return (
-                        <Paper
-                          key={idx}
-                          elevation={1}
-                          onClick={() => {
-                            setSelectedStock({
-                              script_id: stock.Id,
-                              name: stock.name,
-                              ltp: stock.ltp,
-                              per: stock.per,
-                              rateChange: stock.rateChange,
-                              data: generateCandleData(stock.name),
-                            });
-                            setCandleOpen(true);
-                          }}
-                          sx={{
-                            mb: 0.5,
-                            mt: 0.5,
-                            mr: 0.5,
-                            ml: 0.5,
-                            borderRadius: 1,
-                            cursor: 'pointer',
-                            border: `1px solid ${changeColor}`,
-                            boxShadow: `0 2px 5px ${shadowColor}`,
-                            transition: 'transform 0.12s ease, box-shadow 0.12s ease',
-                            '&:hover': {
-                              transform: 'scale(1.01)',
-                              boxShadow: `0 4px 12px ${shadowColor}`,
-                            },
-                          }}
+                      {loading && index !== 0 ? (
+                        <Box
+                          display="flex"
+                          justifyContent="center"
+                          alignItems="center"
+                          height="100%"
                         >
-                          <Box display="flex" alignItems="center" px={0.5}>
-                            {/* Square avatar */}
-                            <Avatar
-                              variant="square"
+                          <CircularProgress size={28} />
+                        </Box>
+                      ) : (
+                        stocks.map((stock, idx) => {
+                          // 🔑 Normalize fields
+                          const stockName =
+                            stock.name || stock.ScriptName || stock.InstrumentIdentifier || "--";
+                          const ltp = stock.ltp || stock.LastTradePrice || 0;
+                          const per =
+                            stock.per ??
+                            stock.PriceChangePercentage ??
+                            0;
+                          const rateChange =
+                            stock.rateChange ??
+                            stock.PriceChange ??
+                            0;
+
+                          const isPositive = Number(per) >= 0;
+                          const changeColor = isPositive ? "#2196f3" : "#f44336";
+
+                          return (
+                            <Paper
+                              key={idx}
+                              elevation={1}
+                              onClick={() => {
+                                setSelectedStock({
+                                  script_id:
+                                    stock.Id || stock.InstrumentIdentifier,
+                                  name: stockName,
+                                  ltp,
+                                  per,
+                                  rateChange,
+                                  data: generateCandleData(stockName),
+                                });
+                                setCandleOpen(true);
+                              }}
                               sx={{
-                                bgcolor: changeColor,
-                                width: 32,
-                                height: 32,
-                                mr: 1,
-                                fontSize: 14,
-                                fontWeight: 600,
+                                mb: 0.5,
+                                mt: 0.5,
+                                mx: 0.5,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                border: `1px solid ${changeColor}`,
+                                boxShadow: `0 2px 5px ${shadowColor}`,
+                                transition:
+                                  "transform 0.12s ease, box-shadow 0.12s ease",
+                                "&:hover": {
+                                  transform: "scale(1.01)",
+                                  boxShadow: `0 4px 12px ${shadowColor}`,
+                                },
                               }}
                             >
-                              {stock.name.charAt(0)}
-                            </Avatar>
-
-                            {/* Main content */}
-                            <Box flexGrow={1}>
-                              <Box display="flex" justifyContent="space-between" alignItems="center">
-                                <Typography variant="subtitle2" fontWeight={600}>
-                                  {stock.name}
-                                </Typography>
-                                <Typography variant="body2" fontWeight={600}>
-                                  ₹{Number(stock.ltp).toLocaleString()}
-                                </Typography>
-                              </Box>
-
-                              <Box display="flex" justifyContent="space-between" alignItems="center">
-                                <Typography
-                                  variant="body2"
-                                  color={isPositive ? 'success.main' : 'error.main'}
-                                  fontWeight={600}
+                              <Box display="flex" alignItems="center" px={0.5}>
+                                <Avatar
+                                  variant="square"
+                                  sx={{
+                                    bgcolor: changeColor,
+                                    width: 32,
+                                    height: 32,
+                                    mr: 1,
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                  }}
                                 >
-                                  {isPositive ? `+${stock.per}%` : `${stock.per}%`}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color={isPositive ? 'success.main' : 'error.main'}
-                                  fontWeight={600}
-                                >
-                                  ₹{Number(stock.rateChange).toLocaleString()}
-                                </Typography>
+                                  {stockName.charAt(0)}
+                                </Avatar>
+
+                                <Box flexGrow={1}>
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                  >
+                                    <Typography variant="subtitle2" fontWeight={600}>
+                                      {stockName}
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600}>
+                                      ₹{Number(ltp).toLocaleString()}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                  >
+                                    <Typography
+                                      variant="body2"
+                                      color={isPositive ? "success.main" : "error.main"}
+                                      fontWeight={600}
+                                    >
+                                      {isPositive ? `+${per}%` : `${per}%`}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      color={isPositive ? "success.main" : "error.main"}
+                                      fontWeight={600}
+                                    >
+                                      ₹{Number(rateChange).toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                </Box>
                               </Box>
-                            </Box>
-                          </Box>
-                        </Paper>
-                      );
-                    })}
-                  </Paper>
-                </Grid>
-              );
-            })}
+                            </Paper>
+                          );
+                        })
+                      )}
+                    </Paper>
+                  </Grid>
+                );
+              }
+            )}
           </Grid>
         </Grid>
 

@@ -29,11 +29,12 @@ import OrderFilter from './OrderFilter';
 import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
-import { deleteTrade, fetcholdOrdersAPI, updateTrade } from './API/API';
+import { deleteTrade, fetcholdforexOrdersAPI, fetcholdOrdersAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import Pagination from './filters/Pagination';
+import ForexFilter from './forexfilter';
 
-const Previousvalan = ({
+const Forexvaln = ({
     filterShow = true,
     setFilterShow = () => { }
 }) => {
@@ -50,6 +51,9 @@ const Previousvalan = ({
     const [orderType, setOrderType] = useState('');  // trade_type
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [selectedMarket, setSelectedMarket] = useState(null);
+    const [selectedScripts, setSelectedScripts] = useState([]);
 
     const [filterType, setFilterType] = useState("today");
     const [searchText, setSearchText] = useState("");
@@ -109,7 +113,7 @@ const Previousvalan = ({
     const fetchOrders = async (type = "today", searchValue = "") => {
         setLoading(true);
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        const result = await fetcholdOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
+        const result = await fetcholdforexOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
         setOrders(result);
         setLoading(false);
     };
@@ -280,7 +284,7 @@ const Previousvalan = ({
                             <Typography variant="h6">Filters</Typography>
                             <IconButton onClick={toggleDrawer(false)}><CloseIcon /></IconButton>
                         </Box>
-                        <OrderFilter
+                        <ForexFilter
                             isDarkMode={isDarkMode}
                             setStatus={setStatus}
                             setEnd_date={setEnd_date}
@@ -290,17 +294,16 @@ const Previousvalan = ({
                             end_date={end_date}
                             start_end={start_end}
                             orderType={orderType}
-                            setMarket={setMarket}
-                            setScript={setScript}
+                            setMarket={setSelectedMarket}
+                            setScript={setSelectedScripts}
                             setClient={setClient}
                             setMaster={setMaster}
                             setBroker={setBroker}
-                            market={market}
-                            script={script}
+                            market={selectedMarket}
+                            script={selectedScripts}
                             client={client}
                             master={master}
                             broker={broker}
-                            userType={userType}
                             onApply={onFilterApply}
                         />
                     </Box>
@@ -310,7 +313,7 @@ const Previousvalan = ({
 
             {!isMobile && filterShow && (
                 <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}>
-                    <OrderFilter
+                    <ForexFilter
                         isDarkMode={isDarkMode}
                         setStatus={setStatus}
                         setEnd_date={setEnd_date}
@@ -320,13 +323,13 @@ const Previousvalan = ({
                         end_date={end_date}
                         start_end={start_end}
                         orderType={orderType}
-                        setMarket={setMarket}
-                        setScript={setScript}
+                        setMarket={setSelectedMarket}
+                        setScript={setSelectedScripts}
                         setClient={setClient}
                         setMaster={setMaster}
                         setBroker={setBroker}
-                        market={market}
-                        script={script}
+                        market={selectedMarket}
+                        script={selectedScripts}
                         client={client}
                         master={master}
                         broker={broker}
@@ -566,6 +569,7 @@ const Previousvalan = ({
                                         "Order Type",
                                         "Qty (Lot)",
                                         "Order Price",
+                                        "Net Price",
                                         "Status",
                                         "O. Time",
                                         "Comm Amt",
@@ -609,7 +613,7 @@ const Previousvalan = ({
 
                                     return (
                                         <tr key={item.trd_id || index} >
-                                            <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                            <td dangerouslySetInnerHTML={{ d_type_html: item.device_type_html }} />
                                             <td>{item.trd_matchedtime}</td>
                                             {userType !== 1 && <td>{item.client_full_name}</td>}
                                             <td>
@@ -633,7 +637,7 @@ const Previousvalan = ({
                                                             display: "inline-block",
                                                         }}
                                                     >
-                                                        {item.mrkt_name}
+                                                        {item.mrkt_t_name}
                                                     </Box>
                                                 </Box>
                                             </td>
@@ -651,6 +655,7 @@ const Previousvalan = ({
                                             >
                                                 {item.trd_type}
                                             </td>
+
                                             <td>{item.trd_type2}</td>
                                             <td>
                                                 <Box component="span" sx={{ fontWeight: 700 }}>
@@ -663,11 +668,12 @@ const Previousvalan = ({
                                             <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                 {item.trd_rate}
                                             </td>
-                                            <td>{item.trd_status}</td>
+                                            <td>{item.net_rate}</td>
+                                            <td>{item.status}</td>
                                             <td>{item.trd_time}</td>
                                             <td>{item.trd_comm_amnt}</td>
                                             {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
-                                            {[3, 4, 5].includes(userType) && <td>{item.trade_ip_address}</td>}
+                                            {[3, 4, 5].includes(userType) && <td>{item.trd_time_time}</td>}
                                             {userType !== 2 && (
                                                 <td>
                                                     <button
@@ -823,4 +829,6 @@ const Previousvalan = ({
     );
 };
 
-export default Previousvalan
+
+
+export default Forexvaln
