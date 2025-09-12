@@ -4,11 +4,10 @@ import axiosInstance from "./axiosconfig";
 
 import { constant, forex_market_type_id } from "../Watchlist/constant";
 
-const dataStored = JSON.parse(sessionStorage.getItem("data"));
-
 async function getDefaultParams() {
-  const { ip_address, user_agent } = await getUserInfo();
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  const { ip_address, user_agent } = await getUserInfo();
+
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
@@ -910,19 +909,25 @@ function isChanged(apiData) {
   if (JSON.stringify(apiData) == data) {
     return;
   } else {
-    window.location.href !== "http://localhost:3000/login" ? window.location.reload() : null;
+    // window.location.href !== "http://localhost:3000/login" ? window.location.reload() : null;
   }
 }
 
 export const checkLoginAPI = async (isJustLogin, user_id, auth_key) => {
+  // console.log("REMAIN THIS CONSOLE LOG HERE, OTHERWISE SOMETIMES THIS API IS NOT CALLED");
   let defaultParams = await getDefaultParams();
-  // console.log("fetchNotificationAPI.........");
+
+  // console.log('beofre isJustLogin defaultParams', defaultParams);
   if (isJustLogin) {
+    // console.log("inside isJustLogin");
     defaultParams = { ...defaultParams, login_user_id: user_id, auth_key }
     // console.log('defaultParams', defaultParams);
   }
-  // console.log('defaultParams', defaultParams);
-  if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;
+  // console.log('after isJustLogin defaultParams', defaultParams);
+  if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) {
+    // console.log("cannt get defaultParams");
+    return
+  };
   // console.log("if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;")
   try {
     const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
@@ -1280,9 +1285,9 @@ export const fetchLedgerDetailsAPI = async (userId) => {
 
 
 export const tradePlaceAPI = async (dataObj) => {
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
   console.log('dataObj', dataObj);
   const defaultParams = await getDefaultParams();
-  const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const payload = {
     ...defaultParams,
     device_type: 0,
