@@ -37,7 +37,7 @@ function LoginFormV2() {
   const formik = useFormik({
     initialValues: {
       username: '',
-      password: 'ABCD1234',
+      password: 'Abcd1234',
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -156,6 +156,7 @@ function LoginFormV2() {
                 }}
               />
             </FormControl>
+            ABCD1234
           </div>
           <div className={classes.optArea} />
           <div className={classes.btnArea}>

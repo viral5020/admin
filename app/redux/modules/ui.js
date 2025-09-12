@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import menuContent from 'dan-api/ui/menu';
+import { getSibarContent } from 'dan-api/ui/newMenu';
 
 const initialState = {
   /* Settings for Themes and layout */
@@ -42,12 +43,39 @@ const getMenus = menuArray => menuArray.map(item => {
   return false;
 });
 
+// const setNavCollapse = (arr, curRoute) => {
+//   console.log('arr', arr)
+//   console.log('curRoute', curRoute);
+//   console.log('menuData', menuContent);
+
+//   let headMenu = 'not found';
+//   for (let i = 0; i < arr.length; i += 1) {
+//     for (let j = 0; j < arr[i].length; j += 1) {
+//       // console.log('menuContent[i].key', menuContent[i].key);
+//       console.log('arr[i][j].link', arr[i][j].link);
+//       if (arr[i][j].link === curRoute) {
+//         console.log('menuContent[i].key', menuContent[i].key);
+//         headMenu = menuContent[i].key;
+//       }
+//     }
+//   }
+//   return headMenu;
+// };
+
 const setNavCollapse = (arr, curRoute) => {
+  console.log('arr', arr)
+  console.log('curRoute', curRoute);
+  const menuData = getSibarContent();
+  console.log('menuData', menuData);
+
   let headMenu = 'not found';
+
   for (let i = 0; i < arr.length; i += 1) {
     for (let j = 0; j < arr[i].length; j += 1) {
+      console.log('arr[i][j].link', arr[i][j].link);
       if (arr[i][j].link === curRoute) {
-        headMenu = menuContent[i].key;
+        console.log('menuData[i].key', menuData[i].key);
+        headMenu = menuData[i].key;
       }
     }
   }
@@ -68,11 +96,18 @@ const uiSlice = createSlice({
       state.sidebarOpen = false;
       state.subMenuOpen = [];
     },
+
+
+
+
     openAction: (state, action) => {
       const { initialLocation, key } = action.payload;
+      console.log('initialLocation, key', initialLocation, key);
       // Set initial open parent menu
+      const dataMenu = getSibarContent();
       const activeParent = setNavCollapse(
-        getMenus(menuContent),
+        // getMenus(menuContent),
+        getMenus(dataMenu),
         initialLocation
       );
       // Once page loaded will expand the parent menu
@@ -89,6 +124,10 @@ const uiSlice = createSlice({
         state.subMenuOpen = [key];
       }
     },
+
+
+
+
     changeThemeAction: (state, action) => {
       state.theme = action.payload;
     },

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { PropTypes } from 'prop-types';
 
 import Fade from '@mui/material/Fade';
@@ -9,9 +9,11 @@ import {
   Sidebar,
   BreadCrumb,
 } from 'dan-components';
-import dataMenu from 'dan-api/ui/menu';
+import { getSibarContent } from 'dan-api/ui/menu';
+// import menuItems from 'dan-api/ui/menu';
 import Decoration from '../Decoration';
 import useStyles from '../appStyles-jss';
+import { useLocation } from 'react-router-dom';
 
 function LeftSidebarLayout(props) {
   const { classes, cx } = useStyles();
@@ -31,6 +33,39 @@ function LeftSidebarLayout(props) {
     titleException,
     handleOpenGuide
   } = props;
+  const location = useLocation();
+
+  const dd = getSibarContent();
+  const [dataMenu, setDataMenu] = useState(dd);
+  // const dataMenuRef = useRef();
+  const [rerender, setRerender] = useState(false);
+  const { user_id = null, auth_key = null } = location.state ?? {};
+
+  // PUT DELAY, So fetchNotificationAPI runs and set sessionStorage, and that sessionStorage Data is Further used by getSibarContent() func  
+  useEffect(() => {
+    if (Boolean(user_id) && Boolean(auth_key)) {
+      console.log("Inside useEffect of LeftSidebarLayout.js");
+      // setTimeout(() => {
+      //   const dd = getSibarContent();
+      //   // dataMenuRef.current = dd;
+      //   setDataMenu(dd);
+      //   console.log('dd', dd);
+      //   // setRerender(!rerender);
+      // }, [3000])
+
+      const userInterval = setInterval(() => {
+        const newData = JSON.parse(sessionStorage.getItem("data"));
+
+        if (newData) {
+          clearInterval(userInterval);
+          const dd = getSibarContent();
+          console.log('dd', dd);
+          setDataMenu(dd);
+        }
+      }, 1000);
+    }
+  }, [location.pathname])
+
 
   return (
     <Fragment>
@@ -45,13 +80,25 @@ function LeftSidebarLayout(props) {
         history={history}
         openGuide={handleOpenGuide}
       />
-      <Sidebar
-        open={sidebarOpen}
-        toggleDrawerOpen={toggleDrawer}
-        loadTransition={loadTransition}
-        dataMenu={dataMenu}
-        leftSidebar
-      />
+      {/* {dataMenuRef &&
+        <Sidebar
+          open={sidebarOpen}
+          toggleDrawerOpen={toggleDrawer}
+          loadTransition={loadTransition}
+          dataMenu={dataMenuRef.current}
+          leftSidebar
+        />
+      } */}
+      {dataMenu &&
+        <Sidebar
+          open={sidebarOpen}
+          toggleDrawerOpen={toggleDrawer}
+          loadTransition={loadTransition}
+          dataMenu={dataMenu}
+          leftSidebar
+        />
+      }
+
       <main className={cx(classes.content, !sidebarOpen ? classes.contentPaddingLeft : '')} id="mainContent">
         <Decoration
           mode={mode}
@@ -74,7 +121,7 @@ function LeftSidebarLayout(props) {
           >
             <div className={!pageLoaded ? classes.hideApp : ''}>
               {/* Application content will load here */}
-              { children }
+              {children}
             </div>
           </Fade>
         </section>

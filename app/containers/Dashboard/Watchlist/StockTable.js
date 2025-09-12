@@ -235,7 +235,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
 
   const getCondition = (val, showIcon, showPR, changeVal) => {
     const roundedVal = roundToTwoIN(val);
-    // const isBidAsk = 
     return (
       <Box
         component="span"
@@ -355,7 +354,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
           cursor: (column.id === 'askRate' || column.id === 'bidRate') ? 'pointer' : '',
         }}
         onClick={() => handleBidAskClick(dataArray, column.id)}
-
       >
         {column.id === 'priceChangePercent'
           ? getCondition(dataArray[column.id], true, true, dataArray?.priceChange)

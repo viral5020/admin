@@ -95,14 +95,6 @@ import Valan from '../Dashboard/Utility/Valan';
   };
 })();
 
-
-const rawData = JSON.parse(sessionStorage.getItem("data"));
-const userType = parseInt(rawData?.user_type, 10);
-
-const notificationData = JSON.parse(sessionStorage.getItem("notification"));
-const isStock = notificationData?.isStock;
-const isForex = notificationData?.isForex;
-
 const OpenTrialBalanceNewTab = ({ userType }) => {
   if (userType === 4 || userType === 5) {
     // Open Trialbalance in new tab
@@ -116,6 +108,54 @@ const OpenTrialBalanceNewTab = ({ userType }) => {
 function Application(props) {
   const { history } = props;
   const changeMode = useContext(ThemeContext);
+
+  const [isStock, setIsStock] = useState();
+  const [isForex, setIsForex] = useState();
+
+  const [userType, setUserType] = useState();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newData = JSON.parse(sessionStorage.getItem("notification"));
+      // if (JSON.stringify(newData) !== JSON.stringify(notificationData)) {
+      // console.log('notification', newData);
+      // console.log('^^^ noti', Boolean(newData));
+      if (newData) {
+        // console.log('^^^ noti', newData);
+        clearInterval(interval);
+        setIsStock(newData?.isStock);
+        setIsForex(newData?.isForex);
+      }
+    }, 1000); // poll every second (or adjust as needed)
+
+
+    const userInterval = setInterval(() => {
+      const newData = JSON.parse(sessionStorage.getItem("data"));
+      // console.log('data', newData);
+
+      // if (JSON.stringify(newData) !== JSON.stringify(notificationData)) {
+      // console.log('Boolean data', Boolean(newData))
+      if (newData) {
+        // console.log('^^^ data', newData);
+        clearInterval(userInterval);
+        const ddd = parseInt(newData?.user_type, 10);
+        setUserType(ddd);
+      }
+    }, 1000); // poll every second (or adjust as needed)
+  }, []);
+
+  // useEffect(() => {
+  //   console.log('*** isForex', isForex);
+  // }, [isForex]);
+
+  // useEffect(() => {
+  //   console.log('*** isStock', isStock);
+  // }, [isStock]);
+
+  // useEffect(() => {
+  //   console.log('*** userType', userType);
+  // }, [userType]);
+
   return (
     <Dashboard history={history} changeMode={changeMode}>
       <Routes>
