@@ -613,7 +613,7 @@ const Employeelisting = ({
                     },
                 }}
                 // onClick={() => handleClickOpen2 (row)}
-                onClick={() => navigate("/app/dashboard/Edit-Account", { state: { userId: row.user_id } })}
+                onClick={() => navigate("/app/dashboard/add-employee", { state: { userId: row.user_id } })}
             >
                 E
             </Button>

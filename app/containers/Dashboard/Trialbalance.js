@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { useLocation } from "react-router-dom";
 
 const Trialbalance = () => {
     const queryParams = new URLSearchParams(useLocation().search);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    if (!dataStored) return alert("Session expired");
-    const rawData = JSON.parse(sessionStorage.getItem("data"));
-    const userType = parseInt(rawData?.user_type, 10);
+
+    if (!dataStored) {
+        alert("Session expired");
+        return null;
+    }
+
+    const userType = parseInt(dataStored?.user_type, 10);
 
     const [filters, setFilters] = useState({
         all: false,
@@ -15,6 +19,25 @@ const Trialbalance = () => {
         broker: false,
         client: false,
     });
+
+    // Automatically redirect for userType 4 or 5
+    useEffect(() => {
+        if (userType === 4 || userType === 5) {
+            const BASE_URL = "http://128.199.126.171/~goldorg/pdf/trial_balance";
+            const url = new URL(BASE_URL);
+            url.searchParams.set("isAll", "1"); // default for these user types
+            url.searchParams.set("is", "1");
+            url.searchParams.set("k", dataStored.auth_key);
+            url.searchParams.set("lui", dataStored.user_id);
+
+            window.open(url.toString(), "_blank");
+        }
+    }, [userType, dataStored]);
+
+    // Hide UI for userType 4 or 5
+    if (userType === 4 || userType === 5) {
+        return null;
+    }
 
     const handleCheckboxChange = (key) => {
         if (key === "all") {
@@ -35,9 +58,8 @@ const Trialbalance = () => {
 
     const handleSubmit = () => {
         const BASE_URL = "http://128.199.126.171/~goldorg/pdf/trial_balance";
-
-
         const url = new URL(BASE_URL);
+
         url.searchParams.set("isAll", filters.all ? "1" : "0");
         url.searchParams.set("onlyMasters", filters.master ? "1" : "0");
         url.searchParams.set("onlyBrokers", filters.broker ? "1" : "0");
@@ -62,32 +84,32 @@ const Trialbalance = () => {
                     All
                 </label>
 
-                {/* Only Master: visible if userType=== 3 */}
+                {/* Only Master: visible if userType===3 */}
                 {userType === 3 && (
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={filters.master}
-                            disabled={filters.all}
-                            onChange={() => handleCheckboxChange("master")}
-                        />
-                        Master
-                    </label>
+                    <>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={filters.master}
+                                disabled={filters.all}
+                                onChange={() => handleCheckboxChange("master")}
+                            />
+                            Master
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={filters.broker}
+                                disabled={filters.all}
+                                onChange={() => handleCheckboxChange("broker")}
+                            />
+                            Broker
+                        </label>
+                    </>
                 )}
 
-                {/* Only Broker: visible if userType=== 3 */}
-                {userType === 3 && (
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={filters.broker}
-                            disabled={filters.all}
-                            onChange={() => handleCheckboxChange("broker")}
-                        />
-                        Broker
-                    </label>
-                )}
-
+                {/* Client: visible if userType===2 or 3 */}
                 {(userType === 2 || userType === 3) && (
                     <label>
                         <input

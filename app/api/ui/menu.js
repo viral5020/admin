@@ -307,7 +307,7 @@ if (userType !== 2) {
         ? [{
           key: 'trade-edit-delete-log-old',
           name: 'Trade edit delete log old',
-          // link: '/app/dashboard/trade-edit-delete-log-old',
+          link: '/app/dashboard/trade-edit-delete-log-old',
           icon: 'receipt-outline'
         }]
         : []),
@@ -339,7 +339,7 @@ if (userType !== 2) {
         ? [{
           key: 'cash-edit-delete-log',
           name: 'Cash edit delete log',
-          // link: '/app/dashboard/cash-edit-delete-log',
+          link: '/app/dashboard/cash-edit-delete-log',
           icon: 'receipt-outline'
         }]
         : []),
@@ -371,7 +371,7 @@ if (userType !== 2) {
         ? [{
           key: 'valan',
           name: 'Valan',
-          // link: '/app/dashboard/valan',
+          link: '/app/dashboard/valan',
           icon: 'receipt-outline'
         }]
         : []),
@@ -420,7 +420,7 @@ if (userType === 1 || userType === 3 || userType === 2 || userType === 4 || user
         }]
         : []),
 
-      ...(userType === 3   //pdf link for 4 and 5 user type
+      ...(userType === 3
         ? [{
           key: 'add_account',
           name: 'Trial Balance',
@@ -428,7 +428,35 @@ if (userType === 1 || userType === 3 || userType === 2 || userType === 4 || user
           icon: 'add-circle-outline'
         }]
         : []),
-      ...(userType === 1
+
+      ...(userType === 4 || userType === 5
+        ? [{
+          key: 'add_account',
+          name: 'Trial Balance',
+          icon: 'add-circle-outline',
+          link: (() => {
+            const dataStored = JSON.parse(sessionStorage.getItem("data"));
+            if (!dataStored) return "#";
+
+            const BASE_URL = "http://128.199.126.171/~goldorg/pdf/trial_balance";
+            const url = new URL(BASE_URL);
+            url.searchParams.set("isAll", "1");
+            url.searchParams.set("is", "1");
+            url.searchParams.set("k", dataStored.auth_key);
+            url.searchParams.set("lui", dataStored.user_id);
+
+            return url.toString();
+          })(),
+
+          onClick: (e) => {
+            // ensures opening in new tab if link handling fails
+            const link = e.currentTarget.getAttribute('href');
+            window.open(link, '_blank');
+          }
+        }]
+        : []),
+
+      ...(userType === 1 || userType === 2
         ? [{
           key: 'ledger',
           name: 'Ledger',
@@ -436,7 +464,7 @@ if (userType === 1 || userType === 3 || userType === 2 || userType === 4 || user
           icon: 'time-outline'
         }]
         : []),
-      ...(userType === 3
+      ...(userType === 3 || userType === 4
         ? [{
           key: 'ledger',
           name: 'Ledger Report',
@@ -508,7 +536,7 @@ if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
         icon: 'time-outline'
       }] : []),
 
-      // always visible
+
       {
         key: 'order limit',
         name: 'order limit',

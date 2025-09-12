@@ -142,7 +142,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
       </Grid>
       }
       {/* (6) Script Name */}
-      {showScript && <Grid item xs={12} sm={6} md={3} lg={2.4} position={'relative'}>
+      {setScript && <Grid item xs={12} sm={6} md={3} lg={2.4} position={'relative'}>
         {/* <Tooltip
           arrow
           title={isScriptNameDisable

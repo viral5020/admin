@@ -8,7 +8,7 @@ const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
 async function getDefaultParams() {
   const { ip_address, user_agent } = await getUserInfo();
-  // const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
@@ -1282,6 +1282,7 @@ export const fetchLedgerDetailsAPI = async (userId) => {
 export const tradePlaceAPI = async (dataObj) => {
   console.log('dataObj', dataObj);
   const defaultParams = await getDefaultParams();
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const payload = {
     ...defaultParams,
     device_type: 0,
@@ -2068,6 +2069,127 @@ export const editDeleteLogLogsAPI = async (
   }
 };
 
+export const ValanLogsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+  }
+
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/list_valan_master", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const editDeleteoldLogsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/trade_log_view_old", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const CasheditDeleteLogsAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_deleted,
+    is_updated,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/cash_ledger_log_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
 export const manualtradesAPI = async (
   currentPage,
   pageSize,
@@ -2273,7 +2395,20 @@ export const getUserDetailsAPI = async (user_id) => {
   }
 };
 
+export const getemployeeDetailsAPI = async (user_id) => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const { data } = await axiosInstance.post("/ajaxfiles/view_user_details_emp", { ...defaultParams, user_id });
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching getUserDetails:", error);
+    return error;
+  }
+};
+
 export const fetchPermissionsAPI = async () => {
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
   try {
     const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
     const payload = {

@@ -81,6 +81,9 @@ import Brokrageref from '../Dashboard/Brokrageref';
 import Forexvaln from '../Dashboard/Forexvaln';
 import Employeelisting from '../Dashboard/Employeelisting';
 import Addemployee from '../Dashboard/Addemployee';
+import Tradeditdeleteold from '../Dashboard/filters/Tradeditdeleteold';
+import Casheditdeletelog from '../Dashboard/Utility/Casheditdeletelog';
+import Valan from '../Dashboard/Utility/Valan';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -92,12 +95,24 @@ import Addemployee from '../Dashboard/Addemployee';
   };
 })();
 
+
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
 const notificationData = JSON.parse(sessionStorage.getItem("notification"));
 const isStock = notificationData?.isStock;
 const isForex = notificationData?.isForex;
+
+const OpenTrialBalanceNewTab = ({ userType }) => {
+  if (userType === 4 || userType === 5) {
+    // Open Trialbalance in new tab
+    window.open("/dashboard/Trial-balance", "_blank");
+    return <Navigate to="/app" />; // Redirect current tab if needed
+  } else {
+    // Unauthorized users
+    return <Navigate to="/app" />;
+  }
+};
 function Application(props) {
   const { history } = props;
   const changeMode = useContext(ThemeContext);
@@ -148,21 +163,31 @@ function Application(props) {
           <Route path='dashboard/bulk-trading' element={userType !== 1 && (isForex || isStock) ? <Bulktrading /> : <Navigate to="/app" />} />
           <Route path='dashboard/cross-trade-log' element={(userType === 3 || userType === 4 || userType === 5) && (isForex || isStock) ? <Crosstradelog /> : <Navigate to="/app" />} />
 
-          <Route path='dashboard/previous-valan-trade' element={<Previousvalan />} />
-          <Route path='dashboard/Self-P&L' element={<Selfpl />} />
-          <Route path='dashboard/manual-trade' element={<Manualtrade />} />
-          <Route path='dashboard/Brokrage-refresh' element={<Brokrageref />} />
-          <Route path='dashboard/forex-previous-valan-trade' element={<Forexvaln />} />
-          <Route path='dashboard/Employe-Listing' element={<Employeelisting />} />
-          <Route path='dashboard/add-employee' element={<Addemployee />} />
+          <Route path='dashboard/previous-valan-trade' element={userType === 4 || userType === 5 ? <Previousvalan /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Self-P&L' element={userType === 4 ? <Selfpl /> : <Navigate to="/app" />} />
+          <Route path='dashboard/manual-trade' element={userType === 4 ? <Manualtrade /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Brokrage-refresh' element={userType === 4 || userType === 5 ? <Brokrageref /> : <Navigate to="/app" />} />
+          <Route path='dashboard/forex-previous-valan-trade' element={userType === 4 || userType === 5 ? <Forexvaln /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Employe-Listing' element={userType === 4 ? <Employeelisting /> : <Navigate to="/app" />} />
+          <Route path='dashboard/add-employee' element={userType === 4 ? <Addemployee /> : <Navigate to="/app" />} />
+
+
+          <Route path='dashboard/trade-edit-delete-log-old' element={(userType === 4 || userType === 5) && (isForex || isStock) ? <Tradeditdeleteold /> : <Navigate to="/app" />} />
+          <Route path='dashboard/cash-edit-delete-log' element={userType === 4 || userType === 5 ? <Casheditdeletelog /> : <Navigate to="/app" />} />
+          <Route path='dashboard/valan' element={userType === 4 || userType === 5 ? <Valan /> : <Navigate to="/app" />} />
 
 
           {/* <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <Cashentry /> : <Navigate to="/app" />} /> */}
           <Route path='dashboard/Cash-Entry' element={userType !== 2 && userType !== 1 ? <JV /> : <Navigate to="/app" />} />
-          <Route path='dashboard/Trial-balance' element={userType === 3 ? <Trialbalance /> : <Navigate to="/app" />} />
-          <Route path='dashboard/Order-Limit' element={userType === 3 ? <Orderlimit /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Trial-balance' element={userType === 3 || userType === 4 || userType === 5 ? <Trialbalance /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Trial-balance' element={userType === 4 || userType === 5 ? <Trialbalance /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Order-Limit' element={<Orderlimit />} />
           <Route path='dashboard/Blocked-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
           <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
+
+
+          <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
+
         </Route>
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />

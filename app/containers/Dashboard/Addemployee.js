@@ -11,29 +11,71 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { fetchPermissionsAPI } from "./API/API";
+import { fetchPermissionsAPI, getemployeeDetailsAPI } from "./API/API";
+import { useLocation } from "react-router-dom";
 
 const Addemployee = () => {
+    const location = useLocation();
+    const { userId: editUserId } = location.state || {};
+    const [isEditMode, setIsEditMode] = useState(false);
+
     const [commonFormData, setCommonFormData] = useState({
         name: "",
         password: "",
-        permissions: {},
         remarks: "",
+        permissions: {},
     });
-    const [permissionList, setPermissionList] = useState([]); // from API
+
+    const [permissionList, setPermissionList] = useState([]);
     const [errors, setErrors] = useState({});
 
-    // Fetch permissions from API
+    // Fetch employee details if edit mode
+    async function getUserDataForEdit() {
+        try {
+            const response = await getemployeeDetailsAPI(editUserId);
+            if (response?.status === "ok") {
+                const user = response.data;
+
+                const userPermissions = {};
+                user.selected_permission.forEach((perm) => {
+                    userPermissions[perm.permission_name] = perm.selected;
+                });
+
+                setCommonFormData((prev) => ({
+                    ...prev,
+                    name: user.user_name || "",
+                    remarks: user.remarks || "",
+                    permissions: { ...prev.permissions, ...userPermissions },
+                }));
+
+                setIsEditMode(true);
+            } else {
+                toast.error("Failed to load employee details");
+            }
+        } catch (error) {
+            console.error("Error fetching employee details:", error);
+            toast.error("Something went wrong while fetching employee details");
+        }
+    }
+
+    useEffect(() => {
+        if (editUserId) {
+            getUserDataForEdit();
+        }
+    }, [editUserId]);
+
+    // Fetch permission list
     useEffect(() => {
         const getPermissions = async () => {
             try {
                 const permissions = await fetchPermissionsAPI();
                 setPermissionList(permissions);
 
-                // Initialize permissions state
                 const initialPermissions = {};
                 permissions.forEach((perm) => {
-                    initialPermissions[perm.permission_name] = perm.selected || false;
+                    initialPermissions[perm.permission_name] =
+                        commonFormData.permissions[perm.permission_name] ??
+                        (perm.selected || false);
                 });
 
                 setCommonFormData((prev) => ({
@@ -47,7 +89,6 @@ const Addemployee = () => {
 
         getPermissions();
     }, []);
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -83,62 +124,76 @@ const Addemployee = () => {
     const handleCancelClick = () => {
         resetForm();
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const { name, password, remarks, permissions } = commonFormData;
 
-        // Validate required fields
-        if (!name || !password) {
+        if (!name || (!isEditMode && !password)) {
             toast.error("Please fill all required fields");
             return;
         }
 
-        // Convert permissions object to array of selected IDs
         const selectedPermissions = Object.keys(permissions).filter(
             (key) => permissions[key]
         );
 
-        // Validate that at least one permission is selected
         if (selectedPermissions.length === 0) {
             toast.error("Please select at least one permission");
             return;
         }
 
-        // Convert array to comma-separated string
         const permissionString = selectedPermissions.join(",");
 
-        // Get session data
         const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
 
-        const payload = {
-            is_app: 1,
-            login_user_id: dataStored?.user_id || "",
-            auth_key: dataStored?.auth_key || "",
-            name,
-            password,
-            remarks,
-            empPermission: permissionString, // send as comma-separated string
-        };
-
         try {
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/create_employee",
-                payload
-            );
+            let response;
+
+            if (isEditMode) {
+                response = await axios.post(
+                    "http://128.199.126.171/~goldorg/ajaxfiles/edit_user_emp",
+                    {
+                        is_app: 1,
+                        login_user_id: dataStored?.user_id || "",
+                        auth_key: dataStored?.auth_key || "",
+                        change_user_id: editUserId,
+                        name,
+                        remarks,
+                        empPermission: permissionString,
+                    }
+                );
+            } else {
+                response = await axios.post(
+                    "http://128.199.126.171/~goldorg/ajaxfiles/create_employee",
+                    {
+                        is_app: 1,
+                        login_user_id: dataStored?.user_id || "",
+                        auth_key: dataStored?.auth_key || "",
+                        name,
+                        password,
+                        remarks,
+                        empPermission: permissionString,
+                    }
+                );
+            }
 
             if (response.data.status === "success") {
-                toast.success("Employee added successfully!");
+                toast.success(
+                    isEditMode
+                        ? "Employee updated successfully!"
+                        : "Employee added successfully!"
+                );
                 resetForm();
             } else {
-                toast.error(response.data.message || "Failed to add employee");
+                toast.error(response.data.message || "Failed to save employee");
             }
         } catch (error) {
             console.error("API Error:", error);
-            toast.error("Something went wrong while adding employee");
+            toast.error("Something went wrong while saving employee");
         }
     };
-
 
     return (
         <>
@@ -151,7 +206,9 @@ const Addemployee = () => {
                 <Grid container spacing={2} sx={{ mb: 2 }}>
                     {/* Name */}
                     <Grid item xs={12} sm={6}>
-                        <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Name</Typography>
+                        <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
+                            Name
+                        </Typography>
                         <TextField
                             required
                             name="name"
@@ -165,22 +222,26 @@ const Addemployee = () => {
                         />
                     </Grid>
 
-                    {/* Password */}
-                    <Grid item xs={12} sm={6}>
-                        <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>Password</Typography>
-                        <TextField
-                            required
-                            type="password"
-                            name="password"
-                            value={commonFormData.password}
-                            onChange={handleChange}
-                            placeholder="Enter Password"
-                            fullWidth
-                            size="small"
-                            error={!!errors.password}
-                            helperText={errors.password}
-                        />
-                    </Grid>
+                    {/* Password (only for create mode) */}
+                    {!isEditMode && (
+                        <Grid item xs={12} sm={6}>
+                            <Typography sx={{ mb: 0.5, fontSize: "0.85rem" }}>
+                                Password
+                            </Typography>
+                            <TextField
+                                required
+                                type="password"
+                                name="password"
+                                value={commonFormData.password}
+                                onChange={handleChange}
+                                placeholder="Enter Password"
+                                fullWidth
+                                size="small"
+                                error={!!errors.password}
+                                helperText={errors.password}
+                            />
+                        </Grid>
+                    )}
                 </Grid>
 
                 {/* Permission Section */}
@@ -194,7 +255,9 @@ const Addemployee = () => {
                             control={
                                 <Checkbox
                                     name={perm.permission_name}
-                                    checked={commonFormData.permissions[perm.permission_name] || false}
+                                    checked={
+                                        commonFormData.permissions[perm.permission_name] || false
+                                    }
                                     onChange={handlePermissionChange}
                                 />
                             }
@@ -204,14 +267,19 @@ const Addemployee = () => {
                 </FormGroup>
 
                 {/* Remarks */}
-                <Typography sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}>
+                <Typography
+                    sx={{ mb: 0.5, fontSize: "0.85rem", fontWeight: 500 }}
+                >
                     Remarks
                 </Typography>
                 <TextField
                     name="remarks"
                     value={commonFormData.remarks}
                     onChange={(e) => {
-                        setCommonFormData((prev) => ({ ...prev, remarks: e.target.value }));
+                        setCommonFormData((prev) => ({
+                            ...prev,
+                            remarks: e.target.value,
+                        }));
                         handleChange(e);
                     }}
                     placeholder="Remarks"
@@ -253,12 +321,11 @@ const Addemployee = () => {
                             textTransform: "none",
                         }}
                     >
-                        Submit
+                        {isEditMode ? "Update" : "Submit"}
                     </Button>
                 </div>
             </form>
 
-            {/* Toast container */}
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </>
     );
