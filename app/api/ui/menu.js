@@ -477,16 +477,6 @@ export function getSibarContent() {
     });
   }
 
-
-
-
-
-
-
-
-
-
-
   if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
     menu.push({
       key: 'Setting',
@@ -495,7 +485,8 @@ export function getSibarContent() {
         // visible if userType !== 3
         ...(userType !== 3 ? [{
           key: 'ledger',
-          name: 'Script Setting',
+          name: 'Script Wise Lot Setting',
+          link: '/app/dashboard/Script-Wise-Lot-Setting',
           icon: 'time-outline'
         }] : []),
 

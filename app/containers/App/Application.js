@@ -84,6 +84,7 @@ import Addemployee from '../Dashboard/Addemployee';
 import Tradeditdeleteold from '../Dashboard/filters/Tradeditdeleteold';
 import Casheditdeletelog from '../Dashboard/Utility/Casheditdeletelog';
 import Valan from '../Dashboard/Utility/Valan';
+import Scriptwiselot from '../Dashboard/Scriptwiselot';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -224,9 +225,7 @@ function Application(props) {
           <Route path='dashboard/Order-Limit' element={<Orderlimit />} />
           <Route path='dashboard/Blocked-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
           <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
-
-
-          <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Script-Wise-Lot-setting' element={userType !== 3 ? <Scriptwiselot /> : <Navigate to="/app" />} />
 
         </Route>
 
