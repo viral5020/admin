@@ -1,35 +1,35 @@
 console.log("Menu.js running...");
 
-const userdata = {};
-const notifcationData = {};
+// const userdata = {};
+// const notifcationData = {};
 
-const isForex = false;
-const isStock = false;
-const userType = null;
+// const isForex = false;
+// const isStock = false;
+// const userType = null;
 
-const interval = setInterval(() => {
-  const newData = JSON.parse(sessionStorage.getItem("notification"));
-  if (newData) {
-    clearInterval(interval);
-    notifcationData = newData;
-    console.log('>> notifcationData', notifcationData);
-    isStock = notifcationData?.isStock;
-    isForex = notifcationData?.isForex;
-    console.log('>> isStock, isForex', isStock, isForex);
-  }
-}, 1000); // poll every second (or adjust as needed)
+// const interval = setInterval(() => {
+//   const newData = JSON.parse(sessionStorage.getItem("notification"));
+//   if (newData) {
+//     clearInterval(interval);
+//     notifcationData = newData;
+//     console.log('>> notifcationData', notifcationData);
+//     isStock = notifcationData?.isStock;
+//     isForex = notifcationData?.isForex;
+//     console.log('>> isStock, isForex', isStock, isForex);
+//   }
+// }, 1000); // poll every second (or adjust as needed)
 
 
-const userInterval = setInterval(() => {
-  const newData = JSON.parse(sessionStorage.getItem("data"));
-  if (newData) {
-    clearInterval(userInterval);
-    userdata = newData;
-    console.log('>> userdata', userdata);
-    userType = parseInt(userdata?.user_type, 10);
-    console.log('>> userType', userType);
-  }
-}, 1000); // poll every second (or adjust as needed)
+// const userInterval = setInterval(() => {
+//   const newData = JSON.parse(sessionStorage.getItem("data"));
+//   if (newData) {
+//     clearInterval(userInterval);
+//     userdata = newData;
+//     console.log('>> userdata', userdata);
+//     userType = parseInt(userdata?.user_type, 10);
+//     console.log('>> userType', userType);
+//   }
+// }, 1000); // poll every second (or adjust as needed)
 
 
 
