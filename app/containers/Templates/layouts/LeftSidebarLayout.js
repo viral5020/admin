@@ -35,16 +35,16 @@ function LeftSidebarLayout(props) {
   } = props;
   const location = useLocation();
 
-  const dd = getSibarContent();
-  const [dataMenu, setDataMenu] = useState(dd);
-  // const dataMenuRef = useRef();
-  const [rerender, setRerender] = useState(false);
-  const { user_id = null, auth_key = null } = location.state ?? {};
+  const dt = getSibarContent();
+  // console.log('dt', dt);// logs on every page changes
+  const [dataMenu, setDataMenu] = useState(dt);
 
-  // PUT DELAY, So fetchNotificationAPI runs and set sessionStorage, and that sessionStorage Data is Further used by getSibarContent() func  
+  const { user_id = null, auth_key = null } = location.state ?? {};
+  // console.log('location.pathname', location.pathname); // it doesnt log login path
+
   useEffect(() => {
     if (Boolean(user_id) && Boolean(auth_key)) {
-      // console.log("Inside useEffect of LeftSidebarLayout.js");
+      console.log("Inside useEffect of LeftSidebarLayout.js");
 
       const userInterval = setInterval(() => {
         const newData = JSON.parse(sessionStorage.getItem("data"));

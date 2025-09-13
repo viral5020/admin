@@ -29,6 +29,37 @@ import { roundToTwoIN } from '../helpers/utilFunc';
 import { toastTime } from './constant';
 import { favouriteActionAPI, removeMarketWatchAPI } from '../API/API';
 
+const colors = {
+  positive: {
+    light: "#1976d2", // blue
+    dark: "#90caf9",  // light blue
+  },
+  negative: {
+    light: "#d32f2f", // red
+    dark: "#ef9a9a",  // light red
+  },
+  neutral: {
+    light: "#757575", // gray
+    dark: "#bdbdbd",  // light gray
+  },
+};
+
+const backgrounds = {
+  positive: {
+    light: "rgba(25, 118, 210, 0.1)",
+    dark: "rgba(144, 202, 249, 0.15)",
+  },
+  negative: {
+    light: "rgba(211, 47, 47, 0.1)",
+    dark: "rgba(239, 154, 154, 0.15)",
+  },
+  neutral: {
+    light: "rgba(117, 117, 117, 0.1)",
+    dark: "rgba(189, 189, 189, 0.15)",
+  },
+};
+
+
 const generateCandleData = (name) => {
   const base = 1000 + Math.random() * 100;
   const data = Array.from({ length: 10 }, (_, i) => {
@@ -233,15 +264,27 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
     }
   };
 
-  const getCondition = (val, showIcon, showPR, changeVal) => {
+  const getCondition = (dataArray, columnId, showIcon, showPR) => {
+    const val = dataArray[columnId];
     const roundedVal = roundToTwoIN(val);
+    const changeVal = dataArray?.priceChange;
+    let state;
+
+    if (columnId === 'askRate') {
+      state = dataArray?.isAskUp ? "positive" : "negative";
+    } else if (columnId === 'bidRate') {
+      state = dataArray?.isBidUp ? "positive" : "negative";
+    } else {
+      state = changeVal > 0 ? "positive" : changeVal < 0 ? "negative" : "neutral";
+    }
+
     return (
       <Box
         component="span"
         sx={{
-          color: changeVal > 0 ? theme.palette.success.main : changeVal < 0 ? theme.palette.error.main : theme.palette.text.secondary,
-          backgroundColor: changeVal > 0 ? 'rgba(76, 175, 80, 0.08)' : changeVal < 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(158, 158, 158, 0.08)',
-          borderRadius: 0.5,
+          color: colors[state][isDarkMode ? "dark" : "light"],
+          backgroundColor: backgrounds[state][isDarkMode ? "dark" : "light"],
+
           borderRadius: 1,
           px: 0.6,
           py: 0.3,
@@ -249,8 +292,6 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
           alignItems: 'center',
           fontWeight: 600,
           mr: showIcon ? 1 : 0,
-          // fontSize: '0.75rem',
-          // lineHeight: 1.1,
         }}
       >
         {showIcon &&
@@ -263,8 +304,9 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
           ))}
         {showPR ? roundedVal + '%' : roundedVal}
       </Box>
-    )
+    );
   };
+
 
   const renderCell = (dataArray, columnData, idx) => columnData.map((column, index) => {
     const rowVal = dataArray?.priceChangePercent; // ✅ main field to decide color
@@ -352,13 +394,25 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
           backgroundColor: rowBgColor, // ✅ Apply to all other cells too
           fontWeight: column.id === 'ltp' ? 700 : null,
           cursor: (column.id === 'askRate' || column.id === 'bidRate') ? 'pointer' : '',
+
+          animation: (
+            (column.id === 'askRate' && dataArray?.isAskChanged) ||
+            (column.id === 'bidRate' && dataArray?.isBidChanged)
+          ) ? `blinkAnim$ 0.5s` : "none",
+
+          "@keyframes blinkAnim": {
+            "0%": { opacity: 1 },
+            "5%": { opacity: 0.7 },
+            "50%": { opacity: 1 },
+            "100%": { opacity: 1 },
+          },
         }}
         onClick={() => handleBidAskClick(dataArray, column.id)}
       >
         {column.id === 'priceChangePercent'
-          ? getCondition(dataArray[column.id], true, true, dataArray?.priceChange)
+          ? getCondition(dataArray, column.id, true, true)
           : (column.id === 'priceChange' || column.id === 'askRate' || column.id === 'bidRate')
-            ? getCondition(dataArray[column.id], false, false, dataArray?.priceChange)
+            ? getCondition(dataArray, column.id, false, false)
             : roundToTwoIN(dataArray[column.id])}
       </TableCell>
     );

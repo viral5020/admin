@@ -36,8 +36,8 @@ function LoginFormV3() {
 
   const formik = useFormik({
     initialValues: {
-      username: '',
-      password: 'ABCD1234',
+      username: '34569',
+      password: '66774422',
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {

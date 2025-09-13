@@ -326,7 +326,7 @@ const MobileStockTable = ({
                                         {isSmallMobile ? 'Q : ' : 'Qty : '} {stock?.quantity}
                                     </Typography>
                                     <Box>
-                                        <Typography sx={{ fontSize: '0.84rem', display: 'inline', mr: 2 }}>{stock?.serverTime}</Typography>
+                                        <Typography sx={{ fontSize: '0.84rem', display: 'inline', mr: 1 }}><i>{stock?.serverTime}</i></Typography>
                                         <Typography sx={{ fontSize: '0.84rem', display: 'inline' }}
                                             onClick={() => setIsStockOpen(stock)}
                                         ><CandlestickChartIcon /></Typography>

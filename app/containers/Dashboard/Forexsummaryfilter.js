@@ -56,6 +56,7 @@ const Forexsummaryfilter = ({
           script={script}
           setScript={setScript}
           setMarket={setMarket}
+          isForex={true}
         />
 
         {/* Client, Master, Broker Filters */}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -32,17 +32,28 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 function LoginFormV2() {
   const deco = useSelector((state) => state.ui.decoration);
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
-    initialValues: {
-      username: '',
-      password: 'Abcd1234',
-    },
+    initialValues: location.pathname !== '/login-v3'
+      ? {
+        username: '',
+        password: 'Abcd1234',
+      }
+      : {
+        username: '34569',
+        password: '66774422',
+      },
+
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
+
+      // chek if admin login or not
+      const api_url = location.pathname === '/login-v3' ? 'main-ad98min-login/ad_min/login1/login_process' : 'ajaxfiles/logincheck';
+
       try {
-        const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/logincheck', {
+        const response = await fetch(`http://128.199.126.171/~goldorg/${api_url}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

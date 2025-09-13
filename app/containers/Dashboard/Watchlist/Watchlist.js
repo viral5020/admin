@@ -643,80 +643,87 @@ function Watchlist() {
       {isLoading ?
         <Loader />
         : <Box>
-          {marketNames.map((marketName, index) => (
-            <Box key={marketName} mb={1} mt={setisFavoritePage ? 1 : 0}>
-              <Accordion
-                expanded={expanded.has(marketName)}
-                onChange={() => toggleExpand(marketName)}
-                sx={{
-                  // border: '2px solid red',
-                  // '& .MuiAccordionSummary-root': {
-                  //   px: 1,
-                  // },
-                  '& .MuiAccordionDetails-root': {
-                    px: 0,
-                  }
-                }}
-                disableGutters
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
+          {marketNames.length === 0 ?
+            <Typography variant="body1" align="center" sx={{ mt: 4 }}>
+              No stocks in {isForex ? 'Forex ' : ''}Watchlist {isFavoritePage ? 'Favorite' : ''}. Please add some.
+            </Typography>
+
+            :
+
+            marketNames.map((marketName, index) => (
+              <Box key={marketName} mb={1} mt={setisFavoritePage ? 1 : 0}>
+                <Accordion
+                  expanded={expanded.has(marketName)}
+                  onChange={() => toggleExpand(marketName)}
                   sx={{
-                    minHeight: 0, // remove default tall height
-                    padding: '0 4px', // tighter horizontal padding
-                    '&.Mui-expanded': {
-                      minHeight: 0, // keep compact when expanded
-                    },
-                    '& .MuiAccordionSummary-content': {
-                      margin: 0, // remove extra margin
-                      ml: 1,
-                    },
+                    // border: '2px solid red',
+                    // '& .MuiAccordionSummary-root': {
+                    //   px: 1,
+                    // },
+                    '& .MuiAccordionDetails-root': {
+                      px: 0,
+                    }
                   }}
+                  disableGutters
                 >
-                  <Box display="flex" alignItems="center" gap={0.5}>
-                    {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {marketName}
-                    </Typography>
-                  </Box>
-                </AccordionSummary>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    sx={{
+                      minHeight: 0, // remove default tall height
+                      padding: '0 4px', // tighter horizontal padding
+                      '&.Mui-expanded': {
+                        minHeight: 0, // keep compact when expanded
+                      },
+                      '& .MuiAccordionSummary-content': {
+                        margin: 0, // remove extra margin
+                        ml: 1,
+                      },
+                    }}
+                  >
+                    <Box display="flex" alignItems="center" gap={0.5}>
+                      {/* <ArrowRightAltIcon fontSize="small" color="action" /> */}
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {marketName}
+                      </Typography>
+                    </Box>
+                  </AccordionSummary>
 
-                <AccordionDetails>
-                  {isMobile ?
-                    <MobileStockTable
-                      searchText={searchText}
-                      setIsStockOpen={setIsStockOpen}
-                      // isStockOpen={isStockOpenInMobile}
-                      dummyData={dummyData}
-                      setDummyData={setDummyData}
-                      marketName={marketName}
-                      isDarkMode={isDarkMode}
-                      handleBidAskClick={handleBidAskClick}
-                      // setBuySellPopup={setBuySellPopup}
-                      // buySellPopup={buySellPopup}
-                      showToast={showToast}
-                      handleStar={handleStar}
-                      setRemoveMarket={setRemoveMarket}
-                    />
+                  <AccordionDetails>
+                    {isMobile ?
+                      <MobileStockTable
+                        searchText={searchText}
+                        setIsStockOpen={setIsStockOpen}
+                        // isStockOpen={isStockOpenInMobile}
+                        dummyData={dummyData}
+                        setDummyData={setDummyData}
+                        marketName={marketName}
+                        isDarkMode={isDarkMode}
+                        handleBidAskClick={handleBidAskClick}
+                        // setBuySellPopup={setBuySellPopup}
+                        // buySellPopup={buySellPopup}
+                        showToast={showToast}
+                        handleStar={handleStar}
+                        setRemoveMarket={setRemoveMarket}
+                      />
 
-                    :
-                    <StockTable
-                      searchText={searchText}
-                      setIsStockOpen={setIsStockOpen}
-                      setDummyData={setDummyData}
-                      dummyData={dummyData}
-                      marketName={marketName}
-                      handleBidAskClick={handleBidAskClick}
-                      // setBuySellPopup={setBuySellPopup}
-                      // buySellPopup={buySellPopup}
-                      showToast={showToast}
-                      handleStar={handleStar}
-                      setRemoveMarket={setRemoveMarket}
-                    />}
-                </AccordionDetails>
-              </Accordion>
-            </Box>
-          ))}
+                      :
+                      <StockTable
+                        searchText={searchText}
+                        setIsStockOpen={setIsStockOpen}
+                        setDummyData={setDummyData}
+                        dummyData={dummyData}
+                        marketName={marketName}
+                        handleBidAskClick={handleBidAskClick}
+                        // setBuySellPopup={setBuySellPopup}
+                        // buySellPopup={buySellPopup}
+                        showToast={showToast}
+                        handleStar={handleStar}
+                        setRemoveMarket={setRemoveMarket}
+                      />}
+                  </AccordionDetails>
+                </Accordion>
+              </Box>
+            ))}
         </Box >}
 
       <BackToTop />
