@@ -115,14 +115,11 @@ function Application(props) {
 
   const [userType, setUserType] = useState();
 
+
   useEffect(() => {
     const interval = setInterval(() => {
       const newData = JSON.parse(sessionStorage.getItem("notification"));
-      // if (JSON.stringify(newData) !== JSON.stringify(notificationData)) {
-      // console.log('notification', newData);
-      // console.log('^^^ noti', Boolean(newData));
       if (newData) {
-        // console.log('^^^ noti', newData);
         clearInterval(interval);
         setIsStock(newData?.isStock);
         setIsForex(newData?.isForex);
@@ -132,17 +129,15 @@ function Application(props) {
 
     const userInterval = setInterval(() => {
       const newData = JSON.parse(sessionStorage.getItem("data"));
-      // console.log('data', newData);
-
-      // if (JSON.stringify(newData) !== JSON.stringify(notificationData)) {
-      // console.log('Boolean data', Boolean(newData))
       if (newData) {
-        // console.log('^^^ data', newData);
         clearInterval(userInterval);
         const ddd = parseInt(newData?.user_type, 10);
         setUserType(ddd);
       }
     }, 1000); // poll every second (or adjust as needed)
+
+    return () => clearInterval(interval) && clearInterval(userInterval);
+
   }, []);
 
   // useEffect(() => {

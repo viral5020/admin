@@ -44,14 +44,7 @@ function LeftSidebarLayout(props) {
   // PUT DELAY, So fetchNotificationAPI runs and set sessionStorage, and that sessionStorage Data is Further used by getSibarContent() func  
   useEffect(() => {
     if (Boolean(user_id) && Boolean(auth_key)) {
-      console.log("Inside useEffect of LeftSidebarLayout.js");
-      // setTimeout(() => {
-      //   const dd = getSibarContent();
-      //   // dataMenuRef.current = dd;
-      //   setDataMenu(dd);
-      //   console.log('dd', dd);
-      //   // setRerender(!rerender);
-      // }, [3000])
+      // console.log("Inside useEffect of LeftSidebarLayout.js");
 
       const userInterval = setInterval(() => {
         const newData = JSON.parse(sessionStorage.getItem("data"));

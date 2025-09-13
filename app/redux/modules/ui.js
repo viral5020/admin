@@ -63,18 +63,18 @@ const getMenus = menuArray => menuArray.map(item => {
 // };
 
 const setNavCollapse = (arr, curRoute) => {
-  console.log('arr', arr)
-  console.log('curRoute', curRoute);
+  // console.log('arr', arr)
+  // console.log('curRoute', curRoute);
   const menuData = getSibarContent();
-  console.log('menuData', menuData);
+  // console.log('menuData', menuData);
 
   let headMenu = 'not found';
 
   for (let i = 0; i < arr.length; i += 1) {
     for (let j = 0; j < arr[i].length; j += 1) {
-      console.log('arr[i][j].link', arr[i][j].link);
+      // console.log('arr[i][j].link', arr[i][j].link);
       if (arr[i][j].link === curRoute) {
-        console.log('menuData[i].key', menuData[i].key);
+        // console.log('menuData[i].key', menuData[i].key);
         headMenu = menuData[i].key;
       }
     }
@@ -102,7 +102,7 @@ const uiSlice = createSlice({
 
     openAction: (state, action) => {
       const { initialLocation, key } = action.payload;
-      console.log('initialLocation, key', initialLocation, key);
+      // console.log('initialLocation, key', initialLocation, key);
       // Set initial open parent menu
       const dataMenu = getSibarContent();
       const activeParent = setNavCollapse(

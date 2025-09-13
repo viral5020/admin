@@ -27,7 +27,7 @@ function MainMenu(props) {
   const { classes, cx } = useStyles();
   const dispatch = useDispatch();
   const open = useSelector((state) => state.ui.subMenuOpen);
-  console.log('!!!!! open', open);  // chatgpt : its value automatically setted to ['not found'] ,this should not happen, this work well in 1st code but give unexpectness like this in 2nd code
+  // console.log('!!!!! open', open);  // chatgpt : its value automatically setted to ['not found'] ,this should not happen, this work well in 1st code but give unexpectness like this in 2nd code
   const location = useLocation();
 
   const handleTransition = () => {
