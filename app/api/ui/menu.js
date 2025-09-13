@@ -528,12 +528,14 @@ export function getSibarContent() {
         ...(userType !== 3 ? [{
           key: 'Add Script',
           name: 'Add Script',
+          link: '/app/dashboard/Add-Script',
           icon: 'receipt-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'Add Expiry',
           name: 'Add Expiry',
+          link: '/app/dashboard/Add-Expiry',
           icon: 'cube-outline'
         }] : []),
 
@@ -541,12 +543,14 @@ export function getSibarContent() {
         ...(userType !== 3 ? [{
           key: 'Edit Expiry',
           name: 'Edit Expiry',
+          link: '/app/dashboard/Edit-Expiry',
           icon: 'add-circle-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'Edit Script',
           name: 'Edit Script',
+          link: '/app/dashboard/Edit-Script',
           icon: 'time-outline'
         }] : []),
 

@@ -85,6 +85,10 @@ import Tradeditdeleteold from '../Dashboard/filters/Tradeditdeleteold';
 import Casheditdeletelog from '../Dashboard/Utility/Casheditdeletelog';
 import Valan from '../Dashboard/Utility/Valan';
 import Scriptwiselot from '../Dashboard/Scriptwiselot';
+import Addscript from '../Dashboard/Addscript';
+import Addepiry from '../Dashboard/Addepiry';
+import Editexpiry from '../Dashboard/Editexpiry';
+import Editscript from '../Dashboard/Editscript';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -221,6 +225,10 @@ function Application(props) {
           <Route path='dashboard/Blocked-Allowed-Script' element={(isForex || isStock) ? <Blockedallowedscript /> : <Navigate to="/app" />} />
           <Route path='dashboard/Master-QTY-Setting' element={userType === 3 ? <Masterqtysetting /> : <Navigate to="/app" />} />
           <Route path='dashboard/Script-Wise-Lot-setting' element={userType !== 3 ? <Scriptwiselot /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Add-Script' element={userType !== 3 ? <Addscript /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Add-Expiry' element={userType !== 3 ? <Addepiry /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Edit-Expiry' element={userType !== 3 ? <Editexpiry /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Edit-Script' element={userType !== 3 ? <Editscript /> : <Navigate to="/app" />} />
 
         </Route>
 
