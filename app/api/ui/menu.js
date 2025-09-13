@@ -1,5 +1,3 @@
-
-
 console.log("Menu.js running...");
 
 const userdata = {};
