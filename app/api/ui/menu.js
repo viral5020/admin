@@ -579,7 +579,7 @@ export function getSibarContent() {
         // visible if forex/stock enabled
         ...((isForex || isStock) ? [{
           key: 'block/allowed',
-          name: 'block/allowed  Script',
+          name: 'Block/allowed  Script',
           link: '/app/dashboard/Blocked-Allowed-Script',
           icon: 'time-outline'
         }] : []),
@@ -587,44 +587,50 @@ export function getSibarContent() {
         // only userType === 4
         ...(userType === 4 && (isForex || isStock) ? [{
           key: 'stop future trading',
-          name: 'stop future trading',
+          name: 'Stop future trading',
           link: '/app/dashboard/Stop-future-trading',
           icon: 'time-outline'
         }] : []),
 
         ...(userType !== 3 && (isForex || isStock) ? [{
           key: 'split script',
-          name: 'split script',
+          name: 'Split script',
+          link: '/app/dashboard/Split-script',
           icon: 'time-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'NSEOPT management',
           name: 'NSEOPT management',
+          link: '/app/dashboard/NSEOPT-management',
           icon: 'time-outline'
         }] : []),
 
         ...(userType === 4 ? [{
           key: 'MARQUEE',
           name: 'MARQUEE',
+          link: '/app/dashboard/MARQUEE',
           icon: 'time-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'expiry validation',
           name: 'expiry validation',
+          link: '/app/dashboard/Expiry-Validation',
           icon: 'time-outline'
         }] : []),
 
         ...(userType === 4 || userType === 5 ? [{
           key: 'notifcation',
-          name: 'notifcation',
+          name: 'Notifcation',
+          link: '/app/dashboard/Notifcation',
           icon: 'time-outline'
         }] : []),
 
         ...(userType === 4 || userType === 5 ? [{
           key: 'level import',
           name: 'level import',
+          link: '/app/dashboard/level-import',
           icon: 'time-outline'
         }] : []),
 
@@ -637,7 +643,8 @@ export function getSibarContent() {
 
         ...(userType !== 3 ? [{
           key: 'time setting',
-          name: 'time setting',
+          name: 'Time Setting',
+          link: '/app/dashboard/Time-Setting',
           icon: 'time-outline'
         }] : []),
 
