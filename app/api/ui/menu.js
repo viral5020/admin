@@ -564,6 +564,7 @@ export function getSibarContent() {
         ...(userType !== 3 ? [{
           key: 'CNBD Awaaz',
           name: 'CNBD Awaaz',
+          link: '/app/dashboard/CNBD-Awaaz',
           icon: 'time-outline'
         }] : []),
 
@@ -587,6 +588,7 @@ export function getSibarContent() {
         ...(userType === 4 && (isForex || isStock) ? [{
           key: 'stop future trading',
           name: 'stop future trading',
+          link: '/app/dashboard/Stop-future-trading',
           icon: 'time-outline'
         }] : []),
 
