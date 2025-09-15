@@ -14,6 +14,8 @@ import {
   InputLabel,
   IconButton,
   Autocomplete,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import axios from "axios";
 import { RadioGroup } from "@mui/material";
@@ -167,7 +169,7 @@ export default function AddAccountForm() {
   const location = useLocation();
   const { userId: editUserId } = location.state || {};
   const [isEditMode, setIsEditMode] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(0); // 0 -> NOT LOADING, 
 
   const [userType, setUserType] = useState("")
   const [commonFormData, setCommonFormData] = useState({ password: '', name: '', userType: '', remarks: '' });
@@ -276,11 +278,7 @@ export default function AddAccountForm() {
   }, [userFormData?.marketOptions?.[MCXFUT_id]?.intraBrokerage])
 
 
-
-  // START FROM HERE MONDAY...
-  // BELOW FUNC IS COPY OF ABOVE USER FUNC, BELOW CREATE FOR MASTER
-  // GENERATE MASTER PAYLOAD
-  // SET MASTER_DEATILS FROM VIEW_USER_DETAILS API TO masterFormData
+  // same as above but FOR MASTER
   function setMcxScriptsDefaultFieldForMaster(key) {
     let scriptList = masterFormData?.mcxScripts;
     // console.log('userFormData.marketOptions?.[MCXFUT_id]?.commissionType', userFormData.marketOptions?.[MCXFUT_id]?.commissionType);
@@ -355,6 +353,8 @@ export default function AddAccountForm() {
   };
 
   async function getMarketTypesAndMcxScript() {
+    console.log('getMarketTypesAndMcxScript isLoading', isLoading);
+    setIsLoading(c => c + 1);
     console.log("getMarketTypesAndMcxScript.........")
     const data = await getMarketScriptForAddAccountAPI();
     if (data) {
@@ -363,6 +363,7 @@ export default function AddAccountForm() {
       setMcxscript(data.mcx_script || []);
       setBrokerList(data.broker_list || []);
     }
+    setIsLoading(c => c - 1);
   }
 
   useEffect(() => {
@@ -381,6 +382,8 @@ export default function AddAccountForm() {
   }, [isEditMode])
 
   async function getUserDataForEdit() {
+    console.log('getUserDataForEdit isLoading', isLoading);
+    setIsLoading(c => c + 1);
     const data = await getUserDetailsAPI(editUserId);
     const user_type = data?.fetch_get_user_data?.user_type;
     setUserType(user_type);
@@ -388,6 +391,7 @@ export default function AddAccountForm() {
     user_type == '1' && setEdit_User_DataFunc(data.data);
     user_type == '2' && setEdit_Broker_DataFunc(data.data);
     user_type == '3' && setEdit_Master_DataFunc(data.data);
+    setIsLoading(c => c - 1);
   }
 
   function setEdit_User_DataFunc(data) {
@@ -588,10 +592,6 @@ export default function AddAccountForm() {
 
     setMasterFormData(masterData);
   }
-
-  useEffect(() => {
-    console.log('brokerFormData', brokerFormData)
-  }, [brokerFormData])
 
   function setEdit_Broker_DataFunc(data) {
     const { user_name, remarks, user_id, user_id_key } = data;
@@ -923,6 +923,7 @@ export default function AddAccountForm() {
 
   // Form submit
   const handleSubmit = async (e) => {
+    setIsLoading(c => c + 1);
     e.preventDefault();
     console.log('@@@ masterFormData', masterFormData);
     console.log('@@@ userFormData', userFormData);
@@ -966,6 +967,7 @@ export default function AddAccountForm() {
         transition: Bounce,
       });
     }
+    setIsLoading(c => c - 1);
   };
 
 
@@ -981,7 +983,9 @@ export default function AddAccountForm() {
   function handleCancelClick() {
 
   }
-
+  useEffect(() => {
+    console.log('isLoading', isLoading);
+  }, [isLoading])
   return (
     <form
       onSubmit={handleSubmit}
@@ -991,6 +995,25 @@ export default function AddAccountForm() {
         fontSize: "0.9rem",
       }}
     >
+      {isLoading ? (  // if not 0 then execute
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.4)", // semi-transparent gray overlay
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1300, // keep above everything
+          }}
+        >
+          <CircularProgress size={40} />
+        </Box>
+      ) : null}
+
       <ToastContainer
         position="top-right"
         autoClose={100000}

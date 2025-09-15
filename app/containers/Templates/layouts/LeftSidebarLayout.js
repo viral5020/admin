@@ -48,8 +48,9 @@ function LeftSidebarLayout(props) {
 
       const userInterval = setInterval(() => {
         const newData = JSON.parse(sessionStorage.getItem("data"));
+        const newNotificationData = JSON.parse(sessionStorage.getItem("notification"));
 
-        if (newData) {
+        if (newData && newNotificationData) {
           clearInterval(userInterval);
           const dd = getSibarContent();
           console.log('dd', dd);

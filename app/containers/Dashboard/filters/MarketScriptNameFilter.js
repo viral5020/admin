@@ -9,7 +9,14 @@ import axiosInstance from '../API/axiosconfig';
 import { fetchOptionsAPI } from '../API/API';
 
 
-const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScriptMultiSelect = false, isForex, showMarket = true, showScript = true }) => {
+const MarketScriptNameFilter = ({
+  script,
+  setScript,
+  setMarket,
+  market,
+  isScriptMultiSelect = false,
+  isForex,
+}) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
@@ -98,7 +105,7 @@ const MarketScriptNameFilter = ({ script, setScript, setMarket, market, isScript
   return (
     <>
       {/* (5) Market Name */}
-      {showMarket && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      {setMarket && <Grid item xs={12} sm={6} md={3} lg={2.4}>
         <Autocomplete
           options={marketOptions}
           getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}

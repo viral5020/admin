@@ -46,7 +46,7 @@ const OrderPage = () => {
         login_user_id: dataStored.user_id,
         auth_key: dataStored.auth_key,
         market: selectedMarket?.name || "",
-        scripts: selectedScripts.map((s) => s.name).join(","),
+        script_id: formatScriptIds(script),
         search_text: searchText.trim(),
       };
 
@@ -185,6 +185,7 @@ const OrderPage = () => {
             script={script}
             setScript={setScript}
             setMarket={setMarket}
+            isScriptMultiSelect={true}
           />
 
           <Button

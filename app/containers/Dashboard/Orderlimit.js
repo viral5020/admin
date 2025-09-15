@@ -26,15 +26,25 @@ import { fetchOrderlimitAPI, fetchRejectionLogsAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
-import { DeleteIcon } from 'dan-vendor/react-trello/dist/styles/Elements';
 import { FormControlLabel } from '@mui/material';
 import { Radio } from '@mui/material';
+import {
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
+    Type as ListType,
+    LeadingActions
+} from 'react-swipeable-list';
+import 'react-swipeable-list/dist/styles.css';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 const Orderlimit = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isFirstRender = useIsFirstRender();
+    const isDarkMode = theme.palette.mode === 'dark';
 
     const [filterType, setFilterType] = useState('today');
     const [searchText, setSearchText] = useState('');
@@ -246,6 +256,38 @@ const Orderlimit = () => {
         isFilterChange && !isFirstRender && fetchPageData();
     }, [isFilterChange])
 
+    function handleRemove() {
+        console.log(" handleRemove...........")
+    }
+
+    const renderActions = (log, idx) => ({
+        trailing: (
+            <TrailingActions>
+                <SwipeAction
+                    // destructive={false}
+                    onClick={() => handleOpenConfirm(log)}
+                    swipeActionThreshold={0.5} // 50% swipe threshold
+                >
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            // backgroundColor: isDarkMode ? '#696969' : '#797979',
+                            height: '100%',
+                            borderRadius: 0,
+                            minWidth: '80px',
+                            color: '#fff',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        {/* Remove */}
+                        <DeleteIcon sx={{ fontSize: '2rem' }} />
+                    </Button>
+                </SwipeAction>
+            </TrailingActions>
+        )
+    });
+
     return (
         <Box
             sx={{
@@ -255,8 +297,8 @@ const Orderlimit = () => {
                 px: isMobile ? 0 : 2,
                 py: isMobile ? 0 : 2,
                 overflow: 'hidden',
-                maxHeight: isMobile ? '100vh' : '90vh',
-                overflowY: 'auto',
+                maxHeight: isMobile ? 'auto' : '90vh',
+                // overflowY: 'auto',
                 backgroundColor: theme.palette.background.default,
             }}
         >
@@ -338,79 +380,98 @@ const Orderlimit = () => {
                         {logs.length === 0 ? (
                             <Typography sx={{ fontSize: '14px', px: 1 }}>No records found.</Typography>
                         ) : (
-                            logs.map((log, index) => {
-                                const isBuy = log.trade_type === 'Buy';
-                                const isSell = log.trade_type === 'Sell';
+                            <SwipeableList type={ListType.IOS} threshold={0.7}>
+                                {logs.map((log, index) => {
+                                    const isBuy = log.trade_type === 'Buy';
+                                    const isSell = log.trade_type === 'Sell';
 
-                                const borderGradient = isBuy
-                                    ? 'linear-gradient(to right, #2196f3, #21cbf3)'
-                                    : isSell
-                                        ? 'linear-gradient(to right, #f44336, #ff7961)'
-                                        : '#ccc';
+                                    const borderGradient = isBuy
+                                        ? 'linear-gradient(to right, #2196f3, #21cbf3)'
+                                        : isSell
+                                            ? 'linear-gradient(to right, #f44336, #ff7961)'
+                                            : '#ccc';
 
-                                const boxShadowColor = isBuy
-                                    ? 'rgba(33, 150, 243, 0.3)'
-                                    : isSell
-                                        ? 'rgba(244, 67, 54, 0.3)'
-                                        : 'rgba(0,0,0,0.1)';
+                                    const boxShadowColor = isBuy
+                                        ? 'rgba(33, 150, 243, 0.3)'
+                                        : isSell
+                                            ? 'rgba(244, 67, 54, 0.3)'
+                                            : 'rgba(0,0,0,0.1)';
 
-                                return (
-                                    <Card
-                                        key={index}
-                                        sx={{
-                                            mb: 1,
-                                            mx: 1,
-                                            borderRadius: 2, // rounded corners
-                                            border: '1px solid', // solid border
-                                            borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc', // adjust color based on theme
-                                            backgroundColor: theme.palette.background.paper, // flat background
-                                            boxShadow: `0 2px 6px ${boxShadowColor}`, // subtle shadow
-                                        }}
-                                    >
-                                        <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                                    const { trailing } = renderActions(log, index);
+                                    // console.log('222222 log', log);sadasdas
 
-                                            {/* First row → Market + Script */}
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                                <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-                                                    {log.market_type_name}
-                                                </Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.secondary }}>
-                                                    {log.script_name}
-                                                </Typography>
-                                            </Box>
+                                    return (
+                                        <SwipeableListItem
+                                            key={log?.client_order_limit_id + index}
+                                            trailingActions={trailing}
+                                            fullSwipe   // enables swipe-to-trigger
+                                        // threshold={0.7}    // 👈 set your custom trigger % (70%)
+                                        // threshold={0.2}
+                                        // onSwipeEnd={(progress) => {
+                                        //     if (progress > 0.7) {    // progress is between 0 and 1
+                                        //         handleOpenConfirm(log);
+                                        //     }
+                                        // }}
+                                        >
+                                            <Card
+                                                // key={index}
+                                                // fullWidth
+                                                sx={{
+                                                    mb: 1,
+                                                    mx: 1,
+                                                    width: '100%',
+                                                    borderRadius: 2, // rounded corners
+                                                    border: '1px solid', // solid border
+                                                    borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc', // adjust color based on theme
+                                                    backgroundColor: theme.palette.background.paper, // flat background
+                                                    boxShadow: `0 2px 6px ${boxShadowColor}`, // subtle shadow
+                                                }}
+                                            >
+                                                <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
 
-                                            {/* Second row → Value + Price % */}
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    ₹ {log.value}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        color: log.trade_type === "Buy" ? "green" : log.trade_type === "Sell" ? "red" : theme.palette.text.primary,
-                                                    }}
-                                                >
-                                                    {log.price_percent}
-                                                </Typography>
-                                            </Box>
+                                                    {/* First row → Market + Script */}
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                                        <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
+                                                            {log.market_type_name}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.secondary }}>
+                                                            {log.script_name}
+                                                        </Typography>
+                                                    </Box>
 
-                                            {/* Third row → Trade type + Time */}
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                                {userType !== 1 && (
-                                                    <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                                                        {log.client_name}
-                                                    </Typography>
-                                                )}
-                                                <Typography variant="caption" sx={{ fontStyle: 'italic', color: theme.palette.text.secondary }}>
-                                                    {log.time}
-                                                </Typography>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
+                                                    {/* Second row → Value + Price % */}
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                            ₹ {log.value}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{
+                                                                fontWeight: 700,
+                                                                color: log.trade_type === "Buy" ? "green" : log.trade_type === "Sell" ? "red" : theme.palette.text.primary,
+                                                            }}
+                                                        >
+                                                            {log.price_percent}
+                                                        </Typography>
+                                                    </Box>
 
-                                );
-                            })
+                                                    {/* Third row → Trade type + Time */}
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                                        {userType !== 1 && (
+                                                            <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                                                                {log.client_name}
+                                                            </Typography>
+                                                        )}
+                                                        <Typography variant="caption" sx={{ fontStyle: 'italic', color: theme.palette.text.secondary }}>
+                                                            {log.time}
+                                                        </Typography>
+                                                    </Box>
+                                                </CardContent>
+                                            </Card>
+                                        </SwipeableListItem>
+                                    );
+                                })}
+                            </SwipeableList>
                         )}
 
                         <Dialog
