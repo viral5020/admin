@@ -91,6 +91,13 @@ import Editexpiry from '../Dashboard/Editexpiry';
 import Editscript from '../Dashboard/Editscript';
 import Cnbdawaz from '../Dashboard/Cnbdawaz';
 import Stopfuturetrading from '../Dashboard/Stopfuturetrading';
+import Splitscript from '../Dashboard/Splitscript';
+import Nseoptmanagement from '../Dashboard/Nseoptmanagement';
+import Marquee from '../Dashboard/Marquee';
+import Expiryvalidation from '../Dashboard/Expiryvalidation';
+import Notificationn from '../Dashboard/Notification';
+import Timesetting from '../Dashboard/Timesetting';
+import Levelimport from '../Dashboard/Levelimport';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -233,6 +240,13 @@ function Application(props) {
           <Route path='dashboard/Edit-Script' element={userType !== 3 ? <Editscript /> : <Navigate to="/app" />} />
           <Route path='dashboard/CNBD-Awaaz' element={userType !== 3 ? <Cnbdawaz /> : <Navigate to="/app" />} />
           <Route path='dashboard/Stop-future-trading' element={userType === 4 && (isForex || isStock) ? <Stopfuturetrading /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Split-script' element={userType !== 3 && (isForex || isStock) ? <Splitscript /> : <Navigate to="/app" />} />
+          <Route path='dashboard/NSEOPT-management' element={userType !== 3 ? <Nseoptmanagement /> : <Navigate to="/app" />} />
+          <Route path='dashboard/MARQUEE' element={userType === 4 ? <Marquee /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Expiry-Validation' element={userType !== 3 ? <Expiryvalidation /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Notifcation' element={userType === 4 || userType === 5 ? <Notificationn /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Time-Setting' element={userType !== 3 ? <Timesetting /> : <Navigate to="/app" />} />
+          <Route path='dashboard/level-import' element={userType !== 3 ? <Levelimport /> : <Navigate to="/app" />} />
 
         </Route>
 
