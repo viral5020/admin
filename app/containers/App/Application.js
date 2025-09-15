@@ -89,6 +89,8 @@ import Addscript from '../Dashboard/Addscript';
 import Addepiry from '../Dashboard/Addepiry';
 import Editexpiry from '../Dashboard/Editexpiry';
 import Editscript from '../Dashboard/Editscript';
+import Cnbdawaz from '../Dashboard/Cnbdawaz';
+import Stopfuturetrading from '../Dashboard/Stopfuturetrading';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -229,6 +231,8 @@ function Application(props) {
           <Route path='dashboard/Add-Expiry' element={userType !== 3 ? <Addepiry /> : <Navigate to="/app" />} />
           <Route path='dashboard/Edit-Expiry' element={userType !== 3 ? <Editexpiry /> : <Navigate to="/app" />} />
           <Route path='dashboard/Edit-Script' element={userType !== 3 ? <Editscript /> : <Navigate to="/app" />} />
+          <Route path='dashboard/CNBD-Awaaz' element={userType !== 3 ? <Cnbdawaz /> : <Navigate to="/app" />} />
+          <Route path='dashboard/Stop-future-trading' element={userType === 4 && (isForex || isStock) ? <Stopfuturetrading /> : <Navigate to="/app" />} />
 
         </Route>
 

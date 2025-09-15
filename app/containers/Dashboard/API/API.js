@@ -2470,3 +2470,36 @@ export const ScriptwiselotAPI = async (
     throw error;
   }
 };
+
+export const StopfuturelistAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/list_future_block", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
