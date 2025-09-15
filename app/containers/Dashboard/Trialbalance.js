@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@mui/material";
+import { Button, useMediaQuery, useTheme } from "@mui/material";
 import { useLocation } from "react-router-dom";
 
 const Trialbalance = () => {
     const queryParams = new URLSearchParams(useLocation().search);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     if (!dataStored) {
         alert("Session expired");
@@ -73,7 +75,7 @@ const Trialbalance = () => {
 
     return (
         <div style={{ padding: 20 }}>
-            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, alignItems: isMobile ? "left" : "center" }}>
                 {/* All checkbox always visible */}
                 <label>
                     <input

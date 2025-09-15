@@ -297,7 +297,12 @@ const Cashentrytable = () => {
 
     useEffect(() => { fetchLogs(); }, []);
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [pageSize, totalRecords]);
-    useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+        setCurrentPage(0);
+    }, [debouncedSearchText]);
+
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 

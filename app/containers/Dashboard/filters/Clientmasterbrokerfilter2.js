@@ -4,16 +4,14 @@ import { useTheme } from '@emotion/react';
 import axiosInstance from '../API/axiosconfig';
 import { getInputBoxStyle } from './inputBoxStyle';
 
-const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
+const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSelectedUser }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
     const inputBoxStyle = getInputBoxStyle(isDarkMode);
 
-    const [userType, setUserType] = useState(null);
     const [options, setOptions] = useState([]);
-    const [selectedOption, setSelectedOption] = useState(null);
 
-    const userTypes = [
+    const userTypeOptions = [
         { label: 'Client', value: 'client' },
         { label: 'Master', value: 'master' },
         { label: 'Broker', value: 'broker' },
@@ -61,7 +59,7 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
     // fetch initial options when userType changes
     useEffect(() => {
         if (userType) fetchOptions(userType.value, ""); // empty string initially
-        setSelectedOption(null);
+        setSelectedUser(null);
     }, [userType]);
 
     return (
@@ -69,7 +67,7 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
             {/* User Type Dropdown */}
             <Grid item xs={12} sm={6} md={3}>
                 <Autocomplete
-                    options={userTypes}
+                    options={userTypeOptions}
                     getOptionLabel={(option) => option.label}
                     value={userType}
                     onChange={(e, val) => setUserType(val)}
@@ -85,10 +83,9 @@ const ClientMasterBrokerFilter2 = ({ value, setValue }) => {
                 <Autocomplete
                     options={options}
                     getOptionLabel={(option) => typeof option === "string" ? option : option?.text || ""}
-                    value={selectedOption}
+                    value={selectedUser}
                     onChange={(e, val) => {
-                        setSelectedOption(val);
-                        setValue(val);
+                        setSelectedUser(val);
                     }}
                     onInputChange={(e, newInputValue, reason) => {
                         if (userType && reason === 'input') {

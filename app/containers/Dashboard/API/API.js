@@ -342,21 +342,21 @@ export const fetchRejectionLogsAPI = async (
       is_app: "1",
       login_user_id: userId,
       auth_key: authKey,
-      sEcho: 1,
 
       isTodayTrade: filterType,
       sSearch: searchQuery,
 
+      sEcho: 1,
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
 
-      // market_type_id: marketId,
-      // script_id: scriptId,
-      // user_id: clientId,
-      // master_user_id: masterId,
+      market_type_id: marketId,
+      script_id: scriptId,
+      user_id: clientId,
+      master_user_id: masterId,
 
-      // end_date: end_date,
-      // start_date: start_date,
+      end_date: end_date,
+      start_date: start_date,
     });
 
     return response.data || [];
@@ -1809,18 +1809,13 @@ export const cashledgerAPI = async (
 
 export const cashEntryAPI = async (
   currentPage,
-  pageSize,
-  searchText,
-  market,
-  scriptIds,
-  master,
-  client,
-  end_date,
-  start_date,
-  is_deleted,
-  is_updated,
-  is_admin,
-  cash_add
+  pageSize = 10,
+  searchText = '',
+  user_type = '',
+  user_id = '',
+  start_date = '',
+  end_date = '',
+  cash_add = '',
 ) => {
   const defaultParams = await getDefaultParams();
 
@@ -1831,17 +1826,11 @@ export const cashEntryAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
 
-    market_type_id: market?.id,
-    script_id: scriptIds,
-    master_user_id: master?.id,
-    user_id: client?.id,
-
-    end_date,
+    user_type,
+    user_id,
     start_date,
+    end_date,
 
-    is_deleted,
-    is_updated,
-    is_admin,
     cash_add,
   };
 
@@ -1905,6 +1894,11 @@ export const JVEntryAPI = async (
 
 
 export const BillfilterAPI = async ({
+  currentPage,
+  pageSize = 10,
+  term = "",
+  // sSearch = "",
+
   valan_id = valanId?.id,
   amount = "",
   start_date = "",
@@ -1913,13 +1907,19 @@ export const BillfilterAPI = async ({
   user_id = "",
   broker_user_id = "",
   master_user_id = "",
-  term = "",
 }) => {
+  //{"master_user_id":"","broker_user_id":"","valan_id":"2025-08-18","market_type_id":"","user_id":"","start_date":"","end_date":"","amount":17000}
   try {
     const defaultParams = await getDefaultParams();
 
     const payload = {
       ...defaultParams,
+      sEcho: 1,
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
+      term,
+      //  
+
       master_user_id,
       broker_user_id,
       valan_id,
@@ -1945,11 +1945,13 @@ export const BillfilterAPI = async ({
 };
 
 export const CrosstradelogAPI = async ({
-  valan_id = valanId?.id,
-  amount = "",
+  currentPage,
+  pageSize = 10,
+  valan_id,
   start_date = "",
   end_date = "",
   market_type_id = "",
+  script_id,
   user_id = "",
   broker_user_id = "",
   master_user_id = "",
@@ -1960,15 +1962,19 @@ export const CrosstradelogAPI = async ({
 
     const payload = {
       ...defaultParams,
-      master_user_id,
-      broker_user_id,
+      sEcho: 1,
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
+      term,
+
       valan_id,
       market_type_id,
+      script_id,
       user_id,
+      master_user_id,
+      broker_user_id,
       start_date,
       end_date,
-      amount,
-      term,
     };
 
     const response = await axios.post(
@@ -1985,6 +1991,44 @@ export const CrosstradelogAPI = async ({
 };
 
 export const tradeEditLoglistAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+
+    master_user_id: master?.id,
+    user_id: client?.id,
+
+    end_date,
+    start_date,
+
+    is_admin,
+  }
+
+  try {
+    const response = await axiosInstance.post("datatables/user_edit_log_list", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const editDeleteLogLogsAPI = async (
   currentPage,
   pageSize,
   searchText,
@@ -2018,50 +2062,6 @@ export const tradeEditLoglistAPI = async (
     is_deleted,
     is_updated,
     is_admin,
-  }
-
-  try {
-    const response = await axiosInstance.post("datatables/user_edit_log_list", formData);
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch logs:", error);
-    throw error;
-  }
-};
-
-export const editDeleteLogLogsAPI = async (
-  currentPage,
-  pageSize,
-  searchText,
-  market,
-  scriptIds,
-  master,
-  client,
-  end_date,
-  start_date,
-  is_deleted,
-  is_updated,
-) => {
-  const defaultParams = await getDefaultParams();
-
-  const formData = {
-    ...defaultParams,
-    sEcho: 1,
-    iDisplayStart: currentPage * pageSize,
-    iDisplayLength: pageSize,
-    sSearch: searchText,
-
-    market_type_id: market?.id,
-    script_id: scriptIds,
-    master_user_id: master?.id,
-    user_id: client?.id,
-
-    end_date,
-    start_date,
-
-    is_deleted,
-    is_updated,
   }
 
   try {
@@ -2240,6 +2240,9 @@ export const manualtradesAPI = async (
 };
 
 export const bulktradingAPI = async ({
+  currentPage,
+  pageSize = 10,
+  sSearch = '',
   master_user_id = '',
   broker_user_id = '',
   market_type_id = '',
@@ -2253,6 +2256,11 @@ export const bulktradingAPI = async ({
 
   const payload = {
     ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch,
+
     master_user_id,
     broker_user_id,
     market_type_id,
@@ -2262,7 +2270,7 @@ export const bulktradingAPI = async ({
     end_date,
     noOfTrades
   };
-
+  // {"master_user_id":"","broker_user_id":"","market_type_id":"","script_id":"","user_id":"","start_date":"","end_date":"","noOfTrades":2}
   try {
     const response = await axiosInstance.post('ajaxfiles/bulk_trading_report', payload);
     return response.data;
@@ -2498,6 +2506,110 @@ export const StopfuturelistAPI = async (
     const response = await axiosInstance.post("datatables/list_future_block", formData);
 
     return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const ExpiryvalidationAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+  }
+
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/list_expiry_validation", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+
+export const TimesettingAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+  }
+
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/list_start_end_time", formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+
+export const NSEOPTmanageAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated
+) => {
+  const defaultParams = await getDefaultParams();
+
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+  };
+
+  try {
+    const response = await axiosInstance.post("datatables/option_block_list", formData);
+
+    console.log("API raw response:", response.data); // debug
+
+    // return aaData array inside data
+    return response.data?.aaData || [];
   } catch (error) {
     console.error("Failed to fetch logs:", error);
     throw error;

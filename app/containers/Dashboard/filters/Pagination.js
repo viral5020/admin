@@ -21,7 +21,7 @@ const Pagination = ({
 }) => {
     const isMobile = useMediaQuery("(max-width:600px)");
     const [pageNo, setPageNo] = useState()
-    const debouncedSearchText = useDebounce(pageNo, 2000);
+    const debouncedPageNo = useDebounce(pageNo, 2000);
     const gotoPageRef = useRef();
 
     useEffect(() => {
@@ -32,7 +32,7 @@ const Pagination = ({
         }
         setPageNo('');
         gotoPageRef.current.blur();
-    }, [debouncedSearchText])
+    }, [debouncedPageNo])
 
     return (
         <Box

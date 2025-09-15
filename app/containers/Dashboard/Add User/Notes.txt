@@ -12,11 +12,9 @@
 
 >> rejection logs -- all filters value not passing in api
 
->> User Profile -- Cash Entry > EDIT DELETE BTN NOT WORKING
-
 >> trade edit-delete-log -- `Show Admin Only` key doesnt send in api
 
->> ledger report -- asceding / descending not working
+>> User Profile -- Cash Entry > EDIT DELETE BTN NOT WORKING
 
  -- mobile view --
 
@@ -28,5 +26,5 @@
 
  >> Trial balance -- arrange mobile view
 
- >> max qty-details -- + Add Position should open in popup
+ >> max-qty-details -- + Add Position should open in popup
 

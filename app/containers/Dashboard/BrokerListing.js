@@ -796,7 +796,15 @@ const BrokerListing = ({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="12" style={{ textAlign: "center", padding: 20 }}>
+                <td
+                  colSpan="12"
+                  style={{
+                    textAlign: isMobile ? "start" : "center",
+                    padding: 20,
+                    position: 'relative',
+                    left: isMobile ? '35vw' : ''
+                  }}
+                >
                   <CircularProgress size={24} />
                 </td>
               </tr>

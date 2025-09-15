@@ -60,44 +60,31 @@ const Crosstradelog = () => {
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
-    const [End1_date, setEnd1_date] = useState('');
-    const [Start1_date, setStart1_date] = useState('');
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
+
+    const [end_date, setEnd_date] = useState('');
+    const [start_date, setStart_date] = useState('');
 
     const [valanId, setValanId] = useState(null);
-    const [amount, setAmount] = useState('');
-
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
     const fetchLogs = async () => {
+        console.log("fetchLogs");
         try {
-            // Validate valanId and amount
-            if (!Start1_date || !End1_date) {
-                console.warn("Select Start Date and End Date");
-                setLogs([]);
-                setTotalRecords(0);
-                return;
-            }
-
             setLoading(true);
 
             const scriptIds = formatScriptIds?.(script);
 
             const response = await CrosstradelogAPI({
-                valan_id: valanId?.id,
-                amount: amount,
+                currentPage,
+                pageSize,
                 start_date,
                 end_date,
-                market_type_id: scriptIds,
-                user_id: client,
-                broker_user_id: master,
-                master_user_id: isAdminOnly ? master : "",
+                valan_id: valanId?.id,
+                market_type_id: market?.id,
+                script_id: scriptIds,
+                user_id: client?.id,
+                broker_user_id: broker?.id,
+                master_user_id: master?.id,
                 term: searchText,
-                is_deleted,
-                is_updated,
-                currentPage,
             });
 
             const logsArray = response?.data || [];
@@ -183,10 +170,10 @@ const Crosstradelog = () => {
                     </div>
 
                     <TradeEditDeleteLogFilter
-                        End1_date={End1_date}
-                        Start1_date={Start1_date}
-                        setEnd1_date={setEnd1_date}
-                        setStart1_date={setStart1_date}
+                        End1_date={end_date}
+                        Start1_date={start_date}
+                        setEnd1_date={setEnd_date}
+                        setStart1_date={setStart_date}
                         market={market}
                         setMarket={setMarket}
                         client={client}
@@ -202,7 +189,7 @@ const Crosstradelog = () => {
                 </Box>
             </Drawer>
 
-            <Paper sx={{ p: 2, borderRadius: 2 }}>
+            <Paper sx={{ p: 1, borderRadius: 2 }}>
                 {/* Desktop filters (always visible) */}
                 {!isMobile && (
                     <>
@@ -220,10 +207,10 @@ const Crosstradelog = () => {
                         </div>
 
                         <TradeEditDeleteLogFilter
-                            End1_date={End1_date}
-                            Start1_date={Start1_date}
-                            setEnd1_date={setEnd1_date}
-                            setStart1_date={setStart1_date}
+                            End1_date={end_date}
+                            Start1_date={start_date}
+                            setEnd1_date={setEnd_date}
+                            setStart1_date={setStart_date}
                             market={market}
                             setMarket={setMarket}
                             client={client}
@@ -270,13 +257,7 @@ const Crosstradelog = () => {
                     />
                 </Box>
 
-                {/* Validation */}
-                {(!Start1_date || !End1_date) && (
-                    <Typography textAlign="center" color="error" sx={{ mt: 2 }}>
-                        Please select Start Date and End Date
-                    </Typography>
-                )}
-
+                {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                         <CircularProgress />

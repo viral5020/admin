@@ -77,6 +77,13 @@ const TradeEditDeleteLogFilter = ({
                     value={start_date}
                     onChange={setStart_date}
                 />}
+
+                {setEnd_date && <DateFilter
+                    label="To Date"
+                    value={end_date}
+                    onChange={setEnd_date}
+                />}
+
                 {setafter_date && <DateFilter
                     label="Trade after"
                     value={after_date}
@@ -93,12 +100,6 @@ const TradeEditDeleteLogFilter = ({
                     label="Entry After"
                     value={entry_date}
                     onChange={setentry_date}
-                />}
-
-                {setEnd_date && <DateFilter
-                    label="To Date"
-                    value={end_date}
-                    onChange={setEnd_date}
                 />}
 
                 {setbefore_date && <DateFilter
@@ -130,8 +131,6 @@ const TradeEditDeleteLogFilter = ({
                     script={script}
                     setMarket={setMarket}
                     setScript={setScript}
-                    showMarket={Boolean(setMarket)}
-                    showScript={Boolean(setScript)}
                 />
 
                 <ClientMasterBrokerFilter

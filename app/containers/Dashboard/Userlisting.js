@@ -680,56 +680,16 @@ const Userlisting = ({
   return (
     <div style={{ padding: 16 }}>
       {/* Filters - Fixed on top */}
-      <Box
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          backgroundColor: theme.palette.background.paper,
-          p: 1,
-          mb: 2,
-        }}
-      >
-        {isMobile && filterShow ? (
-          <Drawer
-            anchor="left"
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-          >
-            <Box sx={{ width: 300, p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Filters
-              </Typography>
-              <UserListFilter
-                isDarkMode={theme.palette.mode === "dark"}
-                databroker={databroker}
-                setDatabroker={setDatabroker}
-                master={master}
-                setMaster={setMaster}
-                user={user}
-                setUser={setUser}
-                status={status}
-                setStatus={setStatus}
-                segment={segment}
-                setSegment={setSegment}
-                loginBefore={loginBefore}
-                setLoginBefore={setLoginBefore}
-                loginAfter={loginAfter}
-                setLoginAfter={setLoginAfter}
-                tradeBefore={tradeBefore}
-                setTradeBefore={setTradeBefore}
-                tradeAfter={tradeAfter}
-                setTradeAfter={setTradeAfter}
-                type={type}
-                setType={setType}
-                onApply={() => {
-                  currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
-                }}
-              />
-            </Box>
-          </Drawer>
-        ) : (
-          filterShow && (
+      {isMobile && filterShow ? (
+        <Drawer
+          anchor="left"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+        >
+          <Box sx={{ width: 300, p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Filters
+            </Typography>
             <UserListFilter
               isDarkMode={theme.palette.mode === "dark"}
               databroker={databroker}
@@ -756,9 +716,49 @@ const Userlisting = ({
                 currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
               }}
             />
-          )
-        )}
-      </Box>
+          </Box>
+        </Drawer>
+      ) : (
+        filterShow && (
+          <Box
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              backgroundColor: theme.palette.background.paper,
+              p: 1,
+              mb: 2,
+            }}
+          >
+            <UserListFilter
+              isDarkMode={theme.palette.mode === "dark"}
+              databroker={databroker}
+              setDatabroker={setDatabroker}
+              master={master}
+              setMaster={setMaster}
+              user={user}
+              setUser={setUser}
+              status={status}
+              setStatus={setStatus}
+              segment={segment}
+              setSegment={setSegment}
+              loginBefore={loginBefore}
+              setLoginBefore={setLoginBefore}
+              loginAfter={loginAfter}
+              setLoginAfter={setLoginAfter}
+              tradeBefore={tradeBefore}
+              setTradeBefore={setTradeBefore}
+              tradeAfter={tradeAfter}
+              setTradeAfter={setTradeAfter}
+              type={type}
+              setType={setType}
+              onApply={() => {
+                currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
+              }}
+            />
+          </Box>
+        )
+      )}
 
 
       {/* Search */}
@@ -830,7 +830,15 @@ const Userlisting = ({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="9" style={{ textAlign: "center", padding: 20 }}>
+                <td
+                  colSpan="12"
+                  style={{
+                    textAlign: isMobile ? "start" : "center",
+                    padding: 20,
+                    position: 'relative',
+                    left: isMobile ? '35vw' : ''
+                  }}
+                >
                   <CircularProgress size={24} />
                 </td>
               </tr>

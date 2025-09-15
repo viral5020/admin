@@ -7,6 +7,7 @@ import { useTheme } from '@emotion/react';
 import { forex_comex_market } from '../helpers/utilFunc';
 import axiosInstance from '../API/axiosconfig';
 import { fetchOptionsAPI } from '../API/API';
+import AutoSuggestFilter from './AutoSuggestFilter';
 
 
 const MarketScriptNameFilter = ({
@@ -62,14 +63,6 @@ const MarketScriptNameFilter = ({
   };
 
   async function fetchOptions(url, params, setter) {
-    // try {
-    //   const { data } = await axiosInstance.post(url, params); // POST request with body
-    //   const results = data.results;
-    //   setter(Array.isArray(results) ? results : []);
-    // } catch (err) {
-    //   console.error(`Error fetching from ${url}`, err);
-    //   setter([]);
-    // }
     const data = await fetchOptionsAPI(url, params);
     setter(Array.isArray(data) ? data : []);
   };
@@ -118,7 +111,7 @@ const MarketScriptNameFilter = ({
           onInputChange={(e, val, reason) => {  //** */
             (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
             handleFetch(val, 'market');
-            setScript([]); // clear script when market changes
+            setScript?.([]); // clear script when market changes
           }}
           onChange={(e, val) => {
             setMarket(val);
@@ -172,7 +165,7 @@ const MarketScriptNameFilter = ({
           //   if (!value || Object.keys(value).length === 0) return false; // empty object case
           //   return option?.text === value?.text;
           // }}
-          filterSelectedOptions
+          // filterSelectedOptions
           onInputChange={(e, val, reason) => {
             if (reason === 'input') {
               handleFetch(val, 'script');
@@ -248,6 +241,34 @@ const MarketScriptNameFilter = ({
 
     </>
   )
+
+  // return (
+  //   <>
+  //     <AutoSuggestFilter
+  //       fieldName="market"
+  //       label="Market"
+  //       isMultiSelect={false}
+  //       options={marketOptions}
+  //       field={market}
+  //       setField={setMarket}
+  //       setOptions={setMarketOptions}
+  //       isForex={isForex}
+  //     />
+
+  //     <AutoSuggestFilter
+  //       fieldName="script"
+  //       label="Script"
+  //       isMultiSelect={isScriptMultiSelect}
+  //       options={scriptOptions}
+  //       field={script}
+  //       setField={setScript}
+  //       setOptions={setScriptOptions}
+  //       isForex={isForex}
+  //       market={market}
+  //     />
+
+  //   </>
+  // )
 }
 
 export default MarketScriptNameFilter

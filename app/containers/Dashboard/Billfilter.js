@@ -56,14 +56,12 @@ const Billfilter = () => {
 
     // Filters
     const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
+    // const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
     const [end_date, setEnd_date] = useState('');
     const [start_date, setStart_date] = useState('');
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
     const [isAdminOnly, setIsAdminOnly] = useState(false);
 
     const [valanId, setValanId] = useState(null);
@@ -76,6 +74,7 @@ const Billfilter = () => {
             // Validate valanId and amount
             if (!valanId || !amount) {
                 console.warn("Select Valan and Amount");
+                setIsFilterChange(false);
                 setLogs([]);
                 setTotalRecords(0);
                 return;
@@ -83,21 +82,22 @@ const Billfilter = () => {
 
             setLoading(true);
 
-            const scriptIds = formatScriptIds?.(script);
+            // const scriptIds = formatScriptIds?.(script);
 
             const response = await BillfilterAPI({
+                currentPage,
+                pageSize,
                 valan_id: valanId?.id,
                 amount: amount,
                 start_date,
                 end_date,
-                market_type_id: scriptIds,
-                user_id: client,
-                broker_user_id: master,
-                master_user_id: isAdminOnly ? master : "",
+                market_type_id: market?.id || '',
+                user_id: client?.id || '',
+                broker_user_id: broker?.id || '',
+                master_user_id: isAdminOnly ? master?.id : "",
                 term: searchText,
-                is_deleted,
-                is_updated,
                 currentPage,
+                // sSearch: searchText,
             });
 
             const logsArray = response?.data || [];
@@ -194,8 +194,10 @@ const Billfilter = () => {
                         start_date={start_date}
                         setEnd_date={setEnd_date}
                         setStart_date={setStart_date}
+
                         market={market}
                         setMarket={setMarket}
+
                         client={client}
                         master={master}
                         broker={broker}
@@ -310,7 +312,7 @@ const Billfilter = () => {
                                     </IconButton>
                                 </Box>
 
-                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
+                                <div style={{ display: 'flex-column', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
                                     <div style={{ flex: 1, minWidth: '200px' }}>
                                         <ValanFilter valanId={valanId} setValanId={setValanId} />
                                     </div>

@@ -29,31 +29,28 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
   return <NavLink to={props.to} {...props} />; // eslint-disable-line
 });
 
+const types = [
+  { url: '/login', name: 'user', api: 'ajaxfiles/logincheck', username: '', password: 'Abcd1234' },
+  { url: '/login-v3', name: 'Admin', api: 'main-ad98min-login/ad_min/login1/login_process', username: '34569', password: '66774422' },
+  { url: '/login-emp', name: 'Empolyee', api: 'employee-login/login_process', username: 'EMP', password: '' },
+]
+
 function LoginFormV2() {
   const deco = useSelector((state) => state.ui.decoration);
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
-  const formik = useFormik({
-    initialValues: location.pathname !== '/login-v3'
-      ? {
-        username: '',
-        password: 'Abcd1234',
-      }
-      : {
-        username: '34569',
-        password: '66774422',
-      },
+  const type = types.find(t => t.url === location.pathname) || types[0];
+  const { value, url, name, api, username, password } = type;
 
+  const formik = useFormik({
+    initialValues: { username, password },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
 
-      // chek if admin login or not
-      const api_url = location.pathname === '/login-v3' ? 'main-ad98min-login/ad_min/login1/login_process' : 'ajaxfiles/logincheck';
-
       try {
-        const response = await fetch(`http://128.199.126.171/~goldorg/${api_url}`, {
+        const response = await fetch(`http://128.199.126.171/~goldorg/${api}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

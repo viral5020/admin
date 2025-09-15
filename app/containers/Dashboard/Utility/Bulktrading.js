@@ -17,8 +17,12 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    Drawer,
+    IconButton,
+    useMediaQuery
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import TradeEditDeleteLogFilter from './TradeEditDeleteLogFilter';
 import Pagination from '../filters/Pagination';
@@ -27,6 +31,7 @@ import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import { bulktradingAPI, fetchOrders1API } from '../API/API';
 import axios from 'axios';
+import FilterBtn from '../filters/FilterBtn';
 
 const Bulktrading = ({
     filterShow = true,
@@ -34,6 +39,8 @@ const Bulktrading = ({
 }) => {
     console.log("filterShow=", filterShow);
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
 
     // Main table states
     const [logs, setLogs] = useState([]);
@@ -49,15 +56,14 @@ const Bulktrading = ({
     const [totalPages, setTotalPages] = useState(0);
 
     // Filter states
+    const [filterDrawer, setFilterDrawer] = useState(false);
     const [market, setMarket] = useState('');
     const [script, setScript] = useState([]);
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
-    const [broker, setBroker] = useState('');
+
     const [after_date, setafter_date] = useState('');
     const [before_date, setbefore_date] = useState('');
-    const [start_date, setStart_date] = useState('');
-    const [end_date, setEnd_date] = useState('');
 
     // Trade dialog states
     const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
@@ -77,6 +83,9 @@ const Bulktrading = ({
     useEffect(() => {
         console.log('QQQQ orders', orders);
     }, [orders])
+
+    const toggleDrawer = (open) => () => setFilterDrawer(open);
+
 
     // --- Fetch trades for dialog ---
     const fetchTradeDetails = async (log) => {
@@ -109,6 +118,8 @@ const Bulktrading = ({
 
             const payload = {
                 is_app: '1',
+                currentPage,
+                pageSize,
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
                 master_user_id: master?.id || '',
@@ -116,9 +127,10 @@ const Bulktrading = ({
                 market_type_id: market?.id || '',
                 script_id: scriptIds || '',
                 user_id: client?.id || '',
-                start_date: start_date || '',
-                end_date: end_date || '',
+                start_date: after_date || '',
+                end_date: before_date || '',
                 noOfTrades: noOfTrades || '',
+                sSearch: searchText,
             };
             const result = await bulktradingAPI(payload);
 
@@ -198,49 +210,21 @@ const Bulktrading = ({
     }, []);
 
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
-    useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+        setCurrentPage(0);
+    }, [debouncedSearchText]);
+
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 
     return (
-        <Paper sx={{ p: 2, borderRadius: 2 }}>
+        <Paper sx={{ p: 1, borderRadius: 2 }}>
 
-            {/* Bulk trade list input */}
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                <TextField
-                    type="number"
-                    label="Number of Orders"
-                    value={noOfTrades}
-                    onChange={(e) => setNoOfTrades(e.target.value)}
-                    size="small"
-                    InputProps={{ inputProps: { min: 1 } }}
-                />
-            </Box>
-
-            {/* Filter */}
-            {filterShow && (
-                <Box>
-                    <TradeEditDeleteLogFilter
-                        after_date_date={after_date}
-                        before_date={before_date}
-                        setbefore_date={setbefore_date}
-                        setafter_date={setafter_date}
-                        market={market}
-                        script={script}
-                        broker={broker}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        setBroker={setBroker}
-                        client={client}
-                        master={master}
-                        setClient={setClient}
-                        setMaster={setMaster}
-                        onApply={onFilterApply}
-                    />
-                </Box>
-            )}
             {/* Search */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
+                {filterShow && isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
                 <TextField
                     variant="outlined"
                     placeholder="Search logs..."
@@ -257,6 +241,67 @@ const Bulktrading = ({
                     }}
                 />
             </Box>
+
+            {/* Bulk trade list input */}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+                <TextField
+                    type="number"
+                    label="Number of Orders"
+                    value={noOfTrades}
+                    onChange={(e) => setNoOfTrades(e.target.value)}
+                    size="small"
+                    InputProps={{ inputProps: { min: 1 } }}
+                />
+            </Box>
+
+            {/* Filter */}
+            {filterShow &&
+                isMobile ?
+                <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                    <Box sx={{ width: 280, p: 2 }} role="presentation">
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="h6">Filters</Typography>
+                            <IconButton onClick={() => setFilterDrawer(false)}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Box>
+
+                        <TradeEditDeleteLogFilter
+                            after_date_date={after_date}
+                            before_date={before_date}
+                            setbefore_date={setbefore_date}
+                            setafter_date={setafter_date}
+                            market={market}
+                            script={script}
+                            setScript={setScript}
+                            setMarket={setMarket}
+                            client={client}
+                            master={master}
+                            setClient={setClient}
+                            setMaster={setMaster}
+                            onApply={onFilterApply}
+                        />
+                    </Box>
+                </Drawer>
+
+                : <Box>
+                    <TradeEditDeleteLogFilter
+                        after_date_date={after_date}
+                        before_date={before_date}
+                        setbefore_date={setbefore_date}
+                        setafter_date={setafter_date}
+                        market={market}
+                        script={script}
+                        setScript={setScript}
+                        setMarket={setMarket}
+                        client={client}
+                        master={master}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        onApply={onFilterApply}
+                    />
+                </Box>
+            }
 
             {/* Main logs table */}
             {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}

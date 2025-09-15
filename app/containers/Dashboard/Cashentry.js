@@ -76,18 +76,15 @@ const Cashentry = ({
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
 
+    const [userType, setUserType] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
 
-    const [end_date, setEnd_date] = useState('');
-    const [start_date, setStart_date] = useState('');
-    const [entry_date, setentry_date] = useState('');
-    const [entrybefore_date, setentrybefore_date] = useState('');
-
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
+    const [entryAfter_date, setEntryAfter_date] = useState('');
+    const [entryBefore_date, setEntryBefore_date] = useState('');
 
     const [formOpen, setFormOpen] = useState(false);
+
+    const [entryUserType, setEntryUserType] = useState(null);
     const [entryUser, setEntryUser] = useState(null);
     const [entryDate, setEntryDate] = useState("");
     const [entryType, setEntryType] = useState("");
@@ -134,16 +131,13 @@ const Cashentry = ({
                 currentPage,
                 pageSize,
                 searchText,
-                market,
-                scriptIds,
-                master,
-                client,
-                end_date,
-                start_date,
-                is_deleted,
-                is_updated,
-                isAdminOnly,
-                "cash_add"
+
+
+                userType?.value,
+                selectedUser?.id,
+                entryAfter_date,
+                entryBefore_date
+                // cash_add=cash_add
             );
 
             const data = Array.isArray(result?.aaData) ? result.aaData : [];
@@ -179,6 +173,7 @@ const Cashentry = ({
             is_app: "1",
             login_user_id: dataStored.user_id,
             auth_key: dataStored.auth_key,
+            user_type: entryUserType.value,
             user_id: entryUser.id,
             type: entryType,
             date1: entryDate,
@@ -302,7 +297,12 @@ const Cashentry = ({
 
     useEffect(() => { fetchLogs(); }, []);
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [pageSize, totalRecords]);
-    useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+        setCurrentPage(0);
+    }, [debouncedSearchText]);
+
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 
@@ -343,9 +343,11 @@ const Cashentry = ({
                     {filterShow && (
                         <Box sx={{ mb: 3 }}>
                             <ClientMasterBrokerFilter2
-                                value={selectedUser}
-                                setValue={setSelectedUser}
                                 sx={{ width: "100%" }}
+                                userType={userType}
+                                setUserType={setUserType}
+                                selectedUser={selectedUser}
+                                setSelectedUser={setSelectedUser}
                             />
                         </Box>
                     )}
@@ -354,10 +356,10 @@ const Cashentry = ({
                             {/* Filter + Add Cash Entry icon button together */}
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <TradeEditDeleteLogFilter
-                                    entry_date={entry_date}
-                                    setentry_date={setentry_date}
-                                    entrybefore_date={entrybefore_date}
-                                    setentrybefore_date={setentrybefore_date}
+                                    entry_date={entryAfter_date}
+                                    setentry_date={setEntryAfter_date}
+                                    entrybefore_date={entryBefore_date}
+                                    setentrybefore_date={setEntryBefore_date}
                                     onApply={onFilterApply}
                                 />
 
@@ -383,9 +385,11 @@ const Cashentry = ({
                                     {/* Filter and Current Balance side by side */}
                                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                                         <ClientMasterBrokerFilter2
-                                            value={entryUser}
-                                            setValue={setEntryUser}
-                                            sx={{ flex: 1 }}
+                                            sx={{ width: "100%" }}
+                                            userType={entryUserType}
+                                            setUserType={setEntryUserType}
+                                            selectedUser={entryUser}
+                                            setSelectedUser={setEntryUser}
                                         />
                                         <Box
                                             sx={{
@@ -563,9 +567,23 @@ const Cashentry = ({
                                     <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                                 </Box>
                                 <Box sx={{ mb: 3, width: "100%" }}>
-                                    <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
+                                    <ClientMasterBrokerFilter2
+                                        sx={{ width: "100%" }}
+                                        userType={userType}
+                                        setUserType={setUserType}
+                                        selectedUser={selectedUser}
+                                        setSelectedUser={setSelectedUser}
+                                    />
                                 </Box>
-                                <TradeEditDeleteLogFilter entry_date={entry_date} setentry_date={setentry_date} entrybefore_date={entrybefore_date} setentrybefore_date={setentrybefore_date} onApply={onFilterApply} />
+
+                                <TradeEditDeleteLogFilter
+                                    entry_date={entryAfter_date}
+                                    setentry_date={setEntryAfter_date}
+                                    entrybefore_date={entryBefore_date}
+                                    setentrybefore_date={setEntryBefore_date}
+                                    onApply={onFilterApply}
+                                />
+
                                 <Box sx={{ mb: 1 }}>
                                     <Button
                                         variant="contained"
@@ -578,7 +596,13 @@ const Cashentry = ({
                                     </Button>
                                     <Collapse in={formOpen}>
                                         <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
-                                            <ClientMasterBrokerFilter2 value={entryUser} setValue={setEntryUser} sx={{ width: "100%" }} />
+                                            <ClientMasterBrokerFilter2
+                                                sx={{ width: "100%" }}
+                                                userType={entryUserType}
+                                                setUserType={setEntryUserType}
+                                                selectedUser={entryUser}
+                                                setSelectedUser={setEntryUser}
+                                            />
                                             {/* Current Balance on the left */}
                                             <Box
                                                 sx={{

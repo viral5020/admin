@@ -132,8 +132,6 @@ const Blockedallowedscriptfilter = ({
                     script={script}
                     setMarket={setMarket}
                     setScript={setScript}
-                    showMarket={Boolean(setMarket)}
-                    showScript={Boolean(setScript)}
                 />
 
                 <Clientmasterall

@@ -66,29 +66,11 @@ const Cashledger = ({
 
     const [filterDrawer, setFilterDrawer] = useState(false);
 
-    const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-    const [broker, setBroker] = useState('');
-
+    const [userType, setUserType] = useState(null)
     const [selectedUser, setSelectedUser] = useState(null);
 
-    const [end_date, setEnd_date] = useState('');
-    const [start_date, setStart_date] = useState('');
-    const [entry_date, setentry_date] = useState('');
-    const [entrybefore_date, setentrybefore_date] = useState('');
-
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
-
-    const [formOpen, setFormOpen] = useState(false);
-    const [entryUser, setEntryUser] = useState(null);
-    const [entryDate, setEntryDate] = useState("");
-    const [entryType, setEntryType] = useState("");
-    const [entryAmount, setEntryAmount] = useState("");
-    const [entryRemark, setEntryRemark] = useState("");
+    const [entryAfter_date, setEntryAfter_date] = useState('');
+    const [entryBefore_date, setEntryBefore_date] = useState('');
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [logToDelete, setLogToDelete] = useState(null);
@@ -118,23 +100,20 @@ const Cashledger = ({
         });
     };
 
+    // user_type=&user_id=&start_date=2025-08-28&end_date=2025-08-28&cash_add=cash_add
     const fetchLogs = async () => {
         try {
             setLoading(true);
-            const scriptIds = formatScriptIds?.(script);
             const result = await cashEntryAPI(
                 currentPage,
                 pageSize,
                 searchText,
-                market,
-                scriptIds,
-                master,
-                client,
-                end_date,
-                start_date,
-                is_deleted,
-                is_updated,
-                isAdminOnly,
+
+                userType?.value,
+                selectedUser?.id,
+                entryAfter_date,
+                entryBefore_date
+                // cash_add=cash_add
             );
 
             const data = Array.isArray(result?.aaData) ? result.aaData : [];
@@ -247,7 +226,12 @@ const Cashledger = ({
 
     useEffect(() => { fetchLogs(); }, []);
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [pageSize, totalRecords]);
-    useEffect(() => { !isFirstRender && setCurrentPage(0); }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+        setCurrentPage(0);
+    }, [debouncedSearchText]);
+
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
     useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
 
@@ -258,28 +242,62 @@ const Cashledger = ({
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {filterShow && (
                         <Box sx={{ mb: 3 }}>
-                            <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
+                            <ClientMasterBrokerFilter2
+                                sx={{ width: "100%" }}
+                                userType={userType}
+                                setUserType={setUserType}
+                                selectedUser={selectedUser}
+                                setSelectedUser={setSelectedUser}
+                            />
                         </Box>
                     )}
                     {filterShow && (
                         <Box sx={{ mb: 3 }}>
                             <TradeEditDeleteLogFilter
-                                entry_date={entry_date}
-                                setentry_date={setentry_date}
-                                entrybefore_date={entrybefore_date}
-                                setentrybefore_date={setentrybefore_date}
+                                entry_date={entryAfter_date}
+                                setentry_date={setEntryAfter_date}
+                                entrybefore_date={entryBefore_date}
+                                setentrybefore_date={setEntryBefore_date}
                                 onApply={onFilterApply}
                             />
                         </Box>
                     )}
 
-                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-                        <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
-                            startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: theme.palette.text.secondary }} /></InputAdornment>
-                        }} />
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: 2,
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mb: 2.5,
+                        }}
+                    >
+                        <TextField
+                            variant="outlined"
+                            placeholder="Search logs..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            size="small"
+                            sx={{ flex: 1, minWidth: 200 }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon
+                                            sx={{ color: theme.palette.text.secondary }}
+                                        />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
                     </Box>
 
-                    {logs.length === 0 && !loading ? <Typography textAlign='center'>No Logs Found</Typography> : loading ? <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box> : (
+                    {logs.length === 0 && !loading ? (
+                        <Typography textAlign="center">No Logs Found</Typography>
+                    ) : loading ? (
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
                         <>
                             <TableContainer>
                                 <Table stickyHeader size="small">
@@ -297,13 +315,24 @@ const Cashledger = ({
                                         {logs.map((log, i) => (
                                             <TableRow key={i}>
                                                 <TableCell>{log?.user ?? "-"}</TableCell>
-                                                <TableCell><strong>{log?.account_date_time?.toLocaleString() ?? "-"}</strong></TableCell>
+                                                <TableCell>
+                                                    <strong>
+                                                        {log?.account_date_time?.toLocaleString() ?? "-"}
+                                                    </strong>
+                                                </TableCell>
                                                 <TableCell>{log?.debit ?? "-"}</TableCell>
                                                 <TableCell>{log?.credit ?? "-"}</TableCell>
                                                 <TableCell>{log?.remark ?? "-"}</TableCell>
                                                 <TableCell>
                                                     <Box sx={{ display: "flex", gap: 0.5 }}>
-                                                        <Button size="small" variant="outlined" color="primary" onClick={() => handleEditClick(log)}>Edit</Button>
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            onClick={() => handleEditClick(log)}
+                                                        >
+                                                            Edit
+                                                        </Button>
                                                         <Button
                                                             size="small"
                                                             variant="outlined"
@@ -312,7 +341,6 @@ const Cashledger = ({
                                                         >
                                                             Delete
                                                         </Button>
-
                                                     </Box>
                                                 </TableCell>
                                             </TableRow>
@@ -321,36 +349,100 @@ const Cashledger = ({
                                 </Table>
                             </TableContainer>
 
-                            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                            <Dialog
+                                open={deleteDialogOpen}
+                                onClose={() => setDeleteDialogOpen(false)}
+                            >
                                 <DialogTitle>Confirm Delete</DialogTitle>
                                 <DialogContent>
-                                    <Typography>Are you sure you want to delete this entry?</Typography>
+                                    <Typography>
+                                        Are you sure you want to delete this entry?
+                                    </Typography>
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                                    <Button color="error" onClick={handleConfirmDelete}>Delete</Button>
+                                    <Button onClick={() => setDeleteDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button color="error" onClick={handleConfirmDelete}>
+                                        Delete
+                                    </Button>
                                 </DialogActions>
                             </Dialog>
 
                             <Dialog open={!!editingLog} onClose={() => setEditingLog(null)}>
                                 <DialogTitle>Edit Log</DialogTitle>
                                 <DialogContent>
-                                    <TextField label="User" fullWidth value={editValue.user?.name || ""} onChange={(e) => setEditValue({ ...editValue, user: { ...editValue.user, name: e.target.value } })} margin="dense" />
-                                    <TextField label="Date" type="date" fullWidth value={editValue.date1} onChange={(e) => setEditValue({ ...editValue, date1: e.target.value })} margin="dense" InputLabelProps={{ shrink: true }} />
-                                    <TextField select label="Type" fullWidth value={editValue.type} onChange={(e) => setEditValue({ ...editValue, type: e.target.value })} margin="dense">
+                                    <TextField
+                                        label="User"
+                                        fullWidth
+                                        value={editValue.user?.name || ""}
+                                        onChange={(e) =>
+                                            setEditValue({
+                                                ...editValue,
+                                                user: { ...editValue.user, name: e.target.value },
+                                            })
+                                        }
+                                        margin="dense"
+                                    />
+                                    <TextField
+                                        label="Date"
+                                        type="date"
+                                        fullWidth
+                                        value={editValue.date1}
+                                        onChange={(e) =>
+                                            setEditValue({ ...editValue, date1: e.target.value })
+                                        }
+                                        margin="dense"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <TextField
+                                        select
+                                        label="Type"
+                                        fullWidth
+                                        value={editValue.type}
+                                        onChange={(e) =>
+                                            setEditValue({ ...editValue, type: e.target.value })
+                                        }
+                                        margin="dense"
+                                    >
                                         <MenuItem value={1}>Receipt</MenuItem>
                                         <MenuItem value={0}>Payment</MenuItem>
                                     </TextField>
-                                    <TextField label="Amount" type="number" fullWidth value={editValue.amount} onChange={(e) => setEditValue({ ...editValue, amount: e.target.value })} margin="dense" />
-                                    <TextField label="Remark" fullWidth value={editValue.remarks} onChange={(e) => setEditValue({ ...editValue, remarks: e.target.value })} margin="dense" />
+                                    <TextField
+                                        label="Amount"
+                                        type="number"
+                                        fullWidth
+                                        value={editValue.amount}
+                                        onChange={(e) =>
+                                            setEditValue({ ...editValue, amount: e.target.value })
+                                        }
+                                        margin="dense"
+                                    />
+                                    <TextField
+                                        label="Remark"
+                                        fullWidth
+                                        value={editValue.remarks}
+                                        onChange={(e) =>
+                                            setEditValue({ ...editValue, remarks: e.target.value })
+                                        }
+                                        margin="dense"
+                                    />
                                 </DialogContent>
                                 <DialogActions>
                                     <Button onClick={() => setEditingLog(null)}>Cancel</Button>
-                                    <Button color="primary" onClick={handleUpdateLog}>Save</Button>
+                                    <Button color="primary" onClick={handleUpdateLog}>
+                                        Save
+                                    </Button>
                                 </DialogActions>
                             </Dialog>
 
-                            <Pagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} setPageSize={setPageSize} pageSize={pageSize} />
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                setCurrentPage={setCurrentPage}
+                                setPageSize={setPageSize}
+                                pageSize={pageSize}
+                            />
                         </>
                     )}
 
@@ -361,33 +453,80 @@ const Cashledger = ({
                 <>
                     {/* Mobile version */}
 
-
-                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 1.5, mt: 0.5 }}>
-                        <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: 2,
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mb: 1.5,
+                            mt: 0.5,
+                        }}
+                    >
+                        <Drawer
+                            anchor="left"
+                            open={filterDrawer}
+                            onClose={() => setFilterDrawer(false)}
+                        >
                             {filterShow && (
                                 <Box sx={{ width: 280, p: 2 }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            mb: 2,
+                                        }}
+                                    >
                                         <Typography variant="h6">Filters</Typography>
-                                        <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
+                                        <IconButton onClick={() => setFilterDrawer(false)}>
+                                            <CloseIcon />
+                                        </IconButton>
                                     </Box>
                                     <Box sx={{ mb: 3, width: "100%" }}>
-                                        <ClientMasterBrokerFilter2 value={selectedUser} setValue={setSelectedUser} sx={{ width: "100%" }} />
+                                        <ClientMasterBrokerFilter2
+                                            sx={{ width: "100%" }}
+                                            userType={userType}
+                                            setUserType={setUserType}
+                                            selectedUser={selectedUser}
+                                            setSelectedUser={setSelectedUser}
+                                        />
                                     </Box>
-                                    <TradeEditDeleteLogFilter entry_date={entry_date} setentry_date={setentry_date} entrybefore_date={entrybefore_date} setentrybefore_date={setentrybefore_date} onApply={onFilterApply} />
+                                    <TradeEditDeleteLogFilter
+                                        entry_date={entryAfter_date}
+                                        setentry_date={setEntryAfter_date}
+                                        entrybefore_date={entryBefore_date}
+                                        setentrybefore_date={setEntryBefore_date}
+                                        onApply={onFilterApply}
+                                    />
                                 </Box>
                             )}
                         </Drawer>
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                        <TextField variant="outlined" placeholder="Search logs..." value={searchText} onChange={(e) => setSearchText(e.target.value)} size="small" sx={{ flex: 1, minWidth: 200 }} InputProps={{
-                            startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: theme.palette.text.secondary }} /></InputAdornment>
-                        }} />
+                        <TextField
+                            variant="outlined"
+                            placeholder="Search logs..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            size="small"
+                            sx={{ flex: 1, minWidth: 200 }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon
+                                            sx={{ color: theme.palette.text.secondary }}
+                                        />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
                     </Box>
 
                     {logs.map((log, index) => {
-                        const borderGradient = 'linear-gradient(90deg, #FF8A80, #FF80AB)'; // Example gradient
-                        const boxShadowColor = 'rgba(0,0,0,0.08)';
+                        const borderGradient = "linear-gradient(90deg, #FF8A80, #FF80AB)"; // Example gradient
+                        const boxShadowColor = "rgba(0,0,0,0.08)";
 
                         return (
                             <Card
@@ -396,31 +535,62 @@ const Cashledger = ({
                                     mb: 1,
                                     mx: 1,
                                     borderRadius: 2,
-                                    border: '1px solid transparent',
+                                    border: "1px solid transparent",
                                     backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper}), ${borderGradient}`,
-                                    backgroundOrigin: 'border-box',
-                                    backgroundClip: 'content-box, border-box',
+                                    backgroundOrigin: "border-box",
+                                    backgroundClip: "content-box, border-box",
                                     boxShadow: `0 4px 12px ${boxShadowColor}`,
                                 }}
                             >
-                                <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 } }}>
+                                <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
                                     {/* Top Row: User / Date */}
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                                            {log.user ?? '-'} ({log.id ?? '-'})
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                fontWeight: 700,
+                                                color: theme.palette.text.primary,
+                                            }}
+                                        >
+                                            {log.user ?? "-"} ({log.id ?? "-"})
                                         </Typography>
-                                        <Typography variant="caption" sx={{ fontStyle: 'italic', color: theme.palette.text.secondary }}>
-                                            {log.account_date_time?.toLocaleString() ?? '-'}
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                fontStyle: "italic",
+                                                color: theme.palette.text.secondary,
+                                            }}
+                                        >
+                                            {log.account_date_time?.toLocaleString() ?? "-"}
                                         </Typography>
                                     </Box>
 
                                     {/* Second Row: Remark and Debit/Credit */}
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            mt: 0.5,
+                                        }}
+                                    >
                                         <Box>
-                                            <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-                                                {log.remark ?? '-'}
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: theme.palette.text.primary,
+                                                }}
+                                            >
+                                                {log.remark ?? "-"}
                                             </Typography>
-                                            <Box sx={{ mt: 0.25, display: 'flex', gap: 1 }}>
+                                            <Box sx={{ mt: 0.25, display: "flex", gap: 1 }}>
                                                 <Typography
                                                     variant="caption"
                                                     sx={{
@@ -432,7 +602,7 @@ const Cashledger = ({
                                                         color: theme.palette.common.white, // white text inside solid block
                                                     }}
                                                 >
-                                                    Debit: {log.debit ?? '-'}
+                                                    Debit: {log.debit ?? "-"}
                                                 </Typography>
                                                 <Typography
                                                     variant="caption"
@@ -445,17 +615,25 @@ const Cashledger = ({
                                                         color: theme.palette.common.white, // white text inside solid block
                                                     }}
                                                 >
-                                                    Credit: {log.credit ?? '-'}
+                                                    Credit: {log.credit ?? "-"}
                                                 </Typography>
                                             </Box>
                                         </Box>
 
                                         {/* Actions */}
-                                        <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
-                                            <IconButton size="small" color="primary" onClick={() => handleEditClick(log)}>
+                                        <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                onClick={() => handleEditClick(log)}
+                                            >
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
-                                            <IconButton size="small" color="error" onClick={() => handleDeleteClick(log)}>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleDeleteClick(log)}
+                                            >
                                                 <DeleteIcon fontSize="small" />
                                             </IconButton>
                                         </Box>
@@ -465,36 +643,100 @@ const Cashledger = ({
                         );
                     })}
 
-                    <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                    <Dialog
+                        open={deleteDialogOpen}
+                        onClose={() => setDeleteDialogOpen(false)}
+                    >
                         <DialogTitle>Confirm Delete</DialogTitle>
                         <DialogContent>
-                            <Typography>Are you sure you want to delete this entry?</Typography>
+                            <Typography>
+                                Are you sure you want to delete this entry?
+                            </Typography>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                            <Button color="error" onClick={handleConfirmDelete}>Delete</Button>
+                            <Button onClick={() => setDeleteDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button color="error" onClick={handleConfirmDelete}>
+                                Delete
+                            </Button>
                         </DialogActions>
                     </Dialog>
 
                     <Dialog open={!!editingLog} onClose={() => setEditingLog(null)}>
                         <DialogTitle>Edit Log</DialogTitle>
                         <DialogContent>
-                            <TextField label="User" fullWidth value={editValue.user?.name || ""} onChange={(e) => setEditValue({ ...editValue, user: { ...editValue.user, name: e.target.value } })} margin="dense" />
-                            <TextField label="Date" type="date" fullWidth value={editValue.date1} onChange={(e) => setEditValue({ ...editValue, date1: e.target.value })} margin="dense" InputLabelProps={{ shrink: true }} />
-                            <TextField select label="Type" fullWidth value={editValue.type} onChange={(e) => setEditValue({ ...editValue, type: e.target.value })} margin="dense">
+                            <TextField
+                                label="User"
+                                fullWidth
+                                value={editValue.user?.name || ""}
+                                onChange={(e) =>
+                                    setEditValue({
+                                        ...editValue,
+                                        user: { ...editValue.user, name: e.target.value },
+                                    })
+                                }
+                                margin="dense"
+                            />
+                            <TextField
+                                label="Date"
+                                type="date"
+                                fullWidth
+                                value={editValue.date1}
+                                onChange={(e) =>
+                                    setEditValue({ ...editValue, date1: e.target.value })
+                                }
+                                margin="dense"
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                select
+                                label="Type"
+                                fullWidth
+                                value={editValue.type}
+                                onChange={(e) =>
+                                    setEditValue({ ...editValue, type: e.target.value })
+                                }
+                                margin="dense"
+                            >
                                 <MenuItem value={1}>Receipt</MenuItem>
                                 <MenuItem value={0}>Payment</MenuItem>
                             </TextField>
-                            <TextField label="Amount" type="number" fullWidth value={editValue.amount} onChange={(e) => setEditValue({ ...editValue, amount: e.target.value })} margin="dense" />
-                            <TextField label="Remark" fullWidth value={editValue.remarks} onChange={(e) => setEditValue({ ...editValue, remarks: e.target.value })} margin="dense" />
+                            <TextField
+                                label="Amount"
+                                type="number"
+                                fullWidth
+                                value={editValue.amount}
+                                onChange={(e) =>
+                                    setEditValue({ ...editValue, amount: e.target.value })
+                                }
+                                margin="dense"
+                            />
+                            <TextField
+                                label="Remark"
+                                fullWidth
+                                value={editValue.remarks}
+                                onChange={(e) =>
+                                    setEditValue({ ...editValue, remarks: e.target.value })
+                                }
+                                margin="dense"
+                            />
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => setEditingLog(null)}>Cancel</Button>
-                            <Button color="primary" onClick={handleUpdateLog}>Save</Button>
+                            <Button color="primary" onClick={handleUpdateLog}>
+                                Save
+                            </Button>
                         </DialogActions>
                     </Dialog>
 
-                    <Pagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} setPageSize={setPageSize} pageSize={pageSize} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        setCurrentPage={setCurrentPage}
+                        setPageSize={setPageSize}
+                        pageSize={pageSize}
+                    />
                     <ToastContainer position="top-right" autoClose={3000} />
                     <BackToTop />
                 </>

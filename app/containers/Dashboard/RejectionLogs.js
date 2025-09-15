@@ -50,9 +50,9 @@ const RejectionLogs = ({
   const [script, setScript] = useState([]);
   const [client, setClient] = useState('');
   const [master, setMaster] = useState('');
-  const [broker, setBroker] = useState('');
-  const [End_date, setEnd_date] = useState('');
-  const [Start_date, setStart_date] = useState('');
+  // const [broker, setBroker] = useState('');
+  const [end_date, setEnd_date] = useState('');
+  const [start_date, setStart_date] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -71,6 +71,13 @@ const RejectionLogs = ({
       searchText,
       pageSize,
       currentPage,
+
+      market?.id,
+      script?.id,
+      client?.id,
+      master?.id,
+      end_date,
+      start_date,
     );
 
     const safeData = Array.isArray(data?.aaData) ? data.aaData : [];
@@ -140,8 +147,8 @@ const RejectionLogs = ({
             <IconButton onClick={() => setDrawerOpen(false)}><CloseIcon /></IconButton>
           </Box>
           <TradeEditDeleteLogFilter
-            End_date={End_date}
-            Start_date={Start_date}
+            End_date={end_date}
+            Start_date={start_date}
             setEnd_date={setEnd_date}
             setStart_date={setStart_date}
             market={market}
@@ -160,8 +167,8 @@ const RejectionLogs = ({
       {/* For desktop, keep filter inline */}
       {!isMobile && filterShow && (
         <TradeEditDeleteLogFilter
-          End_date={End_date}
-          Start_date={Start_date}
+          End_date={end_date}
+          Start_date={start_date}
           setEnd_date={setEnd_date}
           setStart_date={setStart_date}
           market={market}

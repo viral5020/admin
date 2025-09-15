@@ -4,8 +4,11 @@ import {
     Box, Button, CircularProgress, InputAdornment, Paper,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField, Typography, useMediaQuery, useTheme,
-    Dialog, DialogTitle, DialogContent, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Drawer,
+    IconButton
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
@@ -13,6 +16,7 @@ import { tradeEditLoglistAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
+import FilterBtn from './filters/FilterBtn';
 
 const Usereditlog = () => {
     const theme = useTheme();
@@ -63,11 +67,8 @@ const Usereditlog = () => {
     // Fetch Logs
     const fetchLogs = async () => {
         setLoading(true);
-        const scriptIds = formatScriptIds(script);
         const result = await tradeEditLoglistAPI(
-            currentPage, pageSize, searchText, market,
-            scriptIds, master, client, end_date, start_date,
-            is_deleted, is_updated, isAdminOnly
+            currentPage, pageSize, searchText, master, client, end_date, start_date, isAdminOnly
         );
         const data = result.aaData || [];
         setLogs(data);
@@ -164,6 +165,7 @@ const Usereditlog = () => {
     };
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
+
     const onFilterApply = () => {
         setIsFilterChange(true);
         setCurrentPage(0);
@@ -178,13 +180,46 @@ const Usereditlog = () => {
 
     return (
         <>
-            <Paper sx={{ p: 2, borderRadius: 2 }}>
-                <TradeEditDeleteLogFilter
-                    end_date={end_date} start_date={start_date} setEnd_date={setEnd_date} setStart_date={setStart_date}
-                    client={client} master={master} setClient={setClient} setMaster={setMaster}
-                />
+            <Paper sx={{ p: 1, borderRadius: 2 }}>
 
+                {isMobile ?
+                    <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                        <Box sx={{ width: 280, p: 2 }} role="presentation">
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6">Filters</Typography>
+                                <IconButton onClick={() => setFilterDrawer(false)}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Box>
+
+                            <TradeEditDeleteLogFilter
+                                end_date={end_date}
+                                start_date={start_date}
+                                setEnd_date={setEnd_date}
+                                setStart_date={setStart_date}
+                                client={client}
+                                master={master}
+                                setClient={setClient}
+                                setMaster={setMaster}
+                                onApply={onFilterApply}
+                            />
+                        </Box>
+                    </Drawer>
+
+                    : <TradeEditDeleteLogFilter
+                        end_date={end_date}
+                        start_date={start_date}
+                        setEnd_date={setEnd_date}
+                        setStart_date={setStart_date}
+                        client={client}
+                        master={master}
+                        setClient={setClient}
+                        setMaster={setMaster}
+                        onApply={onFilterApply}
+                    />
+                }
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
+                    <FilterBtn setFilterOpen={setFilterDrawer} />
                     <TextField
                         variant="outlined"
                         placeholder="Search logs..."

@@ -18,6 +18,10 @@ import {
   useMediaQuery,
   useTheme,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
@@ -246,6 +250,7 @@ const EditDeleteLogs = () => {
     setMaxBet('');
     setShowFilters(false);
   };
+
   const handleFilterToggle = () => {
     if (showFilters) {
       // Reset all filter fields
@@ -259,6 +264,72 @@ const EditDeleteLogs = () => {
     }
     (userType == 3 || userType == 4) ? setShowFilters(prev => !prev) : null;
   };
+
+  function AddPosition() {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+        <TextField select label="Market" value={marketName}
+          onChange={e => setMarketName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
+          {marketOptions.map(m =>
+            <MenuItem key={m.market_type_id} value={m.market_type_id}>
+              {m.market_type_name}
+            </MenuItem>
+          )}
+        </TextField>
+
+        <TextField select label="Script" value={scriptName}
+          onChange={e => setScriptName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
+          {scriptOptions.map(s =>
+            <MenuItem key={s.value || s.script_name} value={s.value || s.script_name}>
+              {s.label || s.script_name}
+            </MenuItem>
+          )}
+        </TextField>
+
+        {[
+          { label: 'Position', val: positionLimit, set: setPositionLimit, isHidden: marketName === 3 },
+          { label: 'Min Order', val: minOrder, set: setMinOrder },
+          { label: 'Max Order', val: maxOrder, set: setMaxOrder },
+          { label: 'Min Bet', val: minBet, set: setMinBet, isHidden: marketName === 3 },
+          { label: 'Max Bet', val: maxBet, set: setMaxBet, isHidden: marketName === 3 }
+        ].map(({ label, val, set, isHidden }) => (
+          <TextField
+            key={label}
+            label={label}
+            type="number"
+            value={val}
+            onChange={(e) => set(e.target.value)}
+            size="small"
+            fullWidth={isMobile}
+            sx={{ width: isMobile ? '100%' : 150, display: Boolean(isHidden) && 'none' }}
+          />
+        ))}
+      </Box>
+    )
+  }
+
+  function AddPossitionActionBtn() {
+    return (
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleSubmit}
+          sx={{ flex: 1, borderRadius: 1 }}
+        >
+          ADD
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleCancel}
+          sx={{ flex: 1, borderRadius: 1 }}
+        >
+          CANCEL
+        </Button>
+      </Box>
+    )
+  }
 
   return (
     <>
@@ -368,66 +439,23 @@ const EditDeleteLogs = () => {
         )}
 
         {/* Filters Section (Shared) */}
-        {showFilters && (
-          <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-            <TextField select label="Market" value={marketName}
-              onChange={e => setMarketName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
-              {marketOptions.map(m =>
-                <MenuItem key={m.market_type_id} value={m.market_type_id}>
-                  {m.market_type_name}
-                </MenuItem>
-              )}
-            </TextField>
-
-            <TextField select label="Script" value={scriptName}
-              onChange={e => setScriptName(e.target.value)} size="small" sx={{ width: isMobile ? '100%' : 180 }}>
-              {scriptOptions.map(s =>
-                <MenuItem key={s.value || s.script_name} value={s.value || s.script_name}>
-                  {s.label || s.script_name}
-                </MenuItem>
-              )}
-            </TextField>
-
-            {[
-              { label: 'Position', val: positionLimit, set: setPositionLimit, isHidden: marketName === 3 },
-              { label: 'Min Order', val: minOrder, set: setMinOrder },
-              { label: 'Max Order', val: maxOrder, set: setMaxOrder },
-              { label: 'Min Bet', val: minBet, set: setMinBet, isHidden: marketName === 3 },
-              { label: 'Max Bet', val: maxBet, set: setMaxBet, isHidden: marketName === 3 }
-            ].map(({ label, val, set, isHidden }) => (
-              <TextField
-                key={label}
-                label={label}
-                type="number"
-                value={val}
-                onChange={(e) => set(e.target.value)}
-                size="small"
-                fullWidth={isMobile}
-                sx={{ width: isMobile ? '100%' : 150, display: Boolean(isHidden) && 'none' }}
-              />
-            ))}
-
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleSubmit}
-                sx={{ flex: 1, borderRadius: 1 }}
-              >
-                ADD
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleCancel}
-                sx={{ flex: 1, borderRadius: 1 }}
-              >
-                CANCEL
-              </Button>
-            </Box>
-
-          </Box>
-        )}
+        {showFilters
+          ? isMobile
+            ? <Dialog open={showFilters} onClose={handleFilterToggle} fullWidth maxWidth="sm">
+              <DialogTitle>Add Position</DialogTitle>
+              <DialogContent>
+                <AddPosition />
+              </DialogContent>
+              <DialogActions>
+                <AddPossitionActionBtn />
+              </DialogActions>
+            </Dialog>
+            : <>
+              <AddPosition />
+              <AddPossitionActionBtn />
+            </>
+          : null
+        }
 
 
         {/* Logs Table or Cards */}
