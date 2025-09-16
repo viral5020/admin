@@ -35,12 +35,13 @@ export function getSibarContent(authData) {
   }
 
   // console.log('isStock', isStock);
-  console.log('isEmployeeLogin', isEmployeeLogin);
+  // console.log('isEmployeeLogin', isEmployeeLogin);
   // console.log('userType', userType);
   // console.log('emp_permission', emp_permission);
   // console.log('emp_permission?.includes("TRADE")', emp_permission?.includes('TRADE'));
+
   // ---------- Stock Trading Menu ----------
-  if (isStock && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && emp_permission?.includes('TRADE')))) { // && (isEmployeeLogin === false || usertype===4 && isEmployee === true && isPermisssion.include('TRADE'))
+  if (isStock && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && emp_permission?.includes('TRADE')))) {
     menu.push({
       key: 'stock_trading',
       name: 'Stock Trading',

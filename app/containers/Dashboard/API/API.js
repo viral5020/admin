@@ -21,6 +21,16 @@ async function getDefaultParams() {
   }
 }
 
+export const changePasswordApi = async (api, current_password, new_password, confirm_password) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const { data } = await axiosInstance.post(`/${api}`, { ...defaultParams, current_password, new_password, confirm_password });
+    return data;
+  } catch (err) {
+    console.error("Error fetching in changePassword:", err);
+  }
+};
+
 const getUserInfo = async () => {
   try {
     // Get IP Address

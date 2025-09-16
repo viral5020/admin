@@ -15,6 +15,15 @@ import Quote from '../Quote/Quote';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+// import { changePasswordApi } from 'app/containers/Dashboard/API/API.js'
+import { changePasswordApi } from '../../containers/Dashboard/API/API'
+
+
+const types = {
+  // userType: api for change password
+  default: 'ajaxfiles/change_password',
+  emp: 'ajaxfiles/change_emp_password',
+}
 
 const useStyles = makeStyles()((theme) => ({
   divider: {
@@ -35,6 +44,10 @@ function Favorites() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const userData = JSON.parse(sessionStorage.getItem('data'));
+
+  const api = userData?.isEmployeeLogin ? types.emp : types.default;
+
   // Form state
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -50,31 +63,6 @@ function Favorites() {
     setError('');
   };
 
-  async function handleChnagePassword(values) {
-    try {
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/change_password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-      console.log('API Response:', data);
-
-      if (data.status === 'ok') {
-        navigate('/app');
-      } else {
-        alert('Change failed: ' + (data.message || 'Invalid credentials'));
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Change error:', error);
-      alert('Something went wrong. Please try again.');
-    }
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { currentPassword, newPassword, confirmPassword } = formData;
@@ -88,23 +76,29 @@ function Favorites() {
       return;
     }
 
-    const auth_key = sessionStorage.getItem('auth_key');
-    const login_id = sessionStorage.getItem('login_id');
-    const user_id = sessionStorage.getItem('user_id');
+    try {
+      const response = await changePasswordApi(api, currentPassword, newPassword, confirmPassword);
 
-    const values = {
-      is_app: 1,
-      auth_key,
-      login_user_id: user_id,
-      current_password: currentPassword,
-      new_password: newPassword,
-      confirm_password: confirmPassword,
-    };
+      console.log('API Response:', response);
 
-    handleChnagePassword(values);
+      if (response.status === 'ok') {
+        alert(response.message);
+        navigate('/app');
+        setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setError('');
+      } else if (response.message === 'Current Password is wrong.') {
+        alert('Change failed: ' + (response.message));
+        navigate('/login');
+      } else if (response.message === 'Session Expired') {
+        alert('Change failed: ' + (response.message) + '. Please login again.');
+      } else {
+        alert('Change failed: ' + (response.message || 'Invalid credentials'));
+      }
 
-    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setError('');
+    } catch (error) {
+      console.error('Change error:', error);
+      alert('Something went wrong. Please try again.');
+    }
   };
 
   return (
