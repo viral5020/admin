@@ -35,22 +35,11 @@ console.log("Menu.js running...");
 
 
 export function getSibarContent() {
-  const rawData = sessionStorage.getItem("data");
-  let userType = null;
-
-  if (rawData) {
-    try {
-      const parsedData = JSON.parse(rawData);
-      userType = parseInt(parsedData.user_type, 10);
-    } catch (err) {
-      console.error("Error parsing session storage data:", err);
-    }
-  } else {
-    console.warn("No sessionStorage data found for key 'data'");
-  }
-
+  console.log("getSibarContent() {")
+  const userData = JSON.parse(sessionStorage.getItem("data"));
+  const userType = parseInt(userData.user_type, 10);
+  const { isEmployeePermission, isEmployeeLogin } = userData;
   console.log('userType:', userType);
-
 
   const notificationData = JSON.parse(sessionStorage.getItem("notification"));
   const isStock = notificationData?.isStock;
@@ -77,7 +66,7 @@ export function getSibarContent() {
   }
 
   // ---------- Stock Trading Menu ----------
-  if (isStock) {
+  if (isStock && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && isEmployeePermission?.include('TRADE')))) { // && (isEmployeeLogin === false || usertype===4 && isEmployee === true && isPermisssion.include('TRADE'))
     menu.push({
       key: 'stock_trading',
       name: 'Stock Trading',
@@ -177,7 +166,7 @@ export function getSibarContent() {
   }
 
   // ---------- Forex Menu ----------
-  if (isForex) {
+  if (isForex && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && isEmployeePermission?.include('TRADE')))) {
     menu.push({
       key: 'forex_trading',
       name: 'Forex Trading',
@@ -239,8 +228,7 @@ export function getSibarContent() {
   }
 
   // ---------- User Menu ----------
-
-  if (userType !== 1) {
+  if (userType !== 1) { // user === 'USERS'
     menu.push({
       key: 'user',
       name: 'User',
@@ -308,8 +296,7 @@ export function getSibarContent() {
   }
 
   // Utility Menu
-
-  if (userType !== 2) {
+  if (userType !== 2 && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && isEmployeePermission?.include('UTILITY')))) {
     menu.push({
       key: 'utility',
       name: 'Utility',
@@ -512,7 +499,12 @@ export function getSibarContent() {
     });
   }
 
-  if ((userType !== 1 && userType !== 2) && (isStock || isForex)) {
+  if (
+    (userType !== 1 && userType !== 2)
+    && (isStock || isForex)
+    && (!isEmployeeLogin
+      || (userType == 4 && isEmployeeLogin && isEmployeePermission?.include('SETTING'))
+    )) { // && isPermission.include('SETTING') 
     menu.push({
       key: 'Setting',
       name: 'Setting',
@@ -659,44 +651,6 @@ export function getSibarContent() {
       ]
     });
   }
-
-
-
-
-  // bulk tradind 1 na ho to dekhega and is stock or is forex
-  // bill filter 1 and 2 nai to dikhega
-  // trade edit deldte log is forex or is stock and user type 2 na ho to
-  // trade edit deldte log old is forex or is stock and 4 or 5
-  // user edit log 3    4   or 5 ho to dikhega
-  // IP address log 1 and 2 na ho to
-
-  // Admin login list 4 or5 ho to
-  // cash edit delet log  3 4 or5 ho to
-  // auto square up log is forex or is stock and 3 4 or 5
-  // cross trade log is forex or is stock and 3 4 or 5
-  // rejection log is forex or is stock and 2 an ho to
-  // valan 4 or 5 ho to dihega
-
-  // menu.push({
-  //   key: 'editDeleteLogs',
-  //   name: 'Edit Delete',
-  //   link: '/app/dashboard/edit-Delete-Logs',
-  //   icon: 'create-outline'
-  // });
-
-  // userType !== 2 && menu.push({
-  //   key: 'editDeleteLogs',
-  //   name: 'Banned/Blocked script',
-  //   link: '/app/dashboard/Banned-Blocked-Scripts',
-  //   icon: 'create-outline'
-  // });
-
-
-
-
-
-
-  // module.exports = menu;
 
   // console.log('menu', menu);
   return menu;

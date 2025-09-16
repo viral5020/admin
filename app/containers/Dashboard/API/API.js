@@ -7,49 +7,18 @@ import { constant, forex_market_type_id } from "../Watchlist/constant";
 async function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const { ip_address, user_agent } = await getUserInfo();
+  const { isEmployeeLogin, isEmployeeLoginId, login_string } = dataStored;
+
+  const emp_para = { isEmployeeLogin, isEmployeeLoginId, login_string };
 
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
     auth_key: dataStored?.auth_key,
     ip_address,
-    user_agent
+    user_agent,
+    ...(isEmployeeLogin ? emp_para : {})
   }
-}
-
-const eee = {
-  // "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-  // "ip_address": "116.74.117.150",
-  "is_app": "1",
-  "login_user_id": "41297",
-  "auth_key": "9QA0wn7z6W",
-  "market_type_id": "4",
-  "script_id": "7895546",
-  "script_expiry_id": "27287",
-  "trade_rate": "33",
-  "trade_qty": "22",
-  "trade_lot": "11",
-  "trade_type": 0,
-  "trade_type_x": 1,
-  "check_script_name": "NASDAQ",
-  "device_type": 0
-}
-
-const rrr = {
-  "auth_key": "{{auth_key}}",
-  "is_app": "1",
-  "login_user_id": "{{user_id}}",
-  "market_type_id": "1",
-  "script_id": "2",
-  "script_expiry_id": "27745",
-  "trade_rate": 113300,
-  "trade_qty": 30,
-  "trade_lot": 1,
-  "trade_type": 0,
-  "trade_type_x": "0", // buy sell
-  "check_script_name": "SILVER-I",
-  "device_type": 0,
-  "user_id": "41297"  // backed fix
 }
 
 const getUserInfo = async () => {

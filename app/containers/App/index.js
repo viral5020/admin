@@ -38,7 +38,7 @@ function App(props) {
             {/* <Route path="login" element={<Login />} /> */}
             <Route path="login" element={<LoginV2 />} />
             <Route path="login-v3" element={<LoginV2 />} />
-            <Route path="login-emp" element={<LoginV2 />} />
+            <Route path="login-v4" element={<LoginV2 />} />
             <Route path="mainadminlogin" element={<MainAdminlogin />} />
             {/* <Route path="login-v3" element={<LoginV3 />} /> */}
             <Route path="register" element={<Register />} />

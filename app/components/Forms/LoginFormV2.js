@@ -32,7 +32,7 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 const types = [
   { url: '/login', name: 'user', api: 'ajaxfiles/logincheck', username: '', password: 'Abcd1234' },
   { url: '/login-v3', name: 'Admin', api: 'main-ad98min-login/ad_min/login1/login_process', username: '34569', password: '66774422' },
-  { url: '/login-emp', name: 'Empolyee', api: 'employee-login/login_process', username: 'EMP', password: '' },
+  { url: '/login-v4', name: 'Empolyee', api: 'employee-login/login_process', username: '438997', password: 'aaaaaa' },
 ]
 
 function LoginFormV2() {
