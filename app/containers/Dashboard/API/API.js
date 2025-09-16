@@ -918,9 +918,8 @@ export const fetchNotificationAPI = async (isJustLogin, user_id, auth_key) => {
 
   try {
     const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...defaultParams });
-    // console.log('response.data', response.data);
-    isChanged(response.data);
-    sessionStorage.setItem('notification', JSON.stringify(response.data));
+    // isChanged(response.data);
+    return response.data;
   } catch (error) {
     console.error("Error in checkLogin:", error);
     throw error;

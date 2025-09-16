@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, NavLink, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -25,6 +25,7 @@ import logo from 'dan-images/logo.svg';
 
 
 import { useStyles } from 'dan-vendor/tss-react/mui';
+import { setUserData } from 'dan-redux/modules/authSlice';
 
 // validation functions
 /// validation functions
@@ -43,6 +44,7 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 });
 
 function Mainadminloginform() {
+    const dispatch = useDispatch();
     const deco = useSelector((state) => state.ui.decoration);
     const navigate = useNavigate();
 
@@ -70,6 +72,7 @@ function Mainadminloginform() {
 
                 if (isLoginSuccessful) {
                     sessionStorage.setItem('data', JSON.stringify(data));
+                    dispatch(setUserData(data));
                     // setTimeout(() => navigate('/app'), 400)
                     setTimeout(() => window.location.href = '/app', 1000);
                 } else {

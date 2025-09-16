@@ -25,8 +25,12 @@ import avatarApi from 'dan-api/images/avatars';
 import link from 'dan-api/ui/link';
 import useStyles from './header-jss';
 import { Typography } from 'dan-vendor/@mui/material';
+import { useDispatch } from 'react-redux';
+import { setUserData } from 'dan-redux/modules/authSlice';
 
 function UserMenu(props) {
+  const dispatch = useDispatch();
+
   const { classes, cx } = useStyles();
 
   const [menuState, setMenuState] = useState({ anchorEl: null, openMenu: null });
@@ -145,6 +149,8 @@ function UserMenu(props) {
 
       // 6️⃣ Replace session with merged data
       sessionStorage.setItem('data', JSON.stringify(newSessionData));
+      dispatch(setUserData(data));
+
       console.log('Session updated:', sessionStorage.getItem('data'));
 
       // 7️⃣ Close dialog and reload

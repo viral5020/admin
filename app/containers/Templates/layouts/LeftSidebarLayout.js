@@ -13,7 +13,7 @@ import { getSibarContent } from 'dan-api/ui/menu';
 // import menuItems from 'dan-api/ui/menu';
 import Decoration from '../Decoration';
 import useStyles from '../appStyles-jss';
-import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 function LeftSidebarLayout(props) {
   const { classes, cx } = useStyles();
@@ -33,32 +33,9 @@ function LeftSidebarLayout(props) {
     titleException,
     handleOpenGuide
   } = props;
-  const location = useLocation();
+  const auth = useSelector((state) => state.auth);
+  const dataMenu = getSibarContent(auth);
 
-  const dt = getSibarContent();
-  // console.log('dt', dt);// logs on every page changes
-  const [dataMenu, setDataMenu] = useState(dt);
-
-  const { user_id = null, auth_key = null } = location.state ?? {};
-  // console.log('location.pathname', location.pathname); // it doesnt log login path
-
-  useEffect(() => {
-    if (Boolean(user_id) && Boolean(auth_key)) {
-      console.log("Inside useEffect of LeftSidebarLayout.js");
-
-      const userInterval = setInterval(() => {
-        const newData = JSON.parse(sessionStorage.getItem("data"));
-        const newNotificationData = JSON.parse(sessionStorage.getItem("notification"));
-
-        if (newData && newNotificationData) {
-          clearInterval(userInterval);
-          const dd = getSibarContent();
-          console.log('dd', dd);
-          setDataMenu(dd);
-        }
-      }, 1000);
-    }
-  }, [location.pathname])
 
 
   return (

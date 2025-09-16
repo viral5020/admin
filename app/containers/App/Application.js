@@ -98,6 +98,7 @@ import Expiryvalidation from '../Dashboard/Expiryvalidation';
 import Notificationn from '../Dashboard/Notification';
 import Timesetting from '../Dashboard/Timesetting';
 import Levelimport from '../Dashboard/Levelimport';
+import { useSelector } from 'react-redux';
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -121,49 +122,14 @@ const OpenTrialBalanceNewTab = ({ userType }) => {
 };
 function Application(props) {
   const { history } = props;
+  const auth = useSelector((state) => state.auth);
   const changeMode = useContext(ThemeContext);
 
-  const [isStock, setIsStock] = useState();
-  const [isForex, setIsForex] = useState();
-
-  const [userType, setUserType] = useState();
-
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newData = JSON.parse(sessionStorage.getItem("notification"));
-      if (newData) {
-        clearInterval(interval);
-        setIsStock(newData?.isStock);
-        setIsForex(newData?.isForex);
-      }
-    }, 1000); // poll every second (or adjust as needed)
+  const isStock = auth.notificationData?.isStock;
+  const isForex = auth.notificationData?.isForex;
+  const userType = parseInt(auth.userData?.user_type, 10);;
 
 
-    const userInterval = setInterval(() => {
-      const newData = JSON.parse(sessionStorage.getItem("data"));
-      if (newData) {
-        clearInterval(userInterval);
-        const ddd = parseInt(newData?.user_type, 10);
-        setUserType(ddd);
-      }
-    }, 1000); // poll every second (or adjust as needed)
-
-    return () => clearInterval(interval) && clearInterval(userInterval);
-
-  }, []);
-
-  // useEffect(() => {
-  //   console.log('*** isForex', isForex);
-  // }, [isForex]);
-
-  // useEffect(() => {
-  //   console.log('*** isStock', isStock);
-  // }, [isStock]);
-
-  // useEffect(() => {
-  //   console.log('*** userType', userType);
-  // }, [userType]);
 
   return (
     <Dashboard history={history} changeMode={changeMode}>

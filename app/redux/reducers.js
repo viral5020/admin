@@ -16,12 +16,13 @@ import chat from '../containers/SampleApps/Chat/reducers/chatSlice';
 import ecommerce from '../containers/SampleApps/Ecommerce/reducers/ecommerceSlice';
 import calendar from '../containers/SampleApps/Calendar/reducers/calendarSlice';
 import taskboard from '../containers/SampleApps/TaskBoard/reducers/taskboardSlice';
-
+import authReducer from './modules/authSlice';
 /**
  * Merges the main reducer with the router state and dynamically injected reducers
  */
 export default combineSlices({
   ui: uiReducer,
+  auth: authReducer,
   treeTable,
   language,
   crudTable,

@@ -1,0 +1,37 @@
+Stock trading > if (isStock) && if(isForex) // && (isEmployeeLogin === false || usertype===4 && isEmployee === true && isPermisssion.include('trade'))
+
+// isEmployeeLogin true
+
+// isPermisssion
+
+// isemplogin
+// isemploginid
+// login_string
+
+function FunctionalCompoment(){
+
+....
+}
+
+----------------------------------------------------------
+Stock trading > if (isStock) && if(isForex) // && (isEmployeeLogin === false || usertype===4 && isEmployee === true && isPermisssion.include('trade'))
+
+// isEmployeeLogin true
+
+// isPermisssion
+
+// isemplogin
+// isemploginid
+// login_string
+
+function FunctionalCompoment(){
+
+....
+}
+
+
+
+
+
+----------------------------------------------------------
+----------------------------------------------------------

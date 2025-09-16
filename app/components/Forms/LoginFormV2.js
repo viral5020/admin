@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -16,6 +16,7 @@ import * as yup from 'yup';
 import brand from 'dan-api/dummy/brand';
 import logo from 'dan-images/logo.svg';
 import useStyles from './user-jss';
+import { setUserData } from 'dan-redux/modules/authSlice';
 // import { fetchNotificationAPI } from 'app/containers/Dashboard/API/API';
 // import { fetchNotificationAPI } from '../../containers/Dashboard/API/API';
 
@@ -36,6 +37,7 @@ const types = [
 ]
 
 function LoginFormV2() {
+  const dispatch = useDispatch();
   const deco = useSelector((state) => state.ui.decoration);
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,6 +67,7 @@ function LoginFormV2() {
 
         if (isLoginSuccessful) {
           sessionStorage.setItem('data', JSON.stringify(data));
+          dispatch(setUserData(data));
 
           // Adjust this property name to match the API response exactly
           const { user_id, auth_key } = data;

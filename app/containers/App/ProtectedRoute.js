@@ -1,8 +1,11 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { checkLoginAPI, fetchNotificationAPI } from '../Dashboard/API/API';
+import { useDispatch } from 'react-redux';
+import { setEmp_permission, setNotificationData } from 'dan-redux/modules/authSlice';
 
 const ProtectedRoute = () => {
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const [isPageShown, setIsPageShown] = useState(false);
@@ -12,9 +15,14 @@ const ProtectedRoute = () => {
   const isJustLogin = Boolean(user_id) && Boolean(auth_key);
 
   async function isProtected() {
-    !isJustLogin ? await fetchNotificationAPI() : await fetchNotificationAPI(isJustLogin, user_id, auth_key);
+    const notificationData = !isJustLogin ? await fetchNotificationAPI() : await fetchNotificationAPI(isJustLogin, user_id, auth_key);
+    dispatch(setNotificationData(notificationData));
+    sessionStorage.setItem('notification', JSON.stringify(notificationData));
 
     const response = !isJustLogin ? await checkLoginAPI() : await checkLoginAPI(isJustLogin, user_id, auth_key);
+    dispatch(setEmp_permission(response?.emp_permission || []));
+
+    // console.log("await checkLoginAPI()");
 
     if (response.status !== 'ok') {
       setIsPageShown(false);
