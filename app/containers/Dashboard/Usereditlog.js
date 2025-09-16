@@ -12,7 +12,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
-import { tradeEditLoglistAPI } from './API/API';
+import { fetchBasicLogAPI, fetchBrokerageLogAPI, fetchMarketLogAPI, tradeEditLoglistAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
@@ -84,58 +84,57 @@ const Usereditlog = () => {
         setBasicLoading(true);
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/setting/user_basic_edit_log", {
-                is_app: "1",
+            const data = await fetchBasicLogAPI({
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
                 user_id: log.user_id,
                 log_datetime: log.log_time
             });
-            setBasicDetails(response.data.data);
-        } catch (error) {
-            console.error("Failed to fetch basic details", error);
+            setBasicDetails(data);
+        } catch {
+            toast.error("Failed to fetch basic details");
         } finally {
             setBasicLoading(false);
         }
     };
 
+    // Brokerage details
     const handleBrokerageClick = async (log) => {
         setSelectedLog(log);
         setOpenBrokerage(true);
         setBrokerageLoading(true);
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/setting/user_commission_edit_log", {
-                is_app: "1",
+            const data = await fetchBrokerageLogAPI({
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
                 user_id: log.user_id,
                 log_datetime: log.log_time
             });
-            setBrokerageDetails(response.data.data);
-        } catch (error) {
-            console.error("Failed to fetch brokerage details", error);
+            setBrokerageDetails(data);
+        } catch {
+            toast.error("Failed to fetch brokerage details");
         } finally {
             setBrokerageLoading(false);
         }
     };
 
+    // Market details
     const handleMarketClick = async (log) => {
         setSelectedLog(log);
         setOpenMarket(true);
         setMarketLoading(true);
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/setting/user_market_edit_log", {
-                is_app: "1",
+            const data = await fetchMarketLogAPI({
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
                 user_id: log.user_id,
                 log_datetime: log.log_time
             });
-            setMarketDetails(response.data.data);
-        } catch (error) {
-            console.error("Failed to fetch market details", error);
+            setMarketDetails(data);
+        } catch {
+            toast.error("Failed to fetch market details");
         } finally {
             setMarketLoading(false);
         }

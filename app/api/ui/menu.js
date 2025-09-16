@@ -103,7 +103,7 @@ export function getSibarContent() {
             key: 'previous',
             name: 'previous valan trade',
             link: '/app/dashboard/previous-valan-trade',
-            icon: 'cube-outline'
+            icon: 'documents-outline'
           }]
           : []),
 
@@ -157,7 +157,7 @@ export function getSibarContent() {
             key: 'Brokrage refresh',
             name: 'Brokrage refresh',
             link: '/app/dashboard/Brokrage-refresh',
-            icon: 'reader-outline'
+            icon: 'calendar-outline'
           }]
           : []),
 
@@ -201,7 +201,7 @@ export function getSibarContent() {
             key: 'positions',
             name: 'previous valan trade',
             link: '/app/dashboard/forex-previous-valan-trade',
-            icon: 'cube-outline'
+            icon: 'documents-outline'
           }]
           : []),
 
@@ -279,7 +279,7 @@ export function getSibarContent() {
             key: 'employee_listing',
             name: 'Employe Listing',
             link: '/app/dashboard/Employe-Listing',
-            icon: 'cube-outline'
+            icon: 'id-card-outline'
           }]
           : []),
 
@@ -315,7 +315,7 @@ export function getSibarContent() {
             key: 'bill-filter',
             name: 'Bill filter',
             link: '/app/dashboard/bill-filter',
-            icon: 'receipt-outline'
+            icon: 'color-filter-outline'
           }]
           : []),
         ...(userType !== 2 && (isForex || isStock)
@@ -323,7 +323,7 @@ export function getSibarContent() {
             key: 'trade-edit-delete-log',
             name: 'Trade edit delete log',
             link: '/app/dashboard/trade-edit-delete-log',
-            icon: 'receipt-outline'
+            icon: 'create-outline'
           }]
           : []),
         ...((userType === 4 || userType === 5) && (isForex || isStock)
@@ -331,7 +331,7 @@ export function getSibarContent() {
             key: 'trade-edit-delete-log-old',
             name: 'Trade edit delete log old',
             link: '/app/dashboard/trade-edit-delete-log-old',
-            icon: 'receipt-outline'
+            icon: 'create-outline'
           }]
           : []),
         ...(userType === 3 || userType === 4 || userType === 5
@@ -339,7 +339,7 @@ export function getSibarContent() {
             key: 'user-edit-log',
             name: 'User edit log',
             link: '/app/dashboard/user-edit-log',
-            icon: 'receipt-outline'
+            icon: 'person-outline'
           }]
           : []),
         ...(userType !== 2 && userType !== 1
@@ -347,7 +347,7 @@ export function getSibarContent() {
             key: 'ip-address-log',
             name: 'IP address log',
             link: '/app/dashboard/ip-address-log',
-            icon: 'receipt-outline'
+            icon: 'hardware-chip-outline'
           }]
           : []),
         ...(userType === 4 && userType === 5
@@ -363,7 +363,7 @@ export function getSibarContent() {
             key: 'cash-edit-delete-log',
             name: 'Cash edit delete log',
             link: '/app/dashboard/cash-edit-delete-log',
-            icon: 'receipt-outline'
+            icon: 'cash-outline'
           }]
           : []),
         ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
@@ -371,7 +371,7 @@ export function getSibarContent() {
             key: 'auto-square-up-log',
             name: 'Auto Square Up log',
             link: '/app/dashboard/auto-square-up-log',
-            icon: 'receipt-outline'
+            icon: 'albums-outline'
           }]
           : []),
         ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
@@ -379,7 +379,7 @@ export function getSibarContent() {
             key: 'cross-trade-log',
             name: 'Cross trade log',
             link: '/app/dashboard/cross-trade-log',
-            icon: 'receipt-outline'
+            icon: 'swap-horizontal-outline'
           }]
           : []),
         ...(userType !== 2 && (isForex || isStock)
@@ -421,7 +421,7 @@ export function getSibarContent() {
             key: 'ledger',
             name: 'Cash Ledger',
             link: '/app/Cash-ledger',
-            icon: 'time-outline'
+            icon: 'wallet-outline'
           }]
           : []),
 
@@ -439,7 +439,7 @@ export function getSibarContent() {
             key: 'forexpositions',
             name: 'Cash Entry',
             link: '/app/dashboard/Cash-Entry',
-            icon: 'cube-outline'
+            icon: 'cash-outline'
           }]
           : []),
 
@@ -448,7 +448,7 @@ export function getSibarContent() {
             key: 'add_account',
             name: 'Trial Balance',
             link: '/app/dashboard/Trial-balance',
-            icon: 'add-circle-outline'
+            icon: 'folder-outline'
           }]
           : []),
 
@@ -456,7 +456,7 @@ export function getSibarContent() {
           ? [{
             key: 'add_account',
             name: 'Trial Balance',
-            icon: 'add-circle-outline',
+            icon: 'folder-outline',
             link: (() => {
               const dataStored = JSON.parse(sessionStorage.getItem("data"));
               if (!dataStored) return "#";
@@ -492,7 +492,7 @@ export function getSibarContent() {
             key: 'ledger',
             name: 'Ledger Report',
             link: '/app/ledger-report',
-            icon: 'time-outline'
+            icon: 'clipboard-outline'
           }]
           : []),
       ]
@@ -514,21 +514,21 @@ export function getSibarContent() {
           key: 'ledger',
           name: 'Script Wise Lot Setting',
           link: '/app/dashboard/Script-Wise-Lot-Setting',
-          icon: 'time-outline'
+          icon: 'albums-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'Add Script',
           name: 'Add Script',
           link: '/app/dashboard/Add-Script',
-          icon: 'receipt-outline'
+          icon: 'duplicate-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'Add Expiry',
           name: 'Add Expiry',
           link: '/app/dashboard/Add-Expiry',
-          icon: 'cube-outline'
+          icon: 'enter-outline'
         }] : []),
 
         // only userType === 3
@@ -536,14 +536,14 @@ export function getSibarContent() {
           key: 'Edit Expiry',
           name: 'Edit Expiry',
           link: '/app/dashboard/Edit-Expiry',
-          icon: 'add-circle-outline'
+          icon: 'pencil-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'Edit Script',
           name: 'Edit Script',
           link: '/app/dashboard/Edit-Script',
-          icon: 'time-outline'
+          icon: 'timer-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
@@ -557,7 +557,7 @@ export function getSibarContent() {
           key: 'CNBD Awaaz',
           name: 'CNBD Awaaz',
           link: '/app/dashboard/CNBD-Awaaz',
-          icon: 'time-outline'
+          icon: 'link-outline'
         }] : []),
 
 
@@ -565,7 +565,7 @@ export function getSibarContent() {
           key: 'order limit',
           name: 'order limit',
           link: '/app/dashboard/Order-Limit',
-          icon: 'time-outline'
+          icon: 'clipboard-outline'
         },
 
         // visible if forex/stock enabled
@@ -573,7 +573,7 @@ export function getSibarContent() {
           key: 'block/allowed',
           name: 'Block/allowed  Script',
           link: '/app/dashboard/Blocked-Allowed-Script',
-          icon: 'time-outline'
+          icon: 'warning-outline'
         }] : []),
 
         // only userType === 4
@@ -581,14 +581,14 @@ export function getSibarContent() {
           key: 'stop future trading',
           name: 'Stop future trading',
           link: '/app/dashboard/Stop-future-trading',
-          icon: 'time-outline'
+          icon: 'receipt-outline'
         }] : []),
 
         ...(userType !== 3 && (isForex || isStock) ? [{
           key: 'split script',
           name: 'Split script',
           link: '/app/dashboard/Split-script',
-          icon: 'time-outline'
+          icon: 'shuffle-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
@@ -602,28 +602,28 @@ export function getSibarContent() {
           key: 'MARQUEE',
           name: 'MARQUEE',
           link: '/app/dashboard/MARQUEE',
-          icon: 'time-outline'
+          icon: 'chatbox-ellipses-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'expiry validation',
           name: 'expiry validation',
           link: '/app/dashboard/Expiry-Validation',
-          icon: 'time-outline'
+          icon: 'alert-circle-outline'
         }] : []),
 
         ...(userType === 4 || userType === 5 ? [{
           key: 'notifcation',
           name: 'Notifcation',
           link: '/app/dashboard/Notifcation',
-          icon: 'time-outline'
+          icon: 'notifications-outline'
         }] : []),
 
         ...(userType === 4 || userType === 5 ? [{
           key: 'level import',
           name: 'level import',
           link: '/app/dashboard/level-import',
-          icon: 'time-outline'
+          icon: 'document-attach-outline'
         }] : []),
 
         ...(userType === 3 ? [{
@@ -637,7 +637,7 @@ export function getSibarContent() {
           key: 'time setting',
           name: 'Time Setting',
           link: '/app/dashboard/Time-Setting',
-          icon: 'time-outline'
+          icon: 'alarm-outline'
         }] : []),
 
         ...(userType !== 2 && userType !== 4 && userType !== 5

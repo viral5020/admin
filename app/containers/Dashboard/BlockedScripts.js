@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import axios from "axios";
-import { setScriptBlockSettingAPI } from "./API/API";
+import { fetchBlockedScriptsAPI, setScriptBlockSettingAPI } from "./API/API";
 import MarketScriptNameFilter from "./filters/MarketScriptNameFilter";
 import { formatScriptIds } from "./helpers/utilFunc";
 
@@ -41,29 +41,15 @@ const OrderPage = () => {
 
     setLoading(true);
     try {
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored.user_id,
+      const result = await fetchBlockedScriptsAPI({
+        user_id: dataStored.user_id,
         auth_key: dataStored.auth_key,
-        market: selectedMarket?.name || "",
-        script_id: formatScriptIds(script),
-        search_text: searchText.trim(),
-      };
+        selectedMarket,     // make sure you have this state/prop
+        script,             // make sure you have this state/prop
+        searchText,
+        formatScriptIds,    // pass your helper function here
+      });
 
-      console.log("🔍 Fetching with payload:", payload);
-
-      const response = await fetch(
-        "http://128.199.126.171/~goldorg/ajaxfiles/setting/list_block_script.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await response.json();
       if (result.status === "ok") {
         setPositionData(result.data || []);
       } else {
@@ -71,7 +57,6 @@ const OrderPage = () => {
         setPositionData([]);
       }
     } catch (err) {
-      console.error("❌ Failed to fetch position data", err);
       setPositionData([]);
     } finally {
       setLoading(false);

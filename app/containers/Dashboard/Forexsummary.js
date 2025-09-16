@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchforexSummaryReportAPI } from "./API/API";
+import { fetchforexSummaryReportAPI, fetchLedgerDetailsAPI } from "./API/API";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -72,21 +72,16 @@ const Summary_report = () => {
   const fetchLedgerDetails = async (userId) => {
     setLoadingLedger(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
+
     try {
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored?.user_id,
+      const result = await fetchLedgerDetailsAPI({
+        user_id: dataStored?.user_id,
         auth_key: dataStored?.auth_key,
-        user_id: userId,
-      };
+        targetUserId: userId,
+      });
 
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill",
-        payload
-      );
-
-      if (response.data.status === "ok" && Array.isArray(response.data.data)) {
-        const filtered = response.data.data.filter(
+      if (result.status === "ok" && Array.isArray(result.data)) {
+        const filtered = result.data.filter(
           (item) => item.valan_name !== "Opening Balance"
         );
         setLedgerDetails(filtered);
@@ -94,7 +89,6 @@ const Summary_report = () => {
         setLedgerDetails([]);
       }
     } catch (err) {
-      console.error("Error fetching ledger details:", err);
       setLedgerDetails([]);
     } finally {
       setLoadingLedger(false);

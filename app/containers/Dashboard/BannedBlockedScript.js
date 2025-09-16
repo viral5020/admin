@@ -6,6 +6,7 @@ import {
   useTheme,
   CircularProgress,
 } from "@mui/material";
+import { fetchPositionDataAPI } from "./API/API";
 
 const BannedBlockedScript = () => {
   const theme = useTheme();
@@ -25,29 +26,14 @@ const BannedBlockedScript = () => {
 
     setLoading(true);
     try {
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored.user_id,
+      const result = await fetchPositionDataAPI({
+        user_id: dataStored.user_id,
         auth_key: dataStored.auth_key,
-        market: selectedMarket?.name || "",
-        scripts: selectedScripts.map((s) => s.name).join(","),
-        sSearch: searchText.trim(),
-      };
+        selectedMarket,     // make sure you have this state/prop
+        selectedScripts,    // make sure you have this state/prop
+        searchText,
+      });
 
-      console.log("🔍 Fetching with payload:", payload);
-
-      const response = await fetch(
-        "http://128.199.126.171/~goldorg/ajaxfiles/get_script_wise_qty1",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await response.json();
       if (result.status === "ok") {
         setPositionData(result.script_list || []);
       } else {
@@ -55,7 +41,6 @@ const BannedBlockedScript = () => {
         setPositionData([]);
       }
     } catch (err) {
-      console.error("❌ Failed to fetch position data", err);
       setPositionData([]);
     } finally {
       setLoading(false);

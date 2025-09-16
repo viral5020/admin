@@ -22,7 +22,7 @@ import {
     IconButton,
     RadioGroup,
 } from '@mui/material';
-import { fetchOrderlimitAPI, fetchRejectionLogsAPI } from './API/API';
+import { addClientOrderLimitAPI, deleteClientOrderLimitAPI, fetchOrderlimitAPI, fetchRejectionLogsAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
@@ -130,30 +130,20 @@ const Orderlimit = () => {
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+            const response = await addClientOrderLimitAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 market_type_id: typeof addMarket === "object" ? addMarket.id || addMarket.value : addMarket,
                 script_id: typeof addScript === "object" ? addScript.id || addScript.value : addScript,
-                user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
+                client_user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
                 master_user_id: addMaster && typeof addMaster === "object" ? addMaster.id : addMaster || "",
                 price_percent: valueType === 1 ? addPricePercent : 0,
                 value: valueType === 0 ? addValue : 0,
-            };
+            });
 
-            console.log("🔹 Sending payload to add_client_order_limit:", payload);
+            console.log("✅ API add_client_order_limit response:", response);
 
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_client_order_limit",
-                payload
-            );
-
-            console.log("✅ API add_client_order_limit response:", response.data);
-
-            // Refresh table immediately after closing
-            fetchPageData();
-
+            fetchPageData(); // refresh table immediately
         } catch (error) {
             console.error("❌ Add failed:", error);
             if (error.response) console.error("🔻 Error response:", error.response.data);
@@ -167,25 +157,15 @@ const Orderlimit = () => {
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+            const response = await deleteClientOrderLimitAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 client_order_id: selectedLog.client_order_limit_id || selectedLog.id,
-            };
+            });
 
-            console.log("🔹 Sending payload to delete_client_order_limit:", payload);
+            console.log("✅ API delete_client_order_limit response:", response);
 
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/delete_client_order_limit",
-                payload
-            );
-
-            console.log("✅ API delete_client_order_limit response:", response.data);
-
-            // Refresh table immediately after closing
-            fetchPageData();
-
+            fetchPageData(); // refresh table immediately
         } catch (error) {
             console.error("❌ Delete failed:", error);
             if (error.response) console.error("🔻 Error response:", error.response.data);

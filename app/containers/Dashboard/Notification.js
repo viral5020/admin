@@ -10,6 +10,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import { addNotificationAPI } from "./API/API";
 
 const Notificationn = () => {
     const [commonFormData, setCommonFormData] = useState({
@@ -68,26 +69,21 @@ const Notificationn = () => {
         const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
 
         try {
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_notification",
-                {
-                    is_app: 1,
-                    login_user_id: dataStored?.user_id || "",
-                    auth_key: dataStored?.auth_key || "",
-                    user_type: userTypeString,
-                    title,
-                    message,
-                }
-            );
+            const result = await addNotificationAPI({
+                user_id: dataStored?.user_id || "",
+                auth_key: dataStored?.auth_key || "",
+                user_type: userTypeString,
+                title,
+                message,
+            });
 
-            if (response.data.status === "success") {
+            if (result.status === "success") {
                 toast.success("Notification added successfully!");
                 resetForm();
             } else {
-                toast.error(response.data.message || "Failed to add notification");
+                toast.error(result.message || "Failed to add notification");
             }
         } catch (error) {
-            console.error("API Error:", error);
             toast.error("Something went wrong while saving notification");
         }
     };

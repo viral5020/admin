@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { uploadUserTypeQtyMasterAPI } from './API/API'
 
 const Masterqtysetting = () => {
     const [file, setFile] = useState(null)
@@ -10,31 +11,23 @@ const Masterqtysetting = () => {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (!file) {
-            setMessage('Please select a CSV file first.')
-            return
+            setMessage("Please select a CSV file first.");
+            return;
         }
-
-        const formData = new FormData()
-        formData.append('file', file)
 
         try {
-            setLoading(true)
-            setMessage('')
-            const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty_master', {
-                method: 'POST',
-                body: formData
-            })
-            const data = await response.json()
-            setMessage(`✅ ${data.message || 'File uploaded successfully.'}`)
+            setLoading(true);
+            setMessage("");
+            const data = await uploadUserTypeQtyMasterAPI(file);
+            setMessage(`✅ ${data.message || "File uploaded successfully."}`);
         } catch (err) {
-            console.error(err)
-            setMessage('❌ Upload failed. Please try again.')
+            setMessage("❌ Upload failed. Please try again.");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     // Inline styles
     const containerStyle = {

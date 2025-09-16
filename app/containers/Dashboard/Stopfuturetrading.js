@@ -27,7 +27,7 @@ import axios from 'axios';
 
 import FilterBtn from './filters/FilterBtn';
 import BackToTop from './helpers/BackToTop';
-import { StopfuturelistAPI } from './API/API';
+import { deleteFutureTradingBlockAPI, StopfuturelistAPI } from './API/API';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
 import Pagination from './filters/Pagination';
 import Stopfuturefilter from './Utility/Stopfuturefilter';
@@ -69,28 +69,23 @@ const Stopfuturetrading = () => {
     // ✅ Delete handler (common for desktop + mobile)
     const handleDelete = async (future_id) => {
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
-            const payload = {
+            const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
+
+            const result = await deleteFutureTradingBlockAPI({
                 future_id,
-                login_user_id: dataStored.user_id ?? '',
-                auth_key: dataStored.auth_key ?? '',
-                is_app: 1,
-            };
+                user_id: dataStored.user_id ?? "",
+                auth_key: dataStored.auth_key ?? "",
+            });
 
-            const response = await axios.post(
-                'http://128.199.126.171/~goldorg/setting/remove_future_trading_block',
-                payload
-            );
-
-            if (response.data?.status === 'ok') {
-                toast.success('Future block deleted!', { position: 'top-right', autoClose: 3000 });
+            if (result?.status === "ok") {
+                toast.success("Future block deleted!", { position: "top-right", autoClose: 3000 });
                 setLogs((prev) => prev.filter((item) => item.future_id !== future_id));
             } else {
-                toast.error('Failed to delete!', { position: 'top-right', autoClose: 3000 });
+                toast.error("Failed to delete!", { position: "top-right", autoClose: 3000 });
             }
         } catch (error) {
-            console.error('Error deleting:', error);
-            toast.error('Error deleting future block!', { position: 'top-right', autoClose: 3000 });
+            console.error("Error deleting:", error);
+            toast.error("Error deleting future block!", { position: "top-right", autoClose: 3000 });
         }
     };
 

@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ValanFilter from './ValanFilter';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import FilterBtn from './filters/FilterBtn';
-import { post } from './API/API'; // You can create a post wrapper around fetch/axios
+import { confirmTradeAPI, post } from './API/API'; // You can create a post wrapper around fetch/axios
 
 const Brokrageref = ({ filterShow = true }) => {
     const theme = useTheme();
@@ -67,28 +67,18 @@ const Brokrageref = ({ filterShow = true }) => {
     };
 
     const confirmTrade = async () => {
-        const payload = {
-            is_app: 1,
-            login_user_id: parsedData?.user_id,
-            auth_key: parsedData?.auth_key,
-            broker_id: broker?.id || "",
-            master_id: master?.id || "",
-            user_id: client?.id || '',
-            valan_id: valanId?.id || "",
-            password: password
-        };
-
         try {
-            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/brokerage_refresh", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
+            const result = await confirmTradeAPI({
+                user_id: parsedData?.user_id,
+                auth_key: parsedData?.auth_key,
+                broker,
+                master,
+                client,
+                valanId,
+                password,
             });
 
-            const data = await response.json();
-            console.log("API Response:", data);
+            console.log("API Response:", result);
             setDialogOpen(false);
         } catch (err) {
             console.error("Error calling API:", err);

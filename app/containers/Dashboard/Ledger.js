@@ -12,6 +12,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { CircularProgress } from '@mui/material';
+import { fetchLedgerAPI, fetchSportsLedgerAPI } from './API/API';
 
 const LedgerPage = () => {
   const [tab, setTab] = useState(0);
@@ -51,20 +52,21 @@ const LedgerPage = () => {
   const bgPaper = theme.palette.background.paper;
 
   // --- Fetch Ledger ---
+
   const fetchLedger = async () => {
     setLoading(true);
+
     try {
       const selectedUserId = sessionStorage.getItem("selectedUserId");
-      const response = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_valan_wise_ledger.php', {
-        ...filters,
-        is_app: '1',
-        login_user_id: dataStored?.user_id,
+      const result = await fetchLedgerAPI({
+        user_id: dataStored?.user_id,
         auth_key: dataStored?.auth_key,
-        user_id: selectedUserId,
+        selectedUserId,
+        filters,
       });
 
-      if (response.data.status === "ok") {
-        const data = response.data.data;
+      if (result.status === "ok") {
+        const data = result.data;
         const otherEntries = data.filter(item => item.valan_name !== "Opening Balance");
         const opening = data.find(item => item.valan_name === "Opening Balance");
 
@@ -73,7 +75,7 @@ const LedgerPage = () => {
         setBalanceAmount(otherEntries.reduce((sum, d) => sum + (parseFloat(d.debit) || 0), 0));
       }
     } catch (err) {
-      console.error('Ledger fetch error', err);
+      console.error("Ledger fetch error", err);
     } finally {
       setLoading(false);
     }
@@ -82,22 +84,18 @@ const LedgerPage = () => {
   // --- Fetch Sports Ledger ---
   const fetchSportsLedger = async () => {
     setLoading(true);
+
     try {
-      const response = await axios.post('http://128.199.126.171/~goldorg/datatables/cricket_account_statement', {
-        is_app: "1",
-        login_user_id: dataStored?.user_id,
+      const result = await fetchSportsLedgerAPI({
+        user_id: dataStored?.user_id,
         auth_key: dataStored?.auth_key,
-        sEcho: 1,
-        iDisplayStart: 0,
-        iDisplayLength: 100,
-        sSearch: ""
       });
 
-      if (response.data?.aaData) {
-        setSportsData(response.data.aaData);
+      if (result?.aaData) {
+        setSportsData(result.aaData);
       }
     } catch (err) {
-      console.error('Sports fetch error', err);
+      console.error("Sports fetch error", err);
     } finally {
       setLoading(false);
     }

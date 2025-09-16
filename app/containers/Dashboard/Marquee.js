@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Grid, Button, TextField, useTheme } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { updateMarqueeMessageAPI } from './API/API';
 
 const Marquee = () => {
     const theme = useTheme();
@@ -11,49 +12,29 @@ const Marquee = () => {
 
     const handleSubmit = async () => {
         if (!message) {
-            toast.warning('Please enter a message.', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
+            toast.warning("Please enter a message.", { position: "top-right", autoClose: 3000 });
             return;
         }
 
-        const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
-
-        const payload = {
-            message,
-            is_app: 1,
-            login_user_id: dataStored.user_id ?? '',
-            auth_key: dataStored.auth_key ?? '',
-        };
-
-        console.log('Payload:', payload);
+        const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
 
         try {
-            const response = await axios.post(
-                'http://128.199.126.171/~goldorg/ajaxfiles/setting/marquee_add',
-                payload
-            );
-            console.log('API Response:', response.data);
+            const result = await updateMarqueeMessageAPI({
+                user_id: dataStored.user_id ?? "",
+                auth_key: dataStored.auth_key ?? "",
+                message,
+            });
 
-            if (response.data.success) {
-                toast.success('message updated successfully!', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
-                setmessage('');
+            console.log("API Response:", result);
+
+            if (result.success) {
+                toast.success("Message updated successfully!", { position: "top-right", autoClose: 3000 });
+                setmessage("");
             } else {
-                toast.error('Failed to update message. Please try again.', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
+                toast.error("Failed to update message. Please try again.", { position: "top-right", autoClose: 3000 });
             }
         } catch (error) {
-            console.error('Error updating message:', error);
-            toast.error('An error occurred while updating message.', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
+            toast.error("An error occurred while updating message.", { position: "top-right", autoClose: 3000 });
         }
     };
 

@@ -26,7 +26,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import AddIcon from '@mui/icons-material/Add';
-import { addPosition } from './API/API';
+import { addPosition, fetchMarketWatchFiltersAPI, fetchScriptQtyListAPI, fetchUserLevelsAPI } from './API/API';
 import Pagination from './filters/Pagination';
 
 const marketChipStyles = {
@@ -84,33 +84,29 @@ const EditDeleteLogs = () => {
   const fetchPageData = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    try {
-      const response = await axios.post(
-        'http://128.199.126.171/~goldorg/datatables/script_qty_list',
-        {
-          is_app: '1',
-          login_user_id: dataStored?.user_id,
-          auth_key: dataStored?.auth_key,
-          sEcho: 1,
-          iDisplayStart: currentPage * pageSize,
-          iDisplayLength: pageSize,
-          sSearch: searchText,
-          user_level: selectedUserLevel,
-          market_name: marketName,
-          script_name: scriptName,
-          position_limit: positionLimit,
-          min_order: minOrder,
-          max_order: maxOrder,
-          min_bet: minBet,
-          max_bet: maxBet,
-        }
-      );
 
-      const newData = response.data.aaData || [];
+    try {
+      const result = await fetchScriptQtyListAPI({
+        user_id: dataStored?.user_id,
+        auth_key: dataStored?.auth_key,
+        currentPage,
+        pageSize,
+        searchText,
+        selectedUserLevel,
+        marketName,
+        scriptName,
+        positionLimit,
+        minOrder,
+        maxOrder,
+        minBet,
+        maxBet,
+      });
+
+      const newData = result.aaData || [];
       setLogs(newData);
-      setTotalRecords(response.data.iTotalRecords || 0);
+      setTotalRecords(result.iTotalRecords || 0);
     } catch (err) {
-      console.error('Failed to fetch logs:', err);
+      console.error("Failed to fetch logs:", err);
     } finally {
       setLoading(false);
       setIsFilterChange(false);
@@ -122,33 +118,34 @@ const EditDeleteLogs = () => {
 
     const fetchUserLevels = async () => {
       try {
-        const res = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_user_level', {
-          is_app: '1',
-          login_user_id: dataStored?.user_id,
+        const levels = await fetchUserLevelsAPI({
+          user_id: dataStored?.user_id,
           auth_key: dataStored?.auth_key,
         });
-        const levels = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
         setUserLevels(levels);
       } catch (err) {
-        console.error('Failed to fetch user levels:', err);
+        console.error("Failed to fetch user levels:", err);
       }
     };
 
     const fetchFilters = async () => {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
       try {
-        const res = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter', {
-          is_app: '1',
-          login_user_id: dataStored?.user_id,
+        const res = await fetchMarketWatchFiltersAPI({
+          user_id: dataStored?.user_id,
           auth_key: dataStored?.auth_key,
         });
 
-        const staticMarket = { value: "3", label: "Cricket", market_type_id: 3, market_type_name: "Cricket" };
-        const marketList = Array.isArray(res.data?.market_type) ? res.data.market_type : [];
-        const scriptList = Array.isArray(res.data?.script_list) ? res.data.script_list : [];
+        const staticMarket = {
+          value: "3",
+          label: "Cricket",
+          market_type_id: 3,
+          market_type_name: "Cricket",
+        };
+
+        const marketList = Array.isArray(res.market_type) ? res.market_type : [];
+        const scriptList = Array.isArray(res.script_list) ? res.script_list : [];
 
         const updatedMarkets = [...marketList, staticMarket];
-
         let updatedScripts = [...scriptList];
 
         if (marketName === "3") {
@@ -162,10 +159,9 @@ const EditDeleteLogs = () => {
         setMarketOptions(updatedMarkets);
         setScriptOptions(updatedScripts);
       } catch (err) {
-        console.error('Failed to fetch filters:', err);
+        console.error("Failed to fetch filters:", err);
       }
     };
-
 
     fetchUserLevels();
     fetchFilters();

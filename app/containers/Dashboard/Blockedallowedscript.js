@@ -16,7 +16,7 @@ import {
     DialogContentText,
     DialogActions,
 } from '@mui/material';
-import { fetchBlockedAllowedAPI } from './API/API';
+import { addClientBlockScriptAPI, deleteClientBlockScriptAPI, fetchBlockedAllowedAPI, removeSelectedClientBlockScriptAPI } from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import Blockedallowedscriptfilter from './Utility/Blockedallowedscriptfilter';
@@ -86,20 +86,15 @@ const Blockedallowedscript = () => {
         handleCloseAddDialog();
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+
+            await addClientBlockScriptAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 market_type_id: typeof addMarket === "object" ? addMarket.id || addMarket.value : addMarket,
                 script_id: typeof addScript === "object" ? addScript.id || addScript.value : addScript,
-                user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
+                client_user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
                 master_user_id: addMaster && typeof addMaster === "object" ? addMaster.id : addMaster || "",
-            };
-
-            await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_client_block_script_setting",
-                payload
-            );
+            });
 
             fetchPageData();
         } catch (error) {
@@ -107,22 +102,17 @@ const Blockedallowedscript = () => {
         }
     };
 
-    // ------------------- Delete Order -------------------
+    // Delete
     const handleConfirmDelete = async () => {
         handleCloseConfirm();
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+
+            await deleteClientBlockScriptAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 client_block_script_id: selectedLog.client_block_script_id || selectedLog.id,
-            };
-
-            await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block_script_setting",
-                payload
-            );
+            });
 
             fetchPageData();
         } catch (error) {
@@ -130,25 +120,20 @@ const Blockedallowedscript = () => {
         }
     };
 
-    // ------------------- Remove Selected -------------------
+    // Remove selected
     const handleConfirmRemoveSelected = async () => {
         handleCloseRemoveAllDialog();
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+
+            await removeSelectedClientBlockScriptAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 market_type_id: typeof addMarket === "object" ? addMarket.id || addMarket.value : addMarket,
                 script_id: typeof addScript === "object" ? addScript.id || addScript.value : addScript,
-                user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
+                client_user_id: addClient && typeof addClient === "object" ? addClient.id : addClient || "",
                 master_user_id: addMaster && typeof addMaster === "object" ? addMaster.id : addMaster || "",
-            };
-
-            await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block1_script_setting",
-                payload
-            );
+            });
 
             fetchPageData();
         } catch (error) {

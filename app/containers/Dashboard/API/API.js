@@ -1223,34 +1223,34 @@ export const fetchforexMarginManagementListAPI = async (userId, authKey, client,
 };
 
 
-export const fetchLedgerDetailsAPI = async (userId) => {
-  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+// export const fetchLedgerDetailsAPI = async (userId) => {
+//   const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-  const payload = {
-    is_app: '1',
-    login_user_id: dataStored?.user_id,
-    auth_key: dataStored?.auth_key,
-    user_id: userId,
-  };
+//   const payload = {
+//     is_app: '1',
+//     login_user_id: dataStored?.user_id,
+//     auth_key: dataStored?.auth_key,
+//     user_id: userId,
+//   };
 
-  try {
-    const response = await axios.post(
-      'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
-      payload
-    );
+//   try {
+//     const response = await axios.post(
+//       'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
+//       payload
+//     );
 
-    if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
-      // Filter out "Opening Balance" if needed
-      const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
-      return filtered; // return the filtered data
-    } else {
-      return [];
-    }
-  } catch (err) {
-    console.error('Error fetching ledger details:', err);
-    return [];
-  }
-};
+//     if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
+//       // Filter out "Opening Balance" if needed
+//       const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
+//       return filtered; // return the filtered data
+//     } else {
+//       return [];
+//     }
+//   } catch (err) {
+//     console.error('Error fetching ledger details:', err);
+//     return [];
+//   }
+// };
 
 
 export const tradePlaceAPI = async (dataObj) => {
@@ -2584,3 +2584,986 @@ export const NSEOPTmanageAPI = async (
     throw error;
   }
 };
+
+
+
+// api.js
+
+export const fetchPositionDataAPI = async ({
+  user_id,
+  auth_key,
+  selectedMarket,
+  selectedScripts,
+  searchText,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      market: selectedMarket?.name || "",
+      scripts: selectedScripts.map((s) => s.name).join(","),
+      sSearch: searchText.trim(),
+    };
+
+    console.log("🔍 Fetching with payload:", payload);
+
+    const response = await fetch(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_script_wise_qty1",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const result = await response.json();
+    return result; // return full response for flexibility
+  } catch (err) {
+    console.error("❌ API call failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchBlockedScriptsAPI = async ({
+  user_id,
+  auth_key,
+  selectedMarket,
+  script,
+  searchText,
+  formatScriptIds,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      market: selectedMarket?.name || "",
+      script_id: formatScriptIds(script),
+      search_text: searchText.trim(),
+    };
+
+    console.log("🔍 Fetching with payload:", payload);
+
+    const response = await fetch(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/list_block_script.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    return await response.json();
+  } catch (err) {
+    console.error("❌ API call failed", err);
+    throw err;
+  }
+};
+
+
+export const confirmTradeAPI = async ({
+  user_id,
+  auth_key,
+  broker,
+  master,
+  client,
+  valanId,
+  password,
+}) => {
+  try {
+    const payload = {
+      is_app: 1,
+      login_user_id: user_id,
+      auth_key,
+      broker_id: broker?.id || "",
+      master_id: master?.id || "",
+      user_id: client?.id || "",
+      valan_id: valanId?.id || "",
+      password,
+    };
+
+    console.log("🔍 Confirm Trade Payload:", payload);
+
+    const response = await fetch(
+      "http://128.199.126.171/~goldorg/ajaxfiles/brokerage_refresh",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const result = await response.json();
+    return result; // return full response
+  } catch (err) {
+    console.error("❌ API call (Confirm Trade) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchBalanceAPI = async ({ user_id, auth_key, entryUserId }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      user_id: entryUserId,
+    };
+
+    console.log("🔍 Fetching Balance with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance",
+      payload
+    );
+
+    return response.data; // return raw data so component can decide what to do
+  } catch (err) {
+    console.error("❌ API call (Fetch Balance) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchLedgerDetailsAPI = async ({ user_id, auth_key, targetUserId }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      user_id: targetUserId,
+    };
+
+    console.log("🔍 Fetching Ledger Details with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill",
+      payload
+    );
+
+    return response.data; // return raw response for flexibility
+  } catch (err) {
+    console.error("❌ API call (Ledger Details) failed", err);
+    throw err;
+  }
+};
+
+export const fetchJVAPI = async ({ user_id, auth_key, start_date, end_date }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      date: start_date || "21-08-2025",
+      date_to: end_date || "28-08-2025",
+    };
+
+    console.log("🔍 Fetching Logs with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/fetch_jv_entries",
+      payload
+    );
+
+    return response.data; // return raw API response
+  } catch (err) {
+    console.error("❌ API call (Fetch Logs) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchLedgerAPI = async ({ user_id, auth_key, selectedUserId, filters }) => {
+  try {
+    const payload = {
+      ...filters,
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      user_id: selectedUserId,
+    };
+
+    console.log("🔍 Fetching Ledger with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_valan_wise_ledger.php",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Fetch Ledger) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchSportsLedgerAPI = async ({ user_id, auth_key }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      sEcho: 1,
+      iDisplayStart: 0,
+      iDisplayLength: 100,
+      sSearch: "",
+    };
+
+    console.log("🔍 Fetching Sports Ledger with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/datatables/cricket_account_statement",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Sports Ledger) failed", err);
+    throw err;
+  }
+};
+
+
+export const updateCnbcLinkAPI = async ({ user_id, auth_key, link }) => {
+  try {
+    const payload = {
+      link,
+      is_app: 1,
+      login_user_id: user_id,
+      auth_key,
+    };
+
+    console.log("🔍 Updating CNBC link with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/update_cnbc",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Update CNBC Link) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchLedgerReportAPI = async ({ user_id, auth_key, filters }) => {
+  try {
+    const payload = {
+      ...filters,
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+    };
+
+    console.log("🔍 Fetching Ledger Report with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/ledger_report",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Ledger Report) failed", err);
+    throw err;
+  }
+};
+
+
+export const uploadUserTypeQtyAPI = async ({ user_id, auth_key, file }) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("login_user_id", user_id);
+    formData.append("auth_key", auth_key);
+
+    console.log("🔍 Uploading file:", file.name);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Upload User Type Qty) failed", err);
+    throw err;
+  }
+};
+
+
+export const confirmTradeManualAPI = async ({
+  user_id,
+  auth_key,
+  password,
+  trade_date,
+  addMarket,
+  addScript,
+  lot,
+  quantity,
+  price,
+  pair,
+  addClient,
+}) => {
+  try {
+    const scriptArray = Array.isArray(addScript) ? addScript : [addScript];
+
+    const payload = {
+      is_app: 1,
+      login_user_id: user_id,
+      auth_key,
+      password: password || "",
+      trade_date,
+      high_low: 0,
+      market_type_id: addMarket?.id || "",
+      device_type: 0,
+      script_id: scriptArray[0]?.value || "",
+      script_expiry_id: scriptArray[0]?.script_expiry_id || "",
+      trade_lot: lot || 1,
+      trade_qty: quantity || 0,
+      trade_rate: price || 0,
+      trade_type: pair === "buy" ? 1 : 0,
+      with_broker: 1,
+      check_script_name: scriptArray.map((s) => s.script_name).join(","),
+      user_id: addClient?.id || user_id || "",
+    };
+
+    console.log("🔍 Submitting manual trade with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/trade_manual",
+      payload
+    );
+
+    return response.data; // return API response
+  } catch (err) {
+    console.error("❌ API call (Manual Trade) failed", err);
+    throw err;
+  }
+};
+
+
+export const updateMarqueeMessageAPI = async ({ user_id, auth_key, message }) => {
+  try {
+    const payload = {
+      message,
+      is_app: 1,
+      login_user_id: user_id,
+      auth_key,
+    };
+
+    console.log("🔍 Updating Marquee Message with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/marquee_add",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Update Marquee Message) failed", err);
+    throw err;
+  }
+};
+
+export const uploadUserTypeQtyMasterAPI = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    console.log("🔍 Uploading CSV file:", file.name);
+
+    const response = await fetch(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty_master",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+    return data; // return API response
+  } catch (err) {
+    console.error("❌ API call (Upload CSV) failed", err);
+    throw err;
+  }
+};
+
+export const fetchScriptQtyListAPI = async ({
+  user_id,
+  auth_key,
+  currentPage = 0,
+  pageSize = 10,
+  searchText = "",
+  selectedUserLevel,
+  marketName,
+  scriptName,
+  positionLimit,
+  minOrder,
+  maxOrder,
+  minBet,
+  maxBet,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      sEcho: 1,
+      iDisplayStart: currentPage * pageSize,
+      iDisplayLength: pageSize,
+      sSearch: searchText,
+      user_level: selectedUserLevel,
+      market_name: marketName,
+      script_name: scriptName,
+      position_limit: positionLimit,
+      min_order: minOrder,
+      max_order: maxOrder,
+      min_bet: minBet,
+      max_bet: maxBet,
+    };
+
+    console.log("🔍 Fetching Script Qty List with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/datatables/script_qty_list",
+      payload
+    );
+
+    return response.data; // return full API response
+  } catch (err) {
+    console.error("❌ API call (Script Qty List) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchUserLevelsAPI = async ({ user_id, auth_key }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+    };
+
+    console.log("🔍 Fetching user levels with payload:", payload);
+
+    const res = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_user_level",
+      payload
+    );
+
+    return Array.isArray(res.data)
+      ? res.data
+      : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
+  } catch (err) {
+    console.error("❌ API call (User Levels) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Fetch filters (markets + scripts)
+export const fetchMarketWatchFiltersAPI = async ({ user_id, auth_key }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+    };
+
+    console.log("🔍 Fetching Market Watch Filters with payload:", payload);
+
+    const res = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter",
+      payload
+    );
+
+    return res.data || {};
+  } catch (err) {
+    console.error("❌ API call (Market Watch Filters) failed", err);
+    throw err;
+  }
+};
+
+export const addNotificationAPI = async ({ user_id, auth_key, user_type, title, message }) => {
+  try {
+    const payload = {
+      is_app: 1,
+      login_user_id: user_id,
+      auth_key,
+      user_type,
+      title,
+      message,
+    };
+
+    console.log("🔍 Adding notification with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_notification",
+      payload
+    );
+
+    return response.data; // return API response
+  } catch (err) {
+    console.error("❌ API call (Add Notification) failed", err);
+    throw err;
+  }
+};
+
+
+export const removeBlockOptionExpiryAPI = async ({ script_expiry_option_id }) => {
+  try {
+    const payload = {
+      script_expiry_option_id,
+      is_block: 0,
+    };
+
+    console.log("🔍 Removing block option with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry",
+      payload
+    );
+
+    return response.data; // return API response
+  } catch (err) {
+    console.error("❌ API call (Remove Block Option) failed", err);
+    throw err;
+  }
+};
+
+export const addClientOrderLimitAPI = async ({
+  user_id,
+  auth_key,
+  market_type_id,
+  script_id,
+  client_user_id,
+  master_user_id,
+  price_percent,
+  value,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      market_type_id,
+      script_id,
+      user_id: client_user_id,
+      master_user_id,
+      price_percent,
+      value,
+    };
+
+    console.log("🔹 Sending payload to add_client_order_limit:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_client_order_limit",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Add Client Order Limit) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Delete client order limit
+export const deleteClientOrderLimitAPI = async ({ user_id, auth_key, client_order_id }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      client_order_id,
+    };
+
+    console.log("🔹 Sending payload to delete_client_order_limit:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/delete_client_order_limit",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Delete Client Order Limit) failed", err);
+    throw err;
+  }
+};
+
+export const deleteFutureTradingBlockAPI = async ({ future_id, user_id, auth_key }) => {
+  try {
+    const payload = {
+      future_id,
+      login_user_id: user_id,
+      auth_key,
+      is_app: 1,
+    };
+
+    console.log("🔍 Deleting future trading block with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/setting/remove_future_trading_block",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Delete Future Trading Block) failed", err);
+    throw err;
+  }
+};
+
+
+export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) => {
+  try {
+    const payload = { user_id, auth_key, noOfTrades };
+    console.log("🔍 Fetching bulk trade list with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/datatables/bulk_trade_list",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Bulk Trade List) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Save/update bulk trading settings
+export const saveBulkTradingSettingsAPI = async ({ user_id, auth_key, noOfTrades }) => {
+  try {
+    const payload = {
+      user_id,
+      auth_key,
+      no_of_trade: noOfTrades,
+    };
+
+    console.log("🔍 Saving bulk trading settings with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_bulk_trading",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Save Bulk Trading Settings) failed", err);
+    throw err;
+  }
+};
+
+export const addClientBlockScriptAPI = async ({
+  user_id,
+  auth_key,
+  market_type_id,
+  script_id,
+  client_user_id,
+  master_user_id,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      market_type_id,
+      script_id,
+      user_id: client_user_id,
+      master_user_id,
+    };
+
+    console.log("🔹 Adding client block script with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_client_block_script_setting",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Add Client Block Script) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Delete client block script setting
+export const deleteClientBlockScriptAPI = async ({ user_id, auth_key, client_block_script_id }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      client_block_script_id,
+    };
+
+    console.log("🔹 Deleting client block script with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block_script_setting",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Delete Client Block Script) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Remove selected client block script setting
+export const removeSelectedClientBlockScriptAPI = async ({
+  user_id,
+  auth_key,
+  market_type_id,
+  script_id,
+  client_user_id,
+  master_user_id,
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      market_type_id,
+      script_id,
+      user_id: client_user_id,
+      master_user_id,
+    };
+
+    console.log("🔹 Removing selected client block script with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block1_script_setting",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Remove Selected Client Block Script) failed", err);
+    throw err;
+  }
+};
+
+export const addReceiptAPI = async ({
+  user_id,
+  auth_key,
+  user_type,
+  entry_user_id,
+  type,
+  date1,
+  amount,
+  remarks = "",
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      user_type,
+      user_id: entry_user_id,
+      type,
+      date1,
+      amount,
+      remarks,
+    };
+
+    console.log("🔹 Adding receipt with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/add_receipt",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Add Receipt) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Edit entry/receipt
+export const editReceiptAPI = async ({
+  user_id,
+  auth_key,
+  entry_id,
+  entry_user_id,
+  type,
+  date1,
+  amount,
+  remarks = "",
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      entry_id,
+      user_id: entry_user_id,
+      type,
+      date1,
+      amount,
+      remarks,
+    };
+
+    console.log("🔹 Editing receipt with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/edit_receipt",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Edit Receipt) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Delete entry/receipt
+export const deleteReceiptAPI = async ({ user_id, auth_key, entry_id, entry_user_id }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id: user_id,
+      auth_key,
+      entry_id,
+      user_id: entry_user_id,
+    };
+
+    console.log("🔹 Deleting receipt with payload:", payload);
+
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/delete_receipt",
+      payload
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Delete Receipt) failed", err);
+    throw err;
+  }
+};
+
+export const addJVEntryAPI = async ({
+  login_user_id,
+  auth_key,
+  from_ledger,
+  to_ledger,
+  ledger_type,
+  date1,
+  amount,
+  remarks = "",
+  jv_entry_id = 0,
+  jv_entry_time = ""
+}) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id,
+      auth_key,
+      from_ledger,
+      to_ledger,
+      ledger_type,
+      date1,
+      amount,
+      remarks,
+      jv_entry_id,
+      jv_entry_time
+    };
+
+    console.log("🔹 Add JV payload:", payload);
+    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/add_jv", payload);
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Add JV) failed", err);
+    throw err;
+  }
+};
+
+// 🔹 Update JV entry (same endpoint as add, but with jv_entry_id)
+export const updateJVEntryAPI = async (payload) => addJVEntryAPI(payload);
+
+// 🔹 Delete JV entry
+export const deleteJVEntryAPI = async ({ login_user_id, auth_key, entryId }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id,
+      auth_key,
+      entryId
+    };
+
+    console.log("🔹 Delete JV payload:", payload);
+    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/delete_jv_entry", payload);
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Delete JV) failed", err);
+    throw err;
+  }
+};
+
+
+const fetchUserLog = async ({ endpoint, login_user_id, auth_key, user_id, log_datetime }) => {
+  try {
+    const payload = {
+      is_app: "1",
+      login_user_id,
+      auth_key,
+      user_id,
+      log_datetime
+    };
+    console.log(`🔹 Fetching from ${endpoint} with payload:`, payload);
+    const response = await axios.post(endpoint, payload);
+    return response.data.data || [];
+  } catch (err) {
+    console.error(`❌ API call failed for ${endpoint}`, err);
+    throw err;
+  }
+};
+
+// Fetch basic edit log
+export const fetchBasicLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
+  fetchUserLog({
+    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_basic_edit_log",
+    login_user_id,
+    auth_key,
+    user_id,
+    log_datetime
+  });
+
+// Fetch brokerage edit log
+export const fetchBrokerageLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
+  fetchUserLog({
+    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_commission_edit_log",
+    login_user_id,
+    auth_key,
+    user_id,
+    log_datetime
+  });
+
+// Fetch market edit log
+export const fetchMarketLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
+  fetchUserLog({
+    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_market_edit_log",
+    login_user_id,
+    auth_key,
+    user_id,
+    log_datetime
+  });

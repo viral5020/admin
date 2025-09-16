@@ -257,7 +257,7 @@ const Timesetting = () => {
                                         <TableRow>
                                             <TableCell>Market Name</TableCell>
                                             <TableCell>Script Name</TableCell>
-                                            <TableCell>Expiry Validation Id</TableCell>
+
                                             <TableCell>Start Time</TableCell>
                                             <TableCell>End Time</TableCell>
                                             <TableCell>Added Datetime</TableCell>

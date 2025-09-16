@@ -159,33 +159,27 @@ const Manualtrade = () => {
 
     const confirmTrade = async () => {
         try {
-            const scriptArray = Array.isArray(addScript) ? addScript : [addScript];
-            const payload = {
-                is_app: 1,
-                login_user_id: parsedData?.user_id,
-                auth_key: parsedData?.auth_key,
-                password: userType === 4 ? document.getElementById('trade-password')?.value || '' : '',
-                trade_date,
-                high_low: 0,
-                market_type_id: addMarket?.id || '',
-                device_type: 0,
-                script_id: scriptArray[0]?.value || '',
-                script_expiry_id: scriptArray[0]?.script_expiry_id || '',
-                trade_lot: lot || 1,
-                trade_qty: quantity || 0,
-                trade_rate: price || 0,
-                trade_type: pair === 'buy' ? 1 : 0,
-                with_broker: 1,
-                check_script_name: scriptArray.map(s => s.script_name).join(','),
-                user_id: addClient?.id || parsedData?.user_id || '',
-            };
+            const passwordValue = userType === 4 ? document.getElementById("trade-password")?.value || "" : "";
 
-            await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/trade_manual', payload);
+            await confirmTradeManualAPI({
+                user_id: parsedData?.user_id,
+                auth_key: parsedData?.auth_key,
+                password: passwordValue,
+                trade_date,
+                addMarket,
+                addScript,
+                lot,
+                quantity,
+                price,
+                pair,
+                addClient,
+            });
+
             setDialogOpen(false);
             fetchLogs();
         } catch (error) {
             console.error(error);
-            alert('Failed to submit trade.');
+            alert("Failed to submit trade.");
         }
     };
 

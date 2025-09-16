@@ -67,6 +67,7 @@ const Splitscriptfilter = ({
             date: splitDate,
             split_number: splitNumber,
             new_trade: newTrade, // Yes=1, No=0
+            is_app: 1,
             login_user_id: dataStored.user_id ?? '',
             auth_key: dataStored.auth_key ?? '',
         };

@@ -13,41 +13,27 @@ const Levelimport = () => {
 
     const handleSubmit = async () => {
         if (!selectedFile) {
-            toast.warning('Please choose a file.', { position: 'top-right', autoClose: 3000 });
+            toast.warning("Please choose a file.", { position: "top-right", autoClose: 3000 });
             return;
         }
 
-        const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
-
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('login_user_id', dataStored.user_id ?? '');
-        formData.append('auth_key', dataStored.auth_key ?? '');
+        const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
 
         try {
-            const response = await axios.post(
-                'http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty',
-                formData,
-                {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                }
-            );
+            const result = await uploadUserTypeQtyAPI({
+                user_id: dataStored.user_id ?? "",
+                auth_key: dataStored.auth_key ?? "",
+                file: selectedFile,
+            });
 
-            if (response.data.success) {
-                toast.success('File uploaded successfully!', { position: 'top-right', autoClose: 3000 });
+            if (result.success) {
+                toast.success("File uploaded successfully!", { position: "top-right", autoClose: 3000 });
                 setSelectedFile(null);
             } else {
-                toast.error(response.data.message || 'Upload failed.', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
+                toast.error(result.message || "Upload failed.", { position: "top-right", autoClose: 3000 });
             }
         } catch (error) {
-            console.error('Upload Error:', error);
-            toast.error('An error occurred during upload.', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
+            toast.error("An error occurred during upload.", { position: "top-right", autoClose: 3000 });
         }
     };
 

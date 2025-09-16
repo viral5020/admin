@@ -44,6 +44,7 @@ import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import ClientMasterBrokerFilter3 from './filters/ClientMasterBrokerFilter3';
 import DownlineFilter from './filters/ClientMasterBrokerFilter3';
 import { Tooltip } from '@mui/material';
+import { fetchJVAPI } from './API/API';
 
 const Jventry = () => {
     const theme = useTheme();
@@ -115,20 +116,17 @@ const Jventry = () => {
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
             if (!dataStored) return toast.error("Session expired. Please log in again.");
 
-            const payload = {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
+            const result = await fetchJVAPI({
+                user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
-                date: start_date || "21-08-2025",
-                date_to: end_date || "28-08-2025"
-            };
+                start_date,
+                end_date,
+            });
 
-            const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/fetch_jv_entries", payload);
-            const data = Array.isArray(response.data?.data) ? response.data.data : [];
+            const data = Array.isArray(result?.data) ? result.data : [];
             setLogs(data);
             setTotalRecords(data.length);
         } catch (err) {
-            console.error("Failed to fetch logs:", err);
             setLogs([]);
             setTotalRecords(0);
         } finally {
@@ -136,145 +134,92 @@ const Jventry = () => {
         }
     };
 
+    const handleEntrySubmit = async () => {
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored) return toast.error("Session expired. Please log in again.");
+
+        try {
+            const result = await addJVEntryAPI({
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                from_ledger: accountValue?.value || "",
+                to_ledger: toAccountValue?.value || "",
+                ledger_type: entryType,
+                date1: entryDate,
+                amount: entryAmount,
+                remarks: entryRemark,
+            });
+
+            if (result?.status === "success") {
+                toast.success("JV Entry added successfully!");
+                fetchLogs();
+            } else {
+                toast.error(result?.message || "Failed to add JV entry");
+            }
+        } catch (err) {
+            toast.error("Error submitting JV entry");
+        } finally {
+            setFormOpen(false);
+        }
+    };
+
+    // Update JV
+    const handleUpdateLog = async () => {
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored || !editingLog) return toast.error("Session expired or invalid entry.");
+
+        try {
+            const result = await updateJVEntryAPI({
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                from_ledger: editValue.from_account?.value || editValue.from_account || "",
+                to_ledger: editValue.to_account?.value || editValue.to_account || "",
+                ledger_type: editValue.cash_type === "Receipt" ? "1" : "0",
+                date1: editingLog.datetime_entry || "",
+                amount: Math.abs(Number(editValue.debit || editValue.credit || 0)),
+                remarks: editValue.remark || "",
+                jv_entry_id: editingLog.entry_id || 0,
+                jv_entry_time: editingLog.jv_entry_time || editingLog.datetime_Date || ""
+            });
+
+            if (result?.status === "success") {
+                toast.success("JV Entry updated successfully!");
+                fetchLogs();
+            } else {
+                toast.error(result?.message || "Failed to update JV entry");
+            }
+        } catch (err) {
+            toast.error("Error updating JV entry");
+        } finally {
+            setEditingLog(null);
+        }
+    };
+
+    // Delete JV
     const handleConfirmDelete = async () => {
         if (!logToDelete) return;
 
-        const payload = {
-            entryId: logToDelete.entry_id || 0
-        };
-
-        console.log("Payload to delete:", payload);
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored) return toast.error("Session expired. Please log in again.");
 
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            if (!dataStored) return toast.error("Session expired. Please log in again.");
+            const result = await deleteJVEntryAPI({
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                entryId: logToDelete.entry_id
+            });
 
-            // Call the delete API
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/delete_jv_entry",
-                {
-                    ...payload,
-                    login_user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    is_app: "1"
-                }
-            );
-
-            if (response.data?.status === "success" || true) {
+            if (result?.status === "success") {
                 toast.success("JV Entry deleted successfully!");
-                fetchLogs(); // refresh the table
+                fetchLogs();
             } else {
-                toast.error(response.data?.message || "Failed to delete JV entry");
+                toast.error(result?.message || "Failed to delete JV entry");
             }
         } catch (err) {
-            console.error("Delete JV error:", err);
             toast.error("Error deleting JV entry");
         } finally {
             setDeleteDialogOpen(false);
             setLogToDelete(null);
-        }
-    };
-
-    const handleUpdateLog = async () => {
-        if (!editingLog) return;
-
-        // Construct payload for update
-        const payload = {
-            from_ledger: (() => {
-                try {
-                    return JSON.parse(editValue.from_account)?.login_id_no || "";
-                } catch {
-                    return editValue.from_account || "";
-                }
-            })(),
-            to_ledger: (() => {
-                try {
-                    return JSON.parse(editValue.to_account)?.login_id_no || "";
-                } catch {
-                    return editValue.to_account || "";
-                }
-            })(),
-            ledger_type: editValue.cash_type === "Receipt" ? "1" : "0", // string "1"/"0"
-            date1: editingLog.datetime_entry || "", // date from log
-            amount: Math.abs(Number(editValue.debit || editValue.credit || 0)), // always positive
-            remarks: editValue.remark || "",
-            jv_entry_id: editingLog.entry_id || 0,
-            jv_entry_time: editingLog.jv_entry_time || editingLog.datetime_Date || "", // full datetime
-        };
-
-        console.log("Payload to update:", payload);
-
-        try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            if (!dataStored) return toast.error("Session expired. Please log in again.");
-
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/add_jv",
-                {
-                    ...payload,
-                    login_user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    is_app: "1",
-                }
-            );
-
-            // Check response status
-            if (response.data?.status === "success" || true) {
-                toast.success("JV Entry updated successfully!");
-                fetchLogs(); // refresh table
-            } else {
-                toast.error(response.data?.message || "Failed to update JV entry");
-            }
-        } catch (err) {
-            console.error("Update JV error:", err);
-            toast.error("Error updating JV entry");
-        } finally {
-            setEditingLog(null); // close edit dialog
-        }
-    };
-
-
-    const handleEntrySubmit = async () => {
-        // Construct payload with ledger IDs
-        const payload = {
-            from_ledger: accountValue?.value || "",  // use optional chaining
-            to_ledger: toAccountValue?.value || "",
-            ledger_type: entryType,
-            date1: entryDate,
-            amount: entryAmount,
-            remarks: entryRemark,
-            jv_entry_id: 0,
-            jv_entry_time: ""
-        };
-
-        console.log("Payload to submit:", payload);
-
-        try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            if (!dataStored) return toast.error("Session expired. Please log in again.");
-
-            // Send the payload to your API
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/add_jv",
-                {
-                    ...payload,
-                    login_user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    is_app: "1"
-                }
-            );
-
-            if (response.data?.status === "success") {
-                toast.success("JV Entry added successfully!");
-                fetchLogs(); // refresh the table
-            } else {
-                toast.success(response.data?.message || "JV Entry added successfully!");
-            }
-        } catch (err) {
-            console.error("Add JV error:", err);
-            toast.error("Error submitting JV entry");
-        } finally {
-            setFormOpen(false);
         }
     };
 

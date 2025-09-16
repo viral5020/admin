@@ -29,7 +29,7 @@ import Pagination from '../filters/Pagination';
 import BackToTop from '../helpers/BackToTop';
 import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
-import { bulktradingAPI, fetchOrders1API } from '../API/API';
+import { bulktradingAPI, fetchBulkTradeListAPI, fetchOrders1API } from '../API/API';
 import axios from 'axios';
 import FilterBtn from '../filters/FilterBtn';
 
@@ -154,18 +154,17 @@ const Bulktrading = ({
             alert("Number of orders is required and must be positive");
             return;
         }
+
         try {
             setBulkLoading(true);
             const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const payload = {
+
+            const result = await fetchBulkTradeListAPI({
                 user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
-                noOfTrades: noOfTrades
-            };
-            const result = await axios.post(
-                `http://128.199.126.171/~goldorg/datatables/bulk_trade_list`,
-                payload
-            );
+                noOfTrades,
+            });
+
             setBulkTrades(result.data?.data || []);
         } catch (error) {
             console.error("Error fetching bulk trade list:", error);
@@ -179,27 +178,27 @@ const Bulktrading = ({
             alert("Please enter a valid number of orders before applying filter.");
             return;
         }
+
         setIsFilterChange(true);
         setCurrentPage(0);
 
-        // Call API to save/update bulk trading settings
         const saveBulkSettings = async () => {
             try {
                 const dataStored = JSON.parse(sessionStorage.getItem("data"));
-                await axios.post(
-                    `http://128.199.126.171/~goldorg/ajaxfiles/setting/set_bulk_trading`,
-                    {
-                        user_id: dataStored.user_id,
-                        auth_key: dataStored.auth_key,
-                        no_of_trade: noOfTrades
-                    }
-                );
+
+                await saveBulkTradingSettingsAPI({
+                    user_id: dataStored.user_id,
+                    auth_key: dataStored.auth_key,
+                    noOfTrades,
+                });
+
                 // Fetch bulk trade list after saving settings
                 fetchBulkTradeList();
             } catch (err) {
                 console.error("Error saving bulk trading settings:", err);
             }
         };
+
         saveBulkSettings();
     };
 

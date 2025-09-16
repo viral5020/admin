@@ -26,7 +26,7 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 
 import FilterBtn from './filters/FilterBtn';
 import BackToTop from './helpers/BackToTop';
-import { NSEOPTmanageAPI, ScriptwiselotAPI } from './API/API';
+import { NSEOPTmanageAPI, removeBlockOptionExpiryAPI, ScriptwiselotAPI } from './API/API';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
 import Pagination from './filters/Pagination';
 import FilterComponent from './Watchlist/FilterComponent';
@@ -119,24 +119,17 @@ const Nseoptmanagement = () => {
         try {
             setLoading(true);
 
-            const payload = { script_expiry_option_id, is_block: 0 };
+            const result = await removeBlockOptionExpiryAPI({ script_expiry_option_id });
+            console.log("Remove response:", result);
 
-            const response = await axios.post(
-                'http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry',
-                payload
-            );
-
-            console.log('Remove response:', response.data);
-
-            if (response.data?.status === 'ok') {
-                toast.success(response.data.message || 'Option removed successfully');
+            if (result?.status === "ok") {
+                toast.success(result.message || "Option removed successfully");
                 fetchLogs(); // refresh table/cards
             } else {
-                toast.error(response.data?.message || 'Failed to remove option');
+                toast.error(result?.message || "Failed to remove option");
             }
         } catch (err) {
-            toast.error(err.message || 'Error removing option');
-            console.error(err);
+            toast.error(err.message || "Error removing option");
         } finally {
             setLoading(false);
         }
