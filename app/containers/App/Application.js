@@ -129,19 +129,18 @@ function Application(props) {
   const isForex = auth.notificationData?.isForex;
   const userType = parseInt(auth.userData?.user_type, 10);
   const isEmployeeLogin = auth.userData?.isEmployeeLogin;
-
+  const emp_permission = auth.emp_permission;
 
 
   return (
     <Dashboard history={history} changeMode={changeMode}>
       <Routes>
-        { /* Home */}
+
         <Route element={<ProtectedRoute />}>
+
           {/* -------------------- Dashboard Routes -------------------- */}
           <Route path="/" element={<PersonalDashboard />} />
-          {userType === 1 && (
-            <Route path="/app" element={<PersonalDashboard />} />
-          )}
+
           {(userType === 3 || userType === 4) && (
             <Route path="dashboard/Master-Dashboard" element={<Masterdashboard />} />
           )}
@@ -335,7 +334,7 @@ function Application(props) {
 
         </Route>
 
-
+        <Route path="*" element={<NotFound />} />
 
 
 

@@ -130,14 +130,16 @@ export const fetchLoginDataAPI = async (userId, authKey) => {
 //   }
 // };
 export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+  const defaultParams = await getDefaultParams();
+
   const formData = {
+    ...defaultParams,
+
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000,
     sSearch: searchValue,
-    is_app: 1,
-    login_user_id: userId,
-    auth_key: authKey,
+
     isTodayTrade: type,
   };
 
@@ -203,13 +205,14 @@ export const fetchOrders1API = async ({
   script_full_name = "",
   tradeType = ""
 }) => {
+  const defaultParams = await getDefaultParams();
+
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
-    is_app: 1,
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
+
 
     start_end,
     end_date,
@@ -278,12 +281,13 @@ export const fetchforexOrdersAPI = async ({
 
 
 export const fetchPendingOrdersAPI = async (userId, authKey) => {
+  const defaultParams = await getDefaultParams();
+
   try {// &&&&
     const response = await axiosInstance.post("/datatables/order_book_new", {
       is_pending: "true",
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
+      ...defaultParams,
+
       sEcho: 1,
       iDisplayStart: 0,
       iDisplayLength: 10,
@@ -360,12 +364,12 @@ export const fetchOrderlimitAPI = async (
   end_date,
   start_date,
 ) => {
+  const defaultParams = await getDefaultParams();
+
   try {
     const response = await axiosInstance.post("datatables/client_order_limit_list", {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
       sEcho: 1,
+      ...defaultParams,
 
       isTodayTrade: filterType,
       sSearch: searchQuery,
@@ -493,12 +497,12 @@ export const fetchBlockedAllowedAPI = async (
 // };
 export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
   if (!scriptId) return [];
+  const defaultParams = await getDefaultParams();
 
   const formData = {
     isTodayTrade: "today",
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
+
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
@@ -603,13 +607,14 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
 //   }
 // };
 export const fetchTradesAPI = async (userId, authKey, scriptId) => {
+  const defaultParams = await getDefaultParams();
+
   if (!scriptId) return [];
 
   const formData = {
     isTodayTrade: "today",
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
+
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
