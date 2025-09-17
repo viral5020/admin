@@ -1,16 +1,13 @@
 import axios from "axios";
 import { fetchClient } from "./fetchconfig";
 import axiosInstance from "./axiosconfig";
-
 import { constant, forex_market_type_id } from "../Watchlist/constant";
 
 async function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const { ip_address, user_agent } = await getUserInfo();
   const { isEmployeeLogin, isEmployeeLoginId, login_string } = dataStored;
-
   const emp_para = { isEmployeeLogin, isEmployeeLoginId, login_string };
-
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
@@ -37,7 +34,6 @@ const getUserInfo = async () => {
     const ipRes = await axios.get("https://api.ipify.org?format=json");
     const ip_address = ipRes.data.ip;
     const user_agent = navigator.userAgent;
-
     return { ip_address, user_agent };
   } catch (err) {
     console.error("Error fetching IP/UserAgent:", err);
@@ -56,17 +52,15 @@ export async function getIP() {
 };
 
 export const apifetchPositions = async (userId, authKey) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("/datatables/position_book_list", {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
+      ...defaultParams,
       sEcho: 1,
       iDisplayStart: 0,
       iDisplayLength: 1000000,
       sSearch: "",
     });
-
     if (response.data && response.data.aaData) {
       return response.data.aaData;
     } else {
@@ -78,15 +72,12 @@ export const apifetchPositions = async (userId, authKey) => {
   }
 };
 
-
 export const fetchLoginDataAPI = async (userId, authKey) => {
+  const defaultParams = await getDefaultParams();
   try {
     const res = await axiosInstance.post("/datatables/get_login_data_details", {
-      is_app: 1,
-      login_user_id: userId,
-      auth_key: authKey,
+      ...defaultParams,
     });
-
     if (res.data.status === "ok" && Array.isArray(res.data.data)) {
       return res.data.data.slice(0, 5); // return top 5 entries
     } else {
@@ -98,51 +89,16 @@ export const fetchLoginDataAPI = async (userId, authKey) => {
   }
 };
 
-
-
-// export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
-//   const formData = {
-//     sEcho: 1,
-//     iDisplayStart: 0,
-//     iDisplayLength: 10000,
-//     sSearch: searchValue,
-//     is_app: 1,
-//     login_user_id: userId,
-//     auth_key: authKey,
-//     isTodayTrade: type === "today" ? "today" : "",
-//   };
-
-//   try {   // &&&&
-//     const response = await fetchClient("/datatables/order_book_new", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(formData),
-//     });
-
-//     // Try both formats
-//     const data = response.data || response;  // if using axios or custom client
-//     return data.aaData || [];
-//   } catch (error) {
-//     console.error("Error fetching orders:", error);
-//     return [];
-//   }
-// };
 export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
-
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000,
     sSearch: searchValue,
-
     isTodayTrade: type,
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
     return data.aaData || [];
@@ -152,19 +108,15 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
   }
 };
 
-
 export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
+  const defaultParams = await getDefaultParams();
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000,
     sSearch: searchValue,
-    is_app: 1,
-    login_user_id: userId,
-    auth_key: authKey,
-
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_old", formData);
     return data.aaData || [];
@@ -174,18 +126,15 @@ export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
   }
 };
 
-
 export const fetcholdforexOrdersAPI = async (userId, authKey, searchValue = "") => {
+  const defaultParams = await getDefaultParams();
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10000,
     sSearch: searchValue,
-    is_app: 1,
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex_old", formData);
     return data.aaData || [];
@@ -195,31 +144,25 @@ export const fetcholdforexOrdersAPI = async (userId, authKey, searchValue = "") 
   }
 };
 
-
 export const fetchOrders1API = async ({
   userId,
   authKey,
-
   start_end = "",
   end_date = "",
   script_full_name = "",
   tradeType = ""
 }) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
     ...defaultParams,
-
-
     start_end,
     end_date,
     script_full_name,
     tradeType
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
     return data.aaData || [];
@@ -228,7 +171,6 @@ export const fetchOrders1API = async ({
     return [];
   }
 };
-
 
 export const fetchforexOrdersAPI = async ({
   userId,
@@ -247,14 +189,13 @@ export const fetchforexOrdersAPI = async ({
   status = "",
   orderType = ""
 }) => {
+  const defaultParams = await getDefaultParams();
   const formData = {
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchValue,
-    is_app: 1,
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
     isTodayTrade: filterType === "today" ? "today" : "",
     end_date,
     start_end,
@@ -267,9 +208,7 @@ export const fetchforexOrdersAPI = async ({
     is_executed: status === "is_executed" ? "is_executed" : "",
     trade_type: orderType || "",
   };
-
   console.log("Forex API formData:", formData); // debug
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
     return data;
@@ -279,21 +218,17 @@ export const fetchforexOrdersAPI = async ({
   }
 };
 
-
 export const fetchPendingOrdersAPI = async (userId, authKey) => {
   const defaultParams = await getDefaultParams();
-
   try {// &&&&
     const response = await axiosInstance.post("/datatables/order_book_new", {
       is_pending: "true",
       ...defaultParams,
-
       sEcho: 1,
       iDisplayStart: 0,
       iDisplayLength: 10,
       sSearch: "",
     });
-
     if (response.data && response.data.aaData) {
       return response.data.aaData;
     } else {
@@ -304,7 +239,6 @@ export const fetchPendingOrdersAPI = async (userId, authKey) => {
     return [];
   }
 };
-
 
 export const fetchRejectionLogsAPI = async (
   userId,
@@ -320,35 +254,28 @@ export const fetchRejectionLogsAPI = async (
   end_date,
   start_date,
 ) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("/datatables/rejection_log_view", {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
-
+      ...defaultParams,
       isTodayTrade: filterType,
       sSearch: searchQuery,
-
       sEcho: 1,
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
-
       market_type_id: marketId,
       script_id: scriptId,
       user_id: clientId,
       master_user_id: masterId,
-
       end_date: end_date,
       start_date: start_date,
     });
-
     return response.data || [];
   } catch (error) {
     console.error("Error fetching rejection logs:", error);
     return [];
   }
 };
-
 
 export const fetchOrderlimitAPI = async (
   userId,
@@ -365,27 +292,21 @@ export const fetchOrderlimitAPI = async (
   start_date,
 ) => {
   const defaultParams = await getDefaultParams();
-
   try {
     const response = await axiosInstance.post("datatables/client_order_limit_list", {
       sEcho: 1,
       ...defaultParams,
-
       isTodayTrade: filterType,
       sSearch: searchQuery,
-
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
-
       // market_type_id: marketId,
       // script_id: scriptId,
       // user_id: clientId,
       // master_user_id: masterId,
-
       // end_date: end_date,
       // start_date: start_date,
     });
-
     return response.data || [];
   } catch (error) {
     console.error("Error fetching rejection logs:", error);
@@ -407,28 +328,22 @@ export const fetchBlockedAllowedAPI = async (
   end_date,
   start_date,
 ) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_client_block_script_list", {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
       sEcho: 1,
-
+      ...defaultParams,
       isTodayTrade: filterType,
       sSearch: searchQuery,
-
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
-
       // market_type_id: marketId,
       // script_id: scriptId,
       // user_id: clientId,
       // master_user_id: masterId,
-
       // end_date: end_date,
       // start_date: start_date,
     });
-
     return response.data || [];
   } catch (error) {
     console.error("Error fetching rejection logs:", error);
@@ -436,73 +351,12 @@ export const fetchBlockedAllowedAPI = async (
   }
 };
 
-
-// export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
-//   if (!scriptId) return [];
-
-//   try {
-//     const response = await fetchClient("/datatables/order_book_new", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         isTodayTrade: "today",
-//         is_app: "1",
-//         login_user_id: userId,
-//         auth_key: authKey,
-//         sEcho: 1,
-//         iDisplayStart: 0,
-//         iDisplayLength: 10,
-//         script_id: scriptId,
-//         sSearch: "",
-//       }),
-//     });
-
-//     const result = await response.json();
-//     return result?.aaData || [];
-//   } catch (err) {
-//     console.error("Error fetching trades", err);
-//     return [];
-//   }
-// };
-
-
-// export const fetchTrendStocksAPI = async (userId, authKey) => {
-//   try {
-//     const data = await fetchClient("/ajaxfiles/tranding_trades", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         is_app: "1",
-//         login_user_id: userId,
-//         auth_key: authKey,
-//       }),
-//     });
-
-//     if (data && data.status === "ok" && data.data) {
-//       return data.data.map((item) => ({
-//         Id: item.script_id,
-//         name: item.script_name || "N/A",
-//         ltp: item.ltp,
-//         per: item.per,
-//         rateChange: item.rateChange,
-//       }));
-//     }
-//     return [];
-//   } catch (error) {
-//     console.error("Failed to fetch Scripts in Trends:", error);
-//     return [];
-//   }
-// };
 export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
   if (!scriptId) return [];
   const defaultParams = await getDefaultParams();
-
   const formData = {
     isTodayTrade: "today",
     ...defaultParams,
-
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
@@ -510,7 +364,6 @@ export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
     user_id: selectedUserId,
     sSearch: "",
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
     return data?.aaData || [];
@@ -521,15 +374,12 @@ export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
 };
 
 export const fetchTrendStocksAPI = async (userId, authKey) => {
+  const defaultParams = await getDefaultParams();
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/tranding_trades", formData);
-
     if (data?.status === "ok" && data?.data) {
       return data.data.map((item) => ({
         Id: item.script_id,
@@ -539,7 +389,6 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
         rateChange: item.rateChange,
       }));
     }
-
     return [];
   } catch (error) {
     console.error("Failed to fetch Scripts in Trends:", error);
@@ -547,82 +396,18 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
   }
 };
 
-// export const fetchTradesAPI = async (userId, authKey, scriptId) => {
-//   if (!scriptId) return [];
-
-//   try {
-//     const response = await fetchClient("/datatables/order_book_new", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         isTodayTrade: "today",
-//         is_app: "1",
-//         login_user_id: userId,
-//         auth_key: authKey,
-//         sEcho: 1,
-//         iDisplayStart: 0,
-//         iDisplayLength: 10,
-//         script_id: scriptId,
-//         sSearch: "",
-//       }),
-//     });
-
-//     const data = await response.json();
-//     return data?.aaData || [];
-//   } catch (error) {
-//     console.error("Failed to fetch trades:", error);
-//     throw error; // rethrow so the component can handle it  
-//   }
-// };
-
-
-// export const fetchStockPositionsAPI = async (userId, authKey, scriptId) => {
-//   if (!scriptId) return [];
-
-//   try {
-//     const response = await fetchClient("/datatables/position_book_list", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         is_app: "1",
-//         login_user_id: userId,
-//         auth_key: authKey,
-//         isActive: "active",
-//         sEcho: 1,
-//         iDisplayStart: 0,
-//         iDisplayLength: 10,
-//         script_id: scriptId,
-//         sSearch: "",
-//       }),
-//     });
-
-//     const data = await response.json();
-//     return data?.aaData || [];
-//   } catch (error) {
-//     console.error("Error fetching position data:", error);
-//     return [];
-//   }
-// };
 export const fetchTradesAPI = async (userId, authKey, scriptId) => {
   const defaultParams = await getDefaultParams();
-
   if (!scriptId) return [];
-
   const formData = {
     isTodayTrade: "today",
     ...defaultParams,
-
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
     script_id: scriptId,
     sSearch: "",
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
     return data?.aaData || [];
@@ -632,29 +417,23 @@ export const fetchTradesAPI = async (userId, authKey, scriptId) => {
   }
 };
 
-
 export const fetchTopGainersLosersAPI = async (userId, authKey) => {
   if (!userId || !authKey) return { topGainers: [], topLosers: [] };
-
+  const defaultParams = await getDefaultParams();
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post(
       "/ajaxfiles/top_gainers_losers.php",
       formData
     );
-
     if (data?.status === "ok") {
       return {
         topGainers: data.topGainers || [],
         topLosers: data.topLosers || [],
       };
     }
-
     return { topGainers: [], topLosers: [] };
   } catch (error) {
     console.error("❌ Failed to fetch top gainers/losers:", error);
@@ -664,19 +443,16 @@ export const fetchTopGainersLosersAPI = async (userId, authKey) => {
 
 export const fetchStockPositionsAPI = async (userId, authKey, scriptId) => {
   if (!scriptId) return [];
-
+  const defaultParams = await getDefaultParams();
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
     isActive: "active",
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
     script_id: scriptId,
     sSearch: "",
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/position_book_list", formData);
     return data?.aaData || [];
@@ -687,15 +463,13 @@ export const fetchStockPositionsAPI = async (userId, authKey, scriptId) => {
 };
 
 export const fetchDashboardDataAPI = async (userId, authKey) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("/ajaxfiles/dashboard_count_trade",
       {
-        is_app: "1",
-        login_user_id: userId,
-        auth_key: authKey,
+        ...defaultParams,
       }
     );
-
     if (response.data.status === "ok") {
       return {
         today_rejection: response.data.today_rejection,
@@ -706,7 +480,6 @@ export const fetchDashboardDataAPI = async (userId, authKey) => {
         today_pending_trades: response.data.today_pending_trades,
       };
     }
-
     return null;
   } catch (error) {
     console.error("Failed to fetch dashboard data:", error);
@@ -715,11 +488,10 @@ export const fetchDashboardDataAPI = async (userId, authKey) => {
 };
 
 export const setScriptBlockSettingAPI = async (userId, authKey, market_type_id, script_ids) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axios.post('ajaxfiles/setting/set_script_block_setting', {
-      is_app: "1",
-      userId,
-      authKey,
+      ...defaultParams,
       market_type_id,
       script_ids, // pass as array or comma-separated string as required by backend
     });
@@ -731,11 +503,10 @@ export const setScriptBlockSettingAPI = async (userId, authKey, market_type_id, 
 };
 
 export const removeBlockListAPI = async (userId, authKey, script_block_id) => {
+  const defaultParams = await getDefaultParams();
   try {
     const response = await axios.post('ajaxfiles/setting/set_script_block_setting', {
-      is_app: "1",
-      userId,
-      authKey,
+      ...defaultParams,
       script_block_id,
     });
     return response.data;
@@ -750,7 +521,6 @@ export const fetchStrikeDataAPI = async ({ expiry, script, index = 0, term = 'CE
   if (!term || !expiry?.expiry_date || !script?.script_id) {
     throw new Error('Missing term,expiry or script data');
   }
-
   const expiry_id = `${expiry.script_expiry_id}-${index}`;
   const defaultParams = await getDefaultParams();
   const response = await axiosInstance.post('ajaxfiles/get_option_strike_price', {
@@ -758,13 +528,9 @@ export const fetchStrikeDataAPI = async ({ expiry, script, index = 0, term = 'CE
     expiry_id,
     term,
   });
-
   // console.log('response.data', response.data);
-
   return response.data?.data || [];
 };
-
-
 
 export const closeAllPositions = async ({
   password,
@@ -776,7 +542,6 @@ export const closeAllPositions = async ({
   exparyDate,
 }) => {
   const defaultParams = await getDefaultParams();
-
   const payload = {
     password,
     market_type_id: market,
@@ -789,13 +554,11 @@ export const closeAllPositions = async ({
     allow_close_all: true,
     ...defaultParams
   };
-
   try {
     const res = await axiosInstance.post('ajaxfiles/trade_exit_all_position1', {
       ...defaultParams,
       ...payload,
     });
-
     if (res.data.success) {
       return res.data;
     } else {
@@ -817,7 +580,6 @@ export const forexcloseAllPositions = async ({
   exparyDate,
 }) => {
   const defaultParams = await getDefaultParams();
-
   const payload = {
     password,
     market_type_id: market,
@@ -830,13 +592,11 @@ export const forexcloseAllPositions = async ({
     allow_close_all: true,
     ...defaultParams
   };
-
   try {
     const res = await axiosInstance.post('ajaxfiles/trade_exit_all_position1_forex', {
       ...defaultParams,
       ...payload,
     });
-
     if (res.data.success) {
       return res.data;
     } else {
@@ -858,7 +618,6 @@ export const rolloverPositions = async ({
   exparyDate,
 }) => {
   const defaultParams = await getDefaultParams();
-
   const payload = {
     password,
     market_type_id: market,
@@ -868,13 +627,11 @@ export const rolloverPositions = async ({
     broker_id: broker,
     expiry_date: exparyDate,
   };
-
   try {
     const res = await axiosInstance.post('ajaxfiles/trade_roll_over_all', {
       ...defaultParams,
       ...payload,
     });
-
     if (res.data.success) {
       return res.data;
     } else {
@@ -901,7 +658,6 @@ function isChanged(apiData) {
 export const checkLoginAPI = async (isJustLogin, user_id, auth_key) => {
   // console.log("REMAIN THIS CONSOLE LOG HERE, OTHERWISE SOMETIMES THIS API IS NOT CALLED");
   let defaultParams = await getDefaultParams();
-
   // console.log('beofre isJustLogin defaultParams', defaultParams);
   if (isJustLogin) {
     // console.log("inside isJustLogin");
@@ -931,7 +687,6 @@ export const fetchNotificationAPI = async (isJustLogin, user_id, auth_key) => {
     defaultParams = { ...defaultParams, login_user_id: user_id, auth_key }
   }
   if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;
-
   try {
     const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...defaultParams });
     // isChanged(response.data);
@@ -943,7 +698,6 @@ export const fetchNotificationAPI = async (isJustLogin, user_id, auth_key) => {
 };
 
 // stored in sessionstorage > first_password_changed === 0 > navigate to changePassword
-
 export const getWatchListDataAPI = async () => {
   try {
     const defaultParams = await getDefaultParams();
@@ -1026,7 +780,6 @@ export const updateTrade = async ({ trade_id, trade_rate, trade_lot, trade_qty, 
       device_type,
       ...defaultParams, // Optional: add auth tokens, etc., if required
     });
-
     return response.data;
   } catch (error) {
     console.error('Error in updating trade:', error);
@@ -1041,30 +794,24 @@ export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) 
     if (!rawData) {
       throw new Error("User data not found in sessionStorage.");
     }
-
     let parsedData;
     try {
       parsedData = JSON.parse(rawData);
     } catch (err) {
       throw new Error("Failed to parse user data from sessionStorage.");
     }
-
     const userId = parsedData.user_id;
     const authKey = parsedData.auth_key;
-
     if (!userId || !authKey) {
       throw new Error("User credentials are missing.");
     }
-
+    const defaultParams = await getDefaultParams();
     const response = await axiosInstance.post('ajaxfiles/trade_delete', {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
+      ...defaultParams,
       trade_id,
       password,
       device_type,
     });
-
     return response.data;
   } catch (error) {
     console.error('Error deleting trade:', error);
@@ -1084,10 +831,9 @@ export const fetchPositionsAPI = async ({
   master_user_id,
   user_id
 }) => {
+  const defaultParams = await getDefaultParams();
   const payload = {
-    is_app: "1",
-    login_user_id,
-    auth_key,
+    ...defaultParams,
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 100000,
@@ -1101,32 +847,26 @@ export const fetchPositionsAPI = async ({
     master_user_id,
     user_id
   };
-
   console.log("🔹 Fetching positions:", payload);
-
   const response = await axios.post(
     "http://128.199.126.171/~goldorg/datatables/position_book_list_forex",
     payload
   );
-
   return response.data; // let component decide what to do
 };
 
 export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
   if (!scriptId) return [];
-
+  const defaultParams = await getDefaultParams();
   const formData = {
     isTodayTrade: "today",
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
+    ...defaultParams,
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: 10,
     script_id: scriptId,
     sSearch: "",
   };
-
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
     return data?.aaData || [];
@@ -1136,10 +876,8 @@ export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
   }
 };
 
-
 export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     broker_id,
@@ -1151,7 +889,6 @@ export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, 
     script_id,
     valan_id,
   };
-
   try {
     const { data } = await axiosInstance.post("ajaxfiles/summary_report", formData);
     return data?.data || [];
@@ -1163,7 +900,6 @@ export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, 
 
 export const fetchSelfplAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     broker_id,
@@ -1175,7 +911,6 @@ export const fetchSelfplAPI = async (user_id, master_user_id, broker_id, end_dat
     script_id,
     valan_id,
   };
-
   try {
     const { data } = await axiosInstance.post("ajaxfiles/self_profit_and_loss_report", formData);
     return data?.data || [];
@@ -1187,7 +922,6 @@ export const fetchSelfplAPI = async (user_id, master_user_id, broker_id, end_dat
 
 export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     broker_id,
@@ -1199,7 +933,6 @@ export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker
     script_id,
     valan_id,
   };
-
   try {
     const { data } = await axiosInstance.post("ajaxfiles/summary_report_forex", formData);
     return data?.data || [];
@@ -1211,16 +944,13 @@ export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker
 
 export const fetchMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
   if (!userId || !authKey) return [];
-
+  const defaultParams = await getDefaultParams();
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
     broker_id: broker?.id,
     master_user_id: master?.id,
     user_id: client?.id,
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("ajaxfiles/margin_management_list", formData);
     return data?.data || [];
@@ -1232,16 +962,13 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
 
 export const fetchforexMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
   if (!userId || !authKey) return [];
-
+  const defaultParams = await getDefaultParams();
   const formData = {
-    is_app: "1",
-    login_user_id: userId,
-    auth_key: authKey,
     broker_id: broker?.id,
     master_user_id: master?.id,
     user_id: client?.id,
+    ...defaultParams,
   };
-
   try {
     const { data } = await axiosInstance.post("ajaxfiles/margin_management_forex_list", formData);
     return data?.data || [];
@@ -1251,37 +978,6 @@ export const fetchforexMarginManagementListAPI = async (userId, authKey, client,
   }
 };
 
-
-// export const fetchLedgerDetailsAPI = async (userId) => {
-//   const dataStored = JSON.parse(sessionStorage.getItem("data"));
-
-//   const payload = {
-//     is_app: '1',
-//     login_user_id: dataStored?.user_id,
-//     auth_key: dataStored?.auth_key,
-//     user_id: userId,
-//   };
-
-//   try {
-//     const response = await axios.post(
-//       'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
-//       payload
-//     );
-
-//     if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
-//       // Filter out "Opening Balance" if needed
-//       const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
-//       return filtered; // return the filtered data
-//     } else {
-//       return [];
-//     }
-//   } catch (err) {
-//     console.error('Error fetching ledger details:', err);
-//     return [];
-//   }
-// };
-
-
 export const tradePlaceAPI = async (dataObj) => {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   console.log('dataObj', dataObj);
@@ -1289,7 +985,6 @@ export const tradePlaceAPI = async (dataObj) => {
   const payload = {
     ...defaultParams,
     device_type: 0,
-
     market_type_id: dataObj.market_type_id,
     script_id: dataObj.script_id,
     script_expiry_id: dataObj.script_expiry_id,
@@ -1302,7 +997,6 @@ export const tradePlaceAPI = async (dataObj) => {
     user_id: (dataStored?.user_type != 1 && dataStored?.user_type != 2) ? dataObj.client.id : undefined,
   };
   console.log('payload', payload);
-
   const errorPayload = {
     "auth_key": "6tjC7iHdYZ",
     "is_app": "1",
@@ -1319,7 +1013,6 @@ export const tradePlaceAPI = async (dataObj) => {
     "device_type": 0,
     "user_id": "41297"
   }
-
   try {
     const response = await axiosInstance.post('/ajaxfiles/trade_place', payload);
     // const response = await axiosInstance.post('/ajaxfiles/trade_place', errorPayload);
@@ -1330,9 +1023,6 @@ export const tradePlaceAPI = async (dataObj) => {
     throw error;
   }
 };
-
-
-
 
 export const addMarketScriptAPI = async ({
   market_type_id,
@@ -1369,13 +1059,11 @@ export const addMarketScriptAPI = async ({
       script_expiry_type: str,
     }
   }
-
   try {
     const res =
       market_type_id == forex_market_type_id
         ? await axiosInstance.post('ajaxfiles/add_market_watch_forex', { ...defaultParams, ...payload })
         : await axiosInstance.post('ajaxfiles/add_market_watch', { ...defaultParams, ...payload });
-
     if (res.data.status === 'ok') {
       return res.data || {};
     } else {
@@ -1408,7 +1096,6 @@ export async function favouriteActionAPI(market_watch_id, action_type) {
   }
 }
 
-
 export const fetchValanNamesApi = async (term) => {
   try {
     const defaultParams = await getDefaultParams();
@@ -1421,24 +1108,8 @@ export const fetchValanNamesApi = async (term) => {
   }
 };
 
-// export const fetchLedgerDetailsApi = async (user_id, dataStored) => {
-//   const defaultParams = await getDefaultParams();
-
-//   try {
-//     const response = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill', {
-//       ...defaultParams,
-//       user_id,
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error fetching ledger details:', error);
-//     throw error;
-//   }
-// };
-
 export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, broker, master, user, status, searchText) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -1454,10 +1125,8 @@ export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, 
     user,
     status,
   };
-
   try {
     const { data } = await axiosInstance.post("datatables/user_list_key", formData);
-
     return data || [];
   } catch (error) {
     console.error("Failed to fetch  list:", error);
@@ -1467,7 +1136,6 @@ export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, 
 
 export const fetchEmployeelistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, broker, master, user, status, searchText) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -1481,10 +1149,8 @@ export const fetchEmployeelistingAPI = async (currentPage, rowsPerPage, tradeAft
     user,
     status,
   };
-
   try {
     const { data } = await axiosInstance.post("datatables/employee_list_key", formData);
-
     return data || [];
   } catch (error) {
     console.error("Failed to fetch  list:", error);
@@ -1506,7 +1172,6 @@ export const fetchMasterlistingAPI = async (
   searchText
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -1522,10 +1187,8 @@ export const fetchMasterlistingAPI = async (
     // user,
     status,
   };
-
   try {
     const { data } = await axiosInstance.post("datatables/master_list_key", formData);
-
     return data || [];
   } catch (error) {
     console.error("Failed to fetch  list:", error);
@@ -1547,7 +1210,6 @@ export const fetchBrokerlistingAPI = async (
   searchText
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -1563,10 +1225,8 @@ export const fetchBrokerlistingAPI = async (
     // user,
     status,
   };
-
   try {
     const { data } = await axiosInstance.post("datatables/broker_list2", formData);
-
     return data || [];
   } catch (error) {
     console.error("Failed to fetch  list:", error);
@@ -1590,30 +1250,24 @@ export const tradeEditDeleteLogLogsAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/trade_log_view.php", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1636,30 +1290,24 @@ export const tradeAutosquareofAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/auto_closed_report", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1682,30 +1330,24 @@ export const MtmalertsAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/mtm_alert_top20", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1728,30 +1370,24 @@ export const ipaddresslogAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/same_ip_list", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1774,30 +1410,24 @@ export const cashledgerAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/cash_ledger_list", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1816,25 +1446,20 @@ export const cashEntryAPI = async (
   cash_add = '',
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     user_type,
     user_id,
     start_date,
     end_date,
-
     cash_add,
   };
-
   try {
     const response = await axiosInstance.post("datatables/cash_ledger_list", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -1858,28 +1483,23 @@ export const JVEntryAPI = async (
   cash_add
 ) => {
   const defaultParams = await getDefaultParams(); // should include is_app, login_user_id, auth_key
-
   const formData = {
     ...defaultParams,   // contains: is_app, login_user_id, auth_key
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     date,      // ✅ correct key
     date_to,   // ✅ correct key
-
     is_deleted,
     is_updated,
     is_admin,
     cash_add,
   };
-
   try {
     const response = await axiosInstance.post("ajaxfiles/fetch_jv_entries", formData);
     return response.data;
@@ -1889,14 +1509,11 @@ export const JVEntryAPI = async (
   }
 };
 
-
-
 export const BillfilterAPI = async ({
   currentPage,
   pageSize = 10,
   term = "",
   // sSearch = "",
-
   valan_id = valanId?.id,
   amount = "",
   start_date = "",
@@ -1909,7 +1526,6 @@ export const BillfilterAPI = async ({
   //{"master_user_id":"","broker_user_id":"","valan_id":"2025-08-18","market_type_id":"","user_id":"","start_date":"","end_date":"","amount":17000}
   try {
     const defaultParams = await getDefaultParams();
-
     const payload = {
       ...defaultParams,
       sEcho: 1,
@@ -1917,7 +1533,6 @@ export const BillfilterAPI = async ({
       iDisplayLength: pageSize,
       term,
       //  
-
       master_user_id,
       broker_user_id,
       valan_id,
@@ -1928,12 +1543,10 @@ export const BillfilterAPI = async ({
       amount,
       term,
     };
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/bill_filter_amount_wise",
       payload
     );
-
     // ✅ Return the actual array of logs
     return response.data || [];
   } catch (err) {
@@ -1957,14 +1570,12 @@ export const CrosstradelogAPI = async ({
 }) => {
   try {
     const defaultParams = await getDefaultParams();
-
     const payload = {
       ...defaultParams,
       sEcho: 1,
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
       term,
-
       valan_id,
       market_type_id,
       script_id,
@@ -1974,13 +1585,10 @@ export const CrosstradelogAPI = async ({
       start_date,
       end_date,
     };
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/cross_trade_data",
       payload
     );
-
-
     return response.data || [];
   } catch (err) {
     console.error("Error fetching Valan IDs:", err);
@@ -1999,26 +1607,20 @@ export const tradeEditLoglistAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/user_edit_log_list", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2041,30 +1643,24 @@ export const editDeleteLogLogsAPI = async (
   is_admin,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
     is_admin,
   }
-
   try {
     const response = await axiosInstance.post("datatables/trade_log_view.php", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2086,7 +1682,6 @@ export const ValanLogsAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2094,10 +1689,8 @@ export const ValanLogsAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   }
-
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_valan_master", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2119,29 +1712,23 @@ export const editDeleteoldLogsAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
   }
-
   try {
     const response = await axiosInstance.post("datatables/trade_log_view_old", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2163,29 +1750,23 @@ export const CasheditDeleteLogsAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
   }
-
   try {
     const response = await axiosInstance.post("datatables/cash_ledger_log_list", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2207,29 +1788,23 @@ export const manualtradesAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch: searchText,
-
     market_type_id: market?.id,
     script_id: scriptIds,
     master_user_id: master?.id,
     user_id: client?.id,
-
     end_date,
     start_date,
-
     is_deleted,
     is_updated,
   }
-
   try {
     const response = await axiosInstance.post("datatables/order_book_manual", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2251,14 +1826,12 @@ export const bulktradingAPI = async ({
   noOfTrades = '',
 }) => {
   const defaultParams = await getDefaultParams();
-
   const payload = {
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: currentPage * pageSize,
     iDisplayLength: pageSize,
     sSearch,
-
     master_user_id,
     broker_user_id,
     market_type_id,
@@ -2283,11 +1856,8 @@ export const bulktradingAPI = async ({
   }
 };
 
-
-
 export const addAccountAPI = async (payload) => {
   const defaultParams = await getDefaultParams();
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/create_user", { ...defaultParams, ...payload });
     return data || [];
@@ -2301,7 +1871,6 @@ export const addAccountAPI = async (payload) => {
 
 export const getMarketScriptForAddAccountAPI = async () => {
   const defaultParams = await getDefaultParams();
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/get_mcx_script_type", { ...defaultParams });
     return data || [];
@@ -2314,45 +1883,40 @@ export const getMarketScriptForAddAccountAPI = async () => {
 };
 
 console.log("API.js runn.......");
+
 const apiCache = new Map();
+
 export const fetchOptionsAPI = async (url, params) => {
   const key = `${url}:${JSON.stringify(params)}`;
-
   // If we already have cached response, return it
   if (apiCache.has(key)) {
     console.log("Returning cached response for:", key);
     return apiCache.get(key);
   }
-
   // Otherwise, call the API
   try {
     const { data } = await axiosInstance.post(url, params);
-
     // Save response in cache
     apiCache.set(key, data.results);
-
     return data.results;
   } catch (err) {
     console.error(`Error fetching from ${url}`, err);
     setter([]);
   }
 };
+
 export const fetchOptionsPriceOptionAPI = async (url, params) => {
   const key = `${url}:${JSON.stringify(params)}`;
-
   // If we already have cached response, return it
   if (apiCache.has(key)) {
     console.log("Returning cached response for:", key);
     return apiCache.get(key);
   }
-
   // Otherwise, call the API
   try {
     const { data } = await axiosInstance.post(url, params);
-
     // Save response in cache
     apiCache.set(key, data);
-
     return data;
   } catch (err) {
     console.error(`Error fetching from ${url}`, err);
@@ -2362,13 +1926,11 @@ export const fetchOptionsPriceOptionAPI = async (url, params) => {
 
 export const fetchOptionsAPIManualScript = async (url, params) => {
   const key = `${url}:${JSON.stringify(params)}`;
-
   // If we already have cached response, return it
   if (apiCache.has(key)) {
     console.log("Returning cached response for:", key);
     return apiCache.get(key);
   }
-
   // Otherwise, call the API
   try {
     const { data } = await axiosInstance.post(url, params);
@@ -2384,7 +1946,6 @@ export const fetchOptionsAPIManualScript = async (url, params) => {
 
 export const editAccountAPI = async (payload) => {
   const defaultParams = await getDefaultParams();
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/edit_user", { ...defaultParams, ...payload });
     return data || [];
@@ -2396,7 +1957,6 @@ export const editAccountAPI = async (payload) => {
 
 export const getUserDetailsAPI = async (user_id) => {
   const defaultParams = await getDefaultParams();
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/view_user_details", { ...defaultParams, user_id });
     return data || [];
@@ -2408,7 +1968,6 @@ export const getUserDetailsAPI = async (user_id) => {
 
 export const getemployeeDetailsAPI = async (user_id) => {
   const defaultParams = await getDefaultParams();
-
   try {
     const { data } = await axiosInstance.post("/ajaxfiles/view_user_details_emp", { ...defaultParams, user_id });
     return data || [];
@@ -2427,12 +1986,10 @@ export const fetchPermissionsAPI = async () => {
       login_user_id: dataStored?.user_id || '',
       auth_key: dataStored?.auth_key || ''
     };
-
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_emp_permission",
       payload
     );
-
     if (res.data && Array.isArray(res.data.emp_per)) {
       return res.data.emp_per;
     } else {
@@ -2458,7 +2015,6 @@ export const ScriptwiselotAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2466,10 +2022,8 @@ export const ScriptwiselotAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   }
-
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_script_master", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2491,7 +2045,6 @@ export const StopfuturelistAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2499,10 +2052,8 @@ export const StopfuturelistAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   }
-
   try {
     const response = await axiosInstance.post("datatables/list_future_block", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
@@ -2524,7 +2075,6 @@ export const ExpiryvalidationAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2532,17 +2082,14 @@ export const ExpiryvalidationAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   }
-
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_expiry_validation", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
     throw error;
   }
 };
-
 
 export const TimesettingAPI = async (
   currentPage,
@@ -2558,7 +2105,6 @@ export const TimesettingAPI = async (
   is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2566,17 +2112,14 @@ export const TimesettingAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   }
-
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_start_end_time", formData);
-
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
     throw error;
   }
 };
-
 
 export const NSEOPTmanageAPI = async (
   currentPage,
@@ -2592,7 +2135,6 @@ export const NSEOPTmanageAPI = async (
   is_updated
 ) => {
   const defaultParams = await getDefaultParams();
-
   const formData = {
     ...defaultParams,
     sEcho: 1,
@@ -2600,12 +2142,9 @@ export const NSEOPTmanageAPI = async (
     iDisplayLength: pageSize,
     sSearch: searchText,
   };
-
   try {
     const response = await axiosInstance.post("datatables/option_block_list", formData);
-
     console.log("API raw response:", response.data); // debug
-
     // return aaData array inside data
     return response.data?.aaData || [];
   } catch (error) {
@@ -2614,10 +2153,7 @@ export const NSEOPTmanageAPI = async (
   }
 };
 
-
-
 // api.js
-
 export const fetchPositionDataAPI = async ({
   user_id,
   auth_key,
@@ -2625,18 +2161,15 @@ export const fetchPositionDataAPI = async ({
   selectedScripts,
   searchText,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       market: selectedMarket?.name || "",
       scripts: selectedScripts.map((s) => s.name).join(","),
       sSearch: searchText.trim(),
     };
-
     console.log("🔍 Fetching with payload:", payload);
-
     const response = await fetch(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_script_wise_qty1",
       {
@@ -2647,7 +2180,6 @@ export const fetchPositionDataAPI = async ({
         body: JSON.stringify(payload),
       }
     );
-
     const result = await response.json();
     return result; // return full response for flexibility
   } catch (err) {
@@ -2655,7 +2187,6 @@ export const fetchPositionDataAPI = async ({
     throw err;
   }
 };
-
 
 export const fetchBlockedScriptsAPI = async ({
   user_id,
@@ -2665,18 +2196,15 @@ export const fetchBlockedScriptsAPI = async ({
   searchText,
   formatScriptIds,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       market: selectedMarket?.name || "",
       script_id: formatScriptIds(script),
       search_text: searchText.trim(),
     };
-
     console.log("🔍 Fetching with payload:", payload);
-
     const response = await fetch(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/list_block_script.php",
       {
@@ -2685,14 +2213,12 @@ export const fetchBlockedScriptsAPI = async ({
         body: JSON.stringify(payload),
       }
     );
-
     return await response.json();
   } catch (err) {
     console.error("❌ API call failed", err);
     throw err;
   }
 };
-
 
 export const confirmTradeAPI = async ({
   user_id,
@@ -2703,20 +2229,17 @@ export const confirmTradeAPI = async ({
   valanId,
   password,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: 1,
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       broker_id: broker?.id || "",
       master_id: master?.id || "",
       user_id: client?.id || "",
       valan_id: valanId?.id || "",
       password,
     };
-
     console.log("🔍 Confirm Trade Payload:", payload);
-
     const response = await fetch(
       "http://128.199.126.171/~goldorg/ajaxfiles/brokerage_refresh",
       {
@@ -2725,7 +2248,6 @@ export const confirmTradeAPI = async ({
         body: JSON.stringify(payload),
       }
     );
-
     const result = await response.json();
     return result; // return full response
   } catch (err) {
@@ -2734,23 +2256,18 @@ export const confirmTradeAPI = async ({
   }
 };
 
-
 export const fetchLedgerDetailsAPI = async ({ user_id, auth_key, targetUserId }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       user_id: targetUserId,
     };
-
     console.log("🔍 Fetching Ledger Details with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill",
       payload
     );
-
     return response.data; // return raw response for flexibility
   } catch (err) {
     console.error("❌ API call (Ledger Details) failed", err);
@@ -2759,22 +2276,18 @@ export const fetchLedgerDetailsAPI = async ({ user_id, auth_key, targetUserId })
 };
 
 export const fetchJVAPI = async ({ user_id, auth_key, start_date, end_date }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       date: start_date || "21-08-2025",
       date_to: end_date || "28-08-2025",
     };
-
     console.log("🔍 Fetching Logs with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/fetch_jv_entries",
       payload
     );
-
     return response.data; // return raw API response
   } catch (err) {
     console.error("❌ API call (Fetch Logs) failed", err);
@@ -2782,24 +2295,19 @@ export const fetchJVAPI = async ({ user_id, auth_key, start_date, end_date }) =>
   }
 };
 
-
 export const fetchLedgerAPI = async ({ user_id, auth_key, selectedUserId, filters }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
       ...filters,
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       user_id: selectedUserId,
     };
-
     console.log("🔍 Fetching Ledger with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_valan_wise_ledger.php",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Fetch Ledger) failed", err);
@@ -2807,26 +2315,21 @@ export const fetchLedgerAPI = async ({ user_id, auth_key, selectedUserId, filter
   }
 };
 
-
 export const fetchSportsLedgerAPI = async ({ user_id, auth_key }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       sEcho: 1,
       iDisplayStart: 0,
       iDisplayLength: 100,
       sSearch: "",
     };
-
     console.log("🔍 Fetching Sports Ledger with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/datatables/cricket_account_statement",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Sports Ledger) failed", err);
@@ -2834,23 +2337,18 @@ export const fetchSportsLedgerAPI = async ({ user_id, auth_key }) => {
   }
 };
 
-
 export const updateCnbcLinkAPI = async ({ user_id, auth_key, link }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
       link,
-      is_app: 1,
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
     };
-
     console.log("🔍 Updating CNBC link with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/update_cnbc",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Update CNBC Link) failed", err);
@@ -2858,23 +2356,18 @@ export const updateCnbcLinkAPI = async ({ user_id, auth_key, link }) => {
   }
 };
 
-
 export const fetchLedgerReportAPI = async ({ user_id, auth_key, filters }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
       ...filters,
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
     };
-
     console.log("🔍 Fetching Ledger Report with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/ledger_report",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Ledger Report) failed", err);
@@ -2882,16 +2375,13 @@ export const fetchLedgerReportAPI = async ({ user_id, auth_key, filters }) => {
   }
 };
 
-
 export const uploadUserTypeQtyAPI = async ({ user_id, auth_key, file }) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("login_user_id", user_id);
     formData.append("auth_key", auth_key);
-
     console.log("🔍 Uploading file:", file.name);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty",
       formData,
@@ -2899,14 +2389,12 @@ export const uploadUserTypeQtyAPI = async ({ user_id, auth_key, file }) => {
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Upload User Type Qty) failed", err);
     throw err;
   }
 };
-
 
 export const confirmTradeManualAPI = async ({
   user_id,
@@ -2921,13 +2409,11 @@ export const confirmTradeManualAPI = async ({
   pair,
   addClient,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const scriptArray = Array.isArray(addScript) ? addScript : [addScript];
-
     const payload = {
-      is_app: 1,
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       password: password || "",
       trade_date,
       high_low: 0,
@@ -2943,14 +2429,11 @@ export const confirmTradeManualAPI = async ({
       check_script_name: scriptArray.map((s) => s.script_name).join(","),
       user_id: addClient?.id || user_id || "",
     };
-
     console.log("🔍 Submitting manual trade with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/trade_manual",
       payload
     );
-
     return response.data; // return API response
   } catch (err) {
     console.error("❌ API call (Manual Trade) failed", err);
@@ -2958,23 +2441,18 @@ export const confirmTradeManualAPI = async ({
   }
 };
 
-
 export const updateMarqueeMessageAPI = async ({ user_id, auth_key, message }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
       message,
-      is_app: 1,
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
     };
-
     console.log("🔍 Updating Marquee Message with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/marquee_add",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Update Marquee Message) failed", err);
@@ -2986,9 +2464,7 @@ export const uploadUserTypeQtyMasterAPI = async (file) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
-
     console.log("🔍 Uploading CSV file:", file.name);
-
     const response = await fetch(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty_master",
       {
@@ -2996,7 +2472,6 @@ export const uploadUserTypeQtyMasterAPI = async (file) => {
         body: formData,
       }
     );
-
     const data = await response.json();
     return data; // return API response
   } catch (err) {
@@ -3020,11 +2495,10 @@ export const fetchScriptQtyListAPI = async ({
   minBet,
   maxBet,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       sEcho: 1,
       iDisplayStart: currentPage * pageSize,
       iDisplayLength: pageSize,
@@ -3038,14 +2512,11 @@ export const fetchScriptQtyListAPI = async ({
       min_bet: minBet,
       max_bet: maxBet,
     };
-
     console.log("🔍 Fetching Script Qty List with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/datatables/script_qty_list",
       payload
     );
-
     return response.data; // return full API response
   } catch (err) {
     console.error("❌ API call (Script Qty List) failed", err);
@@ -3053,22 +2524,17 @@ export const fetchScriptQtyListAPI = async ({
   }
 };
 
-
 export const fetchUserLevelsAPI = async ({ user_id, auth_key }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
     };
-
     console.log("🔍 Fetching user levels with payload:", payload);
-
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_user_level",
       payload
     );
-
     return Array.isArray(res.data)
       ? res.data
       : Array.isArray(res.data?.data)
@@ -3082,20 +2548,16 @@ export const fetchUserLevelsAPI = async ({ user_id, auth_key }) => {
 
 // 🔹 Fetch filters (markets + scripts)
 export const fetchMarketWatchFiltersAPI = async ({ user_id, auth_key }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
     };
-
     console.log("🔍 Fetching Market Watch Filters with payload:", payload);
-
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter",
       payload
     );
-
     return res.data || {};
   } catch (err) {
     console.error("❌ API call (Market Watch Filters) failed", err);
@@ -3104,23 +2566,19 @@ export const fetchMarketWatchFiltersAPI = async ({ user_id, auth_key }) => {
 };
 
 export const addNotificationAPI = async ({ user_id, auth_key, user_type, title, message }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: 1,
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       user_type,
       title,
       message,
     };
-
     console.log("🔍 Adding notification with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_notification",
       payload
     );
-
     return response.data; // return API response
   } catch (err) {
     console.error("❌ API call (Add Notification) failed", err);
@@ -3128,21 +2586,17 @@ export const addNotificationAPI = async ({ user_id, auth_key, user_type, title, 
   }
 };
 
-
 export const removeBlockOptionExpiryAPI = async ({ script_expiry_option_id }) => {
   try {
     const payload = {
       script_expiry_option_id,
       is_block: 0,
     };
-
     console.log("🔍 Removing block option with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry",
       payload
     );
-
     return response.data; // return API response
   } catch (err) {
     console.error("❌ API call (Remove Block Option) failed", err);
@@ -3160,11 +2614,10 @@ export const addClientOrderLimitAPI = async ({
   price_percent,
   value,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       market_type_id,
       script_id,
       user_id: client_user_id,
@@ -3172,14 +2625,11 @@ export const addClientOrderLimitAPI = async ({
       price_percent,
       value,
     };
-
     console.log("🔹 Sending payload to add_client_order_limit:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_client_order_limit",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Add Client Order Limit) failed", err);
@@ -3189,21 +2639,17 @@ export const addClientOrderLimitAPI = async ({
 
 // 🔹 Delete client order limit
 export const deleteClientOrderLimitAPI = async ({ user_id, auth_key, client_order_id }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       client_order_id,
     };
-
     console.log("🔹 Sending payload to delete_client_order_limit:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/delete_client_order_limit",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Delete Client Order Limit) failed", err);
@@ -3212,21 +2658,17 @@ export const deleteClientOrderLimitAPI = async ({ user_id, auth_key, client_orde
 };
 
 export const deleteFutureTradingBlockAPI = async ({ future_id, user_id, auth_key }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
       future_id,
-      login_user_id: user_id,
-      auth_key,
-      is_app: 1,
+      ...defaultParams,
     };
-
     console.log("🔍 Deleting future trading block with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/setting/remove_future_trading_block",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Delete Future Trading Block) failed", err);
@@ -3234,17 +2676,18 @@ export const deleteFutureTradingBlockAPI = async ({ future_id, user_id, auth_key
   }
 };
 
-
 export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) => {
+  const defaultParams = await getDefaultParams();
   try {
-    const payload = { user_id, auth_key, noOfTrades };
+    const payload = {
+      ...defaultParams,
+      noOfTrades,
+    };
     console.log("🔍 Fetching bulk trade list with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/datatables/bulk_trade_list",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Bulk Trade List) failed", err);
@@ -3254,20 +2697,17 @@ export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) =
 
 // 🔹 Save/update bulk trading settings
 export const saveBulkTradingSettingsAPI = async ({ user_id, auth_key, noOfTrades }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      user_id,
-      auth_key,
+      ...defaultParams,
       no_of_trade: noOfTrades,
     };
-
     console.log("🔍 Saving bulk trading settings with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_bulk_trading",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Save Bulk Trading Settings) failed", err);
@@ -3283,24 +2723,20 @@ export const addClientBlockScriptAPI = async ({
   client_user_id,
   master_user_id,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       market_type_id,
       script_id,
       user_id: client_user_id,
       master_user_id,
     };
-
     console.log("🔹 Adding client block script with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_client_block_script_setting",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Add Client Block Script) failed", err);
@@ -3310,21 +2746,17 @@ export const addClientBlockScriptAPI = async ({
 
 // 🔹 Delete client block script setting
 export const deleteClientBlockScriptAPI = async ({ user_id, auth_key, client_block_script_id }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       client_block_script_id,
     };
-
     console.log("🔹 Deleting client block script with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block_script_setting",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Delete Client Block Script) failed", err);
@@ -3341,24 +2773,20 @@ export const removeSelectedClientBlockScriptAPI = async ({
   client_user_id,
   master_user_id,
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       market_type_id,
       script_id,
       user_id: client_user_id,
       master_user_id,
     };
-
     console.log("🔹 Removing selected client block script with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block1_script_setting",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Remove Selected Client Block Script) failed", err);
@@ -3376,11 +2804,10 @@ export const addReceiptAPI = async ({
   amount,
   remarks = "",
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       user_type,
       user_id: entry_user_id,
       type,
@@ -3388,14 +2815,11 @@ export const addReceiptAPI = async ({
       amount,
       remarks,
     };
-
     console.log("🔹 Adding receipt with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/add_receipt",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Add Receipt) failed", err);
@@ -3414,11 +2838,10 @@ export const editReceiptAPI = async ({
   amount,
   remarks = "",
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       entry_id,
       user_id: entry_user_id,
       type,
@@ -3426,14 +2849,11 @@ export const editReceiptAPI = async ({
       amount,
       remarks,
     };
-
     console.log("🔹 Editing receipt with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/edit_receipt",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Edit Receipt) failed", err);
@@ -3443,22 +2863,18 @@ export const editReceiptAPI = async ({
 
 // 🔹 Delete entry/receipt
 export const deleteReceiptAPI = async ({ user_id, auth_key, entry_id, entry_user_id }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
+      ...defaultParams,
       entry_id,
       user_id: entry_user_id,
     };
-
     console.log("🔹 Deleting receipt with payload:", payload);
-
     const response = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/delete_receipt",
       payload
     );
-
     return response.data;
   } catch (err) {
     console.error("❌ API call (Delete Receipt) failed", err);
@@ -3478,11 +2894,10 @@ export const addJVEntryAPI = async ({
   jv_entry_id = 0,
   jv_entry_time = ""
 }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id,
-      auth_key,
+      ...defaultParams,
       from_ledger,
       to_ledger,
       ledger_type,
@@ -3492,7 +2907,6 @@ export const addJVEntryAPI = async ({
       jv_entry_id,
       jv_entry_time
     };
-
     console.log("🔹 Add JV payload:", payload);
     const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/add_jv", payload);
     return response.data;
@@ -3507,14 +2921,12 @@ export const updateJVEntryAPI = async (payload) => addJVEntryAPI(payload);
 
 // 🔹 Delete JV entry
 export const deleteJVEntryAPI = async ({ login_user_id, auth_key, entryId }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id,
-      auth_key,
+      ...defaultParams,
       entryId
     };
-
     console.log("🔹 Delete JV payload:", payload);
     const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/delete_jv_entry", payload);
     return response.data;
@@ -3524,13 +2936,11 @@ export const deleteJVEntryAPI = async ({ login_user_id, auth_key, entryId }) => 
   }
 };
 
-
 const fetchUserLog = async ({ endpoint, login_user_id, auth_key, user_id, log_datetime }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: "1",
-      login_user_id,
-      auth_key,
+      ...defaultParams,
       user_id,
       log_datetime
     };
@@ -3573,12 +2983,10 @@ export const fetchMarketLogAPI = async ({ login_user_id, auth_key, user_id, log_
     log_datetime
   });
 
-
 export const fetchSummaryApi = async (tab = "Stock", selectedUser = {}) => {
   try {
     // get session data inside api.js itself
     const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-
     const payload = {
       is_app: 1,
       login_user_id: dataStored?.user_id,
@@ -3586,7 +2994,6 @@ export const fetchSummaryApi = async (tab = "Stock", selectedUser = {}) => {
       view_user_id: selectedUser?.id || "",
       tabs: tab, // Stock, Forex, Sports
     };
-
     const response = await axios.post(`${BASE_URL}/view_market_type_data`, payload);
     return response.data; // return the full response
   } catch (error) {
@@ -3595,23 +3002,19 @@ export const fetchSummaryApi = async (tab = "Stock", selectedUser = {}) => {
   }
 };
 
-
 export const fetchSummaryAPI = async ({ login_user_id, auth_key, view_user_id, tab }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: 1,
-      login_user_id,
-      auth_key,
+      ...defaultParams,
       view_user_id,
       tabs: tab
     };
     console.log("🔹 Fetching summary:", payload);
-
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/view_market_type_data",
       payload
     );
-
     return res.data?.status === "ok" ? res.data.data : null;
   } catch (err) {
     console.error("❌ Summary fetch error:", err);
@@ -3619,30 +3022,24 @@ export const fetchSummaryAPI = async ({ login_user_id, auth_key, view_user_id, t
   }
 };
 
-
 export const fetchProfileAPI = async ({ login_user_id, auth_key, view_user_id }) => {
+  const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      is_app: 1,
-      login_user_id,
-      auth_key,
+      ...defaultParams,
       view_user_id
     };
-
     console.log("🔹 Fetching profile:", payload);
-
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile",
       payload
     );
-
     if (res.data.status === "ok") {
       return {
         profile: res.data.data,
         loginIps: res.data.loginIps || []
       };
     }
-
     return { profile: null, loginIps: [] };
   } catch (err) {
     console.error("❌ Profile fetch error:", err);
@@ -3650,53 +3047,40 @@ export const fetchProfileAPI = async ({ login_user_id, auth_key, view_user_id })
   }
 };
 
-
 export const removeMappedAccount = async ({ login_user_id, auth_key, user_id }) => {
+  const defaultParams = await getDefaultParams();
   const payload = {
-    is_app: 1,
-    login_user_id,
-    auth_key,
+    ...defaultParams,
     user_id
   };
-
   console.log("🗑️ Payload to remove mapped account:", payload);
-
   const response = await axios.post(
     "http://128.199.126.171/~goldorg/ajaxfiles/remove_mapped_account",
     payload
   );
-
   return response.data; // return raw API result
 };
 
-
 export const placeTrade = async (closetradeData, sessionData) => {
+  const defaultParams = await getDefaultParams();
   const payload = {
     ...closetradeData,
-    is_app: 1,
-    login_user_id: sessionData?.user_id,
-    auth_key: sessionData?.auth_key,
+    ...defaultParams,
   };
-
   console.log("📤 Payload to place trade:", payload);
-
   const response = await axios.post(
     "http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2",
     payload
   );
-
   return response.data; // raw API response
 };
 
-
 export const saveEmployee = async (formData, dataStored, isEditMode, editUserId) => {
   const { name, password, remarks, permissions } = formData;
-
   const selectedPermissions = Object.keys(permissions).filter(
     (key) => permissions[key]
   );
   const permissionString = selectedPermissions.join(",");
-
   const basePayload = {
     is_app: 1,
     login_user_id: dataStored?.user_id || "",
@@ -3705,7 +3089,6 @@ export const saveEmployee = async (formData, dataStored, isEditMode, editUserId)
     remarks,
     empPermission: permissionString,
   };
-
   if (isEditMode) {
     return axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/edit_user_emp",
@@ -3722,13 +3105,10 @@ export const saveEmployee = async (formData, dataStored, isEditMode, editUserId)
 export const getLedgerBalance = async (dataStored, userId) => {
   if (!dataStored) throw new Error("Session expired. Please log in again.");
   if (!userId) throw new Error("User ID is required to fetch balance");
-
+  const defaultParams = await getDefaultParams();
   const payload = {
-    is_app: "1",
-    login_user_id: dataStored.user_id,
-    auth_key: dataStored.auth_key,
+    ...defaultParams,
     user_id: userId,
   };
-
   return axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", payload);
 };

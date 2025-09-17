@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Grid, Autocomplete, TextField } from '@mui/material';
 import { getInputBoxStyle } from './inputBoxStyle';
 import { useTheme } from '@emotion/react';
-import { fetchOptionsAPI } from '../API/API';
+import { fetchOptionsAPI, getDefaultParams } from '../API/API';
 
 const MasterFilter = ({ master, setMaster }) => {
     const theme = useTheme();
@@ -18,13 +18,8 @@ const MasterFilter = ({ master, setMaster }) => {
         setter(Array.isArray(data) ? data : []);
     }
 
-    function handleFetch(term) {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        let params = {
-            is_app: 1,
-            login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
-        };
+    async function handleFetch(term) {
+        let params = await getDefaultParams();
 
         const url = 'http://128.199.126.171/~goldorg/ajaxfiles/get_master_name_search';
         fetchOptions(url, { ...params, term }, setMasterOptions);
