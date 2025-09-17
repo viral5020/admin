@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { PropTypes } from 'prop-types';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { ThemeContext } from './ThemeWrapper';
 import Dashboard from '../Templates/Dashboard';
 import {
@@ -131,7 +131,6 @@ function Application(props) {
   const isEmployeeLogin = auth.userData?.isEmployeeLogin;
   const emp_permission = auth.emp_permission;
 
-
   return (
     <Dashboard history={history} changeMode={changeMode}>
       <Routes>
@@ -141,196 +140,464 @@ function Application(props) {
           {/* -------------------- Dashboard Routes -------------------- */}
           <Route path="/" element={<PersonalDashboard />} />
 
-          {(userType === 3 || userType === 4) && (
-            <Route path="dashboard/Master-Dashboard" element={<Masterdashboard />} />
-          )}
+          <Route
+            path="dashboard/Master-Dashboard"
+            element={(userType === 3 || userType === 4)
+              ? <Masterdashboard />
+              : <Navigate to="/app" replace />}
+          />
 
           {/* -------------------- Stock Trading -------------------- */}
-          {isStock && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("TRADE"))) && (
-            <>
-              <Route path="dashboard/watchlist" element={<Watchlist />} />
-              <Route path="dashboard/favorite-list" element={<Watchlist />} />
-              <Route path="dashboard/order-Book" element={<OrderBook />} />
-              <Route path="dashboard/positions" element={<Positions />} />
+          <Route
+            element={
+              isStock && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("TRADE")))
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="dashboard/watchlist"
+              element={<Watchlist />}
+            />
+            <Route
+              path="dashboard/favorite-list"
+              element={<Watchlist />}
+            />
+            <Route
+              path="dashboard/order-Book"
+              element={<OrderBook />}
+            />
+            <Route
+              path="dashboard/positions"
+              element={<Positions />}
+            />
 
-              {(userType === 4 || userType === 5) && (
-                <Route path="dashboard/previous-valan-trade" element={<Previousvalan />} />
-              )}
-              {userType !== 2 && (
-                <Route path="dashboard/Banned-Blocked-Scripts" element={<BannedBlockedScript />} />
-              )}
-              {userType !== 1 && (
-                <Route path="dashboard/summary-report" element={<Summary_report />} />
-              )}
-              {userType !== 1 && userType !== 2 && (
-                <Route path="dashboard/Margin-management" element={<Marginmanagement />} />
-              )}
-              {userType !== 1 && userType !== 2 && (
-                <Route path="dashboard/Banned-Blocked-Scripts" element={<BannedBlockedScript />} />
-              )}
-              {userType !== 1 && userType !== 2 && (
-                <Route path="dashboard/Margin-management" element={<Marginmanagement />} />
-              )}
-              {userType !== 1 && (
-                <Route path="dashboard/summary-report" element={<Summary_report />} />
-              )}
-              {userType === 4 && (
-                <>
-                  <Route path="dashboard/manual-trade" element={<Manualtrade />} />
-                  <Route path="dashboard/Self-P&L" element={<Selfpl />} />
-                </>
-              )}
-              {(userType === 4 || userType === 5) && (
-                <Route path="dashboard/Brokrage-refresh" element={<Brokrageref />} />
-              )}
-            </>
-          )}
+            <Route
+              path="dashboard/previous-valan-trade"
+              element={(userType === 4 || userType === 5)
+                ? <Previousvalan />
+                : <Navigate to="/app" replace />}
+            />
 
-          {/* -------------------- Forex Trading -------------------- */}
-          {isForex && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("TRADE"))) && (
-            <>
-              <Route path="dashboard/forex-watchlist" element={<Watchlist />} />
-              <Route path="dashboard/forex-favorite-list" element={<Watchlist />} />
-              <Route path="dashboard/forex-order" element={<Forex_order />} />
-              <Route path="dashboard/forex-position" element={<Forex_position />} />
+            <Route
+              path="dashboard/Banned-Blocked-Scripts"
+              element={userType !== 2
+                ? <BannedBlockedScript />
+                : <Navigate to="/app" replace />}
+            />
 
-              {(userType === 4 || userType === 5) && (
-                <Route path="dashboard/forex-previous-valan-trade" element={<Forexvaln />} />
-              )}
-              {userType !== 1 && (
-                <Route path="dashboard/forex-Summary-report" element={<Forexsummary />} />
-              )}
-              {userType !== 1 && userType !== 2 && (
-                <Route path="dashboard/forex-Margin-management" element={<Forexmarginmanagement />} />
-              )}
-            </>
-          )}
+            <Route
+              path="dashboard/summary-report"
+              element={userType !== 1
+                ? <Summary_report />
+                : <Navigate to="/app" replace />}
+            />
 
-          {/* -------------------- User Menu -------------------- */}
-          {userType !== 1 && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("USERS"))) && (
-            <>
-              {(userType === 3 || userType === 4) && (
-                <Route path="dashboard/User-Profile" element={<Userprofile />} />
-              )}
-              <Route path="dashboard/User-listing" element={<Userlisting />} />
-              {(userType !== 2 && userType !== 1) && (
-                <>
-                  <Route path="dashboard/Master-Listing" element={<MasterList />} />
-                  <Route path="dashboard/Broker-Listing" element={<BrokerListing />} />
-                  <Route path="dashboard/Add-Account" element={<Addacount />} />
-                </>
-              )}
-              {userType === 4 && (
-                <>
-                  <Route path="dashboard/Employe-Listing" element={<Employeelisting />} />
-                  <Route path="dashboard/add-employee" element={<Addemployee />} />
-                </>
-              )}
-            </>
-          )}
+            <Route
+              path="dashboard/Margin-management"
+              element={(userType !== 1 && userType !== 2)
+                ? <Marginmanagement />
+                : <Navigate to="/app" replace />}
+            />
 
-          {/* -------------------- Utility Menu -------------------- */}
-          {userType !== 2 && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("UTILITY"))) && (
-            <>
-              {userType !== 1 && (isStock || isForex) && (
-                <Route path="dashboard/bulk-trading" element={<Bulktrading />} />
-              )}
-              {(userType !== 2 && userType !== 1) && (
-                <>
-                  <Route path="dashboard/bill-filter" element={<Billfilter />} />
-                  <Route path="dashboard/ip-address-log" element={<Iplistlog />} />
-                </>
-              )}
-              {(userType !== 2 && (isStock || isForex)) && (
-                <Route path="dashboard/trade-edit-delete-log" element={<TradeEditDeleteLog />} />
-              )}
-              {(userType === 4 || userType === 5) && (isStock || isForex) && (
-                <Route path="dashboard/trade-edit-delete-log-old" element={<Tradeditdeleteold />} />
-              )}
-              {(userType === 3 || userType === 4 || userType === 5) && (
-                <Route path="dashboard/user-edit-log" element={<Usereditlog />} />
-              )}
-              {(userType === 3 || userType === 4 || userType === 5) && (isStock || isForex) && (
-                <>
-                  <Route path="dashboard/auto-square-up-log" element={<Autosquareuplog />} />
-                  <Route path="dashboard/cross-trade-log" element={<Crosstradelog />} />
-                </>
-              )}
-              {(userType !== 2 && (isStock || isForex)) && (
-                <Route path="dashboard/rejection-logs" element={<RejectionLogs />} />
-              )}
-              {(userType === 4 || userType === 5) && (
-                <>
-                  <Route path="dashboard/cash-edit-delete-log" element={<Casheditdeletelog />} />
-                  <Route path="dashboard/valan" element={<Valan />} />
-                </>
-              )}
-            </>
-          )}
+            <Route
+              path="dashboard/Margin-management"
+              element={(userType !== 1 && userType !== 2)
+                ? <Marginmanagement />
+                : <Navigate to="/app" replace />}
+            />
 
-          {/* -------------------- Accounts Menu -------------------- */}
-          {(userType === 1 || userType === 2 || userType === 3 || userType === 4 || userType === 5) && (
-            <>
-              {(userType !== 2 && userType !== 1) && (
-                <>
-                  <Route path="Cash-ledger" element={<Cashledger />} />
-                  <Route path="dashboard/Cash-Entry" element={<JV />} />
-                </>
-              )}
-              {(userType === 3 || userType === 4) && (
-                <Route path="dashboard/Trial-balance" element={<Trialbalance />} />
-              )}
-              {(userType === 4 || userType === 5) && (
-                <Route path="dashboard/Trial-balance" element={<Trialbalance />} />
-              )}
-              {(userType === 1 || userType === 2) && (
-                <Route path="ledger" element={<Ledger />} />
-              )}
-              {(userType === 3 || userType === 4) && (
-                <Route path="ledger-report" element={<Ledgerreport />} />
-              )}
-            </>
-          )}
+            <Route
+              path="dashboard/summary-report"
+              element={userType !== 1
+                ? <Summary_report />
+                : <Navigate to="/app" replace />}
+            />
 
-          {/* -------------------- Setting Menu -------------------- */}
-          {(userType !== 1 && userType !== 2) && (isStock || isForex) &&
-            (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("SETTING"))) && (
+            {userType === 4 && (
               <>
-                {userType !== 3 && (
-                  <>
-                    <Route path="dashboard/Script-Wise-Lot-Setting" element={<Scriptwiselot />} />
-                    <Route path="dashboard/Add-Script" element={<Addscript />} />
-                    <Route path="dashboard/Add-Expiry" element={<Addepiry />} />
-                    <Route path="dashboard/Edit-Expiry" element={<Editexpiry />} />
-                    <Route path="dashboard/Edit-Script" element={<Editscript />} />
-                    <Route path="dashboard/Banned-scripts" element={<BlockedScripts />} />
-                    <Route path="dashboard/CNBD-Awaaz" element={<Cnbdawaz />} />
-                    <Route path="dashboard/Order-Limit" element={<Orderlimit />} />
-                    <Route path="dashboard/Blocked-Allowed-Script" element={<Blockedallowedscript />} />
-                    <Route path="dashboard/Split-script" element={<Splitscript />} />
-                    <Route path="dashboard/NSEOPT-management" element={<Nseoptmanagement />} />
-                    <Route path="dashboard/Expiry-Validation" element={<Expiryvalidation />} />
-                    <Route path="dashboard/Time-Setting" element={<Timesetting />} />
-                    <Route path="dashboard/level-import" element={<Levelimport />} />
-                  </>
-                )}
-                {userType === 3 && (
-                  <Route path="dashboard/Master-QTY-Setting" element={<Masterqtysetting />} />
-                )}
-                {(userType === 4 && (isStock || isForex)) && (
-                  <Route path="dashboard/Stop-future-trading" element={<Stopfuturetrading />} />
-                )}
-                {(userType === 4 || userType === 5) && (
-                  <>
-                    <Route path="dashboard/MARQUEE" element={<Marquee />} />
-                    <Route path="dashboard/Notifcation" element={<Notificationn />} />
-                  </>
-                )}
-                {(userType !== 2 && userType !== 4 && userType !== 5) && (
-                  <Route path="dashboard/max-qty-details" element={<MaxQTYDetails />} />
-                )}
+                <Route path="dashboard/manual-trade" element={<Manualtrade />} />
+                <Route path="dashboard/Self-P&L" element={<Selfpl />} />
               </>
             )}
+
+            <Route
+              path="dashboard/Brokrage-refresh"
+              element={(userType === 4 || userType === 5)
+                ? <Brokrageref />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
+
+          {/* -------------------- Forex Trading -------------------- */}
+          <Route
+            element={
+              isStock && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("TRADE")))
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="dashboard/forex-watchlist"
+              element={<Watchlist />}
+            />
+            <Route
+              path="dashboard/forex-favorite-list"
+              element={<Watchlist />}
+            />
+            <Route
+              path="dashboard/forex-order"
+              element={<Forex_order />}
+            />
+            <Route
+              path="dashboard/forex-position"
+              element={<Forex_position />}
+            />
+
+            <Route
+              path="dashboard/forex-previous-valan-trade"
+              element={(userType === 4 || userType === 5)
+                ? <Forexvaln />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/forex-Summary-report"
+              element={userType !== 1
+                ? <Forexsummary />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/forex-Margin-management"
+              element={(userType !== 1 && userType !== 2)
+                ? <Forexmarginmanagement />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
+
+          {/* -------------------- User Menu -------------------- */}
+          <Route
+            element={
+              userType !== 1 && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("USERS")))
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="dashboard/User-Profile"
+              element={(userType === 3 || userType === 4)
+                ? <Userprofile />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/User-listing"
+              element={<Userlisting />}
+            />
+
+            <Route
+              path="dashboard/Master-Listing"
+              element={(userType !== 1 && userType !== 2)
+                ? <MasterList />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Broker-Listing"
+              element={(userType !== 1 && userType !== 2)
+                ? <BrokerListing />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Add-Account"
+              element={(userType !== 1 && userType !== 2)
+                ? <Addacount />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Employe-Listing"
+              element={userType === 4
+                ? <Employeelisting />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/add-employee"
+              element={userType === 4
+                ? <Addemployee />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
+
+          {/* -------------------- Utility Menu -------------------- */}
+          <Route
+            element={
+              userType !== 2 && (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("UTILITY")))
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="dashboard/bulk-trading"
+              element={(userType !== 1 && (isStock || isForex))
+                ? <Bulktrading />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/bill-filter"
+              element={(userType !== 1 && userType !== 2)
+                ? <Billfilter />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/ip-address-log"
+              element={(userType !== 1 && userType !== 2)
+                ? <Iplistlog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/trade-edit-delete-log"
+              element={(userType !== 2 && (isStock || isForex))
+                ? <TradeEditDeleteLog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/trade-edit-delete-log-old"
+              element={((userType === 4 || userType === 5) && (isStock || isForex))
+                ? <Tradeditdeleteold />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/user-edit-log"
+              element={(userType === 3 || userType === 4 || userType === 5)
+                ? <Usereditlog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/auto-square-up-log"
+              element={(userType === 3 || userType === 4 || userType === 5) && (isStock || isForex)
+                ? <Autosquareuplog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/cross-trade-log"
+              element={(userType === 3 || userType === 4 || userType === 5) && (isStock || isForex)
+                ? <Crosstradelog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/rejection-logs"
+              element={(userType !== 2 && (isStock || isForex))
+                ? <RejectionLogs />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/cash-edit-delete-log"
+              element={(userType === 4 || userType === 5)
+                ? <Casheditdeletelog />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/valan"
+              element={(userType === 4 || userType === 5)
+                ? <Valan />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
+
+          {/* -------------------- Accounts Menu -------------------- */}
+          <Route
+            element={
+              (userType === 1 || userType === 2 || userType === 3 || userType === 4 || userType === 5)
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="Cash-ledger"
+              element={(userType !== 1 && userType !== 2)
+                ? <Cashledger />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Cash-Entry"
+              element={(userType !== 1 && userType !== 2)
+                ? <JV />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Trial-balance"
+              element={(userType === 3 || userType === 4 || userType === 5)
+                ? <Trialbalance />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="ledger"
+              element={(userType === 1 || userType === 2)
+                ? <Ledger />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="ledger-report"
+              element={(userType === 3 || userType === 4)
+                ? <Ledgerreport />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
+
+          {/* -------------------- Setting Menu -------------------- */}
+          <Route
+            element={
+              (userType !== 1 && userType !== 2) && (isStock || isForex) &&
+                (!isEmployeeLogin || (userType === 4 && isEmployeeLogin && emp_permission?.includes("SETTING")))
+                ? <Outlet />
+                : <Navigate to="/app" replace />
+            }>
+            <Route
+              path="dashboard/Script-Wise-Lot-Setting"
+              element={userType !== 3
+                ? <Scriptwiselot />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Add-Script"
+              element={userType !== 3
+                ? <Addscript />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Add-Expiry"
+              element={userType !== 3
+                ? <Addepiry />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Edit-Expiry"
+              element={userType !== 3
+                ? <Editexpiry />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Edit-Script"
+              element={userType !== 3
+                ? <Editscript />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Banned-scripts"
+              element={userType !== 3
+                ? <BlockedScripts />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/CNBD-Awaaz"
+              element={userType !== 3
+                ? <Cnbdawaz />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Order-Limit"
+              element={userType !== 3
+                ? <Orderlimit />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Blocked-Allowed-Script"
+              element={userType !== 3
+                ? <Blockedallowedscript />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Split-script"
+              element={userType !== 3
+                ? <Splitscript />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/NSEOPT-management"
+              element={userType !== 3
+                ? <Nseoptmanagement />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Expiry-Validation"
+              element={userType !== 3
+                ? <Expiryvalidation />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Time-Setting"
+              element={userType !== 3
+                ? <Timesetting />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/level-import"
+              element={userType !== 3
+                ? <Levelimport />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Master-QTY-Setting"
+              element={userType === 3
+                ? <Masterqtysetting />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Stop-future-trading"
+              element={(userType === 4 && (isStock || isForex))
+                ? <Stopfuturetrading />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/MARQUEE"
+              element={(userType === 4 || userType === 5)
+                ? <Marquee />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/Notifcation"
+              element={(userType === 4 || userType === 5)
+                ? <Notificationn />
+                : <Navigate to="/app" replace />}
+            />
+
+            <Route
+              path="dashboard/max-qty-details"
+              element={(userType !== 2 && userType !== 4 && userType !== 5)
+                ? <MaxQTYDetails />
+                : <Navigate to="/app" replace />}
+            />
+          </Route>
 
         </Route>
 
@@ -342,7 +609,7 @@ function Application(props) {
 
 
       </Routes>
-    </Dashboard>
+    </Dashboard >
   );
 }
 
