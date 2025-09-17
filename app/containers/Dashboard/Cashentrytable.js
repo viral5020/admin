@@ -41,7 +41,7 @@ import Pagination from './filters/Pagination';
 import FilterBtn from './filters/FilterBtn';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
-import { cashEntryAPI } from './API/API';
+import { cashEntryAPI, getLedgerBalance } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 
 import { Tooltip } from '@mui/material';
@@ -298,18 +298,14 @@ const Cashentrytable = () => {
 
         const fetchBalance = async () => {
             setBalanceLoading(true);
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            if (!dataStored) return toast.error("Session expired. Please log in again.");
             try {
-                const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", {
-                    is_app: "1",
-                    login_user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    user_id: entryUser.id,
-                });
+                const dataStored = JSON.parse(sessionStorage.getItem("data"));
+                const response = await getLedgerBalance(dataStored, entryUser?.id);
+
                 setEntryUserBalance(response.data?.balance ?? 0);
             } catch (err) {
-                console.error("Error fetching balance:", err);
+                console.error("❌ Error fetching balance:", err);
+                toast.error(err.message || "Failed to fetch balance");
                 setEntryUserBalance(0);
             } finally {
                 setBalanceLoading(false);

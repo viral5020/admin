@@ -11,7 +11,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { fetchPermissionsAPI, getemployeeDetailsAPI } from "./API/API";
+import { fetchPermissionsAPI, getemployeeDetailsAPI, saveEmployee } from "./API/API";
 import { useLocation } from "react-router-dom";
 
 const Addemployee = () => {
@@ -130,54 +130,22 @@ const Addemployee = () => {
 
         const { name, password, remarks, permissions } = commonFormData;
 
+        // --- Validation ---
         if (!name || (!isEditMode && !password)) {
-            toast.error("Please fill all required fields");
-            return;
+            return toast.error("Please fill all required fields");
         }
 
         const selectedPermissions = Object.keys(permissions).filter(
             (key) => permissions[key]
         );
-
         if (selectedPermissions.length === 0) {
-            toast.error("Please select at least one permission");
-            return;
+            return toast.error("Please select at least one permission");
         }
 
-        const permissionString = selectedPermissions.join(",");
-
-        const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
-
+        // --- API Call ---
         try {
-            let response;
-
-            if (isEditMode) {
-                response = await axios.post(
-                    "http://128.199.126.171/~goldorg/ajaxfiles/edit_user_emp",
-                    {
-                        is_app: 1,
-                        login_user_id: dataStored?.user_id || "",
-                        auth_key: dataStored?.auth_key || "",
-                        change_user_id: editUserId,
-                        name,
-                        remarks,
-                        empPermission: permissionString,
-                    }
-                );
-            } else {
-                response = await axios.post(
-                    "http://128.199.126.171/~goldorg/ajaxfiles/create_employee",
-                    {
-                        is_app: 1,
-                        login_user_id: dataStored?.user_id || "",
-                        auth_key: dataStored?.auth_key || "",
-                        name,
-                        password,
-                        remarks,
-                        empPermission: permissionString,
-                    }
-                );
-            }
+            const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
+            const response = await saveEmployee(commonFormData, dataStored, isEditMode, editUserId);
 
             if (response.data.status === "success") {
                 toast.success(
@@ -190,7 +158,7 @@ const Addemployee = () => {
                 toast.error(response.data.message || "Failed to save employee");
             }
         } catch (error) {
-            console.error("API Error:", error);
+            console.error("❌ API Error:", error);
             toast.error("Something went wrong while saving employee");
         }
     };

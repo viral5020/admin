@@ -44,7 +44,7 @@ import PositionFilter from "./PositionFilter";
 import FilterBtn from "./filters/FilterBtn";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { fetchTradesDataAPI } from "./API/API";
+import { apifetchPositions, fetchTradesDataAPI, placeTrade } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import { formatScriptIds } from "./helpers/utilFunc";
 import { toast, ToastContainer } from "react-toastify";
@@ -185,124 +185,32 @@ const OrderPage1 = ({
         setLoadingTrades(false);
     };
 
-    async function placeTrade() {
+    async function handlePlaceTrade() {
         try {
-            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(closetradeData),
-            });
+            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-            const data = await response.json();
+            const result = await placeTrade(closetradeData, dataStored);
 
-            if (response.ok) {
-                toast.success("Trade placed successfully!");  // ✅ Success toast
+            if (result?.status === "ok" || result?.success) {
+                toast.success(result.message || "Trade placed successfully!");
                 setCloseDialogOpen(false);
-                return { success: true, message: "Trade placed successfully!" };
             } else {
-                toast.error(`Trade placement failed: ${data?.message || "Unknown error"}`); // ❌ Error toast
-                return { success: false, message: data?.message || "Unknown error" };
+                toast.error(result.message || "Trade placement failed");
             }
         } catch (error) {
-            toast.error(`Network error: ${error.message}`); // ❌ Network error toast
-            return { success: false, message: `Network error: ${error.message}` };
+            console.error("❌ Trade placement error:", error);
+            toast.error(`Network error: ${error.message}`);
         }
     }
 
 
-    const fetchPositions = async (_, sSearch = "") => {
+    const fetchPositions = async () => {
         setLoading(true);
-        console.log('market', market);
-        console.log("script", script);
-        try {
-            const response = await axios.post("http://128.199.126.171/~goldorg/datatables/position_book_list", {
-                is_app: "1",
-                login_user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
-                sEcho: 1,
-                iDisplayStart: 0,
-                iDisplayLength: 100000,
-                sSearch,
-
-                all_outstanding: all_outstanding,
-                expiry_date: exparyDate,
-                group_by: client_wise_value,
-
-                market_type_id: market?.id,
-                script_id: formatScriptIds(script),
-                broker_id: broker?.id,
-                master_user_id: master?.id,
-                user_id: client?.id,
-
-            });
-
-            if (response.data && response.data.aaData) {
-                setPositionData(response.data.aaData);
-                setPositionDataNew(response.data.dataList);
-
-                let array = response.data.aaData;
-                let array1 = array;
-                array = array1.reduce(function (a, e, i) {
-                    if (parseInt(e['net_qty']) != 0)
-                        a.push(e['check_script_name']);
-                    return a;
-                }, []);
-                let flat1 = array;
-                flat1 = flat1.filter((v, i, a) => a.indexOf(v) === i);
-                setfFlat(flat1)
-
-
-                socket.emit('positionReport', {
-                    userId: dataStored.user_id,
-                    scripts: flat1,
-                });
-                var flag_total = 1;
-                if (dataStored.user_type != 1) {
-                    flag_total = -1
-                }
-                var total_grand = (response.data.downline_grand + response.data.upline_grand + response.data.self_grand) * flag_total;
-                if (dataStored.user_type != 1) {
-                    setTotals(prv => ({
-                        ...prv,
-                        upline_grand: response.data.upline_grand ?? 0,
-                        downline_grand: response.data.downline_grand ?? 0,
-                        self_grand: response.data.self_grand ?? 0,
-                        total_qty: response.data.total_qty ?? 0,
-                        totalMTM: total_grand ?? 0,
-                        limit1: 0,
-
-                    }));
-                } else {
-                    setTotals(prv => ({
-                        ...prv,
-                        upline_grand: response.data.upline_grand ?? 0,
-                        downline_grand: response.data.downline_grand ?? 0,
-                        self_grand: response.data.self_grand ?? 0,
-                        total_qty: response.data.total_qty ?? 0,
-                        totalMTM: total_grand ?? 0,
-                        limit: response.data.limit ?? 0,
-                        net: response.data.self_grand + response.data.limit ?? 0,
-                        limit1: response.data.limit ?? 0,
-
-                    }));
-                }
-            } else {
-                setPositionData([]);
-
-            }
-
-        } catch (error) {
-            // console.error("Error fetching position data:", error);
-            setPositionData([]);
-
-        } finally {
-            setLoading(false);
-        }
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        const result = await apifetchPositions(dataStored.user_id, dataStored.auth_key);
+        setPositionData(result);
+        setLoading(false);
     };
-
-
 
     useEffect(() => {
 

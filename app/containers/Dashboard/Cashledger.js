@@ -39,7 +39,7 @@ import Pagination from './filters/Pagination';
 import FilterBtn from './filters/FilterBtn';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
-import { cashEntryAPI } from './API/API';
+import { cashEntryAPI, deleteReceiptAPI, editReceiptAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
 
@@ -145,32 +145,26 @@ const Cashledger = ({
             return toast.error("Please fill all required fields!");
         }
 
-        const payload = {
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            entry_id: editingLog.entry_id,
-            user_id: editValue.user.id,
-            type: editValue.type,
-            date1: editValue.date1,
-            amount: editValue.amount,
-            remarks: editValue.remarks || ""
-        };
-
         try {
             setLoading(true);
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/edit_receipt",
-                payload
-            );
+            const result = await editReceiptAPI({
+                user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                entry_id: editingLog.entry_id,
+                entry_user_id: editValue.user.id,
+                type: editValue.type,
+                date1: editValue.date1,
+                amount: editValue.amount,
+                remarks: editValue.remarks || "",
+            });
 
-            if (response.data?.success) {
+            if (result?.success) {
                 toast.success("Entry updated successfully!");
                 setEditingLog(null);
                 setEditValue({ user: null, type: "", date1: "", amount: "", remarks: "" });
-                fetchLogs(); // Refresh table
+                fetchLogs();
             } else {
-                toast.error(response.data?.message || "Failed to update entry.");
+                toast.error(result?.message || "Failed to update entry.");
             }
         } catch (err) {
             console.error(err);
@@ -180,33 +174,28 @@ const Cashledger = ({
         }
     };
 
+    // Delete entry
     const handleConfirmDelete = async () => {
         if (!logToDelete) return;
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
         if (!dataStored) return toast.error("Session expired. Please log in again.");
 
-        const payload = {
-            is_app: "1",
-            login_user_id: dataStored.user_id,
-            auth_key: dataStored.auth_key,
-            entry_id: logToDelete.entry_id,
-            user_id: logToDelete.user_id,
-        };
-
         try {
             setLoading(true);
-            const response = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/delete_receipt",
-                payload
-            );
+            const result = await deleteReceiptAPI({
+                user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                entry_id: logToDelete.entry_id,
+                entry_user_id: logToDelete.user_id,
+            });
 
-            if (response.data?.success) {
+            if (result?.success) {
                 toast.success("Entry deleted successfully!");
                 setDeleteDialogOpen(false);
                 setLogToDelete(null);
-                fetchLogs(); // Refresh table
+                fetchLogs();
             } else {
-                toast.error(response.data?.message || "Failed to delete entry.");
+                toast.error(result?.message || "Failed to delete entry.");
             }
         } catch (err) {
             console.error(err);

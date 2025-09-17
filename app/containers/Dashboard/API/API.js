@@ -507,6 +507,7 @@ export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
     iDisplayStart: 0,
     iDisplayLength: 10,
     script_id: scriptId,
+    user_id: selectedUserId,
     sSearch: "",
   };
 
@@ -1071,30 +1072,44 @@ export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) 
   }
 };
 
+export const fetchPositionsAPI = async ({
+  login_user_id,
+  auth_key,
+  all_outstanding,
+  expiry_date,
+  group_by,
+  market_type_id,
+  script_id,
+  broker_id,
+  master_user_id,
+  user_id
+}) => {
+  const payload = {
+    is_app: "1",
+    login_user_id,
+    auth_key,
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 100000,
+    sSearch: "",
+    all_outstanding,
+    expiry_date,
+    group_by,
+    market_type_id,
+    script_id,
+    broker_id,
+    master_user_id,
+    user_id
+  };
 
+  console.log("🔹 Fetching positions:", payload);
 
+  const response = await axios.post(
+    "http://128.199.126.171/~goldorg/datatables/position_book_list_forex",
+    payload
+  );
 
-export const getForexOrders = async (userId, authKey) => {
-  try {
-    const response = await axiosInstance.post("datatables/position_book_list_forex", {
-      is_app: "1",
-      login_user_id: userId,
-      auth_key: authKey,
-      sEcho: 1,
-      iDisplayStart: 0,
-      iDisplayLength: 1000000,
-      sSearch: "",
-    });
-
-    if (response.data && response.data.aaData) {
-      return response.data.aaData;
-    } else {
-      return [];
-    }
-  } catch (error) {
-    console.error("Error fetching position data:", error);
-    return [];
-  }
+  return response.data; // let component decide what to do
 };
 
 export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
@@ -2720,30 +2735,6 @@ export const confirmTradeAPI = async ({
 };
 
 
-export const fetchBalanceAPI = async ({ user_id, auth_key, entryUserId }) => {
-  try {
-    const payload = {
-      is_app: "1",
-      login_user_id: user_id,
-      auth_key,
-      user_id: entryUserId,
-    };
-
-    console.log("🔍 Fetching Balance with payload:", payload);
-
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance",
-      payload
-    );
-
-    return response.data; // return raw data so component can decide what to do
-  } catch (err) {
-    console.error("❌ API call (Fetch Balance) failed", err);
-    throw err;
-  }
-};
-
-
 export const fetchLedgerDetailsAPI = async ({ user_id, auth_key, targetUserId }) => {
   try {
     const payload = {
@@ -3581,3 +3572,163 @@ export const fetchMarketLogAPI = async ({ login_user_id, auth_key, user_id, log_
     user_id,
     log_datetime
   });
+
+
+export const fetchSummaryApi = async (tab = "Stock", selectedUser = {}) => {
+  try {
+    // get session data inside api.js itself
+    const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    const payload = {
+      is_app: 1,
+      login_user_id: dataStored?.user_id,
+      auth_key: dataStored?.auth_key,
+      view_user_id: selectedUser?.id || "",
+      tabs: tab, // Stock, Forex, Sports
+    };
+
+    const response = await axios.post(`${BASE_URL}/view_market_type_data`, payload);
+    return response.data; // return the full response
+  } catch (error) {
+    console.error("API fetchSummaryApi error:", error);
+    throw error; // rethrow so component can catch it
+  }
+};
+
+
+export const fetchSummaryAPI = async ({ login_user_id, auth_key, view_user_id, tab }) => {
+  try {
+    const payload = {
+      is_app: 1,
+      login_user_id,
+      auth_key,
+      view_user_id,
+      tabs: tab
+    };
+    console.log("🔹 Fetching summary:", payload);
+
+    const res = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/view_market_type_data",
+      payload
+    );
+
+    return res.data?.status === "ok" ? res.data.data : null;
+  } catch (err) {
+    console.error("❌ Summary fetch error:", err);
+    throw err;
+  }
+};
+
+
+export const fetchProfileAPI = async ({ login_user_id, auth_key, view_user_id }) => {
+  try {
+    const payload = {
+      is_app: 1,
+      login_user_id,
+      auth_key,
+      view_user_id
+    };
+
+    console.log("🔹 Fetching profile:", payload);
+
+    const res = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile",
+      payload
+    );
+
+    if (res.data.status === "ok") {
+      return {
+        profile: res.data.data,
+        loginIps: res.data.loginIps || []
+      };
+    }
+
+    return { profile: null, loginIps: [] };
+  } catch (err) {
+    console.error("❌ Profile fetch error:", err);
+    throw err;
+  }
+};
+
+
+export const removeMappedAccount = async ({ login_user_id, auth_key, user_id }) => {
+  const payload = {
+    is_app: 1,
+    login_user_id,
+    auth_key,
+    user_id
+  };
+
+  console.log("🗑️ Payload to remove mapped account:", payload);
+
+  const response = await axios.post(
+    "http://128.199.126.171/~goldorg/ajaxfiles/remove_mapped_account",
+    payload
+  );
+
+  return response.data; // return raw API result
+};
+
+
+export const placeTrade = async (closetradeData, sessionData) => {
+  const payload = {
+    ...closetradeData,
+    is_app: 1,
+    login_user_id: sessionData?.user_id,
+    auth_key: sessionData?.auth_key,
+  };
+
+  console.log("📤 Payload to place trade:", payload);
+
+  const response = await axios.post(
+    "http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2",
+    payload
+  );
+
+  return response.data; // raw API response
+};
+
+
+export const saveEmployee = async (formData, dataStored, isEditMode, editUserId) => {
+  const { name, password, remarks, permissions } = formData;
+
+  const selectedPermissions = Object.keys(permissions).filter(
+    (key) => permissions[key]
+  );
+  const permissionString = selectedPermissions.join(",");
+
+  const basePayload = {
+    is_app: 1,
+    login_user_id: dataStored?.user_id || "",
+    auth_key: dataStored?.auth_key || "",
+    name,
+    remarks,
+    empPermission: permissionString,
+  };
+
+  if (isEditMode) {
+    return axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/edit_user_emp",
+      { ...basePayload, change_user_id: editUserId }
+    );
+  } else {
+    return axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/create_employee",
+      { ...basePayload, password }
+    );
+  }
+};
+
+export const getLedgerBalance = async (dataStored, userId) => {
+  if (!dataStored) throw new Error("Session expired. Please log in again.");
+  if (!userId) throw new Error("User ID is required to fetch balance");
+
+  const payload = {
+    is_app: "1",
+    login_user_id: dataStored.user_id,
+    auth_key: dataStored.auth_key,
+    user_id: userId,
+  };
+
+  return axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", payload);
+};

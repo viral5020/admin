@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import axios from "axios";
-import { cashEntryAPI, fetchOptionsAPI } from "./API/API";
+import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI } from "./API/API";
 
 const UserTablePage = () => {
     const theme = useTheme();
@@ -179,26 +179,19 @@ const UserTablePage = () => {
         setLoadingProfile(true);
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-            const payload = {
-                is_app: 1,
+
+            const { profile, loginIps } = await fetchProfileAPI({
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
-                view_user_id: selectedUser?.id || "",
-            };
+                view_user_id: selectedUser?.id || ""
+            });
 
-            const res = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile",
-                payload
-            );
-
-            if (res.data.status === "ok") {
-                setProfile(res.data.data);
-                setLoginIPs(res.data.loginIps || []);  // <-- Add this
-            }
-        } catch (err) {
-            console.error("Profile fetch error:", err);
+            setProfile(profile);
+            setLoginIPs(loginIps);
+        } catch {
             setProfile(null);
             setLoginIPs([]);
+            toast.error("Failed to fetch profile");
         } finally {
             setLoadingProfile(false);
         }
@@ -210,23 +203,17 @@ const UserTablePage = () => {
         setLoadingSummary(true);
         try {
             const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-            const payload = {
-                is_app: 1,
+            const data = await fetchSummaryAPI({
                 login_user_id: dataStored?.user_id,
                 auth_key: dataStored?.auth_key,
                 view_user_id: selectedUser?.id || "",
-                tabs: tab // Stock, Forex, Sports
-            };
+                tab
+            });
 
-            const res = await axios.post(
-                "http://128.199.126.171/~goldorg/ajaxfiles/view_market_type_data",
-                payload
-            );
-
-            if (res.data.status === "ok") setSummary(res.data.data);
-        } catch (err) {
-            console.error("Summary fetch error:", err);
+            setSummary(data);
+        } catch {
             setSummary(null);
+            toast.error("Failed to fetch summary");
         } finally {
             setLoadingSummary(false);
         }
