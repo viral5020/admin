@@ -12,8 +12,10 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { tradePlaceAPI } from '../API/API';
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast, ToastContainer } from "react-toastify";
+
 import { roundToTwoIN } from '../helpers/utilFunc';
+import { toastObj } from '../helpers/helper';
 
 const marketOptions = [
     { label: "Market", value: 0 },
@@ -57,7 +59,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
     }, [Boolean(stockData)])
 
     useEffect(() => {
-        console.log('&&& stockData', stockData);
+        // console.log('&&& stockData', stockData);
         // setPrice(tabIndex)
     }, [stockData])
 
@@ -99,12 +101,12 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
             const response = await tradePlaceAPI({ ...stockData, market, lot, qty, price, tradeType: tabIndex, client });
             response.status === 'ok' && onClose();
             response.status === 'ok'
-                ? toast.success(`Trade added successfully for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { duration: 5000 }, { id: "trade-toaster" })
-                : toast.error(`${response.message}.`, { duration: 15000 }, { id: "trade-toaster" });
+                ? toast.success(`Trade added successfully for ${stockData?.scriptName} of Qty ${qty} at ${price}.`, { containerId: "trade-toaster", ...toastObj })
+                : toast.error(`${response.message}.`, { containerId: "trade-toaster", ...toastObj });
             resetAllState();
         } catch (error) {
             console.log('error', error)
-            toast.error(error.message || "Some error occured.", { id: "trade-toaster" });
+            toast.error(error.message || "Some error occured.", { containerId: "trade-toaster", ...toastObj });
         } finally {
             setLoading(false);
         }
@@ -135,7 +137,8 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                 },
             }}
         >
-            <Toaster limit={3} zIndex={999998999998} id="trade-toaster" />
+            <ToastContainer limit={3} zIndex={999998999998} containerId="trade-toaster" />
+
             <Box p={isMobile ? 2 : 3} pb={0}>
                 {/* Header */}
                 <Box

@@ -10,6 +10,7 @@ import VerifiedUser from '@mui/icons-material/VerifiedUser';
 import Info from '@mui/icons-material/Info';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import useStyles from './jss/cover-jss';
+import { fetchProfileAPI } from '../../containers/Dashboard/API/API';
 
 const optionsOpt = [
   'Edit Profile',
@@ -49,12 +50,7 @@ function Cover(props) {
     };
 
     try {
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
+      const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
 
       if (result.status !== 'ok') {
         throw new Error(result.message || 'Failed to fetch profile');

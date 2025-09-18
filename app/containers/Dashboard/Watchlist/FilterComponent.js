@@ -16,93 +16,12 @@ import FilterBtn from '../filters/FilterBtn';
 import AutoCompleteFilter from './AutoCompleteFilter';
 import { addMarketScriptAPI, fetchStrikeDataAPI, getMarketWatchFilterAPI, getMarketWiseScriptForexAPI, getScriptWiseExpiryForexAPI } from '../API/API';
 import { constant, forex_market_type_id } from './constant';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast, ToastContainer } from "react-toastify";
+
 import { functionsIn } from 'lodash';
 import { forex_comex_market } from '../helpers/utilFunc';
+import { toastObj } from '../helpers/helper';
 
-const defaultValues = {
-    segment: null,
-    script: null,
-    expiry: null,
-    type: null,
-    strike: null,
-};
-
-const dummyOptions = {
-    Equity: {
-        RELIANCE: {
-            expiries: ['2025-07-05', '2025-07-12', '2025-07-19'],
-            types: ['CE', 'PE'],
-            strikes: [2500, 2550, 2600, 2650]
-        },
-        TCS: {
-            expiries: ['2025-07-10', '2025-07-17'],
-            types: ['CE', 'PE'],
-            strikes: [3600, 3700, 3800]
-        },
-        INFY: {
-            expiries: ['2025-07-01', '2025-07-08', '2025-07-15'],
-            types: ['CE', 'PE'],
-            strikes: [1400, 1450, 1500]
-        },
-        HDFCBANK: {
-            expiries: ['2025-07-03', '2025-07-13'],
-            types: ['CE'],
-            strikes: [1550, 1600]
-        }
-    },
-    Commodity: {
-        GOLD: {
-            expiries: ['2025-07-01', '2025-07-11'],
-            types: ['PE'],
-            strikes: [60000, 60500, 61000]
-        },
-        SILVER: {
-            expiries: ['2025-07-02', '2025-07-09'],
-            types: ['CE', 'PE'],
-            strikes: [72000, 73000, 74000]
-        },
-        CRUDEOIL: {
-            expiries: ['2025-07-04', '2025-07-18'],
-            types: ['PE'],
-            strikes: [6800, 6900, 7000]
-        }
-    },
-    Currency: {
-        USDINR: {
-            expiries: ['2025-07-05', '2025-07-15'],
-            types: ['CE', 'PE'],
-            strikes: [83.5, 84.0, 84.5]
-        },
-        EURINR: {
-            expiries: ['2025-07-07'],
-            types: ['PE'],
-            strikes: [91.0, 92.0]
-        },
-        GBPINR: {
-            expiries: ['2025-07-06'],
-            types: ['CE'],
-            strikes: [106.0, 107.0]
-        }
-    },
-    Index: {
-        NIFTY: {
-            expiries: ['2025-07-04', '2025-07-11', '2025-07-18'],
-            types: ['CE', 'PE'],
-            strikes: [23500, 23600, 23700]
-        },
-        BANKNIFTY: {
-            expiries: ['2025-07-08', '2025-07-15'],
-            types: ['PE'],
-            strikes: [52000, 52500]
-        },
-        FINNIFTY: {
-            expiries: ['2025-07-09'],
-            types: ['CE'],
-            strikes: [22000, 22100]
-        }
-    }
-};
 
 function changeFormat(arr) {
     const result = {};
@@ -418,12 +337,12 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
     };
 
     const showToast = (message) => {
-        if (message.includes('Market Added')) {
-            toast.success(message);
-        } else if (message.includes('Market Already Added')) {
-            toast(message, { icon: '⚠️' });
+        if (message.includes("Market Added")) {
+            toast.success(message, { containerId: "mobile_add_market" });
+        } else if (message.includes("Market Already Added")) {
+            toast.warn(message, { containerId: "mobile_add_market" });
         } else {
-            toast.error(message);
+            toast.error(message, { containerId: "mobile_add_market" });
         }
     };
 
@@ -432,14 +351,14 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
         if (!isValid) return;
 
         if (!expiry.script_expiry_id && segment.market_type_id != forex_market_type_id) {
-            toast(() => <span>⚠️ Please select <b>Expiry</b> first</span>, { id: "mobile_add_market" })
+            toast(<span>⚠️ Please select <b>Expiry</b> first</span>, { containerId: "mobile_add_market", ...toastObj })
             return;
         } else if (segment.market_type_id == constant) {
             if (!type) {
-                toast(() => <span>⚠️ Please select <b>Type</b> first</span>, { id: "mobile_add_market" })
+                toast(<span>⚠️ Please select <b>Type</b> first</span>, { containerId: "mobile_add_market", ...toastObj })
                 return;
             } else if (!strike) {
-                toast(() => <span>⚠️ Please select <b>Strike</b> first</span>, { id: "mobile_add_market" })
+                toast(<span>⚠️ Please select <b>Strike</b> first</span>, { containerId: "mobile_add_market", ...toastObj })
                 return;
             }
         }
@@ -553,7 +472,19 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
             {/* Filter dialog for mobile */}
             <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth>
                 <DialogTitle sx={{ mb: 1, pt: 2, pb: 1 }}>Add Market</DialogTitle>
-                <Toaster id="mobile_add_market" position="top-center" toastOptions={{ duration: 4000, }} />
+
+                <ToastContainer
+                    position="top-center"
+                    autoClose={4000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    containerId="mobile_add_market"
+                />
 
                 <DialogContent dividers>
                     {renderFilterFields()}

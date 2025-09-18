@@ -27,6 +27,7 @@ import useStyles from './header-jss';
 import { Typography } from 'dan-vendor/@mui/material';
 import { useDispatch } from 'react-redux';
 import { setUserData } from 'dan-redux/modules/authSlice';
+import { fetchProfileAPI } from '../../containers/Dashboard/API/API';
 
 function UserMenu(props) {
   const dispatch = useDispatch();
@@ -175,15 +176,8 @@ function UserMenu(props) {
     const sessionData = sess && sess !== 'null' ? JSON.parse(sess) : {};
     if (sessionData?.user_id) setCurrentUserId(String(sessionData.user_id));
     try {
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
-        method: 'POST',
-        body: JSON.stringify({
-          is_app: 1,
-          login_user_id: sessionData.user_id,
-          auth_key: sessionData.auth_key
-        })
-      });
-      const result = await response.json();
+      const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
+
       if (result.status === 'ok') setProfileData(result.data);
     } catch (err) { console.error('❌ Error fetching profile:', err); }
   }

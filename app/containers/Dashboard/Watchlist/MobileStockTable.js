@@ -27,7 +27,6 @@ import {
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
 import './listAnimation.css'; // Animation styles
-import toast, { Toaster } from 'react-hot-toast';
 import StarSharpIcon from '@mui/icons-material/StarSharp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';

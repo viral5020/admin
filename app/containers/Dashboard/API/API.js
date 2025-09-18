@@ -2,19 +2,22 @@ import axios from "axios";
 import { fetchClient } from "./fetchconfig";
 import axiosInstance from "./axiosconfig";
 import { constant, forex_market_type_id } from "../Watchlist/constant";
+import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 async function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const { ip_address, user_agent } = await getUserInfo();
-  const { isEmployeeLogin, isEmployeeLoginId, login_string } = dataStored;
+  const { isEmployeeLogin, isEmployeeLoginId, login_string, investor_status } = dataStored;
   const emp_para = { isEmployeeLogin, isEmployeeLoginId, login_string };
+
   return {
     is_app: "1",
     login_user_id: dataStored?.user_id,
     auth_key: dataStored?.auth_key,
     ip_address,
     user_agent,
-    ...(isEmployeeLogin ? emp_para : {})
+    ...(isEmployeeLogin ? emp_para : {}),
+    ...(investor_status ? { is_investor: true } : {}),
   }
 }
 
@@ -3022,12 +3025,12 @@ export const fetchSummaryAPI = async ({ login_user_id, auth_key, view_user_id, t
   }
 };
 
-export const fetchProfileAPI = async ({ login_user_id, auth_key, view_user_id }) => {
+export const fetchProfileAPI = async ({ view_user_id }) => {
   const defaultParams = await getDefaultParams();
   try {
     const payload = {
       ...defaultParams,
-      view_user_id
+      ...(view_user_id ? { view_user_id } : {})
     };
     console.log("🔹 Fetching profile:", payload);
     const res = await axios.post(

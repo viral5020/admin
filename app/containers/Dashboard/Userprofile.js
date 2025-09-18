@@ -178,13 +178,7 @@ const UserTablePage = () => {
     const fetchProfile = async () => {
         setLoadingProfile(true);
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-            const { profile, loginIps } = await fetchProfileAPI({
-                login_user_id: dataStored?.user_id,
-                auth_key: dataStored?.auth_key,
-                view_user_id: selectedUser?.id || ""
-            });
+            const { profile, loginIps } = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
 
             setProfile(profile);
             setLoginIPs(loginIps);

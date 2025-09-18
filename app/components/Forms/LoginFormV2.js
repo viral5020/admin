@@ -31,7 +31,7 @@ const LinkBtn = React.forwardRef(function LinkBtn(props, ref) { // eslint-disabl
 });
 
 const types = [
-  { url: '/login', name: 'user', api: 'ajaxfiles/logincheck', username: '', password: 'Abcd1234' },
+  { url: '/login', name: 'user', api: 'ajaxfiles/logincheck', username: '', password: 'aaaaaaaa' },
   { url: '/login-v3', name: 'Admin', api: 'main-ad98min-login/ad_min/login1/login_process', username: '34569', password: '66774422' },
   { url: '/login-v4', name: 'Empolyee', api: 'employee-login/login_process', username: '438997', password: 'aaaaaa' },
 ]
@@ -50,7 +50,7 @@ function LoginFormV2() {
     initialValues: { username, password },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-
+      console.log("onSubmit");
       try {
         const response = await fetch(`http://128.199.126.171/~goldorg/${api}`, {
           method: 'POST',
@@ -60,6 +60,7 @@ function LoginFormV2() {
           body: JSON.stringify(values),
         });
 
+        console.log('response', response);
         const data = await response.json();
         console.log('API Response:', data); // Debug the API response
 
@@ -85,7 +86,7 @@ function LoginFormV2() {
           } else {
             navigate('/app', { state: { user_id, auth_key }, replace: true });
           }
-          // }, 500);
+          // }, 5000);
 
 
         } else {

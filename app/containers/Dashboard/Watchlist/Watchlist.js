@@ -39,13 +39,14 @@ import { cloneDeep } from 'lodash';
 import SocketContext from '../Socket/SocketContext';
 import { formatSelectedKeys } from '../helpers/utilFunc';
 import BottomTradePopup from './BottomTradePopup';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-toastify';
 import { toastTime } from './constant';
 import RemoveCircleSharpIcon from '@mui/icons-material/RemoveCircleSharp';
 import ReportIcon from '@mui/icons-material/Report';
 import Star from '@mui/icons-material/Star';
 import StarBorder from '@mui/icons-material/StarBorder';
 import Loader from '../Components/Loader';
+import { toastObj } from '../helpers/helper';
 
 
 const generateCandleData = () => {
@@ -413,8 +414,9 @@ function Watchlist() {
 
   function showToast(msg, onUndo, actionIcon) {
     let didUndo = false;
+    const toast_id = Date.now();
 
-    const toastId = toast.custom((t) => (
+    const toastId = toast(
       <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
         {actionIcon === 'removed'
           ? <StarBorder sx={{ color: 'gray', mr: 0.8 }} />
@@ -436,17 +438,18 @@ function Watchlist() {
           onClick={() => {
             didUndo = true;
             onUndo();
-            toast.dismiss(t.id);
+            toast.dismiss(toast_id);
           }}
         >
           Undo
         </Button>}
       </Box>
-    ), {
-      id: Date.now(), // optional: prevent duplicate toasts
-      duration: toastTime,
-      position: 'top-right',
-    });
+      , {
+        id: toast_id, // optional: prevent duplicate toasts
+        duration: toastTime,
+        position: 'top-right',
+        ...toastObj
+      });
   };
 
   async function handleStar(stockData, e) {
@@ -481,7 +484,7 @@ function Watchlist() {
     !isError ? setDummyData(prevData =>
       prevData.map(stock => {
         return stock.script_id === stockData.script_id
-          ? { ...stock, isFavorite: !stock.isFavorite }  // chtagpt : some times this not working : "!stock.isFavorite"
+          ? { ...stock, isFavorite: !stock.isFavorite }
           : stock;
       })
     ) : null;

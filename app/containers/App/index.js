@@ -17,7 +17,8 @@ import {
 } from '../pageListAsync';
 import SocketApp from '../Dashboard/Socket/SocketApp';
 import MainAdminlogin from '../Pages/Users/MainAdminlogin';
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 
@@ -57,7 +58,7 @@ function App(props) {
         </Routes>
       </BrowserRouter>
 
-      <Toaster limit={3} containerStyle={{ zIndex: 9999999999999 }} /> {/* Above drawer, below dialogs */}
+      <ToastContainer limit={3} containerStyle={{ zIndex: 9999999999999 }} />
     </ThemeWrapper>
   );
 }

@@ -11,6 +11,7 @@ import dummy from 'dan-api/dummy/dummyContents';
 import logo from 'dan-images/logo.svg';
 import MainMenu from './MainMenu';
 import useStyles from './sidebar-jss';
+import { fetchProfileAPI } from '../../containers/Dashboard/API/API';
 
 function SidebarContent(props) {
   const { classes, cx } = useStyles();
@@ -69,12 +70,7 @@ function SidebarContent(props) {
       };
 
       try {
-        const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile', {
-          method: 'POST',
-          body: JSON.stringify(formData),
-        });
-
-        const result = await response.json();
+        const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
 
         if (result.status !== 'ok') {
           throw new Error(result.message || 'Failed to fetch profile');

@@ -23,7 +23,6 @@ import { useTheme } from '@mui/material/styles';
 import { useMediaQuery as useMUIQuery } from '@mui/material';
 import { lighten, darken, alpha } from '@mui/material/styles';
 import { maxWidth } from '@mui/system';
-import toast, { Toaster } from 'react-hot-toast';
 import BottomTradePopup from './BottomTradePopup';
 import { roundToTwoIN } from '../helpers/utilFunc';
 import { toastTime } from './constant';

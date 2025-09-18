@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AutoCompleteFilter from '../Watchlist/AutoCompleteFilter';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import axios from 'dan-vendor/axios';
 
 const forexMarketType = { market_type_id: 5, market_type_name: 'Forex' };
