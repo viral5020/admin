@@ -4,7 +4,7 @@ import axiosInstance from "./axiosconfig";
 import { constant, forex_market_type_id } from "../Watchlist/constant";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 
-async function getDefaultParams() {
+export async function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
   const { ip_address, user_agent } = await getUserInfo();
   const { isEmployeeLogin, isEmployeeLoginId, login_string, investor_status } = dataStored;
@@ -2019,18 +2019,10 @@ export const getemployeeDetailsAPI = async (user_id) => {
 };
 
 export const fetchPermissionsAPI = async () => {
-  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  const defaultParams = await getDefaultParams();
+
   try {
-    const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
-    const payload = {
-      is_app: 1,
-      login_user_id: dataStored?.user_id || '',
-      auth_key: dataStored?.auth_key || ''
-    };
-    const res = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/get_emp_permission",
-      payload
-    );
+    const res = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_emp_permission", defaultParams);
     if (res.data && Array.isArray(res.data.emp_per)) {
       return res.data.emp_per;
     } else {
@@ -3141,17 +3133,13 @@ export const fetchMarketLogAPI = async ({ login_user_id, auth_key, user_id, log_
   });
 
 export const fetchSummaryApi = async (tab = "Stock", selectedUser = {}) => {
+  const defaultParams = await getDefaultParams();
+
   try {
-    // get session data inside api.js itself
-    const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-    const payload = {
-      is_app: 1,
-      login_user_id: dataStored?.user_id,
-      auth_key: dataStored?.auth_key,
-      view_user_id: selectedUser?.id || "",
-      tabs: tab, // Stock, Forex, Sports
-    };
-    const response = await axios.post(`${BASE_URL}/view_market_type_data`, payload);
+    const response = await axios.post(
+      `${BASE_URL}/view_market_type_data`,
+      { ...defaultParams, view_user_id: selectedUser?.id || "", tabs: tab }
+    );
     return response.data; // return the full response
   } catch (error) {
     console.error("API fetchSummaryApi error:", error);
@@ -3253,10 +3241,10 @@ export const saveEmployee = async (formData, dataStored, isEditMode, editUserId)
     (key) => permissions[key]
   );
   const permissionString = selectedPermissions.join(",");
+  const defaultParams = await getDefaultParams();
+
   const basePayload = {
-    is_app: 1,
-    login_user_id: dataStored?.user_id || "",
-    auth_key: dataStored?.auth_key || "",
+    ...defaultParams,
     name,
     remarks,
     empPermission: permissionString,

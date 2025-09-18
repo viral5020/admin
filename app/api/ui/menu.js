@@ -325,7 +325,7 @@ export function getSibarContent(authData) {
             icon: 'hardware-chip-outline'
           }]
           : []),
-        ...(userType === 4 && userType === 5
+        ...(userType === 4 || userType === 5
           ? [{
             key: 'admin-login-list',
             name: 'Admin login list',
