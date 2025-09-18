@@ -111,6 +111,25 @@ export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValu
   }
 };
 
+// Fetch orders for a specific user (centralized wrapper for user profile screen)
+export const fetchOrdersByUserAPI = async ({ target_user_id, pageSize = 50, start = 0 }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_new", {
+      ...defaultParams,
+      sEcho: 1,
+      iDisplayStart: start,
+      iDisplayLength: pageSize,
+      user_id: target_user_id || "",
+      sSearch: "",
+    });
+    return data?.aaData || [];
+  } catch (err) {
+    console.error("fetchOrdersByUserAPI error:", err);
+    return [];
+  }
+};
+
 export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
   const defaultParams = await getDefaultParams();
   const formData = {
@@ -465,6 +484,25 @@ export const fetchStockPositionsAPI = async (userId, authKey, scriptId) => {
   }
 };
 
+// Fetch positions for a specific user (centralized wrapper for user profile screen)
+export const fetchPositionsByUserAPI = async ({ target_user_id, pageSize = 100000, start = 0 }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const { data } = await axiosInstance.post("/datatables/position_book_list", {
+      ...defaultParams,
+      sEcho: 1,
+      iDisplayStart: start,
+      iDisplayLength: pageSize,
+      user_id: target_user_id || "",
+      sSearch: "",
+    });
+    return data?.aaData || [];
+  } catch (err) {
+    console.error("fetchPositionsByUserAPI error:", err);
+    return [];
+  }
+};
+
 export const fetchDashboardDataAPI = async (userId, authKey) => {
   const defaultParams = await getDefaultParams();
   try {
@@ -493,7 +531,7 @@ export const fetchDashboardDataAPI = async (userId, authKey) => {
 export const setScriptBlockSettingAPI = async (userId, authKey, market_type_id, script_ids) => {
   const defaultParams = await getDefaultParams();
   try {
-    const response = await axios.post('ajaxfiles/setting/set_script_block_setting', {
+    const response = await axiosInstance.post('ajaxfiles/setting/set_script_block_setting', {
       ...defaultParams,
       market_type_id,
       script_ids, // pass as array or comma-separated string as required by backend
@@ -508,7 +546,7 @@ export const setScriptBlockSettingAPI = async (userId, authKey, market_type_id, 
 export const removeBlockListAPI = async (userId, authKey, script_block_id) => {
   const defaultParams = await getDefaultParams();
   try {
-    const response = await axios.post('ajaxfiles/setting/set_script_block_setting', {
+    const response = await axiosInstance.post('ajaxfiles/setting/set_script_block_setting', {
       ...defaultParams,
       script_block_id,
     });
@@ -851,8 +889,8 @@ export const fetchPositionsAPI = async ({
     user_id
   };
   console.log("🔹 Fetching positions:", payload);
-  const response = await axios.post(
-    "http://128.199.126.171/~goldorg/datatables/position_book_list_forex",
+  const response = await axiosInstance.post(
+    "datatables/position_book_list_forex",
     payload
   );
   return response.data; // let component decide what to do
@@ -2173,18 +2211,11 @@ export const fetchPositionDataAPI = async ({
       sSearch: searchText.trim(),
     };
     console.log("🔍 Fetching with payload:", payload);
-    const response = await fetch(
-      "http://128.199.126.171/~goldorg/ajaxfiles/get_script_wise_qty1",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      }
+    const { data } = await axiosInstance.post(
+      "ajaxfiles/get_script_wise_qty1",
+      payload
     );
-    const result = await response.json();
-    return result; // return full response for flexibility
+    return data; // return full response for flexibility
   } catch (err) {
     console.error("❌ API call failed", err);
     throw err;
@@ -2208,15 +2239,11 @@ export const fetchBlockedScriptsAPI = async ({
       search_text: searchText.trim(),
     };
     console.log("🔍 Fetching with payload:", payload);
-    const response = await fetch(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/list_block_script.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
+    const { data } = await axiosInstance.post(
+      "ajaxfiles/setting/list_block_script.php",
+      payload
     );
-    return await response.json();
+    return data;
   } catch (err) {
     console.error("❌ API call failed", err);
     throw err;
@@ -2243,16 +2270,11 @@ export const confirmTradeAPI = async ({
       password,
     };
     console.log("🔍 Confirm Trade Payload:", payload);
-    const response = await fetch(
-      "http://128.199.126.171/~goldorg/ajaxfiles/brokerage_refresh",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
+    const { data } = await axiosInstance.post(
+      "ajaxfiles/brokerage_refresh",
+      payload
     );
-    const result = await response.json();
-    return result; // return full response
+    return data; // return full response
   } catch (err) {
     console.error("❌ API call (Confirm Trade) failed", err);
     throw err;
@@ -2274,6 +2296,125 @@ export const fetchLedgerDetailsAPI = async ({ user_id, auth_key, targetUserId })
     return response.data; // return raw response for flexibility
   } catch (err) {
     console.error("❌ API call (Ledger Details) failed", err);
+    throw err;
+  }
+};
+
+// ===== Broker Listing auxiliary actions =====
+export const resetPasswordAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = {
+      ...defaultParams,
+      user_id,
+    };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/reset_password",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (reset_password) failed", err);
+    throw err;
+  }
+};
+
+export const changeUserStatusAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = {
+      ...defaultParams,
+      user_id,
+    };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/change_user_status",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (change_user_status) failed", err);
+    throw err;
+  }
+};
+
+export const clearLoginAttemptsAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = {
+      ...defaultParams,
+      user_id,
+    };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/clear_login_attempts",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (clear_login_attempts) failed", err);
+    throw err;
+  }
+};
+
+// Employee-specific admin actions
+export const resetEmployeePasswordAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = { ...defaultParams, user_id };
+    const { data } = await axiosInstance.post('ajaxfiles/reset_password_emp', payload);
+    return data;
+  } catch (err) {
+    console.error('❌ API call (reset_password_emp) failed', err);
+    throw err;
+  }
+};
+
+export const changeEmployeeStatusAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = { ...defaultParams, user_id };
+    const { data } = await axiosInstance.post('ajaxfiles/change_emp_status', payload);
+    return data;
+  } catch (err) {
+    console.error('❌ API call (change_emp_status) failed', err);
+    throw err;
+  }
+};
+
+export const setInvestorPasswordAPI = async ({ user_id, current_password, password }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = {
+      ...defaultParams,
+      user_id,
+      current_password,
+      password,
+    };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/investor_password_set",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (investor_password_set) failed", err);
+    throw err;
+  }
+};
+
+export const removeInvestorPasswordAPI = async ({ user_id, current_password }) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const payload = {
+      ...defaultParams,
+      user_id,
+      current_password,
+    };
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/investor_password_remove",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (investor_password_remove) failed", err);
     throw err;
   }
 };
@@ -2468,14 +2609,11 @@ export const uploadUserTypeQtyMasterAPI = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
     console.log("🔍 Uploading CSV file:", file.name);
-    const response = await fetch(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/upload_user_type_qty_master",
-      {
-        method: "POST",
-        body: formData,
-      }
+    const { data } = await axiosInstance.post(
+      "ajaxfiles/setting/upload_user_type_qty_master",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
-    const data = await response.json();
     return data; // return API response
   } catch (err) {
     console.error("❌ API call (Upload CSV) failed", err);
@@ -2516,8 +2654,8 @@ export const fetchScriptQtyListAPI = async ({
       max_bet: maxBet,
     };
     console.log("🔍 Fetching Script Qty List with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/datatables/script_qty_list",
+    const response = await axiosInstance.post(
+      "datatables/script_qty_list",
       payload
     );
     return response.data; // return full API response
@@ -2534,8 +2672,8 @@ export const fetchUserLevelsAPI = async ({ user_id, auth_key }) => {
       ...defaultParams,
     };
     console.log("🔍 Fetching user levels with payload:", payload);
-    const res = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/get_user_level",
+    const res = await axiosInstance.post(
+      "ajaxfiles/get_user_level",
       payload
     );
     return Array.isArray(res.data)
@@ -2557,8 +2695,8 @@ export const fetchMarketWatchFiltersAPI = async ({ user_id, auth_key }) => {
       ...defaultParams,
     };
     console.log("🔍 Fetching Market Watch Filters with payload:", payload);
-    const res = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/get_market_watch_filter",
+    const res = await axiosInstance.post(
+      "ajaxfiles/get_market_watch_filter",
       payload
     );
     return res.data || {};
@@ -2578,8 +2716,8 @@ export const addNotificationAPI = async ({ user_id, auth_key, user_type, title, 
       message,
     };
     console.log("🔍 Adding notification with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_notification",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/add_notification",
       payload
     );
     return response.data; // return API response
@@ -2596,13 +2734,29 @@ export const removeBlockOptionExpiryAPI = async ({ script_expiry_option_id }) =>
       is_block: 0,
     };
     console.log("🔍 Removing block option with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/add_block_option_expiry",
       payload
     );
     return response.data; // return API response
   } catch (err) {
     console.error("❌ API call (Remove Block Option) failed", err);
+    throw err;
+  }
+};
+
+// Generic block/unblock option expiry API
+export const setBlockOptionExpiryAPI = async ({ script_expiry_option_id, is_block }) => {
+  try {
+    const payload = { script_expiry_option_id, is_block };
+    console.log("🔍 Setting block option with payload:", payload);
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/add_block_option_expiry",
+      payload
+    );
+    return response.data;
+  } catch (err) {
+    console.error("❌ API call (Set Block Option) failed", err);
     throw err;
   }
 };
@@ -2629,8 +2783,8 @@ export const addClientOrderLimitAPI = async ({
       value,
     };
     console.log("🔹 Sending payload to add_client_order_limit:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_client_order_limit",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/add_client_order_limit",
       payload
     );
     return response.data;
@@ -2649,8 +2803,8 @@ export const deleteClientOrderLimitAPI = async ({ user_id, auth_key, client_orde
       client_order_id,
     };
     console.log("🔹 Sending payload to delete_client_order_limit:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/delete_client_order_limit",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/delete_client_order_limit",
       payload
     );
     return response.data;
@@ -2668,8 +2822,8 @@ export const deleteFutureTradingBlockAPI = async ({ future_id, user_id, auth_key
       ...defaultParams,
     };
     console.log("🔍 Deleting future trading block with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/setting/remove_future_trading_block",
+    const response = await axiosInstance.post(
+      "setting/remove_future_trading_block",
       payload
     );
     return response.data;
@@ -2687,8 +2841,8 @@ export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) =
       noOfTrades,
     };
     console.log("🔍 Fetching bulk trade list with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/datatables/bulk_trade_list",
+    const response = await axiosInstance.post(
+      "datatables/bulk_trade_list",
       payload
     );
     return response.data;
@@ -2707,8 +2861,8 @@ export const saveBulkTradingSettingsAPI = async ({ user_id, auth_key, noOfTrades
       no_of_trade: noOfTrades,
     };
     console.log("🔍 Saving bulk trading settings with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_bulk_trading",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/set_bulk_trading",
       payload
     );
     return response.data;
@@ -2736,8 +2890,8 @@ export const addClientBlockScriptAPI = async ({
       master_user_id,
     };
     console.log("🔹 Adding client block script with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_client_block_script_setting",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/set_client_block_script_setting",
       payload
     );
     return response.data;
@@ -2756,8 +2910,8 @@ export const deleteClientBlockScriptAPI = async ({ user_id, auth_key, client_blo
       client_block_script_id,
     };
     console.log("🔹 Deleting client block script with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block_script_setting",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/remove_client_block_script_setting",
       payload
     );
     return response.data;
@@ -2786,8 +2940,8 @@ export const removeSelectedClientBlockScriptAPI = async ({
       master_user_id,
     };
     console.log("🔹 Removing selected client block script with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/setting/remove_client_block1_script_setting",
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/remove_client_block1_script_setting",
       payload
     );
     return response.data;
@@ -2819,8 +2973,8 @@ export const addReceiptAPI = async ({
       remarks,
     };
     console.log("🔹 Adding receipt with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/add_receipt",
+    const response = await axiosInstance.post(
+      "ajaxfiles/add_receipt",
       payload
     );
     return response.data;
@@ -2853,8 +3007,8 @@ export const editReceiptAPI = async ({
       remarks,
     };
     console.log("🔹 Editing receipt with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/edit_receipt",
+    const response = await axiosInstance.post(
+      "ajaxfiles/edit_receipt",
       payload
     );
     return response.data;
@@ -2874,8 +3028,8 @@ export const deleteReceiptAPI = async ({ user_id, auth_key, entry_id, entry_user
       user_id: entry_user_id,
     };
     console.log("🔹 Deleting receipt with payload:", payload);
-    const response = await axios.post(
-      "http://128.199.126.171/~goldorg/ajaxfiles/delete_receipt",
+    const response = await axiosInstance.post(
+      "ajaxfiles/delete_receipt",
       payload
     );
     return response.data;
@@ -2911,7 +3065,7 @@ export const addJVEntryAPI = async ({
       jv_entry_time
     };
     console.log("🔹 Add JV payload:", payload);
-    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/add_jv", payload);
+    const response = await axiosInstance.post("ajaxfiles/add_jv", payload);
     return response.data;
   } catch (err) {
     console.error("❌ API call (Add JV) failed", err);
@@ -2931,7 +3085,7 @@ export const deleteJVEntryAPI = async ({ login_user_id, auth_key, entryId }) => 
       entryId
     };
     console.log("🔹 Delete JV payload:", payload);
-    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/delete_jv_entry", payload);
+    const response = await axiosInstance.post("ajaxfiles/delete_jv_entry", payload);
     return response.data;
   } catch (err) {
     console.error("❌ API call (Delete JV) failed", err);
@@ -2948,7 +3102,7 @@ const fetchUserLog = async ({ endpoint, login_user_id, auth_key, user_id, log_da
       log_datetime
     };
     console.log(`🔹 Fetching from ${endpoint} with payload:`, payload);
-    const response = await axios.post(endpoint, payload);
+    const response = await axiosInstance.post(endpoint.replace("http://128.199.126.171/~goldorg/", ""), payload);
     return response.data.data || [];
   } catch (err) {
     console.error(`❌ API call failed for ${endpoint}`, err);
@@ -2959,7 +3113,7 @@ const fetchUserLog = async ({ endpoint, login_user_id, auth_key, user_id, log_da
 // Fetch basic edit log
 export const fetchBasicLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
   fetchUserLog({
-    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_basic_edit_log",
+    endpoint: "ajaxfiles/setting/user_basic_edit_log",
     login_user_id,
     auth_key,
     user_id,
@@ -2969,7 +3123,7 @@ export const fetchBasicLogAPI = async ({ login_user_id, auth_key, user_id, log_d
 // Fetch brokerage edit log
 export const fetchBrokerageLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
   fetchUserLog({
-    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_commission_edit_log",
+    endpoint: "ajaxfiles/setting/user_commission_edit_log",
     login_user_id,
     auth_key,
     user_id,
@@ -2979,7 +3133,7 @@ export const fetchBrokerageLogAPI = async ({ login_user_id, auth_key, user_id, l
 // Fetch market edit log
 export const fetchMarketLogAPI = async ({ login_user_id, auth_key, user_id, log_datetime }) =>
   fetchUserLog({
-    endpoint: "http://128.199.126.171/~goldorg/ajaxfiles/setting/user_market_edit_log",
+    endpoint: "ajaxfiles/setting/user_market_edit_log",
     login_user_id,
     auth_key,
     user_id,
@@ -3064,6 +3218,21 @@ export const removeMappedAccount = async ({ login_user_id, auth_key, user_id }) 
   return response.data; // return raw API result
 };
 
+// 🔹 View mapped accounts for current user
+export const viewLoginMapAccountsAPI = async () => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axios.post(
+      "http://128.199.126.171/~goldorg/ajaxfiles/view_login_map_account",
+      defaultParams
+    );
+    return response.data; // expect { status, data }
+  } catch (err) {
+    console.error("❌ API call (view_login_map_account) failed", err);
+    throw err;
+  }
+};
+
 export const placeTrade = async (closetradeData, sessionData) => {
   const defaultParams = await getDefaultParams();
   const payload = {
@@ -3114,4 +3283,26 @@ export const getLedgerBalance = async (dataStored, userId) => {
     user_id: userId,
   };
   return axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_ledger_balance", payload);
+};
+
+// ===== Centralized Auth/Login and Account Mapping =====
+export const loginAPI = async ({ api, values }) => {
+  // login endpoints accept plain credentials
+  const { data } = await axiosInstance.post(`/${api}`, values);
+  return data;
+};
+
+export const loginIntoMappedAccountAPI = async ({ user_id }) => {
+  const defaultParams = await getDefaultParams();
+  const payload = { ...defaultParams, user_id };
+  const { data } = await axiosInstance.post('ajaxfiles/login_into_mapped_account', payload);
+  return data;
+};
+
+export const addLoginMapAccountAPI = async ({ username, password }) => {
+  const defaultParams = await getDefaultParams();
+  const sessionData = JSON.parse(sessionStorage.getItem('data') || '{}');
+  const payload = { ...defaultParams, username, password, mainLinkId: sessionData.user_id };
+  const { data } = await axiosInstance.post('ajaxfiles/add_login_map_account', payload);
+  return data;
 };

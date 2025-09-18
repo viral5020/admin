@@ -17,6 +17,7 @@ import brand from 'dan-api/dummy/brand';
 import logo from 'dan-images/logo.svg';
 import useStyles from './user-jss';
 import { setUserData } from 'dan-redux/modules/authSlice';
+import { loginAPI } from '../../containers/Dashboard/API/API';
 
 // import { fetchNotificationAPI } from 'app/containers/Dashboard/API/API';
 // import { fetchNotificationAPI } from '../../containers/Dashboard/API/API';
@@ -45,15 +46,7 @@ function LoginFormV3() {
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await fetch('http://128.199.126.171/~goldorg/main-ad98min-login/ad_min/login1/login_process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
-
-        const data = await response.json();
+        const data = await loginAPI({ api: 'main-ad98min-login/ad_min/login1/login_process', values });
         console.log('API Response:', data);
 
         const isLoginSuccessful = data.success || data.message?.toLowerCase().includes('success');

@@ -27,7 +27,7 @@ import useStyles from './header-jss';
 import { Typography } from 'dan-vendor/@mui/material';
 import { useDispatch } from 'react-redux';
 import { setUserData } from 'dan-redux/modules/authSlice';
-import { fetchProfileAPI } from '../../containers/Dashboard/API/API';
+import { fetchProfileAPI, viewLoginMapAccountsAPI, removeMappedAccount, loginIntoMappedAccountAPI, addLoginMapAccountAPI } from '../../containers/Dashboard/API/API';
 
 function UserMenu(props) {
   const dispatch = useDispatch();
@@ -77,21 +77,7 @@ function UserMenu(props) {
     console.log('🗑️ Removing account:', selectedAccount);
 
     try {
-      const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/remove_mapped_account', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          is_app: 1,
-          login_user_id: dataStored?.user_id,
-          auth_key: dataStored?.auth_key,
-          user_id: selectedAccount.user_id
-        }),
-      });
-
-      const result = await response.json();
+      const result = await removeMappedAccount({ user_id: selectedAccount.user_id });
       console.log('✅ Remove API result:', result);
 
       if (result.success) {
@@ -117,24 +103,10 @@ function UserMenu(props) {
     try {
       // 1️⃣ Preserve mainLinkId from current session before overwriting
       const existingData = JSON.parse(sessionStorage.getItem("data") || "{}");
-      const mainLinkId = existingData.mainLinkId; // 👈 extract the key you want to keep
-
-      // 2️⃣ Prepare API request
-      const formData = {
-        is_app: 1,
-        login_user_id: existingData?.user_id,
-        auth_key: existingData?.auth_key,
-        user_id: selectedAccount.user_id
-      };
+      const mainLinkId = existingData.mainLinkId;
 
       // 3️⃣ Call API
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/login_into_mapped_account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
+      const result = await loginIntoMappedAccountAPI({ user_id: selectedAccount.user_id });
       console.log('Login result:', result);
 
       // 4️⃣ Check response
@@ -183,18 +155,8 @@ function UserMenu(props) {
   }
 
   async function viewLoginMapAccounts() {
-    const sess = sessionStorage.getItem('data');
-    const sessionData = sess && sess !== 'null' ? JSON.parse(sess) : {};
     try {
-      const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/view_login_map_account', {
-        method: 'POST',
-        body: JSON.stringify({
-          is_app: 1,
-          login_user_id: sessionData.user_id,
-          auth_key: sessionData.auth_key
-        })
-      });
-      const result = await response.json();
+      const result = await viewLoginMapAccountsAPI();
       if (result.status === 'ok') setMapAccounts(result.data || []);
     } catch (err) { console.error('❌ Error fetching mapped accounts:', err); }
   }
@@ -396,21 +358,7 @@ function UserMenu(props) {
               }
               setLinking(true);
               try {
-                const sessionData = JSON.parse(sessionStorage.getItem('data') || '{}');
-                const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-                const response = await fetch('http://128.199.126.171/~goldorg/ajaxfiles/add_login_map_account', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    is_app: 1,
-                    login_user_id: dataStored?.user_id,
-                    auth_key: dataStored?.auth_key,
-                    username: linkUsername,
-                    password: linkPassword,
-                    mainLinkId: sessionData.user_id // preserve main account
-                  }),
-                });
-                const result = await response.json();
+                const result = await addLoginMapAccountAPI({ username: linkUsername, password: linkPassword });
                 console.log('🔗 Add Login Map Account Result:', result);
                 if (result.status === 'ok') {
                   // alert('Account linked successfully!');

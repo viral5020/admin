@@ -8,6 +8,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AutoCompleteFilter from '../Watchlist/AutoCompleteFilter';
 import { toast } from 'react-toastify';
 import axios from 'dan-vendor/axios';
+import { setBlockOptionExpiryAPI } from '../API/API';
 
 const forexMarketType = { market_type_id: 5, market_type_name: 'Forex' };
 
@@ -135,17 +136,12 @@ const NseoptManageFilter = ({
 
         setIsBlockLoading(true);
         try {
-            const payload = {
-                script_expiry_option_id: strike.rate_id, // Use rate_id
-                is_block: 1
-            };
+            const response = await setBlockOptionExpiryAPI({ script_expiry_option_id: strike.rate_id, is_block: 1 });
 
-            const response = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry', payload);
-
-            if (response.data?.status === 'ok') {
-                toast.success(response.data.message || 'Option blocked successfully');
+            if (response?.status === 'ok') {
+                toast.success(response.message || 'Option blocked successfully');
             } else {
-                toast.error(response.data?.message || 'Failed to block option');
+                toast.error(response?.message || 'Failed to block option');
             }
         } catch (err) {
             toast.error(err.message || 'Error blocking option');
@@ -163,17 +159,12 @@ const NseoptManageFilter = ({
 
         setIsAddMarketLoading(true);
         try {
-            const payload = {
-                script_expiry_option_id: strike.rate_id, // Use rate_id
-                is_block: 0
-            };
+            const response = await setBlockOptionExpiryAPI({ script_expiry_option_id: strike.rate_id, is_block: 0 });
 
-            const response = await axios.post('http://128.199.126.171/~goldorg/ajaxfiles/setting/add_block_option_expiry', payload);
-
-            if (response.data?.status === 'ok') {
-                toast.success(response.data.message || 'Option removed successfully');
+            if (response?.status === 'ok') {
+                toast.success(response.message || 'Option removed successfully');
             } else {
-                toast.error(response.data?.message || 'Failed to remove option');
+                toast.error(response?.message || 'Failed to remove option');
             }
         } catch (err) {
             toast.error(err.message || 'Error removing option');

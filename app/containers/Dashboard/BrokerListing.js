@@ -21,7 +21,7 @@ import {
   TextField
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { fetchBrokerlistingAPI, fetchLedgerDetailsAPI, fetchMasterlistingAPI, fetchUserlistingAPI } from "./API/API";
+import { fetchBrokerlistingAPI, fetchLedgerDetailsAPI, fetchMasterlistingAPI, fetchUserlistingAPI, resetPasswordAPI, changeUserStatusAPI, clearLoginAttemptsAPI, setInvestorPasswordAPI, removeInvestorPasswordAPI } from "./API/API";
 import UserListFilter from "./userlistfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
@@ -167,58 +167,30 @@ const BrokerListing = ({
   };
   const handleConfirm = async () => {
     try {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      const payload = {
-        is_app: '1',
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: actionItem.user_id,
-      };
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/reset_password",
-        payload  // sending userId in body
-      );
-
-      console.log("Password reset response:", response.data);
-      if (response.data.status === "ok") {
+      const res = await resetPasswordAPI({ user_id: actionItem.user_id });
+      if (res.status === "ok") {
         handleClose1();
         toast.success("Password has been reset to '1234' successfully!");
       } else {
-        toast.error("Failed to reset password: " + response.data.message);
+        toast.error("Failed to reset password: " + res.message);
       }
     } catch (error) {
       console.error("Error resetting password:", error);
       toast.error("Failed to reset password due to network error.");
     } finally {
-      handleClose1(); // close modal/dialog
+      handleClose1();
     }
   };
 
   const handleStatusConfirm = async () => {
     if (!statusActionItem) return;
-
     try {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      const payload = {
-        is_app: '1',
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: statusActionItem.user_id,
-      };
-
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/change_user_status",
-        payload
-      );
-
-      console.log("Change status response:", response.data);
-
-      if (response.data.status === "ok") {
+      const res = await changeUserStatusAPI({ user_id: statusActionItem.user_id });
+      if (res.status === "ok") {
         handleStatusClose();
         toast.success("User status has been updated successfully!");
-        //fetchMasterListingData(); // refresh table
       } else {
-        toast.error("Failed to update status: " + response.data.message);
+        toast.error("Failed to update status: " + res.message);
       }
     } catch (error) {
       console.error("Error changing status:", error);
@@ -229,27 +201,14 @@ const BrokerListing = ({
   };
 
   const handleConfirmClear = async () => {
-    if (!selectedUserIdcl) return; // ✅ use selectedUserIdcl instead
-
+    if (!selectedUserIdcl) return;
     try {
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: selectedUserIdcl, // ✅ also here
-      };
-
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/clear_login_attempts",
-        payload
-      );
-
-      if (response.data.status === "ok") {
-        handleCloseDialogcl(); // ✅ close correct dialog
+      const res = await clearLoginAttemptsAPI({ user_id: selectedUserIdcl });
+      if (res.status === "ok") {
+        handleCloseDialogcl();
         toast.success("Login attempts cleared successfully!");
       } else {
-        toast.error("Failed to clear login attempts: " + response.data.message);
+        toast.error("Failed to clear login attempts: " + res.message);
       }
     } catch (error) {
       console.error("Error clearing login attempts:", error);
@@ -271,26 +230,13 @@ const BrokerListing = ({
 
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: investorData.user_id,
-        current_password: loginPassword,
-        password: investorPassword
-      };
-
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/investor_password_set",
-        payload
-      );
-
-      if (response.data.status === "ok") {
+      const res = await setInvestorPasswordAPI({ user_id: investorData.user_id, current_password: loginPassword, password: investorPassword });
+      if (res.status === "ok") {
         toast.success("Investor password updated successfully!");
         setInvestorDialogOpen(false);
         // Optionally reload table here
       } else {
-        toast.error(response.data.message || "Failed to update investor password");
+        toast.error(res.message || "Failed to update investor password");
       }
     } catch (error) {
       console.error("Error updating investor password:", error);
@@ -309,24 +255,12 @@ const BrokerListing = ({
 
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
-      const payload = {
-        is_app: "1",
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: investorData.user_id,
-        current_password: loginPassword
-      };
-
-      const response = await axios.post(
-        "http://128.199.126.171/~goldorg/ajaxfiles/investor_password_remove",
-        payload
-      );
-
-      if (response.data.status === "ok") {
+      const res = await removeInvestorPasswordAPI({ user_id: investorData.user_id, current_password: loginPassword });
+      if (res.status === "ok") {
         toast.success("Investor password removed successfully!");
         setInvestorDialogOpen(false);
       } else {
-        toast.error(response.data.message || "Failed to remove investor password");
+        toast.error(res.message || "Failed to remove investor password");
       }
     } catch (error) {
       console.error("Error removing investor password:", error);
@@ -337,23 +271,10 @@ const BrokerListing = ({
 
   const fetchLedgerDetails = async (userId) => {
     setLoadingLedger(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
     try {
-      const payload = {
-        is_app: '1',
-        login_user_id: dataStored?.user_id,
-        auth_key: dataStored?.auth_key,
-        user_id: userId,
-      };
-
-      const response = await axios.post(
-        'http://128.199.126.171/~goldorg/ajaxfiles/get_user_valan_wise_bill',
-        payload
-      );
-
-      if (response.data.status === 'ok' && Array.isArray(response.data.data)) {
-        const filtered = response.data.data.filter(item => item.valan_name !== 'Opening Balance');
-        setLedgerDetails(response.data.data);
+      const data = await fetchLedgerDetailsAPI({ user_id: null, auth_key: null, targetUserId: userId });
+      if (data && Array.isArray(data.data)) {
+        setLedgerDetails(data.data);
       } else {
         setLedgerDetails([]);
       }

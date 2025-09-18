@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import axios from "axios";
-import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI } from "./API/API";
+import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI, fetchOrdersByUserAPI, fetchPositionsByUserAPI } from "./API/API";
 
 const UserTablePage = () => {
     const theme = useTheme();
@@ -92,25 +92,8 @@ const UserTablePage = () => {
     const fetchOrders = async () => {
         setLoadingOrders(true);
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-            const res = await fetch(
-                "http://128.199.126.171/~goldorg/datatables/order_book_new",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        sEcho: 1,
-                        iDisplayStart: 0,
-                        iDisplayLength: 50,
-                        is_app: 1,
-                        login_user_id: dataStored?.user_id,
-                        auth_key: dataStored?.auth_key,
-                        user_id: selectedUser?.id || ""
-                    })
-                }
-            );
-            const data = await res.json();
-            setOrders(data.aaData || []);
+            const rows = await fetchOrdersByUserAPI({ target_user_id: selectedUser?.id, pageSize: 50, start: 0 });
+            setOrders(rows);
         } catch (err) {
             console.error("Orders fetch error:", err);
             setOrders([]);
@@ -123,20 +106,8 @@ const UserTablePage = () => {
     const fetchPositions = async () => {
         setLoadingPositions(true);
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-            const res = await axios.post(
-                "http://128.199.126.171/~goldorg/datatables/position_book_list",
-                {
-                    is_app: "1",
-                    login_user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    sEcho: 1,
-                    iDisplayStart: 0,
-                    iDisplayLength: 100000,
-                    user_id: selectedUser?.id || ""
-                }
-            );
-            setPositions(res.data.aaData || []);
+            const rows = await fetchPositionsByUserAPI({ target_user_id: selectedUser?.id, pageSize: 100000, start: 0 });
+            setPositions(rows);
         } catch (err) {
             console.error("Positions fetch error:", err);
             setPositions([]);
