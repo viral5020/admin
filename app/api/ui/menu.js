@@ -329,7 +329,7 @@ export function getSibarContent(authData) {
           ? [{
             key: 'admin-login-list',
             name: 'Admin login list',
-            // link: '/app/dashboard/admin-login-list',
+            link: '/app/dashboard/admin-login-list',
             icon: 'receipt-outline'
           }]
           : []),

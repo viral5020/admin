@@ -1089,7 +1089,7 @@ const OrderPage = () => {
                                                 }}
                                             >
                                                 👤{" "}
-                                                {row.full_name
+                                                {row.client_full_name
                                                     ?.replace(/<[^>]+>/g, " ")
                                                     ?.split(/\s+/)
                                                     .map((part, i) => (
@@ -1367,7 +1367,7 @@ const OrderPage = () => {
                                                     {/* Script + Market Chip */}
                                                     <td style={{ padding: "6px 10px" }}>
                                                         {userType !== 1 ? (
-                                                            <span dangerouslySetInnerHTML={{ __html: row.full_name }} />
+                                                            <span dangerouslySetInnerHTML={{ __html: row.client_full_name }} />
                                                         ) : null}
                                                     </td>
 
@@ -1407,9 +1407,9 @@ const OrderPage = () => {
                                                     </td>
 
                                                     {/* Numeric data */}
-                                                    <td style={{ padding: "6px 10px" }}>{row.total_buy?.toLocaleString()}</td>
+                                                    <td style={{ padding: "6px 10px" }}>{row.total_buy_qty?.toLocaleString()}</td>
                                                     <td style={{ padding: "6px 10px" }}>{row.buy_avg_rate?.toLocaleString()}</td>
-                                                    <td style={{ padding: "6px 10px" }}>{row.total_sell?.toLocaleString()}</td>
+                                                    <td style={{ padding: "6px 10px" }}>{row.total_sell_qty?.toLocaleString()}</td>
                                                     <td style={{ padding: "6px 10px" }}>{row.sell_avg_rate?.toLocaleString()}</td>
                                                     <td
                                                         style={{
@@ -1853,11 +1853,11 @@ const OrderPage = () => {
                                                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">Total Buy</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
+                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy_qty}</Typography>
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">Total Sell</Typography>
-                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
+                                                            <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell_qty}</Typography>
                                                         </Box>
                                                         <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">Buy Avg Rate</Typography>
@@ -2504,11 +2504,11 @@ const OrderPage = () => {
                                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
                                     <Box sx={{ flex: "1 1 22%" }}>
                                         <Typography variant="caption">Total Buy</Typography>
-                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy}</Typography>
+                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.total_buy_qty}</Typography>
                                     </Box>
                                     <Box sx={{ flex: "1 1 22%" }}>
                                         <Typography variant="caption">Total Sell</Typography>
-                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell}</Typography>
+                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.total_sell_qty}</Typography>
                                     </Box>
                                     <Box sx={{ flex: "1 1 22%" }}>
                                         <Typography variant="caption">Buy Avg Rate</Typography>
