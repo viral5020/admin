@@ -75,6 +75,8 @@ export const apifetchPositions = async (userId, authKey) => {
   }
 };
 
+// ---------- PART 1 --------------
+
 export const fetchLoginDataAPI = async (userId, authKey) => {
   const defaultParams = await getDefaultParams();
   try {
@@ -649,6 +651,8 @@ export const forexcloseAllPositions = async ({
   }
 };
 
+// ---------- PART 2 --------------
+
 export const rolloverPositions = async ({
   password,
   market,
@@ -1037,23 +1041,7 @@ export const tradePlaceAPI = async (dataObj) => {
     check_script_name: dataObj.script_expiry_type ? `${dataObj.script_name}-${dataObj.script_expiry_type}` : dataObj.script_name, // HOW THIS SHOULD BE SET
     user_id: (dataStored?.user_type != 1 && dataStored?.user_type != 2) ? dataObj.client.id : undefined,
   };
-  console.log('payload', payload);
-  const errorPayload = {
-    "auth_key": "6tjC7iHdYZ",
-    "is_app": "1",
-    "login_user_id": "41296",
-    "market_type_id": "1",
-    "script_id": "2",
-    "script_expiry_id": "27745",
-    "trade_rate": 113300,
-    "trade_qty": 30,
-    "trade_lot": 1,
-    "trade_type": 0, // market, lot, stock
-    "trade_type_x": "0", // buy sell
-    "check_script_name": "SILVER-I",
-    "device_type": 0,
-    "user_id": "41297"
-  }
+
   try {
     const response = await axiosInstance.post('/ajaxfiles/trade_place', payload);
     // const response = await axiosInstance.post('/ajaxfiles/trade_place', errorPayload);
@@ -1064,6 +1052,8 @@ export const tradePlaceAPI = async (dataObj) => {
     throw error;
   }
 };
+
+// ---------- PART 3 --------------
 
 export const addMarketScriptAPI = async ({
   market_type_id,
@@ -1777,6 +1767,8 @@ export const editDeleteoldLogsAPI = async (
   }
 };
 
+// ---------- PART 4 --------------
+
 export const CasheditDeleteLogsAPI = async (
   currentPage,
   pageSize,
@@ -2242,6 +2234,8 @@ export const fetchBlockedScriptsAPI = async ({
   }
 };
 
+// ---------- PART 5 --------------
+
 export const confirmTradeAPI = async ({
   user_id,
   auth_key,
@@ -2656,6 +2650,8 @@ export const fetchScriptQtyListAPI = async ({
     throw err;
   }
 };
+
+// ---------- PART 6 --------------
 
 export const fetchUserLevelsAPI = async ({ user_id, auth_key }) => {
   const defaultParams = await getDefaultParams();
@@ -3167,14 +3163,15 @@ export const fetchSummaryAPI = async ({ login_user_id, auth_key, view_user_id, t
   }
 };
 
-export const fetchProfileAPI = async ({ view_user_id }) => {
+export const fetchProfileAPI = async (para) => {
   const defaultParams = await getDefaultParams();
+  const view_user_id = para?.view_user_id;
   try {
     const payload = {
       ...defaultParams,
       ...(view_user_id ? { view_user_id } : {})
     };
-    console.log("🔹 Fetching profile:", payload);
+    // console.log("🔹 Fetching profile:", payload);
     const res = await axios.post(
       "http://128.199.126.171/~goldorg/ajaxfiles/view_user_profile",
       payload

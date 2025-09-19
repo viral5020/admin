@@ -40,17 +40,11 @@ function Cover(props) {
   const handleCloseOpt = () => {
     setAnchorElOpt(null);
   };
+  const userData = JSON.parse(sessionStorage.getItem('data'));
 
   async function viewUserProfile() {
-    const data = JSON.parse(sessionStorage.getItem('data'));
-    const formData = {
-      is_app: 1,
-      login_user_id: data.user_id,
-      auth_key: data.auth_key
-    };
-
     try {
-      const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
+      const result = await fetchProfileAPI();
 
       if (result.status !== 'ok') {
         throw new Error(result.message || 'Failed to fetch profile');
@@ -68,7 +62,7 @@ function Cover(props) {
 
 
   useEffect(() => {
-    viewUserProfile();
+    !userData?.investor_status ? viewUserProfile() : '';
   }, []);
 
   // return (

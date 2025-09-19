@@ -50,7 +50,9 @@ const UserTablePage = () => {
 
     const [isUserSelected, setIsUserSelected] = useState(false);
 
-    const userType = 3; // example user type
+    const userData = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    const userType = userData?.user_type; // example user type
 
     const glassStyles = {
         p: 2,
@@ -67,11 +69,10 @@ const UserTablePage = () => {
     // Fetch users for dropdown
     const fetchUsers = async (term = "") => {
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
             const params = {
                 is_app: 1,
-                login_user_id: dataStored?.user_id,
-                auth_key: dataStored?.auth_key,
+                login_user_id: userData?.user_id,
+                auth_key: userData?.auth_key,
                 term
             };
             const data = await fetchOptionsAPI(
@@ -167,11 +168,10 @@ const UserTablePage = () => {
     const fetchSummary = async (tab = "Stock") => {
         setLoadingSummary(true);
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
             const data = await fetchSummaryAPI({
-                login_user_id: dataStored?.user_id,
-                auth_key: dataStored?.auth_key,
-                view_user_id: selectedUser?.id || "",
+                login_user_id: userData?.user_id,
+                auth_key: userData?.auth_key,
+                view_user_id: userData?.id || "",
                 tab
             });
 
@@ -193,7 +193,7 @@ const UserTablePage = () => {
         fetchOrders();
         fetchPositions();
         fetchLogs();
-        fetchProfile();
+        !userData?.investor_status ? fetchProfile() : '';
         fetchSummary();
     };
 

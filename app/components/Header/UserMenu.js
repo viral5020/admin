@@ -37,7 +37,7 @@ function UserMenu(props) {
   const [menuState, setMenuState] = useState({ anchorEl: null, openMenu: null });
   const [profileData, setProfileData] = useState();
   const [mapAccounts, setMapAccounts] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(() => {
+  const [userData, setuserdata] = useState(() => {
     const sess = sessionStorage.getItem('data');
     if (!sess || sess === 'null') return null;
     try { return String(JSON.parse(sess)?.user_id); } catch { return null; }
@@ -66,7 +66,7 @@ function UserMenu(props) {
   const handleClose = () => setMenuState({ anchorEl: null, openMenu: null });
 
   const handleAccountClick = (account) => {
-    if (String(account.user_id) === String(currentUserId)) return;
+    if (String(account.user_id) === String(userData)) return;
     setSelectedAccount(account);
     setDialogOpen(true);
   };
@@ -146,9 +146,9 @@ function UserMenu(props) {
   async function viewUserProfile() {
     const sess = sessionStorage.getItem('data');
     const sessionData = sess && sess !== 'null' ? JSON.parse(sess) : {};
-    if (sessionData?.user_id) setCurrentUserId(String(sessionData.user_id));
+    if (sessionData?.user_id) setuserdata(String(sessionData.user_id));
     try {
-      const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
+      const result = await fetchProfileAPI();
 
       if (result.status === 'ok') setProfileData(result.data);
     } catch (err) { console.error('❌ Error fetching profile:', err); }
@@ -170,7 +170,10 @@ function UserMenu(props) {
     }
   };
 
-  useEffect(() => { viewUserProfile(); viewLoginMapAccounts(); }, []);
+  useEffect(() => {
+    !userData?.investor_status ? viewUserProfile() : '';
+    viewLoginMapAccounts();
+  }, []);
 
   return (
     <div>
@@ -209,7 +212,7 @@ function UserMenu(props) {
               overflowY: mapAccounts.length > 3 ? 'auto' : 'visible'
             }}>
               {mapAccounts.map(account => {
-                const isCurrent = String(account.user_id) === String(currentUserId);
+                const isCurrent = String(account.user_id) === String(userData);
                 return (
                   <MenuItem
                     key={account.user_id}

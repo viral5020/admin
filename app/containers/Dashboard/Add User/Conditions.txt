@@ -1,3 +1,58 @@
+1. 
+which ever api called with axios.method(...)
+make them call with axiosInstance.method(...) 
+and base url for axiosInstance is "http://128.199.126.171/~goldorg",
+
+2.
+check every axiosInstance api's response's status means
+
+
+if
+    const { variable } = await axiosInstance.post("/api_path/api-path", formData);
+then check variable.status
+
+and if 
+    const variable = await axiosInstance.post("/api_path/api-path", formData);
+then check variable.data.status
+
+add toasts like below
+
+- For try{} block
+if response.data.status === 'error' 
+then run toast.error(response?.data?.message || 'Something went wrong');
+
+- For catch{} block
+}catch(variable){
+run toast.error(variable?.response?.data?.message || 'Something went wrong');
+
+ so in every try and catch block add like this
+
+give full file code
+
+--------------------------------
+
+export const fetchValanNamesApi = async (term) => {
+  try {
+    const defaultParams = await getDefaultParams();
+
+    const response = await axiosInstance.post("/ajaxfiles/get_valan_name_search", { ...defaultParams, term }); // dont use extra line for few params of api
+
+    if (response?.data?.status === "error") {
+      toast.error(response?.data?.message || "Something went wrong");
+      // return []; Dont put return hereas it already outside of if block // also remove this line
+    }
+
+    return response?.data?.results || [];
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "Something went wrong");
+    console.error("Error fetching Valan IDs:", err);
+    return [];
+  }
+};
+
+
+-------------------------
+
 add (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && emp_permission?.includes(keyWord))) this conditions to that routes which route in above file has this condition 
 
 function checkConditions(keyWord){

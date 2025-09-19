@@ -18,13 +18,16 @@ function SidebarContent(props) {
   const [transform, setTransform] = useState(0);
   const [profileData, setProfileData] = useState({});
 
+  const userData = JSON.parse(sessionStorage.getItem('data'));
+
   const handleScroll = (event) => {
     const scroll = event.target.scrollTop;
     setTransform(scroll);
   };
 
   useEffect(() => {
-    viewUserProfile();
+    !userData?.investor_status ? viewUserProfile() : '';
+
     const mainContent = document.getElementById('sidebar');
     mainContent.addEventListener('scroll', handleScroll);
     return () => {
@@ -61,17 +64,11 @@ function SidebarContent(props) {
   };
 
   async function viewUserProfile() {
-    const data = JSON.parse(sessionStorage.getItem('data'));
-    if (data) {
-      const formData = {
-        is_app: 1,
-        login_user_id: data.user_id,
-        auth_key: data.auth_key
-      };
-
+    if (userData) {
       try {
-        const result = await fetchProfileAPI({ view_user_id: selectedUser?.id || "" });
+        const result = await fetchProfileAPI();
 
+        console.log('result', result);
         if (result.status !== 'ok') {
           throw new Error(result.message || 'Failed to fetch profile');
         }
