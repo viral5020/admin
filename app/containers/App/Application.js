@@ -156,6 +156,7 @@ import Notificationn from "../Dashboard/Notification";
 import Timesetting from "../Dashboard/Timesetting";
 import Levelimport from "../Dashboard/Levelimport";
 import { useSelector } from "react-redux";
+import Adminloginlist from "../Dashboard/Utility/Adminloginlist";
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -465,6 +466,17 @@ function Application(props) {
             <Route
               path="dashboard/edit-Delete-Logs"
               element={<EditDeleteLogs />}
+            />
+
+            <Route
+              path="dashboard/admin-login-list"
+              element={
+                userType === 4 || userType === 5 ? (
+                  <Adminloginlist />
+                ) : (
+                  <Navigate to="/app" />
+                )
+              }
             />
           </Route>
           {/* ----------- Accounts ----------- */}

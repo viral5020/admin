@@ -1769,6 +1769,46 @@ export const editDeleteoldLogsAPI = async (
 
 // ---------- PART 4 --------------
 
+export const AdminloginlistAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  end_date,
+  start_date,
+  is_deleted,
+  is_updated,
+  is_admin,
+) => {
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+    end_date,
+    start_date,
+    is_deleted,
+    is_updated,
+    is_admin,
+  }
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/admin_login_list", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
 export const CasheditDeleteLogsAPI = async (
   currentPage,
   pageSize,
@@ -3290,4 +3330,60 @@ export const addLoginMapAccountAPI = async ({ username, password }) => {
   const payload = { ...defaultParams, username, password, mainLinkId: sessionData.user_id };
   const { data } = await axiosInstance.post('ajaxfiles/add_login_map_account', payload);
   return data;
+};
+
+
+export const deleteAllLogsAPI = async (password) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/admin_change_status_all", {
+      ...defaultParams,
+      id: "All",
+      password,
+    });
+    return response.data || {};
+  } catch (error) {
+    console.error("Error deleting all logs:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+// 🔹 Delete Single Log
+export const deleteLogAPI = async (id, password) => {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post("ajaxfiles/setting/admin_change_status", {
+      ...defaultParams,
+      id,
+      password,
+    });
+    return response.data || {};
+  } catch (error) {
+    console.error(`Error deleting log ${id}:`, error);
+    return { success: false, message: error?.response?.data?.message || error.message };
+  }
+};
+
+
+export const removeExpiryValidation = async (row, setLogs) => {
+  if (!row?.expiry_validation_id) return;
+
+  try {
+    const { data } = await axios.post(
+      "ajaxfiles/setting/remove_expiry_validation",
+      { expiry_validation_id: row.expiry_validation_id }
+    );
+
+    if (data?.success) {
+      setLogs((prev) =>
+        prev.filter((r) => r.expiry_validation_id !== row.expiry_validation_id)
+      );
+      toast.success("Entry removed successfully!", { position: "top-right", autoClose: 3000 });
+    } else {
+      toast.error(data?.message || "Failed to remove entry.", { position: "top-right", autoClose: 3000 });
+    }
+  } catch (err) {
+    console.error("Remove error:", err);
+    toast.error("An error occurred while removing the entry.", { position: "top-right", autoClose: 3000 });
+  }
 };
