@@ -634,9 +634,10 @@ const Orderlimit = () => {
                                         <td style={{ textAlign: "center" }}>
                                             <Button
                                                 size="small"
-                                                variant="outlined"
+                                                variant="contained"
                                                 color="error"
                                                 onClick={() => handleOpenConfirm(log)}
+                                                sx={{ borderRadius: 1 }}
                                             >
                                                 Delete
                                             </Button>

@@ -90,7 +90,7 @@ const MarketScriptNameFilter = ({
   return (
     <>
       {/* (5) Market Name */}
-      {setMarket && <Grid item xs={12} sm={6} md={3} lg={2.4}>
+      {setMarket && <Grid item xs={12} sm={6} md={3} lg={2.4} sx={{ pl: 0 }}>
         <Autocomplete
           options={marketOptions}
           getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}

@@ -90,34 +90,40 @@ const Brokrageref = ({ filterShow = true }) => {
 
             {/* Desktop Filters */}
             {filterShow && (
-                <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2 }}>
-                    <Box sx={{ width: 348, mb: 1 }}>
+                <Box
+                    sx={{
+                        p: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 2,
+                        mb: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2, // spacing between the two filters
+                        flexWrap: 'wrap', // optional: allows wrapping on small screens
+                    }}
+                >
+                    {/* Valan Filter */}
+                    <Box sx={{ flex: 1, minWidth: 200 }}>
                         <ValanFilter valanId={valanId} setValanId={setValanId} />
                     </Box>
-                    <TradeEditDeleteLogFilter
-                        setClient={setClient}
-                        setMaster={setMaster}
-                        setBroker={setBroker}
-                        client={client}
-                        master={master}
-                        broker={broker}
-                        userType={userType}
-                    />
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        sx={{
-                            mt: 2,
-                            borderRadius: 1, // bigger border radius
-                            padding: '8px 24px', // optional: makes button a bit bigger
-                            fontWeight: 'bold' // optional: makes text stand out
-                        }}
-                        onClick={onFilterApply}
-                    >
-                        Apply
-                    </Button>
+
+                    {/* Trade Edit/Delete Log Filter */}
+                    <Box sx={{ flex: 3.2, marginTop: 1.6 }}>
+                        <TradeEditDeleteLogFilter
+                            setClient={setClient}
+                            setMaster={setMaster}
+                            setBroker={setBroker}
+                            client={client}
+                            master={master}
+                            broker={broker}
+                            userType={userType}
+                            onApply={onFilterApply}
+                        />
+                    </Box>
                 </Box>
             )}
+
 
             {/* Confirmation Dialog */}
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>

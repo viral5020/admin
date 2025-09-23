@@ -276,9 +276,10 @@ const Timesetting = () => {
                                                 <TableCell>
                                                     <Button
                                                         size="small"
-                                                        variant="outlined"
+                                                        variant="contained"
                                                         color="error"
                                                         onClick={() => handleRemove(row)}
+                                                        sx={{ borderRadius: 1 }}
                                                     >
                                                         Remove
                                                     </Button>

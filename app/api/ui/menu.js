@@ -53,12 +53,12 @@ export function getSibarContent(authData) {
           link: '/app/dashboard/watchlist',
           icon: 'list-outline'
         },
-        {
-          key: 'favorites',
-          name: 'Favorites',
-          link: '/app/dashboard/favorite-list',
-          icon: 'star-outline'
-        },
+        // {
+        //   key: 'favorites',
+        //   name: 'Favorites',
+        //   link: '/app/dashboard/favorite-list',
+        //   icon: 'star-outline'
+        // },
         {
           key: 'orderBook',
           name: 'Order Book',
@@ -76,7 +76,7 @@ export function getSibarContent(authData) {
         ...(userType === 4 || userType === 5
           ? [{
             key: 'previous',
-            name: 'previous valan trade',
+            name: 'Previous Valan Trade',
             link: '/app/dashboard/previous-valan-trade',
             icon: 'documents-outline'
           }]
@@ -84,7 +84,7 @@ export function getSibarContent(authData) {
 
         ...(userType !== 2
           ? [{
-            key: 'editDeleteLogs',
+            key: 'Edit Delete Logs',
             name: 'Banned/Blocked script',
             link: '/app/dashboard/Banned-Blocked-Scripts',
             icon: 'create-outline'
@@ -94,7 +94,7 @@ export function getSibarContent(authData) {
         ...(userType !== 1 && userType !== 2
           ? [{
             key: 'Max QTY details',
-            name: 'margin managemnet',
+            name: 'Margin Management',
             link: '/app/dashboard/Margin-management',
             icon: 'book-outline'
           }]
@@ -103,7 +103,7 @@ export function getSibarContent(authData) {
         ...(userType === 4
           ? [{
             key: 'Max QTY details',
-            name: 'manual trade',
+            name: 'Manual Trade',
             link: '/app/dashboard/manual-trade',
             icon: 'reader-outline'
           }]
@@ -111,8 +111,8 @@ export function getSibarContent(authData) {
         // 7 cmex expire 
         ...(userType !== 1
           ? [{
-            key: 'Summary report',
-            name: 'summary report',
+            key: 'Summary Report',
+            name: 'Summary Report',
             link: '/app/dashboard/summary-report',
             icon: 'trending-up'
           }]
@@ -120,8 +120,8 @@ export function getSibarContent(authData) {
 
         ...(userType === 4
           ? [{
-            key: 'Max QTY details',
-            name: 'self p&l',
+            key: 'Max QTY Details',
+            name: 'Self p&l',
             link: '/app/dashboard/Self-P&L',
             icon: 'reader-outline'
           }]
@@ -129,8 +129,8 @@ export function getSibarContent(authData) {
 
         ...(userType === 4 || userType === 5
           ? [{
-            key: 'Brokrage refresh',
-            name: 'Brokrage refresh',
+            key: 'Brokrage Refresh',
+            name: 'Brokrage Refresh',
             link: '/app/dashboard/Brokrage-refresh',
             icon: 'calendar-outline'
           }]
@@ -153,12 +153,12 @@ export function getSibarContent(authData) {
           link: '/app/dashboard/forex-watchlist',
           icon: 'list-outline'
         },
-        {
-          key: 'favorites',
-          name: 'Favorites',
-          link: '/app/dashboard/forex-favorite-list',
-          icon: 'star-outline'
-        },
+        // {
+        //   key: 'favorites',
+        //   name: 'Favorites',
+        //   link: '/app/dashboard/forex-favorite-list',
+        //   icon: 'star-outline'
+        // },
         {
           key: 'forexOrder Book',
           name: 'Order Book',
@@ -174,7 +174,7 @@ export function getSibarContent(authData) {
         ...(userType === 4 || userType === 5
           ? [{
             key: 'positions',
-            name: 'previous valan trade',
+            name: 'Previous Valan Trade',
             link: '/app/dashboard/forex-previous-valan-trade',
             icon: 'documents-outline'
           }]
@@ -182,8 +182,8 @@ export function getSibarContent(authData) {
 
         ...(userType !== 1 && userType !== 2
           ? [{
-            key: 'Max QTY details',
-            name: 'margin managemnet',
+            key: 'Max QTY Details',
+            name: 'Margin Management',
             link: '/app/dashboard/forex-Margin-management',
             icon: 'book-outline'
           }]
@@ -191,8 +191,8 @@ export function getSibarContent(authData) {
 
         ...(userType !== 1
           ? [{
-            key: 'Max QTY details',
-            name: 'summary report',
+            key: 'Max QTY Details',
+            name: 'Summary Report',
             link: '/app/dashboard/forex-Summary-report',
             icon: 'trending-up'
           }]
@@ -280,7 +280,7 @@ export function getSibarContent(authData) {
         ...(userType !== 1 && (isForex || isStock)
           ? [{
             key: 'bulk-trading',
-            name: 'Bulk trading',
+            name: 'Bulk Trading',
             link: '/app/dashboard/bulk-trading',
             icon: 'receipt-outline'
           }]
@@ -288,7 +288,7 @@ export function getSibarContent(authData) {
         ...(userType !== 2 && userType !== 1
           ? [{
             key: 'bill-filter',
-            name: 'Bill filter',
+            name: 'Bill Filter',
             link: '/app/dashboard/bill-filter',
             icon: 'color-filter-outline'
           }]
@@ -296,7 +296,7 @@ export function getSibarContent(authData) {
         ...(userType !== 2 && (isForex || isStock)
           ? [{
             key: 'trade-edit-delete-log',
-            name: 'Trade edit delete log',
+            name: 'Trade Edit Delete Log',
             link: '/app/dashboard/trade-edit-delete-log',
             icon: 'create-outline'
           }]
@@ -304,7 +304,7 @@ export function getSibarContent(authData) {
         ...((userType === 4 || userType === 5) && (isForex || isStock)
           ? [{
             key: 'trade-edit-delete-log-old',
-            name: 'Trade edit delete log old',
+            name: 'Trade Edit Delete Log Old',
             link: '/app/dashboard/trade-edit-delete-log-old',
             icon: 'create-outline'
           }]
@@ -312,7 +312,7 @@ export function getSibarContent(authData) {
         ...(userType === 3 || userType === 4 || userType === 5
           ? [{
             key: 'user-edit-log',
-            name: 'User edit log',
+            name: 'User Edit Log',
             link: '/app/dashboard/user-edit-log',
             icon: 'person-outline'
           }]
@@ -320,7 +320,7 @@ export function getSibarContent(authData) {
         ...(userType !== 2 && userType !== 1
           ? [{
             key: 'ip-address-log',
-            name: 'IP address log',
+            name: 'IP Address Log',
             link: '/app/dashboard/ip-address-log',
             icon: 'hardware-chip-outline'
           }]
@@ -328,7 +328,7 @@ export function getSibarContent(authData) {
         ...(userType === 4 || userType === 5
           ? [{
             key: 'admin-login-list',
-            name: 'Admin login list',
+            name: 'Admin Login List',
             link: '/app/dashboard/admin-login-list',
             icon: 'receipt-outline'
           }]
@@ -336,7 +336,7 @@ export function getSibarContent(authData) {
         ...(userType === 4 || userType === 5
           ? [{
             key: 'cash-edit-delete-log',
-            name: 'Cash edit delete log',
+            name: 'Cash Edit Delete Log',
             link: '/app/dashboard/cash-edit-delete-log',
             icon: 'cash-outline'
           }]
@@ -344,7 +344,7 @@ export function getSibarContent(authData) {
         ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
           ? [{
             key: 'auto-square-up-log',
-            name: 'Auto Square Up log',
+            name: 'Auto Square Up Log',
             link: '/app/dashboard/auto-square-up-log',
             icon: 'albums-outline'
           }]
@@ -352,7 +352,7 @@ export function getSibarContent(authData) {
         ...((userType === 3 || userType === 4 || userType === 5) && (isForex || isStock)
           ? [{
             key: 'cross-trade-log',
-            name: 'Cross trade log',
+            name: 'Cross Trade Log',
             link: '/app/dashboard/cross-trade-log',
             icon: 'swap-horizontal-outline'
           }]
@@ -536,7 +536,7 @@ export function getSibarContent(authData) {
 
         {
           key: 'order limit',
-          name: 'order limit',
+          name: 'Order Limit',
           link: '/app/dashboard/Order-Limit',
           icon: 'clipboard-outline'
         },
@@ -544,7 +544,7 @@ export function getSibarContent(authData) {
         // visible if forex/stock enabled
         ...((isForex || isStock) ? [{
           key: 'block/allowed',
-          name: 'Block/allowed  Script',
+          name: 'Block/Allowed Script',
           link: '/app/dashboard/Blocked-Allowed-Script',
           icon: 'warning-outline'
         }] : []),
@@ -552,21 +552,21 @@ export function getSibarContent(authData) {
         // only userType === 4
         ...(userType === 4 && (isForex || isStock) ? [{
           key: 'stop future trading',
-          name: 'Stop future trading',
+          name: 'Stop Future Trading',
           link: '/app/dashboard/Stop-future-trading',
           icon: 'receipt-outline'
         }] : []),
 
         ...(userType !== 3 && (isForex || isStock) ? [{
           key: 'split script',
-          name: 'Split script',
+          name: 'Split Script',
           link: '/app/dashboard/Split-script',
           icon: 'shuffle-outline'
         }] : []),
 
         ...(userType !== 3 ? [{
           key: 'NSEOPT management',
-          name: 'NSEOPT management',
+          name: 'NSEOPT Management',
           link: '/app/dashboard/NSEOPT-management',
           icon: 'time-outline'
         }] : []),
@@ -580,7 +580,7 @@ export function getSibarContent(authData) {
 
         ...(userType !== 3 ? [{
           key: 'expiry validation',
-          name: 'expiry validation',
+          name: 'Expiry Validation',
           link: '/app/dashboard/Expiry-Validation',
           icon: 'alert-circle-outline'
         }] : []),
@@ -594,14 +594,14 @@ export function getSibarContent(authData) {
 
         ...(userType === 4 || userType === 5 ? [{
           key: 'level import',
-          name: 'level import',
+          name: 'Level Import',
           link: '/app/dashboard/level-import',
           icon: 'document-attach-outline'
         }] : []),
 
         ...(userType === 3 ? [{
           key: 'master qty setting',
-          name: 'master qty setting',
+          name: 'Master Qty Setting',
           link: '/app/dashboard/Master-QTY-Setting',
           icon: 'time-outline'
         }] : []),
@@ -631,12 +631,12 @@ export function getSibarContent(authData) {
 
 const menu = [{
   key: 'editDeleteLogs',
-  name: 'Banned/Blocked script',
+  name: 'Banned/Blocked Script',
   link: '/app/dashboard/Banned-Blocked-Scripts',
   icon: 'create-outline'
 }, {
   key: 'editDeleteLogs',
-  name: 'Banned/Blocked script',
+  name: 'Banned/Blocked Script',
   link: '/app/dashboard/Banned-Blocked-Scripts',
   icon: 'create-outline'
 }]

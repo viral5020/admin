@@ -182,26 +182,22 @@ const Billfilter = () => {
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {/* Filters */}
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+
+                        <div>
                             <ValanFilter valanId={valanId} setValanId={setValanId} />
                         </div>
-
-                        <div style={{ flex: 1, minWidth: '150px' }}>
+                        <div style={{ minWidth: '150px', marginLeft: '10px', marginBottom: '6px' }}>
                             <input
                                 type="number"
                                 placeholder="Enter amount"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #ccc'
-                                }}
+                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                             />
                         </div>
                     </div>
+
 
                     <TradeEditDeleteLogFilter
                         end_date={end_date}

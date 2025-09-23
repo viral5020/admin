@@ -410,14 +410,48 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
 
             <Grid container alignItems="center" sx={{ mt: isMobile ? 0 : 1.4, flexWrap: 'wrap', gap: { xs: 2, sm: 0 } }}>
                 {!isMobile && (
-                    <Grid item xs={12} sm={6} md={8} lg={9} sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={8}
+                        lg={9}
+                        sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}
+                    >
                         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-                            <Button variant="contained" onClick={handleAdd} size="small" disabled={isAddMarketLoading}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={handleAdd}
+                                size="small"
+                                disabled={isAddMarketLoading}
+                                sx={{ borderRadius: 1 }}
+                            >
                                 {isAddMarketLoading ? <CircularProgress size={18} /> : 'Add'}
                             </Button>
-                            <Button variant="outlined" onClick={handleReset} size="small">Reset</Button>
+
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={handleReset}
+                                size="small"
+                                sx={{ borderRadius: 1 }}
+                            >
+                                Reset
+                            </Button>
+
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                sx={{ borderRadius: 1 }}
+                                onClick={() => window.location.href = 'http://localhost:3000/app/dashboard/favorite-list'}
+                            >
+                                Favorite List
+                            </Button>
                         </Box>
                     </Grid>
+
                 )}
 
                 <Grid item xs={12} sm={6} md={isMobile ? 12 : 4} lg={isMobile ? 12 : 3}>

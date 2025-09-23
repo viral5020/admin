@@ -61,7 +61,7 @@ export const apifetchPositions = async (userId, authKey) => {
       ...defaultParams,
       sEcho: 1,
       iDisplayStart: 0,
-      iDisplayLength: 1000000,
+      iDisplayLength: -1,
       sSearch: "",
     });
     if (response.data && response.data.aaData) {
@@ -94,24 +94,60 @@ export const fetchLoginDataAPI = async (userId, authKey) => {
   }
 };
 
-export const fetchOrdersAPI = async (userId, authKey, type = "today", searchValue = "") => {
+export const fetchOrdersAPI = async ({
+  userId,
+  authKey,
+  filterType = "today",
+  searchValue = "",
+  currentPage = 0,
+  pageSize = 50,
+  end_date = "",
+  start_end = "",
+  marketId = "",
+  scriptIds = "",
+  brokerId = "",
+  masterUserId = "",
+  clientId = "",
+  status = "",
+  orderType = "",
+  view_user_id = "",
+  selectedUser = "",
+}) => {
   const defaultParams = await getDefaultParams();
+
   const formData = {
     ...defaultParams,
     sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10000,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
     sSearch: searchValue,
-    isTodayTrade: type,
+    isTodayTrade: filterType,
+    end_date,
+    start_end,
+    market_type_id: marketId || "",
+    script_id: scriptIds,
+    broker_id: brokerId || "",
+    master_user_id: masterUserId || "",
+    user_id: clientId || "",
+    view_user_id: selectedUser?.id || "",   // ✅ send directly
+    is_pending: status === "is_pending" ? "is_pending" : "",
+    is_executed: status === "is_executed" ? "is_executed" : "",
+    trade_type: orderType || "",
   };
+
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
-    return data.aaData || [];
+    return {
+      aaData: data?.aaData || [],
+      iTotalRecords: data?.iTotalRecords || 0,
+    };
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    return [];
+    console.error("Error fetching spot orders:", error);
+    return { aaData: [], iTotalRecords: 0 };
   }
 };
+
+
 
 // Fetch orders for a specific user (centralized wrapper for user profile screen)
 export const fetchOrdersByUserAPI = async ({ target_user_id, pageSize = 50, start = 0 }) => {
@@ -220,7 +256,7 @@ export const fetchforexOrdersAPI = async ({
     iDisplayLength: pageSize,
     sSearch: searchValue,
     ...defaultParams,
-    isTodayTrade: filterType === "today" ? "today" : "",
+    isTodayTrade: filterType,
     end_date,
     start_end,
     market_type_id: marketId || "",
@@ -241,6 +277,7 @@ export const fetchforexOrdersAPI = async ({
     return [];
   }
 };
+
 
 export const fetchPendingOrdersAPI = async (userId, authKey) => {
   const defaultParams = await getDefaultParams();
@@ -472,7 +509,7 @@ export const fetchStockPositionsAPI = async (userId, authKey, scriptId) => {
     isActive: "active",
     sEcho: 1,
     iDisplayStart: 0,
-    iDisplayLength: 10,
+    iDisplayLength: -1,
     script_id: scriptId,
     sSearch: "",
     ...defaultParams,
@@ -881,7 +918,7 @@ export const fetchPositionsAPI = async ({
     ...defaultParams,
     sEcho: 1,
     iDisplayStart: 0,
-    iDisplayLength: 100000,
+    iDisplayLength: -1,
     sSearch: "",
     all_outstanding,
     expiry_date,
