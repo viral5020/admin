@@ -148,7 +148,6 @@ const Manualtradesfilter = ({
                     onChange={(e) => setPrice(e.target.value)}
                     sx={{ width: 100 }}
                 />
-<<<<<<< HEAD
 
                 {/* Trade Inputs */}
 
@@ -221,8 +220,6 @@ const Manualtradesfilter = ({
                     </Button>
                 </Grid>
 
-=======
->>>>>>> 6f2cc6cc2d131dcd11c528dcb12c17d3927c662f
             </Grid>
 
             {/* Client/Master/Broker Filter */}
