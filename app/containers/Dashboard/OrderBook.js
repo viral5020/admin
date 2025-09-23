@@ -193,7 +193,7 @@ const OrderBook = ({
         clientId: client?.id || null,
         status,
         orderType,
-        view_user_id: user_id
+        user_id: user_id
       });
 
       setOrders(result.aaData || []);
