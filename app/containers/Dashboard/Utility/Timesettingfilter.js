@@ -3,8 +3,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Grid, Button, TextField, useTheme } from '@mui/material';
-import Addexpirymarketfilter from '../filters/addexpirymarketfilter';
-import Timescrptmarketfilter from '../filters/timescrptmarketfilter';
+import Timescrptmarketfilter from '../filters/Timescrptmarketfilter';
 
 const Timesettingfilter = ({
     setEnd1_date,
@@ -29,7 +28,6 @@ const Timesettingfilter = ({
         market?.text?.toUpperCase() === 'NSEOPT';
 
     const handleAdd = async () => {
-        // Validation
         if (!market) {
             toast.warning('Please select a market.', { position: 'top-right', autoClose: 3000 });
             return;
@@ -67,16 +65,7 @@ const Timesettingfilter = ({
 
             if (response.data.success) {
                 toast.success('Time added successfully!', { position: 'top-right', autoClose: 3000 });
-
-                // Reset form
-                setStart1_date('');
-                setEnd1_date('');
-                setIs_updated(0);
-                setIs_deleted(0);
-                setMarket(null);
-                setScript(null);
-                setStartTime('');
-                setEndTime('');
+                handleClear(); // ✅ reset after success
             } else {
                 toast.error(response.data.message || 'Failed to add time. Please try again.', {
                     position: 'top-right',
@@ -90,6 +79,18 @@ const Timesettingfilter = ({
                 autoClose: 3000,
             });
         }
+    };
+
+    // ✅ Clear function
+    const handleClear = () => {
+        setStart1_date('');
+        setEnd1_date('');
+        setIs_updated(0);
+        setIs_deleted(0);
+        setMarket(null);
+        setScript(null);
+        setStartTime('');
+        setEndTime('');
     };
 
 
@@ -116,7 +117,7 @@ const Timesettingfilter = ({
                         size="small"
                         fullWidth
                         InputLabelProps={{ shrink: true }}
-                        inputProps={{ step: 300 }} // 5 min steps
+                        inputProps={{ step: 300 }}
                     />
                 </Grid>
 
@@ -135,7 +136,7 @@ const Timesettingfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={2} lg={2}>
+                <Grid item xs={6} sm={3} md={2} lg={2}>
                     <Button
                         fullWidth
                         onClick={handleAdd}
@@ -151,6 +152,26 @@ const Timesettingfilter = ({
                         }}
                     >
                         Add
+                    </Button>
+                </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs={6} sm={3} md={2} lg={2}>
+                    <Button
+                        fullWidth
+                        onClick={handleClear}
+                        sx={{
+                            backgroundColor: theme.palette.error.main,
+                            color: '#fff',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.error.dark,
+                            },
+                        }}
+                    >
+                        Clear
                     </Button>
                 </Grid>
             </Grid>

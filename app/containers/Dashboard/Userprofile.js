@@ -177,9 +177,10 @@ const UserTablePage = () => {
                     options={users}
                     getOptionLabel={(option) => option?.text || option || ""}
                     value={selectedUser}
-                    onChange={(e, val) => setSelectedUser(val)}  // ✅ single source of truth
+                    onChange={(e, val) => setSelectedUser(val)}
                     onInputChange={(e, val, reason) => reason === "input" && fetchUsers(val)}
                     renderInput={(params) => <TextField {...params} label="Select User" size="small" />}
+                    sx={{ flex: 1 }}
                 />
                 <Button
                     variant="contained"

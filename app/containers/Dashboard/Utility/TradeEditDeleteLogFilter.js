@@ -1,8 +1,8 @@
-import React from 'react'
-import DateFilter from '../filters/DateFilter'
-import MarketScriptNameFilter from '../filters/MarketScriptNameFilter'
-import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter'
-import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material'
+import React from 'react';
+import DateFilter from '../filters/DateFilter';
+import MarketScriptNameFilter from '../filters/MarketScriptNameFilter';
+import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
+import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material';
 
 const TradeEditDeleteLogFilter = ({
     setEnd_date,
@@ -42,9 +42,32 @@ const TradeEditDeleteLogFilter = ({
     onApply
 }) => {
     const theme = useTheme();
+
+    // Clear handler
+    const handleClear = () => {
+        if (setStart_date) setStart_date('');
+        if (setEnd_date) setEnd_date('');
+        if (setafter_date) setafter_date('');
+        if (setbefore_date) setbefore_date('');
+        if (setStart1_date) setStart1_date('');
+        if (setEnd1_date) setEnd1_date('');
+        if (setentry_date) setentry_date('');
+        if (setentrybefore_date) setentrybefore_date('');
+        if (settrade_date) settrade_date('');
+        if (setMarket) setMarket('');
+        if (setScript) setScript('');
+        if (setClient) setClient(null);
+        if (setMaster) setMaster(null);
+        if (setBroker) setBroker(null);
+        if (setIs_deleted) setIs_deleted(false);
+        if (setIs_updated) setIs_updated(false);
+        if (setIsAdminOnly) setIsAdminOnly(false);
+    };
+
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
+
                 {setIs_deleted && setIs_updated &&
                     <Grid item xs={12} sm={6} md={3} lg={2.4}>
                         <FormGroup row sx={{ display: 'flex', alignItems: 'center' }}>
@@ -70,61 +93,18 @@ const TradeEditDeleteLogFilter = ({
                                 label="Delete"
                             />}
                         </FormGroup>
-                    </Grid>}
+                    </Grid>
+                }
 
-                {setStart_date && <DateFilter
-                    label="From Date"
-                    value={start_date}
-                    onChange={setStart_date}
-                />}
-
-                {setEnd_date && <DateFilter
-                    label="To Date"
-                    value={end_date}
-                    onChange={setEnd_date}
-                />}
-
-                {setafter_date && <DateFilter
-                    label="Trade after"
-                    value={after_date}
-                    onChange={setafter_date}
-                />}
-
-                {setStart1_date && <DateFilter
-                    label="Start Date"
-                    value={start1_date}
-                    onChange={setStart1_date}
-                />}
-
-                {setentry_date && <DateFilter
-                    label="Entry After"
-                    value={entry_date}
-                    onChange={setentry_date}
-                />}
-
-                {setbefore_date && <DateFilter
-                    label="Trade Before"
-                    value={before_date}
-                    onChange={setbefore_date}
-                />}
-
-                {setEnd1_date && <DateFilter
-                    label="End Date"
-                    value={end1_date}
-                    onChange={setEnd1_date}
-                />}
-
-                {setentrybefore_date && <DateFilter
-                    label="Entry Before"
-                    value={entrybefore_date}
-                    onChange={setentrybefore_date}
-                />}
-
-                {settrade_date && <DateFilter
-                    label="Trade Date"
-                    value={trade_date}
-                    onChange={settrade_date}
-                />}
+                {setStart_date && <DateFilter label="From Date" value={start_date} onChange={setStart_date} />}
+                {setEnd_date && <DateFilter label="To Date" value={end_date} onChange={setEnd_date} />}
+                {setafter_date && <DateFilter label="Trade after" value={after_date} onChange={setafter_date} />}
+                {setStart1_date && <DateFilter label="Start Date" value={start1_date} onChange={setStart1_date} />}
+                {setentry_date && <DateFilter label="Entry After" value={entry_date} onChange={setentry_date} />}
+                {setbefore_date && <DateFilter label="Trade Before" value={before_date} onChange={setbefore_date} />}
+                {setEnd1_date && <DateFilter label="End Date" value={end1_date} onChange={setEnd1_date} />}
+                {setentrybefore_date && <DateFilter label="Entry Before" value={entrybefore_date} onChange={setentrybefore_date} />}
+                {settrade_date && <DateFilter label="Trade Date" value={trade_date} onChange={settrade_date} />}
 
                 <MarketScriptNameFilter
                     market={market}
@@ -140,50 +120,65 @@ const TradeEditDeleteLogFilter = ({
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
-
                     showClient={Boolean(setClient)}
                     showBroker={Boolean(setBroker)}
                     showMaster={Boolean(setMaster)}
                 />
 
-                {setIsAdminOnly && <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                size="small"
-                                checked={isAdminOnly}
-                                onChange={(e) => setIsAdminOnly(e.target.checked)}
-                            />
-                        }
-                        label="Show Admin Only"
-                        sx={{ mr: 2, ml: 0.5 }}
-                    />
-                </Grid>
+                {setIsAdminOnly &&
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    size="small"
+                                    checked={isAdminOnly}
+                                    onChange={(e) => setIsAdminOnly(e.target.checked)}
+                                />
+                            }
+                            label="Show Admin Only"
+                            sx={{ mr: 2, ml: 0.5 }}
+                        />
+                    </Grid>
                 }
+
                 {/* Apply Button */}
                 {onApply &&
-                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Grid item xs="auto">
                         <Button
-                            fullWidth
-                            onClick={() => onApply()}
+                            onClick={onApply}
                             sx={{
                                 backgroundColor: theme.palette.secondary.main,
                                 color: theme.palette.secondary.contrastText,
                                 padding: '6px 12px',
                                 borderRadius: '4px',
                                 textTransform: 'none',
-                                '&:hover': {
-                                    backgroundColor: theme.palette.secondary.dark,
-                                },
+                                '&:hover': { backgroundColor: theme.palette.secondary.dark },
                             }}
                         >
                             Apply
                         </Button>
                     </Grid>
                 }
-            </Grid >
+
+                {/* Clear Button */}
+                <Grid item xs="auto">
+                    <Button
+                        onClick={handleClear}
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                        }}
+                    >
+                        Clear
+                    </Button>
+                </Grid>
+
+            </Grid>
         </>
-    )
+    );
 }
 
-export default TradeEditDeleteLogFilter
+export default TradeEditDeleteLogFilter;

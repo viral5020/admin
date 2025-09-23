@@ -42,18 +42,23 @@ const UserListFilter = ({
     }
   }, []);
 
+  // Clear all filters
+  const handleClear = () => {
+    if (setUser) setUser(null);
+    if (setMaster) setMaster(null);
+    if (setDatabroker) setDatabroker(null);
+    if (setStatus) setStatus('');
+    if (setLoginAfter) setLoginAfter('');
+    if (setLoginBefore) setLoginBefore('');
+    if (setTradeAfter) setTradeAfter('');
+    if (setTradeBefore) setTradeBefore('');
+  };
+
   return (
     <Box sx={{ pt: 1, mb: 1, overflowX: 'auto' }}>
       <Grid container spacing={1}>
         {/* Status */}
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={4}
-          lg={3}
-          sx={{ pr: 0 }}
-        >
+        <Grid item xs={12} sm={6} md={4} lg={3} sx={{ pr: 0 }}>
           <RadioFilter
             label="Status"
             options={statusOptions}
@@ -63,24 +68,11 @@ const UserListFilter = ({
           />
         </Grid>
 
-
         {/* Login & Trade Dates */}
-        {setLoginAfter && (
-          <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />
-        )}
-        {setLoginBefore && (
-          <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />
-        )}
-        <DateFilter
-          label="Join After"
-          value={tradeAfter}
-          onChange={setTradeAfter}
-        />
-        <DateFilter
-          label="Join Before"
-          value={tradeBefore}
-          onChange={setTradeBefore}
-        />
+        {setLoginAfter && <DateFilter label="Login After" value={loginAfter} onChange={setLoginAfter} />}
+        {setLoginBefore && <DateFilter label="Login Before" value={loginBefore} onChange={setLoginBefore} />}
+        <DateFilter label="Join After" value={tradeAfter} onChange={setTradeAfter} />
+        <DateFilter label="Join Before" value={tradeBefore} onChange={setTradeBefore} />
 
         {/* Client / Master / Broker */}
         <ClientMasterBrokerFilter
@@ -95,24 +87,41 @@ const UserListFilter = ({
           showBroker={userType !== 1 && userType !== 2 && !forBroker}
         />
 
-        {/* Apply Button */}
-        <Grid item xs={12} sm={6} md={3} lg={2.4}>
+        {/* Apply & Clear Buttons Side by Side */}
+        <Grid item xs="auto">
           <Button
             onClick={onApply}
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
               px: 2,
-              py: 0.75,
+
               borderRadius: 1,
               textTransform: 'none',
-              width: '100%',
               '&:hover': { backgroundColor: theme.palette.secondary.dark },
+              mr: 1,
             }}
           >
             Apply
           </Button>
         </Grid>
+
+        <Grid item xs="auto">
+          <Button
+            onClick={handleClear}
+            variant="contained"
+            color="error"
+            sx={{
+              px: 2,
+              ml: -1,
+              borderRadius: 1,
+              textTransform: 'none',
+            }}
+          >
+            Clear
+          </Button>
+        </Grid>
+
       </Grid>
     </Box>
   );

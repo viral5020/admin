@@ -697,11 +697,12 @@ const Masterlisting = ({
                 "T Master",
                 "T User",
                 "T Broker",
+                "Status",
+                "Actions",
                 "Login Time",
                 "Login ip",
                 "Join Date",
-                "Status",
-                "Actions",
+
               ].map((header) => (
                 <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
                   {header}
@@ -781,11 +782,19 @@ const Masterlisting = ({
                   >
                     {row.brokers_under || "-"}
                   </td>
+                  <td
+                    style={{
+                      color: row.user_status === 1 ? "#28a745" : "#ec081fff",
+                      fontWeight: 900,
+                    }}
+                  >
+                    {row.user_status === 1 ? "Active" : "Inactive"}
+                  </td>
+                  <td>{renderActions(row)}</td>
                   <td>{row.login_time || "-"}</td>
                   <td>{row.login_ip || "-"}</td>
                   <td>{row.creation_time || "-"}</td>
-                  <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                  <td>{renderActions(row)}</td>
+
                 </tr>
               ))
             )}

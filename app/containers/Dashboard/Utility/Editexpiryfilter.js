@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Grid, Button, TextField, MenuItem, useTheme } from '@mui/material';
-import Addexpirymarketfilter from '../filters/addexpirymarketfilter';
+import Addexpirymarketfilter from '../filters/Addexpirymarketfilter';
 
 const Editexpiryfilter = ({
     setEnd1_date,
@@ -29,9 +29,8 @@ const Editexpiryfilter = ({
 
     // Fetch expiry list whenever market or script changes
     useEffect(() => {
-        // Only fetch if market is selected and either it's NSE or script is selected
         if (!market || (!isNseMarket && !script)) {
-            setExpiryList([]); // Clear expiry list if script/market is not selected
+            setExpiryList([]);
             setSelectedExpiry(null);
             return;
         }
@@ -53,11 +52,10 @@ const Editexpiryfilter = ({
                 );
 
                 if (response.data.status === 'ok' && response.data.data.length > 0) {
-                    setExpiryList(response.data.data); // API returns [{script_expiry_id, expiry_date}]
+                    setExpiryList(response.data.data);
                 } else {
                     setExpiryList([]);
                     setSelectedExpiry(null);
-
                 }
             } catch (error) {
                 console.error('Error fetching expiry list:', error);
@@ -86,7 +84,7 @@ const Editexpiryfilter = ({
             market_type_id: market?.id ?? market,
             script_id: isNseMarket ? 'All' : script?.id ?? script,
             script_expiry_id: selectedExpiry?.script_expiry_id,
-            expiry_date: selectedExpiry?.expiry_date, // keep existing date
+            expiry_date: selectedExpiry?.expiry_date,
             is_app: 1,
             login_user_id: dataStored.user_id ?? '',
             auth_key: dataStored.auth_key ?? '',
@@ -103,16 +101,7 @@ const Editexpiryfilter = ({
                     position: 'top-right',
                     autoClose: 3000,
                 });
-
-                // Reset form
-                setStart1_date('');
-                setEnd1_date('');
-                setIs_updated(0);
-                setIs_deleted(0);
-                setMarket(null);
-                setScript(null);
-                setSelectedExpiry(null);
-                setExpiryList([]);
+                handleClear();
             } else {
                 toast.error('Failed to edit expiry date. Please try again.', {
                     position: 'top-right',
@@ -128,15 +117,20 @@ const Editexpiryfilter = ({
         }
     };
 
+    const handleClear = () => {
+        setStart1_date && setStart1_date('');
+        setEnd1_date && setEnd1_date('');
+        setIs_updated && setIs_updated(0);
+        setIs_deleted && setIs_deleted(0);
+        setMarket && setMarket(null);
+        setScript && setScript(null);
+        setSelectedExpiry(null);
+        setExpiryList([]);
+    };
+
     return (
         <>
-            <Grid
-                container
-                spacing={1}
-                sx={{ mb: 1.5 }}
-                alignItems="center"
-                justifyContent="flex-start"
-            >
+            <Grid container spacing={1} sx={{ mb: 1.5 }} alignItems="center" justifyContent="flex-start">
                 {/* Market & Script Filter */}
                 <Addexpirymarketfilter
                     market={market}
@@ -155,19 +149,14 @@ const Editexpiryfilter = ({
                         value={selectedExpiry?.script_expiry_id || ''}
                         onChange={(e) =>
                             setSelectedExpiry(
-                                expiryList.find(
-                                    (ex) => ex.script_expiry_id === e.target.value
-                                )
+                                expiryList.find((ex) => ex.script_expiry_id === e.target.value)
                             )
                         }
                         size="small"
                         fullWidth
                     >
                         {expiryList.map((expiry) => (
-                            <MenuItem
-                                key={expiry.script_expiry_id}
-                                value={expiry.script_expiry_id}
-                            >
+                            <MenuItem key={expiry.script_expiry_id} value={expiry.script_expiry_id}>
                                 {expiry.expiry_date}
                             </MenuItem>
                         ))}
@@ -188,9 +177,8 @@ const Editexpiryfilter = ({
                 </Grid>
 
                 {/* Edit Button */}
-                <Grid item xs={12} sm={6} md={2} lg={2}>
+                <Grid item xs="auto">
                     <Button
-                        fullWidth
                         onClick={handleEdit}
                         sx={{
                             backgroundColor: theme.palette.secondary.main,
@@ -198,12 +186,28 @@ const Editexpiryfilter = ({
                             padding: '8px 12px',
                             borderRadius: '4px',
                             textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
+                            mr: 1,
+                            '&:hover': { backgroundColor: theme.palette.secondary.dark },
                         }}
                     >
                         Edit
+                    </Button>
+                </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs="auto">
+                    <Button
+                        onClick={handleClear}
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            ml: -1,
+                        }}
+                    >
+                        Clear
                     </Button>
                 </Grid>
             </Grid>

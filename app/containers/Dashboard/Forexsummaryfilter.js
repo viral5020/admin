@@ -37,6 +37,17 @@ const Forexsummaryfilter = ({
     setUserType(userTypeValue);
   }, []);
 
+  const handleClear = () => {
+    if (setStart_end) setStart_end("");
+    if (setEnd_date) setEnd_date("");
+    if (setMarket) setMarket("");
+    if (setScript) setScript("");
+    if (setClient) setClient(null);
+    if (setMaster) setMaster(null);
+    if (setBroker) setBroker(null);
+    if (setValanId) setValanId(null);
+  };
+
   return (
     <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
       <Grid container spacing={1}>
@@ -87,6 +98,17 @@ const Forexsummaryfilter = ({
             fullWidth
           >
             Apply
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3} lg={2.4}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleClear}
+            sx={{ borderRadius: 1, ml: 1 }}
+            fullWidth
+          >
+            Clear
           </Button>
         </Grid>
       </Grid>

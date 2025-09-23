@@ -49,6 +49,20 @@ const ForexFilter = ({
     setUserType(userTypeValue);
   }, []);
 
+  // Clear all filters
+  const handleClear = () => {
+    setStatus('');
+    setStart_end(null);
+    setEnd_date(null);
+    setOrderType('');
+    setMarket('');
+    setScript('');
+    setClient('');
+    setMaster('');
+    setBroker('');
+  };
+
+
   return (
     <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
       <Grid container spacing={1}>
@@ -102,23 +116,43 @@ const ForexFilter = ({
           showBroker={userType !== 1 && userType !== 2}
         />
 
-        <Grid item xs={12} sm={6} md={3} lg={2.4}>
+        <Grid
+          item
+          xs={12} sm={6} md={3} lg={2.4}
+          sx={{ display: 'flex', gap: 1 }}
+        >
+          {/* Apply Button */}
           <Button
             onClick={onApply}
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
+              padding: '6px 30px', // wider
               borderRadius: '4px',
               textTransform: 'none',
-              '&:hover': {
-                backgroundColor: theme.palette.secondary.dark,
-              },
+              flex: 1,
+              '&:hover': { backgroundColor: theme.palette.secondary.dark },
             }}
-            fullWidth
           >
             Apply
           </Button>
+
+          {/* Clear Button */}
+          <Button
+            onClick={handleClear}
+            sx={{
+              backgroundColor: theme.palette.error.main, // red color
+              color: theme.palette.error.contrastText,   // readable text color
+              padding: '6px 30px', // wider
+              borderRadius: '4px',
+              textTransform: 'none',
+              flex: 1,
+              '&:hover': { backgroundColor: theme.palette.error.dark }, // darker red on hover
+            }}
+          >
+            Clear
+          </Button>
+
         </Grid>
       </Grid>
     </Box>

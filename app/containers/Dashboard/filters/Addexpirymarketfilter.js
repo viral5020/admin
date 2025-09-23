@@ -10,7 +10,7 @@ const Addexpirymarketfilter = ({
     setMarket,
     market,
     isScriptMultiSelect = false,
-    isForex,
+    isForex = false,
     showMarket = true,
     showScript = true,
 }) => {
@@ -19,7 +19,7 @@ const Addexpirymarketfilter = ({
     const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
     const [scriptOptions, setScriptOptions] = useState([]);
 
-    // ✅ check NSEFUT / NSEOPT condition
+    // Check NSEFUT / NSEOPT condition
     const isNseMarket =
         market?.text?.toUpperCase() === 'NSEFUT' ||
         market?.text?.toUpperCase() === 'NSEOPT';
@@ -41,13 +41,18 @@ const Addexpirymarketfilter = ({
     };
 
     async function fetchOptions(url, params, setter) {
-        const data = await fetchOptionsAPI(url, params);
-        setter(Array.isArray(data) ? data : []);
+        try {
+            const data = await fetchOptionsAPI(url, params);
+            setter(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Error fetching options:', err);
+            setter([]);
+        }
     }
 
-    function handleFetch(term, type, val) {
-        const dataStored = JSON.parse(sessionStorage.getItem('data'));
-        let params = {
+    function handleFetch(term = '', type, val) {
+        const dataStored = JSON.parse(sessionStorage.getItem('data') || '{}');
+        const params = {
             is_app: 1,
             login_user_id: dataStored?.user_id,
             auth_key: dataStored?.auth_key,
@@ -57,9 +62,8 @@ const Addexpirymarketfilter = ({
 
         switch (type) {
             case 'market':
-                !isForex &&
+                if (!isForex) {
                     fetchOptions(`${url}/get_market_name_search`, { ...params, term }, (data) => {
-                        // ✅ hide FOREX & NSEEQT
                         const filtered = data.filter(
                             (m) =>
                                 m.text?.toUpperCase() !== 'FOREX' &&
@@ -67,11 +71,12 @@ const Addexpirymarketfilter = ({
                         );
                         setMarketOptions(filtered);
                     });
+                }
                 break;
+
             case 'script':
                 if (isNseMarket) {
-                    // ✅ if NSEFUT/NSEOPT → force script = "All"
-                    setScript('All');
+                    setScript?.('All'); // safe call
                     setScriptOptions([]);
                 } else {
                     fetchOptions(
@@ -81,6 +86,7 @@ const Addexpirymarketfilter = ({
                     );
                 }
                 break;
+
             default:
                 break;
         }
@@ -99,20 +105,19 @@ const Addexpirymarketfilter = ({
                         value={market || null}
                         inputValue={market?.text || ''}
                         onInputChange={(e, val, reason) => {
-                            if (reason === 'input') setMarket({ text: val });
+                            if (reason === 'input') setMarket?.({ text: val });
                             handleFetch(val, 'market');
-                            setScript([]); // reset script on market change
+                            setScript?.([]); // reset script on market change
                         }}
                         onChange={(e, val) => {
-                            setMarket(val);
+                            setMarket?.(val);
                             handleFetch('', 'script', val);
                         }}
                         onBlur={() => {
                             const matched = marketOptions.find(
-                                (opt) =>
-                                    (typeof opt === 'string' ? opt : opt?.text) === market?.text
+                                (opt) => (typeof opt === 'string' ? opt : opt?.text) === market?.text
                             );
-                            !matched && setMarket(null);
+                            if (!matched) setMarket?.(null);
                             handleFetch('', 'script');
                         }}
                         renderInput={(params) => (
@@ -152,7 +157,7 @@ const Addexpirymarketfilter = ({
                             if (reason === 'input') handleFetch(val, 'script');
                         }}
                         onChange={(e, val) => {
-                            setScript(val);
+                            setScript?.(val);
                         }}
                         renderInput={(params) => (
                             <TextField
