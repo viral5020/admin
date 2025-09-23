@@ -395,7 +395,8 @@ const UserTablePage = () => {
                         <Typography variant="h6" sx={{ mb: 1 }}>Positions</Typography>
                         <OrderPage1
                             filterShow={false}
-                            view_user_id={selectedUserId?.view_user_id} // pass selectedUser ID here
+                            filterShow1={false}
+                            view_user_id={selectedUser?.id} // pass selectedUser ID here
                         />
                     </Paper>
                 </>

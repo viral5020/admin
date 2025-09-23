@@ -34,6 +34,19 @@ import SocketContext from './Socket/SocketContext';
 import Nseoptmanagefilter from './Watchlist/Nseoptmanagefilter';
 import { toast } from 'dan-vendor/react-toastify/dist';
 import axios from 'dan-vendor/axios';
+import SearchPdfCsv from './filters/SearchPdfCsv';
+
+const colArr = [
+    "Script Name",
+    "Option Type",
+    "Strike Rate",
+]
+
+const keyArr = [
+    "option_check_script_name",
+    "option_type",
+    "option_strike_rate",
+]
 
 const Nseoptmanagement = () => {
     const theme = useTheme();
@@ -232,20 +245,12 @@ const Nseoptmanagement = () => {
                             flexWrap: 'nowrap',
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
@@ -351,20 +356,12 @@ const Nseoptmanagement = () => {
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 

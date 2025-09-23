@@ -35,6 +35,31 @@ import Pagination from '../filters/Pagination';
 import { editDeleteLogLogsAPI, editDeleteoldLogsAPI, tradeEditDeleteLogLogsAPI, tradeEditLoglistAPI } from '../API/API';
 import BackToTop from '../helpers/BackToTop';
 import TradeEditDeleteLogFilter from '../Utility/TradeEditDeleteLogFilter';
+import SearchPdfCsv from '../filters/SearchPdfCsv';
+
+const colArr = [
+    "Action",
+    "Client",
+    "Script",
+    "Type",
+    "Qty",
+    "lot",
+    "Rate",
+    "Added By",
+    "DateTime"
+]
+
+const keyArr = [
+    "log_type",
+    "user_full_name",
+    "script_name",
+    "trade_type",
+    "trade_qty",
+    { isDesimal: true, name: "trade_lot" },
+    { isDesimal: true, name: "trade_rate" },
+    "added_by",
+    "added_datetime",
+];
 
 
 const Tradeditdeleteold = () => {
@@ -174,20 +199,12 @@ const Tradeditdeleteold = () => {
                         }}
                     >
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
@@ -359,20 +376,12 @@ const Tradeditdeleteold = () => {
 
                     <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        size="small"
-                        sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                            ),
-                        }}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
                     />
                 </Box>
 

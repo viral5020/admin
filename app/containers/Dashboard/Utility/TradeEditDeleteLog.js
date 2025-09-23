@@ -36,7 +36,18 @@ import { editDeleteLogLogsAPI, tradeEditDeleteLogLogsAPI, tradeEditLoglistAPI } 
 import BackToTop from '../helpers/BackToTop';
 import SearchPdfCsv from '../filters/SearchPdfCsv';
 
-const colArr = ["Action", "Client", "Script", "Type", "Qty", "lot", "Rate", "Added By", "DateTime"]
+const colArr = [
+    "Action",
+    "Client",
+    "Script",
+    "Type",
+    "Qty",
+    "lot",
+    "Rate",
+    "Added By",
+    "DateTime"
+]
+
 const keyArr = [
     "log_type",
     "user_full_name",

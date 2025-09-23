@@ -41,6 +41,25 @@ import { saveAs } from "file-saver";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import SearchPdfCsv from "../filters/SearchPdfCsv";
+
+const colArr = [
+    "Sr no",
+    "Device Type",
+    "Brand",
+    "Extra Details",
+    "First Seen",
+    "Last Seen",
+]
+
+const keyArr = [
+    "sr_no",
+    "type",
+    "model",
+    "extra_details",
+    "first_seen",
+    "last_seen",
+]
 
 const Adminloginlist = () => {
     const theme = useTheme();
@@ -226,20 +245,13 @@ const Adminloginlist = () => {
                             mx: 1,
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 
@@ -367,20 +379,13 @@ const Adminloginlist = () => {
                         </Box>
 
                         {/* Right: Search */}
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 

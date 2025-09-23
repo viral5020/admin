@@ -64,28 +64,13 @@ function SidebarContent(props) {
   };
 
   async function viewUserProfile() {
-    if (userData) {
-      try {
-        const result = await fetchProfileAPI();
+    const result = await fetchProfileAPI();
 
-        console.log('result', result);
-        if (result.status !== 'ok') {
-          throw new Error(result.message || 'Failed to fetch profile');
-        }
+    console.log('result', result);
 
-        setProfileData(result.data);
-        // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
-        return result.data;
-
-      } catch (error) {
-        // if (error.message === 'Unauthorised Access') {
-        //   alert('Session expired, please login again.');
-        //   return <Navigate to="/login" replace />;
-        // }
-        console.error('❌ from sidebarContent.js\nError fetching profile:', error);
-        throw error;
-      }
-    }
+    setProfileData(result.data);
+    // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
+    return result.data;
   }
 
   return (
@@ -106,7 +91,7 @@ function SidebarContent(props) {
               className={cx(classes.avatar, classes.bigAvatar)}
             />
             <div>
-              <h4>{profileData.user_name}</h4>
+              <h4>{profileData?.user_name}</h4>
               <Button size="small" onClick={openMenuStatus}>
                 <i className={cx(classes.dotStatus, setStatus(status))} />
                 {status}

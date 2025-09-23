@@ -35,7 +35,23 @@ import axios from 'dan-vendor/axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Timesettingfilter from './Utility/Timesettingfilter';
+import SearchPdfCsv from './filters/SearchPdfCsv';
 
+const colArr = [
+    "Market Name",
+    "Script Name",
+    "Start Time",
+    "End Time",
+    "Added Datetime",
+]
+
+const keyArr = [
+    "market_type_name",
+    "script_name",
+    "start_time",
+    "end_time",
+    "added_datetime",
+]
 
 const Timesetting = () => {
     const theme = useTheme();
@@ -217,20 +233,12 @@ const Timesetting = () => {
                             flexWrap: 'nowrap',
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
@@ -257,7 +265,6 @@ const Timesetting = () => {
                                         <TableRow>
                                             <TableCell>Market Name</TableCell>
                                             <TableCell>Script Name</TableCell>
-
                                             <TableCell>Start Time</TableCell>
                                             <TableCell>End Time</TableCell>
                                             <TableCell>Added Datetime</TableCell>
@@ -269,7 +276,6 @@ const Timesetting = () => {
                                             <TableRow key={i}>
                                                 <TableCell>{row.market_type_name ?? '-'}</TableCell>
                                                 <TableCell>{row.script_name ?? '-'}</TableCell>
-
                                                 <TableCell>{row.start_time ?? '-'}</TableCell>
                                                 <TableCell>{row.end_time ?? '-'}</TableCell>
                                                 <TableCell>{row.added_datetime ?? '-'}</TableCell>
@@ -344,20 +350,12 @@ const Timesetting = () => {
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
