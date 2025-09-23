@@ -51,6 +51,19 @@ const OrderFilter = ({
     setUserType(userTypeValue);
   }, []);
 
+  // Clear all filters
+  const handleClear = () => {
+    setStatus('');
+    setStart_end(null);
+    setEnd_date(null);
+    setOrderType('');
+    setMarket('');
+    setScript('');
+    setClient('');
+    setMaster('');
+    setBroker('');
+  };
+
   return (
     <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
       <Grid container spacing={1}>
@@ -114,7 +127,7 @@ const OrderFilter = ({
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
+              padding: '6px 30px', // wider
               borderRadius: '4px',
               textTransform: 'none',
               flex: 1,
@@ -123,6 +136,23 @@ const OrderFilter = ({
           >
             Apply
           </Button>
+
+          {/* Clear Button */}
+          <Button
+            onClick={handleClear}
+            sx={{
+              backgroundColor: theme.palette.error.main, // red color
+              color: theme.palette.error.contrastText,   // readable text color
+              padding: '6px 30px', // wider
+              borderRadius: '4px',
+              textTransform: 'none',
+              flex: 1,
+              '&:hover': { backgroundColor: theme.palette.error.dark }, // darker red on hover
+            }}
+          >
+            Clear
+          </Button>
+
 
           {/* Trade Export Button */}
           <Button
@@ -136,7 +166,7 @@ const OrderFilter = ({
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "trade_book.csv"; // Adjust filename if needed
+                a.download = "trade_book.csv";
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
@@ -148,7 +178,7 @@ const OrderFilter = ({
             sx={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
-              padding: '6px 12px',
+              padding: '6px 50px', // wider
               borderRadius: '4px',
               textTransform: 'none',
               flex: 1,
@@ -158,6 +188,7 @@ const OrderFilter = ({
             Trade Export
           </Button>
         </Grid>
+
 
       </Grid>
     </Box>

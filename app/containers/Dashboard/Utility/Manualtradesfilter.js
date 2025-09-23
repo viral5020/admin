@@ -16,6 +16,9 @@ import DateFilter from '../filters/DateFilter';
 import Manualscriptfilter from '../filters/Manualscriptfilter';
 import Clientmanualfilter from '../filters/Clientmanualfilter';
 
+
+
+
 const Manualtradesfilter = ({
     // Date filters
     start_date, setStart_date,
@@ -54,6 +57,25 @@ const Manualtradesfilter = ({
             : pair === '1' // Sell
                 ? theme.palette.error.light // red
                 : theme.palette.grey[100]; // default
+
+    const handleClear = () => {
+        if (setStart_date) setStart_date("");
+        if (setEnd_date) setEnd_date("");
+        if (settrade_date) settrade_date("");
+        if (setMarket) setMarket("");
+        if (setScript) setScript("");
+        if (setClient) setClient(null);
+        if (setMaster) setMaster(null);
+        if (setBroker) setBroker(null);
+        if (setLot) setLot("");
+        if (setQuantity) setQuantity("");
+        if (setPrice) setPrice("");
+        if (setPair) setPair("");
+        if (setBrokerage) setBrokerage("");
+        if (setIs_deleted) setIs_deleted(false);
+        if (setIs_updated) setIs_updated(false);
+        if (setIsAdminOnly) setIsAdminOnly(false);
+    };
 
     return (
         <Paper
@@ -176,6 +198,17 @@ const Manualtradesfilter = ({
                         </Button>
                     </Grid>
                 )}
+                <Grid item>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleClear}
+                        sx={{ borderRadius: 1, ml: 1 }}
+                    >
+                        Clear
+                    </Button>
+                </Grid>
+
             </Grid>
         </Paper>
     );

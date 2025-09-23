@@ -121,6 +121,15 @@ const Forexmarginmanagement = () => {
     (currentPage + 1) * rowsPerPage
   );
 
+  const handleClearFilters = () => {
+    setClient(null);
+    setMaster(null);
+    setBroker(null);
+    setSearchQuery("");
+    setFilteredData(reportData);
+    setCurrentPage(0);
+  };
+
   if (loading) {
     return (
       <Box
@@ -175,6 +184,18 @@ const Forexmarginmanagement = () => {
             >
               Apply
             </Button>
+            <Button
+              type="button"
+              variant="contained"
+              color="erroe"
+              sx={{ mt: 2 }}
+              onClick={() => {
+                handleClearFilters();
+                setDrawerOpen(false);
+              }}
+            >
+              Clear
+            </Button>
           </Box>
         </Drawer>
       ) : (
@@ -210,6 +231,17 @@ const Forexmarginmanagement = () => {
                   onClick={fetchMarginManagementListData}
                 >
                   Apply
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="error"
+                  sx={{ minWidth: 100, borderRadius: 1, height: 38, mt: -0.5 }}
+                  onClick={handleClearFilters}
+                >
+                  Clear
                 </Button>
               </Grid>
             </Grid>

@@ -6,7 +6,8 @@ import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import {
   Button, useTheme, Grid, Dialog, DialogTitle,
   DialogContent, DialogContentText, DialogActions,
-  TextField
+  TextField,
+  Box
 } from '@mui/material';
 import { closeAllPositions, forexcloseAllPositions, rolloverPositions } from './API/API';
 import ForexComexScriptFilter from './forexorderfilter';
@@ -102,6 +103,18 @@ const ForexpositionFilter = ({
       handleCloseDialog();
     }
   };
+
+  const handleClear = () => {
+    setExparyDate(null);
+    setClient_wise_value('');
+    setAll_outstanding('');
+    setMarket([]);
+    setScript([]);
+    setClient('');
+    setMaster('');
+    setBroker('');
+  };
+
   return (
     <>
       <Grid container spacing={1} mt={1}>
@@ -141,25 +154,61 @@ const ForexpositionFilter = ({
           showBroker={userType !== 1 && userType !== 2}
         />
 
-        <Grid item xs={12} sm={4} md={2.4}>
-          <Button
-            fullWidth
-            onClick={onApply}
-            sx={{
-              backgroundColor: theme.palette.secondary.main,
-              color: theme.palette.secondary.contrastText,
-              padding: '6px 10px',
-              borderRadius: '4px',
-              textTransform: 'none',
-              fontSize: '0.875rem',
-              '&:hover': {
-                backgroundColor: theme.palette.secondary.dark,
-              },
-            }}
-          >
-            Apply
-          </Button>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
+          <Box sx={{ display: 'flex', gap: 1 }}> {/* flex container */}
+            <Button
+              onClick={onApply}
+              sx={{
+                flex: 1, // both buttons take equal space
+                backgroundColor: theme.palette.secondary.main,
+                color: theme.palette.secondary.contrastText,
+                padding: '6px 10px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                '&:hover': { backgroundColor: theme.palette.secondary.dark },
+              }}
+            >
+              Apply
+            </Button>
+
+            <Button
+              onClick={handleClear}
+              sx={{
+                flex: 1,
+                backgroundColor: theme.palette.grey[500],
+                color: theme.palette.getContrastText(theme.palette.grey[500]),
+                padding: '6px 10px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                '&:hover': { backgroundColor: theme.palette.grey[700] },
+              }}
+            >
+              Clear
+            </Button>
+            {userType !== 2 && (
+              <Button
+                fullWidth
+                onClick={() => setOpenDialog(true)}
+                sx={{
+                  backgroundColor: theme.palette.error.main,
+                  color: theme.palette.error.contrastText,
+                  padding: '6px 10px',
+                  borderRadius: '4px',
+                  textTransform: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': {
+                    backgroundColor: theme.palette.error.dark,
+                  },
+                }}
+              >
+                Close All Positions
+              </Button>
+            )}
+          </Box>
         </Grid>
+
 
         {/* ✅ Rollover Button */}
         {/* {userType !== 2 && (
@@ -215,7 +264,7 @@ const ForexpositionFilter = ({
         {/* ✅ Close All Positions Button */}
         {userType !== 2 && (
           <Grid item xs={12} sm={4} md={2.4}>
-            <Button
+            {/* <Button
               fullWidth
               onClick={() => setOpenDialog(true)}
               sx={{
@@ -231,7 +280,7 @@ const ForexpositionFilter = ({
               }}
             >
               Close All Positions
-            </Button>
+            </Button> */}
 
             <Dialog open={openDialog} onClose={handleCloseDialog}>
               <DialogTitle>Close All Positions</DialogTitle>

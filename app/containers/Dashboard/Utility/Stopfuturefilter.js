@@ -3,18 +3,13 @@ import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Grid, Button, useTheme, TextField, MenuItem } from '@mui/material'
-import MarketScriptNameFilter from '../filters/MarketScriptNameFilter'
 import Marketnamefilter from '../filters/Marketnamefilter'
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter'
 
 const Stopfuturefilter = ({
     setEnd1_date,
     setStart1_date,
-    end1_date,
-    start1_date,
     setIs_deleted,
-    is_deleted,
-    is_updated,
     setIs_updated,
     market,
     script,
@@ -25,11 +20,10 @@ const Stopfuturefilter = ({
 }) => {
     const theme = useTheme()
 
-    // ✅ State for future list & selected future
     const [futureList, setFutureList] = useState([])
     const [selectedFuture, setSelectedFuture] = useState("")
 
-    // ✅ Fetch Future names from API
+    // ✅ Fetch Future names
     useEffect(() => {
         const fetchFutures = async () => {
             try {
@@ -44,10 +38,11 @@ const Stopfuturefilter = ({
                 )
 
                 if (response.data?.results) {
-                    setFutureList(response.data.results) // ✅ use results
+                    setFutureList(response.data.results)
                 }
             } catch (error) {
                 console.error("Error fetching futures:", error)
+                toast.error("Failed to load futures!", { autoClose: 3000 })
             }
         }
         fetchFutures()
@@ -57,9 +52,10 @@ const Stopfuturefilter = ({
         const dataStored = JSON.parse(sessionStorage.getItem("data")) || {}
 
         const payload = {
-            market_type_id: market?.id ?? market,     // from Marketnamefilter
-            script_id: script?.id ?? script,         // from MarketScriptNameFilter
-            master_user_id: master?.id ?? master,    // from ClientMasterBrokerFilter
+            market_type_id: market?.id ?? market,
+            script_id: script?.id ?? script,
+            master_user_id: master?.id ?? master,
+            future_id: selectedFuture, // ✅ include selected future
             is_app: 1,
             login_user_id: dataStored.user_id ?? "",
             auth_key: dataStored.auth_key ?? "",
@@ -72,45 +68,32 @@ const Stopfuturefilter = ({
                 "http://128.199.126.171/~goldorg/ajaxfiles/setting/add_future_trading_block",
                 payload
             )
-            console.log("API Response:", response.data)
 
             if (response.data?.status === "ok") {
-                toast.success("Future block added successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                })
-
-                // reset form
-                setStart1_date("")
-                setEnd1_date("")
-                setIs_updated(0)
-                setIs_deleted(0)
-                setMarket(null)
-                setScript(null)
-                setMaster(null)
-                setSelectedFuture("")
+                toast.success("Future block added successfully!", { autoClose: 3000 })
+                handleClear() // ✅ reset after success
             } else {
-                toast.error(response.data?.msg || "Failed to add future block!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                })
+                toast.error(response.data?.msg || "Failed to add future block!", { autoClose: 3000 })
             }
         } catch (error) {
             console.error("Error adding Future:", error)
-            toast.error("Error adding future block!", {
-                position: "top-right",
-                autoClose: 3000,
-            })
+            toast.error("Error adding future block!", { autoClose: 3000 })
         }
     }
 
+    // ✅ Clear function
+    const handleClear = () => {
+        setMarket(null)
+        setScript(null)
+        setMaster(null)
+        setSelectedFuture("")
+
+    }
 
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
                 <ClientMasterBrokerFilter master={master} setMaster={setMaster} />
-
-                {/* Market & Script Filter */}
                 <Marketnamefilter market={market} setMarket={setMarket} />
 
                 {/* Future Dropdown */}
@@ -132,7 +115,7 @@ const Stopfuturefilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                <Grid item xs={6} sm={3} md={2} lg={2.4}>
                     <Button
                         fullWidth
                         onClick={handleAdd}
@@ -148,6 +131,26 @@ const Stopfuturefilter = ({
                         }}
                     >
                         Add
+                    </Button>
+                </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs={6} sm={3} md={2} lg={2.4}>
+                    <Button
+                        fullWidth
+                        onClick={handleClear}
+                        sx={{
+                            backgroundColor: theme.palette.error.main,
+                            color: '#fff',
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.error.dark,
+                            },
+                        }}
+                    >
+                        Clear
                     </Button>
                 </Grid>
             </Grid>

@@ -695,16 +695,14 @@ const Userlisting = ({
           style={{
             minWidth: "1200px",
             fontSize: "12px",
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
+            backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
             color: theme.palette.mode === "dark" ? "#fff" : "#000",
             whiteSpace: "nowrap",
           }}
         >
           <thead
             style={{
-              backgroundColor:
-                theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
+              backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
               position: "sticky",
               top: 0,
               zIndex: 5,
@@ -712,15 +710,15 @@ const Userlisting = ({
           >
             <tr>
               {[
-                "User Code",
                 "User Name",
+                "User Code",
                 "Broker",
                 "Master",
+                "Status",
+                "Actions",
                 "Login IP",
                 "Login Time",
                 "Joining Date",
-                "Status",
-                "Actions",
               ].map((header) => (
                 <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
                   {header}
@@ -732,12 +730,12 @@ const Userlisting = ({
             {loading ? (
               <tr>
                 <td
-                  colSpan="12"
+                  colSpan="9"
                   style={{
                     textAlign: isMobile ? "start" : "center",
                     padding: 20,
-                    position: 'relative',
-                    left: isMobile ? '35vw' : ''
+                    position: "relative",
+                    left: isMobile ? "35vw" : "",
                   }}
                 >
                   <CircularProgress size={24} />
@@ -751,21 +749,45 @@ const Userlisting = ({
               </tr>
             ) : (
               filteredData.map((row, index) => (
-                <tr key={row.user_id || index}>
-                  <td dangerouslySetInnerHTML={{ __html: row.user_code || "" }} />
-                  <td>{row.user_name || "-"}</td>
+                <tr
+                  key={row.user_id || index}
+                  style={{
+                    backgroundColor:
+                      index % 2 === 0
+                        ? theme.palette.mode === "dark"
+                          ? "#333"
+                          : "#f9f9f9"
+                        : "transparent",
+                    transition: "background-color 0.3s",
+                  }}
+                >
+                  <td dangerouslySetInnerHTML={{ __html: row.user_name || "-" }} />
+                  <td dangerouslySetInnerHTML={{ __html: row.user_code || "-" }} />
                   <td dangerouslySetInnerHTML={{ __html: row.broker || "-" }} />
                   <td dangerouslySetInnerHTML={{ __html: row.master || "-" }} />
+
+                  {/* Status with color */}
+                  <td
+                    style={{
+                      color: row.user_status === 1 ? "#28a745" : "#ec081fff",
+                      fontWeight: 900,
+                    }}
+                  >
+                    {row.user_status === 1 ? "Active" : "Inactive"}
+                  </td>
+
+                  {/* Actions next to Status */}
+                  <td>{renderActions(row)}</td>
+
                   <td>{row.login_ip || "-"}</td>
                   <td>{row.login_time || "-"}</td>
                   <td>{row.creation_time || "-"}</td>
-                  <td>{row.user_status === 1 ? "Active" : "Inactive"}</td>
-                  <td>{renderActions(row)}</td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+
       </div>
 
       {/* 🔽 Pagination */}

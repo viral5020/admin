@@ -42,6 +42,7 @@ const keyArr = [
   "total",
 ]
 
+
 const Marginmanagement = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -133,6 +134,15 @@ const Marginmanagement = () => {
     (currentPage + 1) * rowsPerPage
   );
 
+  const handleClearFilters = () => {
+    setClient(null);
+    setMaster(null);
+    setBroker(null);
+    setSearchQuery("");
+    setFilteredData(reportData);
+    setCurrentPage(0);
+  };
+
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Filters (fixed top) */}
@@ -174,6 +184,18 @@ const Marginmanagement = () => {
             >
               Apply
             </Button>
+            <Button
+              type="button"
+              variant="contained"
+              color="erroe"
+              sx={{ mt: 2 }}
+              onClick={() => {
+                handleClearFilters();
+                setDrawerOpen(false);
+              }}
+            >
+              Clear
+            </Button>
           </Box>
         </Drawer>
       ) : (
@@ -202,10 +224,21 @@ const Marginmanagement = () => {
                   type="submit"
                   variant="contained"
                   color="secondary"
-                  sx={{ minWidth: 100, borderRadius: 0, height: 38, mt: -0.5 }}
+                  sx={{ minWidth: 100, borderRadius: 1, height: 38, mt: -0.5 }}
                   onClick={fetchMarginManagementListData}
                 >
                   Apply
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="error"
+                  sx={{ minWidth: 100, borderRadius: 1, height: 38, mt: -0.5 }}
+                  onClick={handleClearFilters}
+                >
+                  Clear
                 </Button>
               </Grid>
             </Grid>

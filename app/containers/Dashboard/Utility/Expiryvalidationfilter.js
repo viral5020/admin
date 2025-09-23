@@ -3,17 +3,12 @@ import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Grid, Button, TextField, useTheme } from '@mui/material'
-import MarketScriptNameFilter from '../filters/MarketScriptNameFilter'
 import Expirymarketscriptfilter from '../filters/Expirymarketscriptfilter'
 
 const Expiryvalidationfilter = ({
     setEnd1_date,
     setStart1_date,
-    end1_date,
-    start1_date,
     setIs_deleted,
-    is_deleted,
-    is_updated,
     setIs_updated,
     market,
     script,
@@ -51,15 +46,7 @@ const Expiryvalidationfilter = ({
                 autoClose: 3000,
             })
 
-            // Reset form
-            setStart1_date("")
-            setEnd1_date("")
-            setIs_updated(0)
-            setIs_deleted(0)
-            setMarket(null)
-            setScript(null)
-            setAfterDays("")
-            setBeforeDays("")
+            handleClear() // ✅ reset after success
         } catch (error) {
             console.error("Error adding expiry validation:", error)
             toast.error("Failed to add expiry validation!", {
@@ -67,6 +54,18 @@ const Expiryvalidationfilter = ({
                 autoClose: 3000,
             })
         }
+    }
+
+    // ✅ Clear function
+    const handleClear = () => {
+        setStart1_date("")
+        setEnd1_date("")
+        setIs_updated(0)
+        setIs_deleted(0)
+        setMarket(null)
+        setScript(null)
+        setAfterDays("")
+        setBeforeDays("")
     }
 
     return (
@@ -106,7 +105,7 @@ const Expiryvalidationfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                <Grid item xs={6} sm={3} md={2} lg={2.4}>
                     <Button
                         fullWidth
                         onClick={handleAdd}
@@ -122,6 +121,26 @@ const Expiryvalidationfilter = ({
                         }}
                     >
                         Add
+                    </Button>
+                </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs={6} sm={3} md={2} lg={2.4}>
+                    <Button
+                        fullWidth
+                        onClick={handleClear}
+                        sx={{
+                            backgroundColor: theme.palette.error.main,
+                            color: '#fff',
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: theme.palette.error.dark,
+                            },
+                        }}
+                    >
+                        Clear
                     </Button>
                 </Grid>
             </Grid>

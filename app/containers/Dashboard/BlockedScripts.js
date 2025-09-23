@@ -187,6 +187,22 @@ const OrderPage = () => {
           >
             ADD
           </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              setMarket(null);
+              setScript([]);
+            }}
+            sx={{
+              px: 2,
+              borderRadius: 1,
+              whiteSpace: "nowrap",
+              mt: -0.5,
+            }}
+          >
+            CLEAR
+          </Button>
 
         </Box>
 

@@ -20,7 +20,7 @@ const Scriptwiselotfilter = ({
     setMarket,
 }) => {
     const theme = useTheme()
-    const [quantity, setQuantity] = useState("")   // ✅ new state for quantity
+    const [quantity, setQuantity] = useState("")   // ✅ state for quantity
 
     const handleAdd = async () => {
         const dataStored = JSON.parse(sessionStorage.getItem("data")) || {}
@@ -28,42 +28,44 @@ const Scriptwiselotfilter = ({
         const payload = {
             market_type_id: market?.id ?? market,
             script_id: script?.id ?? script,
-            script_lot_qty: quantity,   // ✅ use quantity in payload
+            script_lot_qty: quantity,
             is_app: 1,
             login_user_id: dataStored.user_id ?? "",
             auth_key: dataStored.auth_key ?? "",
         }
-
-        console.log("Add Payload:", payload)
 
         try {
             const response = await axios.post(
                 "http://128.199.126.171/~goldorg/ajaxfiles/setting/set_lot_qty_setting",
                 payload
             )
-            console.log("API Response:", response.data)
 
             toast.success("Quantity added successfully!", {
                 position: "top-right",
                 autoClose: 3000,
             })
 
-            // Reset form
-            setStart1_date("")
-            setEnd1_date("")
-            setIs_updated(0)
-            setIs_deleted(0)
-            setMarket(null)
-            setScript(null)
-            setQuantity("")   // ✅ reset quantity
+            handleClear() // Reset form after add
         } catch (error) {
             console.error("Error adding Quantity:", error)
+            toast.error("Failed to add Quantity!", { position: "top-right", autoClose: 3000 })
         }
+    }
+
+    const handleClear = () => {
+        setStart1_date && setStart1_date("")
+        setEnd1_date && setEnd1_date("")
+        setIs_updated && setIs_updated(0)
+        setIs_deleted && setIs_deleted(0)
+        setMarket && setMarket(null)
+        setScript && setScript(null)
+        setQuantity("") // Reset quantity
     }
 
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
+
                 {/* Market & Script Filter */}
                 <MarketScriptNameFilter
                     market={market}
@@ -76,7 +78,7 @@ const Scriptwiselotfilter = ({
                 <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <TextField
                         label="Quantity"
-                        type="number"   // ✅ numeric input
+                        type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(e.target.value)}
                         size="small"
@@ -85,9 +87,8 @@ const Scriptwiselotfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                <Grid item xs="auto">
                     <Button
-                        fullWidth
                         onClick={handleAdd}
                         sx={{
                             backgroundColor: theme.palette.secondary.main,
@@ -95,14 +96,31 @@ const Scriptwiselotfilter = ({
                             padding: '6px 12px',
                             borderRadius: '4px',
                             textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
+                            mr: 1,
+                            '&:hover': { backgroundColor: theme.palette.secondary.dark },
                         }}
                     >
                         Add
                     </Button>
                 </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs="auto">
+                    <Button
+                        onClick={handleClear}
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            ml: -1,
+                            textTransform: 'none',
+                        }}
+                    >
+                        Clear
+                    </Button>
+                </Grid>
+
             </Grid>
 
             <ToastContainer />

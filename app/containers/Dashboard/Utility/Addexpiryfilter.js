@@ -3,7 +3,8 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Grid, Button, TextField, useTheme } from '@mui/material';
-import Addexpirymarketfilter from '../filters/addexpirymarketfilter';
+import Addexpirymarketfilter from '../filters/Addexpirymarketfilter';
+
 
 
 const Addexpiryfilter = ({
@@ -102,6 +103,17 @@ const Addexpiryfilter = ({
         }
     };
 
+    const handleClear = () => {
+        setStart1_date && setStart1_date("")
+        setEnd1_date && setEnd1_date("")
+        setIs_updated && setIs_updated(0)
+        setIs_deleted && setIs_deleted(0)
+        setMarket && setMarket(null)
+        setScript && setScript(null)
+        setExpiryDate('');
+
+    }
+
 
     return (
         <>
@@ -136,22 +148,35 @@ const Addexpiryfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={2} lg={2}>
+                <Grid item xs="auto">
                     <Button
-                        fullWidth
                         onClick={handleAdd}
                         sx={{
                             backgroundColor: theme.palette.secondary.main,
                             color: '#fff',
-                            padding: '8px 12px',
+                            padding: '6px 12px',
                             borderRadius: '4px',
                             textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
+                            mr: 1,
+                            '&:hover': { backgroundColor: theme.palette.secondary.dark },
                         }}
                     >
                         Add
+                    </Button>
+                </Grid>
+                <Grid item xs="auto">
+                    <Button
+                        onClick={handleClear}
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            ml: -1,
+                        }}
+                    >
+                        Clear
                     </Button>
                 </Grid>
             </Grid>

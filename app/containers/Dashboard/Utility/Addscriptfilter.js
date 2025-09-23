@@ -24,7 +24,7 @@ const Addscriptfilter = ({
     const [scriptText, setScriptText] = useState(script || "") // ✅ textbox for script
 
     const handleAdd = async () => {
-        // ✅ Validation: check all required fields
+        // ✅ Validation
         if (!market || !market?.id) {
             toast.error("Please select a Market!", { position: "top-right", autoClose: 3000 })
             return
@@ -49,29 +49,18 @@ const Addscriptfilter = ({
             auth_key: dataStored.auth_key ?? "",
         }
 
-        console.log("Add Payload:", payload)
-
         try {
             const response = await axios.post(
                 "http://128.199.126.171/~goldorg/ajaxfiles/setting/script_add",
                 payload
             )
-            console.log("API Response:", response.data)
 
             toast.success("Quantity added successfully!", {
                 position: "top-right",
                 autoClose: 3000,
             })
 
-            // ✅ Reset form
-            setStart1_date("")
-            setEnd1_date("")
-            setIs_updated(0)
-            setIs_deleted(0)
-            setMarket(null)
-            setScript(null)
-            setScriptText("")
-            setQuantity("")
+            handleClear() // Reset form after add
         } catch (error) {
             console.error("Error adding Quantity:", error)
             toast.error("Failed to add. Please try again!", {
@@ -81,9 +70,21 @@ const Addscriptfilter = ({
         }
     }
 
+    const handleClear = () => {
+        setStart1_date && setStart1_date("")
+        setEnd1_date && setEnd1_date("")
+        setIs_updated && setIs_updated(0)
+        setIs_deleted && setIs_deleted(0)
+        setMarket && setMarket(null)
+        setScript && setScript(null)
+        setScriptText("")
+        setQuantity("")
+    }
+
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
+
                 {/* Market Dropdown */}
                 <Marketnamefilter
                     market={market}
@@ -116,9 +117,8 @@ const Addscriptfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                <Grid item xs="auto">
                     <Button
-                        fullWidth
                         onClick={handleAdd}
                         sx={{
                             backgroundColor: theme.palette.secondary.main,
@@ -126,14 +126,31 @@ const Addscriptfilter = ({
                             padding: '6px 12px',
                             borderRadius: '4px',
                             textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
+                            mr: 1,
+                            '&:hover': { backgroundColor: theme.palette.secondary.dark },
                         }}
                     >
                         Add
                     </Button>
                 </Grid>
+
+                {/* Clear Button */}
+                <Grid item xs="auto">
+                    <Button
+                        onClick={handleClear}
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textTransform: 'none',
+                            ml: -1,
+                        }}
+                    >
+                        Clear
+                    </Button>
+                </Grid>
+
             </Grid>
 
             <ToastContainer />
