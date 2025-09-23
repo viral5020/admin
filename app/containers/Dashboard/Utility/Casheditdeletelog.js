@@ -35,6 +35,31 @@ import Pagination from '../filters/Pagination';
 import { CasheditDeleteLogsAPI, editDeleteLogLogsAPI, editDeleteoldLogsAPI, tradeEditDeleteLogLogsAPI, tradeEditLoglistAPI } from '../API/API';
 import BackToTop from '../helpers/BackToTop';
 import TradeEditDeleteLogFilter from '../Utility/TradeEditDeleteLogFilter';
+import SearchPdfCsv from '../filters/SearchPdfCsv';
+
+const colArr = [
+    "Action",
+    "Client",
+    "Date",
+    "Debit",
+    "Credit(Lot",
+    "Remark",
+    "Changed By",
+    "IP Address",
+    "Changed Date Time",
+]
+
+const keyArr = [
+    "log_type",
+    "user_details",
+    "account_date_time",
+    "debit",
+    "credit",
+    "remark",
+    "changed_by_details1",
+    "ip_address",
+    "log_datetime",
+]
 
 
 const Casheditdeletelog = () => {
@@ -168,20 +193,13 @@ const Casheditdeletelog = () => {
                         }}
                     >
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 
@@ -338,20 +356,13 @@ const Casheditdeletelog = () => {
 
                     <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        size="small"
-                        sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                            ),
-                        }}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
 

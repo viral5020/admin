@@ -17,6 +17,31 @@ import Pagination from './filters/Pagination';
 import { manualtradesAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import SocketContext from './Socket/SocketContext';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Action",
+    "Client",
+    "Script",
+    "Type",
+    "Qty",
+    "Lot",
+    "Rate",
+    "Added By",
+    "DateTime",
+]
+
+const keyArr = [
+    "log_type",
+    "user_full_name",
+    "script_name",
+    "trade_type",
+    "trade_qty",
+    "trade_lot",
+    "trade_rate",
+    "added_by",
+    "added_datetime",
+]
 
 const Manualtrade = () => {
     const theme = useTheme();
@@ -255,13 +280,13 @@ const Manualtrade = () => {
                     )}
 
                     {/* Search input */}
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={e => setSearchText(e.target.value)}
-                        size="small"
-                        fullWidth
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
 

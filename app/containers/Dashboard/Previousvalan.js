@@ -32,6 +32,8 @@ import { DialogActions } from '@mui/material';
 import { deleteTrade, fetcholdOrdersAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import Pagination from './filters/Pagination';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
 
 const Previousvalan = ({
     filterShow = true,
@@ -68,8 +70,6 @@ const Previousvalan = ({
     const [cancelItem, setCancelItem] = useState(null);
     const [password, setPassword] = useState('');
 
-
-
     const handleCancel = async (itemToCancel, enteredPassword = '') => {
         try {
             const payload = {
@@ -103,6 +103,45 @@ const Previousvalan = ({
     const rawData = sessionStorage.getItem("data");
     const parsedData = JSON.parse(rawData);
     const userType = parseInt(parsedData.user_type, 10);
+
+
+
+    const colArr = [
+        "Device",
+        "Time",
+        ...(userType !== 1 ? ["Client"] : []),
+        "Market",
+        "Script",
+        "B/S",
+        "Order Type",
+        "Qty",
+        "Lot",
+        "Order Price",
+        "Status",
+        "O. Time",
+        "Comm Amt",
+        ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
+        ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
+    ]
+
+    const keyArr = [
+        "device_type_html",
+        "trd_matchedtime",
+        ...(userType !== 1 ? ["client_full_name"] : []),
+        "mrkt_name",
+        "scrp_name",
+        "trd_type",
+        "trd_type2",
+        "trd_qty",
+        "trd_lot",
+        "trd_rate",
+        "trd_status",
+        "trd_time",
+        "trd_comm_amnt",
+        ...([3, 4, 5].includes(userType) ? ["trade_ip_address"] : []),
+        ...(userType === 4 || userType === 5 ? ["trd_id"] : []),
+    ]
+
 
     const toggleDrawer = (open) => () => setDrawerOpen(open);
 
@@ -353,13 +392,14 @@ const Previousvalan = ({
 
 
 
-                <TextField
-                    size="small"
-                    placeholder="Search orders"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    fullWidth
-                // sx={{ ml: 1 }}
+                <SearchPdfCsv
+                    placeholder="Search Order"
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={orders}
+                    colArr={colArr}
+                    keyArr={keyArr}
+                    isLoading={loading}
                 />
             </Box>
 

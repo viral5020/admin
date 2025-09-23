@@ -29,6 +29,20 @@ import BackToTop from './helpers/BackToTop';
 import { ScriptwiselotAPI } from './API/API';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
 import Pagination from './filters/Pagination';
+import SearchPdfCsv from './filters/SearchPdfCsv';
+
+const colArr = [
+    "Market Name",
+    "Script Name",
+    "Quantity",
+]
+
+const keyArr = [
+    "market_type_name",
+    "script_name",
+    "script_lot_qty",
+];
+
 
 const Scriptwiselot = () => {
     const theme = useTheme();
@@ -184,20 +198,12 @@ const Scriptwiselot = () => {
                             flexWrap: 'nowrap',
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
@@ -291,20 +297,12 @@ const Scriptwiselot = () => {
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 

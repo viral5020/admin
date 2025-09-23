@@ -36,7 +36,8 @@ import Pagination from './filters/Pagination';
 
 const OrderBook = ({
   filterShow = true,
-  setFilterShow = () => { }
+  setFilterShow = () => { },
+  view_user_id
 }) => {
   console.log("filterShow=", filterShow);
 
@@ -176,14 +177,9 @@ const OrderBook = ({
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   const fetchOrders = async (page = currentPage, size = pageSize, filter = filterType, search = debouncedSearchText) => {
-    const dataStored = sessionStorage.getItem("data") ? JSON.parse(sessionStorage.getItem("data")) : null;
-    if (!dataStored) return;
-
     setLoading(true);
     try {
       const result = await fetchOrdersAPI({
-        userId: dataStored.user_id,
-        authKey: dataStored.auth_key,
         filterType: filter,
         searchValue: search,
         currentPage: page,
@@ -197,6 +193,7 @@ const OrderBook = ({
         clientId: client?.id || null,
         status,
         orderType,
+        view_user_id
       });
 
       setOrders(result.aaData || []);

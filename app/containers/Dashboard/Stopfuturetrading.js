@@ -32,6 +32,21 @@ import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
 import Pagination from './filters/Pagination';
 import Stopfuturefilter from './Utility/Stopfuturefilter';
 import { toast } from 'dan-vendor/react-toastify/dist';
+import SearchPdfCsv from './filters/SearchPdfCsv';
+
+const colArr = [
+    "Market Name",
+    "Master Name",
+    "Expiry",
+    "Added Date",
+]
+
+const keyArr = [
+    "market_name",
+    "full_name",
+    "expiry_original_format",
+    "added_datetime",
+]
 
 const Stopfuturetrading = () => {
     const theme = useTheme();
@@ -203,20 +218,12 @@ const Stopfuturetrading = () => {
                             mx: 1,
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 
@@ -323,20 +330,12 @@ const Stopfuturetrading = () => {
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
                         />
                     </Box>
 

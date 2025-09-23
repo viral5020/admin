@@ -54,7 +54,7 @@ export async function getIP() {
   }
 };
 
-export const apifetchPositions = async (userId, authKey) => {
+export const apifetchPositions = async (view_user_id) => {
   const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("/datatables/position_book_list", {
@@ -63,6 +63,7 @@ export const apifetchPositions = async (userId, authKey) => {
       iDisplayStart: 0,
       iDisplayLength: -1,
       sSearch: "",
+      ...(view_user_id ? { view_user_id } : {})
     });
     if (response.data && response.data.aaData) {
       return response.data.aaData;
@@ -95,8 +96,6 @@ export const fetchLoginDataAPI = async (userId, authKey) => {
 };
 
 export const fetchOrdersAPI = async ({
-  userId,
-  authKey,
   filterType = "today",
   searchValue = "",
   currentPage = 0,
@@ -110,8 +109,7 @@ export const fetchOrdersAPI = async ({
   clientId = "",
   status = "",
   orderType = "",
-  view_user_id = "",
-  selectedUser = "",
+  view_user_id,
 }) => {
   const defaultParams = await getDefaultParams();
 
@@ -129,10 +127,10 @@ export const fetchOrdersAPI = async ({
     broker_id: brokerId || "",
     master_user_id: masterUserId || "",
     user_id: clientId || "",
-    view_user_id: selectedUser?.id || "",   // ✅ send directly
     is_pending: status === "is_pending" ? "is_pending" : "",
     is_executed: status === "is_executed" ? "is_executed" : "",
     trade_type: orderType || "",
+    ...(view_user_id ? { view_user_id } : {}),
   };
 
   try {

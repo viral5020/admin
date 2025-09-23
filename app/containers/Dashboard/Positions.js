@@ -70,7 +70,8 @@ const OrderPage1 = ({
     filterShow = true,
     setFilterShow = () => { },
     filterShow1 = true,
-    setFilterShow1 = () => { }
+    setFilterShow1 = () => { },
+    view_user_id
 }) => {
     // console.log("filterShow=", filterShow);
     const theme = useTheme();
@@ -237,8 +238,7 @@ const OrderPage1 = ({
 
     const fetchPositions = async () => {
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        const result = await apifetchPositions(dataStored.user_id, dataStored.auth_key);
+        const result = await apifetchPositions(view_user_id);
         setPositionData(result);
         setLoading(false);
     };

@@ -19,6 +19,21 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import ValanFilter from "./ValanFilter";
 import Pagination from "./filters/Pagination";
 import { formatScriptIds } from "./helpers/utilFunc";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Serial No",
+    "Name",
+    "bill_amount",
+    "user_type"
+]
+
+const keyArr = [
+    "sr_no",
+    "user_name",
+    "bill_amount",
+    "user_type",
+]
 
 const Selfpl = () => {
     const theme = useTheme();
@@ -167,51 +182,21 @@ const Selfpl = () => {
                 }}
             >
                 {/* Filters */}
-                {isMobile && !valanId ? (
-                    <>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <IconButton onClick={() => setDrawerOpen(true)} color="primary">
-                                <FilterListIcon />
-                            </IconButton>
-                            <Box sx={{ flex: 1 }}>
-                                <TextField
-                                    placeholder="Search by name or code"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    size="small"
-                                    fullWidth
-                                    disabled={!valanId}
-                                />
-                            </Box>
-                        </Box>
+                <Box sx={{ width: 300 }}>
+                    <ValanFilter valanId={valanId} setValanId={setValanId} />
+                </Box>
 
-                        <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-                            <Box sx={{ width: 300, p: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Filters
-                                </Typography>
-                                <ValanFilter valanId={valanId} setValanId={setValanId} />
-                            </Box>
-                        </Drawer>
-                    </>
-                ) : (
-                    <>
-                        <Box sx={{ width: 300 }}>
-                            <ValanFilter valanId={valanId} setValanId={setValanId} />
-                        </Box>
-
-                        <Box sx={{ mt: 1 }}>
-                            <TextField
-                                placeholder="Search by name or code"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                size="small"
-                                fullWidth
-                                disabled={!valanId}
-                            />
-                        </Box>
-                    </>
-                )}
+                <Box sx={{ mt: 1 }}>
+                    <SearchPdfCsv
+                        placeholder="Search by name or code"
+                        searchText={searchQuery}
+                        setSearchText={setSearchQuery}
+                        logs={paginatedData}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
+                    />
+                </Box>
             </Box>
 
             {/* Scrollable Content Area */}
@@ -240,7 +225,7 @@ const Selfpl = () => {
                             paginatedData.map((row) => {
                                 const m2mColor = Number(row.self_m2m ?? 0) >= 0 ? "#1976d2" : "#d32f2f";
                                 return (
-                                    <Grid item xs={12} key={row.user_id}>
+                                    <Grid item xs={12} key={row.sr_no}>
                                         <Card
                                             sx={{
                                                 borderLeft: `4px solid ${m2mColor}`,
@@ -311,8 +296,9 @@ const Selfpl = () => {
                                     </tr>
                                 ) : (
                                     paginatedData.map((row, idx) => (
-                                        <tr key={row.user_id}>
-                                            <td>{idx + 1 + currentPage * rowsPerPage}</td>
+                                        <tr key={row.sr_no}>
+                                            {/* <td>{idx + 1 + currentPage * rowsPerPage}</td> */}
+                                            <td>{row.sr_no}</td>
                                             <td>{row.user_name}</td>
                                             <td>{row.bill_amount}</td>
                                             <td>{row.user_type}</td>
