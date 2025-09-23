@@ -386,7 +386,7 @@ export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
     iDisplayLength: 10,
     script_id: scriptId,
     user_id: selectedUserId,
-    sSearch: "",
+    sSearch,
   };
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
@@ -1960,15 +1960,17 @@ console.log("API.js runn.......");
 const apiCache = new Map();
 
 export const fetchOptionsAPI = async (url, params) => {
+  const defaultParams = await getDefaultParams();
+
   const key = `${url}:${JSON.stringify(params)}`;
   // If we already have cached response, return it
   if (apiCache.has(key)) {
-    console.log("Returning cached response for:", key);
+    // console.log("Returning cached response for:", key);
     return apiCache.get(key);
   }
   // Otherwise, call the API
   try {
-    const { data } = await axiosInstance.post(url, params);
+    const { data } = await axiosInstance.post(url, { ...params, ...defaultParams });
     // Save response in cache
     apiCache.set(key, data.results);
     return data.results;

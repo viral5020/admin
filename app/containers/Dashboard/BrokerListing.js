@@ -27,6 +27,37 @@ import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+  "Name",
+  "Login id",
+  //   "Parent",
+  //   "Percentage",
+  "Master",
+  "T User",
+  "Outstanding",
+  "Live Brokrage",
+  "Login ip",
+  "Login date",
+  "Join Date",
+  "Status",
+]
+
+const keyArr = [
+  "user_full_name",
+  "loginid",
+  "master_full_name",
+  // "fetch_user_id",
+  "total_user_count",
+  "out_standing",
+  "live_brokerage",
+  "last_login_ip",
+  "last_login_time",
+  "creation_time",
+  "user_status",
+]
+
 
 const BrokerListing = ({
   filterShow = true,
@@ -645,18 +676,13 @@ const BrokerListing = ({
             <FilterListIcon />
           </IconButton>
         )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
+        <SearchPdfCsv
+          searchText={searchText}
+          setSearchText={setSearchText}
+          logs={filteredData}
+          colArr={colArr}
+          keyArr={keyArr}
+          isLoading={loading}
         />
       </div>
       {/* 

@@ -35,6 +35,29 @@ import { RadioGroup } from "@mui/material";
 import { FormControlLabel } from "@mui/material";
 import { Radio } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+  "User Code",
+  "User Name",
+  "Broker",
+  "Master",
+  "Login IP",
+  "Login Time",
+  "Joining Date",
+  "Status",
+]
+
+const keyArr = [
+  "user_code",
+  "user_name",
+  "broker",
+  "master",
+  "login_ip",
+  "login_time",
+  "creation_time",
+  "user_status",
+]
 
 const Userlisting = ({
   filterShow = true,
@@ -655,18 +678,13 @@ const Userlisting = ({
             <FilterListIcon />
           </IconButton>
         )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
+        <SearchPdfCsv
+          searchText={searchText}
+          setSearchText={setSearchText}
+          logs={filteredData}
+          colArr={colArr}
+          keyArr={keyArr}
+          isLoading={loading}
         />
       </div>
 

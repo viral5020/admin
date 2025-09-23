@@ -32,6 +32,22 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import { bulktradingAPI, fetchBulkTradeListAPI, fetchOrders1API } from '../API/API';
 import axios from 'axios';
 import FilterBtn from '../filters/FilterBtn';
+import SearchPdfCsv from "../filters/SearchPdfCsv";
+
+const colArr = [
+    "No of Trades",
+    "End Date & Time",
+    "Start date & Time",
+    "Script Name",
+]
+
+const keyArr = [
+    "script_name",
+    "start_datetime",
+    "end_datetime",
+    "no_of_trade",
+]
+
 
 const Bulktrading = ({
     filterShow = true,
@@ -224,20 +240,13 @@ const Bulktrading = ({
             {/* Search */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
                 {filterShow && isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
-                <TextField
-                    variant="outlined"
-                    placeholder="Search logs..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    size="small"
-                    sx={{ flex: 1, minWidth: 200 }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                            </InputAdornment>
-                        ),
-                    }}
+                <SearchPdfCsv
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={logs}
+                    colArr={colArr}
+                    keyArr={keyArr}
+                    isLoading={loading}
                 />
             </Box>
 

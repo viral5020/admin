@@ -13,6 +13,22 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+
+const colArr = [
+  "Name",
+  "Forex",
+  "Comex",
+  "Total"
+]
+
+const keyArr = [
+  "user_details",
+  "forex_margin",
+  "comex_margin",
+  "total",
+]
 
 const Forexmarginmanagement = () => {
   const theme = useTheme();
@@ -212,18 +228,13 @@ const Forexmarginmanagement = () => {
             <FilterListIcon />
           </IconButton>
         )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px"
-          }}
+        <SearchPdfCsv
+          searchText={searchQuery}
+          setSearchText={setSearchQuery}
+          logs={paginatedData}
+          colArr={colArr}
+          keyArr={keyArr}
+        // isLoading={}
         />
       </div>
 

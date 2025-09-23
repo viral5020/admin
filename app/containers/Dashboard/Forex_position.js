@@ -266,6 +266,21 @@ const OrderPage = () => {
         prevTotals.current = { ...totals };
     }, [totals]);
 
+    async function handlePlaceTrade() {
+        try {
+            const result = await placeTrade(closetradeData);
+
+            if (result?.status === "ok" || result?.success) {
+                toast.success(result.message || "Trade placed successfully!");
+                setCloseDialogOpen(false);
+            } else {
+                toast.error(result.message || "Trade placement failed");
+            }
+        } catch (error) {
+            console.error("❌ Trade placement error:", error);
+            toast.error(`Network error: ${error.message}`);
+        }
+    }
 
     useEffect(() => {
 
@@ -1658,45 +1673,7 @@ const OrderPage = () => {
                                         {selectedRow?.net_qty > 0 ? (
                                             <Button
                                                 fullWidth
-                                                onClick={async () => {
-                                                    const payload = {
-                                                        market_type_id: selectedRow?.market_type_id ?? 1,
-                                                        script_id: selectedRow?.script_id,
-                                                        script_expiry_id: selectedRow?.script_expiry_id,
-                                                        trade_type: tradeTypeMap[orderType],
-                                                        trade_rate: price,
-                                                        trade_qty: qty,
-                                                        trade_lot: lot,
-                                                        trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                        check_script_name: selectedRow?.script_name,
-                                                        user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                        device_type: 0,
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                    };
-
-                                                    try {
-                                                        const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                            method: "POST",
-                                                            headers: {
-                                                                "Content-Type": "application/json",
-                                                            },
-                                                            body: JSON.stringify(payload),
-                                                        });
-
-                                                        const data = await response.json();
-
-                                                        if (response.ok) {
-                                                            console.log("Trade placed successfully", data);
-                                                            setCloseDialogOpen(false);
-                                                        } else {
-                                                            console.error("Trade placement failed", data);
-                                                        }
-                                                    } catch (error) {
-                                                        console.error("Network error:", error);
-                                                    }
-                                                }}
+                                                onClick={handlePlaceTrade}
                                                 variant="contained"
                                                 sx={{
                                                     backgroundColor: "#ff3d3d", // Red for Sell
@@ -1715,46 +1692,7 @@ const OrderPage = () => {
                                         ) : selectedRow?.net_qty < 0 ? (
                                             <Button
                                                 fullWidth
-                                                onClick={async () => {
-
-                                                    const payload = {
-                                                        market_type_id: selectedRow?.market_type_id ?? 1,
-                                                        script_id: selectedRow?.script_id,
-                                                        script_expiry_id: selectedRow?.script_expiry_id,
-                                                        trade_type: tradeTypeMap[orderType],
-                                                        trade_rate: price,
-                                                        trade_qty: qty,
-                                                        trade_lot: lot,
-                                                        trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                        check_script_name: selectedRow?.script_name,
-                                                        user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                        device_type: 0,
-                                                        is_app: "1",
-                                                        login_user_id: dataStored?.user_id,
-                                                        auth_key: dataStored?.auth_key,
-                                                    };
-
-                                                    try {
-                                                        const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                            method: "POST",
-                                                            headers: {
-                                                                "Content-Type": "application/json",
-                                                            },
-                                                            body: JSON.stringify(payload),
-                                                        });
-
-                                                        const data = await response.json();
-
-                                                        if (response.ok) {
-                                                            console.log("Trade placed successfully", data);
-                                                            setCloseDialogOpen(false);
-                                                        } else {
-                                                            console.error("Trade placement failed", data);
-                                                        }
-                                                    } catch (error) {
-                                                        console.error("Network error:", error);
-                                                    }
-                                                }}
+                                                onClick={handlePlaceTrade}
                                                 variant="contained"
                                                 sx={{
                                                     backgroundColor: "#4caf50", // Green for Buy
@@ -2138,45 +2076,7 @@ const OrderPage = () => {
                                                                 {selectedRow?.net_qty > 0 ? (
                                                                     <Button
                                                                         fullWidth
-                                                                        onClick={async () => {
-                                                                            const payload = {
-                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
-                                                                                script_id: selectedRow?.script_id,
-                                                                                script_expiry_id: selectedRow?.script_expiry_id,
-                                                                                trade_type: tradeTypeMap[orderType],
-                                                                                trade_rate: price,
-                                                                                trade_qty: qty,
-                                                                                trade_lot: lot,
-                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                                                check_script_name: selectedRow?.script_name,
-                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                                                device_type: 0,
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                            };
-
-                                                                            try {
-                                                                                const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                                    method: "POST",
-                                                                                    headers: {
-                                                                                        "Content-Type": "application/json",
-                                                                                    },
-                                                                                    body: JSON.stringify(payload),
-                                                                                });
-
-                                                                                const data = await response.json();
-
-                                                                                if (response.ok) {
-                                                                                    console.log("Trade placed successfully", data);
-                                                                                    setCloseDialogOpen(false);
-                                                                                } else {
-                                                                                    console.error("Trade placement failed", data);
-                                                                                }
-                                                                            } catch (error) {
-                                                                                console.error("Network error:", error);
-                                                                            }
-                                                                        }}
+                                                                        onClick={handlePlaceTrade}
                                                                         variant="contained"
                                                                         sx={{
                                                                             backgroundColor: "#ff3d3d", // Red for Sell
@@ -2195,46 +2095,7 @@ const OrderPage = () => {
                                                                 ) : selectedRow?.net_qty < 0 ? (
                                                                     <Button
                                                                         fullWidth
-                                                                        onClick={async () => {
-
-                                                                            const payload = {
-                                                                                market_type_id: selectedRow?.market_type_id ?? 1,
-                                                                                script_id: selectedRow?.script_id,
-                                                                                script_expiry_id: selectedRow?.script_expiry_id,
-                                                                                trade_type: tradeTypeMap[orderType],
-                                                                                trade_rate: price,
-                                                                                trade_qty: qty,
-                                                                                trade_lot: lot,
-                                                                                trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                                                check_script_name: selectedRow?.script_name,
-                                                                                user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                                                device_type: 0,
-                                                                                is_app: "1",
-                                                                                login_user_id: dataStored?.user_id,
-                                                                                auth_key: dataStored?.auth_key,
-                                                                            };
-
-                                                                            try {
-                                                                                const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                                    method: "POST",
-                                                                                    headers: {
-                                                                                        "Content-Type": "application/json",
-                                                                                    },
-                                                                                    body: JSON.stringify(payload),
-                                                                                });
-
-                                                                                const data = await response.json();
-
-                                                                                if (response.ok) {
-                                                                                    console.log("Trade placed successfully", data);
-                                                                                    setCloseDialogOpen(false);
-                                                                                } else {
-                                                                                    console.error("Trade placement failed", data);
-                                                                                }
-                                                                            } catch (error) {
-                                                                                console.error("Network error:", error);
-                                                                            }
-                                                                        }}
+                                                                        onClick={handlePlaceTrade}
                                                                         variant="contained"
                                                                         sx={{
                                                                             backgroundColor: "#4caf50", // Green for Buy
@@ -2789,45 +2650,7 @@ const OrderPage = () => {
                                             {selectedRow?.net_qty > 0 ? (
                                                 <Button
                                                     fullWidth
-                                                    onClick={async () => {
-                                                        const payload = {
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
-
-                                                        try {
-                                                            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                method: "POST",
-                                                                headers: {
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                                body: JSON.stringify(payload),
-                                                            });
-
-                                                            const data = await response.json();
-
-                                                            if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
-                                                                setCloseDialogOpen(false);
-                                                            } else {
-                                                                console.error("Trade placement failed", data);
-                                                            }
-                                                        } catch (error) {
-                                                            console.error("Network error:", error);
-                                                        }
-                                                    }}
+                                                    onClick={handlePlaceTrade}
                                                     variant="contained"
                                                     sx={{
                                                         backgroundColor: "#ff3d3d", // Red for Sell
@@ -2846,46 +2669,7 @@ const OrderPage = () => {
                                             ) : selectedRow?.net_qty < 0 ? (
                                                 <Button
                                                     fullWidth
-                                                    onClick={async () => {
-
-                                                        const payload = {
-                                                            market_type_id: selectedRow?.market_type_id ?? 1,
-                                                            script_id: selectedRow?.script_id,
-                                                            script_expiry_id: selectedRow?.script_expiry_id,
-                                                            trade_type: tradeTypeMap[orderType],
-                                                            trade_rate: price,
-                                                            trade_qty: qty,
-                                                            trade_lot: lot,
-                                                            trade_type_x: selectedRow?.net_qty > 0 ? "1" : "0",
-                                                            check_script_name: selectedRow?.script_name,
-                                                            user_id: selectedRow?.user_id || dataStored?.user_id,
-                                                            device_type: 0,
-                                                            is_app: "1",
-                                                            login_user_id: dataStored?.user_id,
-                                                            auth_key: dataStored?.auth_key,
-                                                        };
-
-                                                        try {
-                                                            const response = await fetch("http://128.199.126.171/~goldorg/ajaxfiles/trade_place_v2", {
-                                                                method: "POST",
-                                                                headers: {
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                                body: JSON.stringify(payload),
-                                                            });
-
-                                                            const data = await response.json();
-
-                                                            if (response.ok) {
-                                                                console.log("Trade placed successfully", data);
-                                                                setCloseDialogOpen(false);
-                                                            } else {
-                                                                console.error("Trade placement failed", data);
-                                                            }
-                                                        } catch (error) {
-                                                            console.error("Network error:", error);
-                                                        }
-                                                    }}
+                                                    onClick={handlePlaceTrade}
                                                     variant="contained"
                                                     sx={{
                                                         backgroundColor: "#4caf50", // Green for Buy

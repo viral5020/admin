@@ -38,6 +38,7 @@ import {
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
 
 
 const Orderlimit = () => {
@@ -88,6 +89,26 @@ const Orderlimit = () => {
     const [addPricePercent, setAddPricePercent] = useState('');
     const [valueType, setValueType] = useState(0);
 
+
+    const colArr = [
+        ...(userType !== 1 ? ["Client"] : []),
+        "Market",
+        "Script",
+        // "Type",
+        "Price Percent",
+        "Value",
+        "Time",
+    ]
+
+    const keyArr = [
+        ...(userType !== 1 ? ["client_name"] : []),
+        "market_type_name",
+        "script_name",
+        // "trade_type",
+        "price_percent",
+        "value",
+        "time",
+    ]
 
 
     const handleOpenConfirm = (log) => {
@@ -328,24 +349,13 @@ const Orderlimit = () => {
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
 
-                    <TextField
-                        size="small"
-                        placeholder="Search logs"
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        fullWidth
-                        sx={{
-                            ml: 1,
-                            '& .MuiOutlinedInput-root': {
-                                height: 26,
-                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: 'black',
-                                },
-                            },
-                            '& input': {
-                                padding: '0 8px',
-                            },
-                        }}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
             </Box>
@@ -589,7 +599,7 @@ const Orderlimit = () => {
                                 }}
                             >
                                 <tr>
-                                    {[...(userType !== 1 ? ["Client"] : []), "market_type_name", "script_name", "price_percent", "value", "time", "Action"].map(
+                                    {[...(userType !== 1 ? ["Client"] : []), "Market", "Script", "Price Percent", "Value", "Time", "Action"].map(
                                         (header) => (
                                             <th key={header} style={{ fontWeight: 600 }}>
                                                 {header}

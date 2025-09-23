@@ -20,7 +20,7 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
                 }
                 onClick={() => setFilterOpen(true)}
                 sx={{
-                    p: '9px',
+                    // p: '9px',
                     height: '100%',
                     backgroundColor: isDarkMode ? '#263238' : '#fff',
                     borderColor: isDarkMode ? '#90a4ae' : '#607d8b',
@@ -29,7 +29,7 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
                     // px: 0,
                     // py: 0,
                     minHeight: '10px',
-                    minWidth: '45px',
+                    minWidth: '35px',
                     '& .MuiButton-startIcon': {
                         marginRight: '6px', // Adjust icon spacing if needed
                     },

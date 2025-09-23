@@ -33,6 +33,34 @@ import { formatScriptIds } from './helpers/utilFunc';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import Summaryreportfilter from './summaryreportfilter';
 import ValanFilter from './ValanFilter';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Sr.No",
+    "User Code",
+    "Market",
+    "Script",
+    "Trade Type",
+    "Trade Rate",
+    "Lot",
+    "Qty",
+    "Amount",
+    "Time",
+]
+
+const keyArr = [
+    "sr_no",
+    "user_code",
+    "Market",
+    "Script",
+    "Trade_Type",
+    "Trade_Rate",
+    "Lot",
+    "Qty",
+    "Amount",
+    "Time",
+]
+
 
 const Crosstradelog = () => {
     const theme = useTheme();
@@ -240,20 +268,13 @@ const Crosstradelog = () => {
                 >
                     {isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
 
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        size="small"
-                        sx={{ flex: 1, minWidth: 200 }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                            ),
-                        }}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
 

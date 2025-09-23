@@ -9,6 +9,7 @@ import ClientMasterBrokerFilter from './filters/ClientMasterBrokerFilter';
 import DateFilter from './filters/DateFilter';
 import RadioFilter from './filters/RadioFilterField';
 import { getInputBoxStyle } from './filters/inputBoxStyle';
+import { exportTradeApi } from './API/API';
 
 const statusOptions = [
   { label: 'Pending Order', value: 'is_pending' },
@@ -127,32 +128,7 @@ const OrderFilter = ({
           <Button
             onClick={async () => {
               try {
-                const rawData = JSON.parse(sessionStorage.getItem("data"));
-                const payload = {
-                  is_app: "1",
-                  login_user_id: rawData.user_id,
-                  auth_key: rawData.auth_key,
-                  status,
-                  start_end,
-                  end_date,
-                  orderType,
-                  market,
-                  script,
-                  client,
-                  master,
-                  broker,
-                };
-
-                console.log("⬇ Export Payload:", payload);
-
-                const response = await fetch(
-                  "http://128.199.126.171/~goldorg/ajaxfiles/download_csv_trade_book",
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                  }
-                );
+                const response = await exportTradeApi({ status, start_end, end_date, orderType, market, script, client, master, broker });
 
                 if (!response.ok) throw new Error("Export failed");
 

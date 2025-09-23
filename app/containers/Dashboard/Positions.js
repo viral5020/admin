@@ -48,6 +48,7 @@ import { apifetchPositions, fetchTradesDataAPI, placeTrade } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import { formatScriptIds } from "./helpers/utilFunc";
 import { toast, ToastContainer } from "react-toastify";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
 
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -156,6 +157,38 @@ const OrderPage1 = ({
         return fixedNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
+
+    const colArr = [
+        ...(userType !== 1 ? ["Client"] : []),
+        "Script",
+        "Market",
+        "Total Buy",
+        "Buy Avg Rate",
+        "Total Sell",
+        "Sell Avg Rate",
+        "Net Qty",
+        // "Last Trade Price",
+        "MTM",
+        "Auto Closed Date",
+        // "Close Btn",
+    ]
+
+    const keyArr = [
+        ...(userType !== 1 ? ["client_full_name"] : []),   // shown only if userType !== 1
+        "script_name",
+        "market_type_name",
+        "total_buy_qty",
+        "buy_avg_rate",
+        "total_sell_qty",
+        "sell_avg_rate",
+        "net_qty",
+        // "check_script_name",  // used for liveRates lookup
+        // "mtm",                // numeric value for color logic
+        "mym_html",           // rendered with dangerouslySetInnerHTML
+        "trade_auto_closed_date",
+    ]
+
+
     const handleCardClick = (row) => {
         setSelectedRow(row);
         setDrawerOpen(true);
@@ -180,16 +213,14 @@ const OrderPage1 = ({
     const fetchTradesData = async () => {
         if (!selectedRow) return;
         setLoadingTrades(true);
-        const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
+        const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id, searchText);
         setTradesData(result);
         setLoadingTrades(false);
     };
 
     async function handlePlaceTrade() {
         try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-            const result = await placeTrade(closetradeData, dataStored);
+            const result = await placeTrade(closetradeData);
 
             if (result?.status === "ok" || result?.success) {
                 toast.success(result.message || "Trade placed successfully!");
@@ -276,6 +307,7 @@ const OrderPage1 = ({
         socket.on('reconnect', function () { })
         var old_rate = 0;
         socket.on('marketWatch', function (args) {
+            // console.log('args', args);
 
 
             if (args && args.data) {
@@ -314,6 +346,7 @@ const OrderPage1 = ({
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+                            console.log('liveRates', liveRates);
 
                             startTransition(() => {
                                 setliveRates(liveRates);
@@ -328,6 +361,7 @@ const OrderPage1 = ({
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
+                            console.log('liveRates', liveRates);
                             startTransition(() => {
                                 setliveRates(liveRates);
                             });
@@ -971,13 +1005,12 @@ const OrderPage1 = ({
 
 
             {/* 🔍 Search Bar */}
-            <Box sx={{
+            {/* <Box sx={{
                 px: 2, py: 1, display: "flex",
                 alignItems: "center", gap: 2
             }}>
                 {isMobile && filterShow && <FilterBtn setFilterOpen={setFilterDrawer} />}
 
-                {/* 🔍 Search Input */}
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -1013,7 +1046,14 @@ const OrderPage1 = ({
                         },
                     }}
                 />
-            </Box>
+            </Box> */}
+            <SearchPdfCsv
+                searchText={searchText}
+                setSearchText={setSearchText}
+                logs={positionData.slice(0, 5)}
+                colArr={colArr}
+                keyArr={keyArr}
+            />
 
 
             {/* Body */}
@@ -1771,7 +1811,7 @@ const OrderPage1 = ({
                                         {selectedRow?.net_qty > 0 ? (
                                             <Button
                                                 fullWidth
-                                                onClick={placeTrade}
+                                                onClick={handlePlaceTrade}
                                                 variant="contained"
                                                 sx={{
                                                     backgroundColor: "#ff3d3d", // Red for Sell
@@ -1790,7 +1830,7 @@ const OrderPage1 = ({
                                         ) : selectedRow?.net_qty < 0 ? (
                                             <Button
                                                 fullWidth
-                                                onClick={placeTrade}
+                                                onClick={handlePlaceTrade}
                                                 variant="contained"
                                                 sx={{
                                                     backgroundColor: "#4caf50", // Green for Buy
@@ -2181,7 +2221,7 @@ const OrderPage1 = ({
                                                                 {selectedRow?.net_qty > 0 ? (
                                                                     <Button
                                                                         fullWidth
-                                                                        onClick={placeTrade}
+                                                                        onClick={handlePlaceTrade}
                                                                         variant="contained"
                                                                         sx={{
                                                                             backgroundColor: "#ff3d3d", // Red for Sell
@@ -2200,7 +2240,7 @@ const OrderPage1 = ({
                                                                 ) : selectedRow?.net_qty < 0 ? (
                                                                     <Button
                                                                         fullWidth
-                                                                        onClick={placeTrade}
+                                                                        onClick={handlePlaceTrade}
                                                                         variant="contained"
                                                                         sx={{
                                                                             backgroundColor: "#4caf50", // Green for Buy
@@ -2762,7 +2802,7 @@ const OrderPage1 = ({
                                             {selectedRow?.net_qty > 0 ? (
                                                 <Button
                                                     fullWidth
-                                                    onClick={placeTrade}
+                                                    onClick={handlePlaceTrade}
                                                     variant="contained"
                                                     sx={{
                                                         backgroundColor: "#ff3d3d", // Red for Sell
@@ -2781,7 +2821,7 @@ const OrderPage1 = ({
                                             ) : selectedRow?.net_qty < 0 ? (
                                                 <Button
                                                     fullWidth
-                                                    onClick={placeTrade}
+                                                    onClick={handlePlaceTrade}
                                                     variant="contained"
                                                     sx={{
                                                         backgroundColor: "#4caf50", // Green for Buy

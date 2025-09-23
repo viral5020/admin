@@ -65,3 +65,27 @@ export const forex_comex_market = [
 ]
 
 export const MCXFUT_id = '1';
+
+export function formatToTwoDecimals(str) {
+    if (str === null || str === undefined || isNaN(str)) return str;
+    return Number(str).toFixed(2);
+}
+
+export function humanize(str) {
+    if (!str) return "";
+
+    return str
+        // insert space before capital letters (for camelCase)
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        // replace hyphens/underscores with spaces
+        .replace(/[-_]/g, " ")
+        // trim spaces
+        .trim()
+        // capitalize first letter of each word
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export function getLastPath(path) {
+    if (!path) return "";
+    return path.split("/").filter(Boolean).pop();
+}

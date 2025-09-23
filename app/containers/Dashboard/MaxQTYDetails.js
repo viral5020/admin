@@ -28,6 +28,24 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import AddIcon from '@mui/icons-material/Add';
 import { addPosition, fetchMarketWatchFiltersAPI, fetchScriptQtyListAPI, fetchUserLevelsAPI } from './API/API';
 import Pagination from './filters/Pagination';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+  "User Level",
+  "Script",
+  "Market",
+  "Position",
+  "Max Order",
+]
+
+const keyArr = [
+  "level_name",
+  "script_name",
+  "market_name",
+  "position_limit",
+  "max_order",
+]
+
 
 const marketChipStyles = {
   NSEEQT: { backgroundColor: "#1976d2", color: "#fff" }, // Blue
@@ -333,41 +351,34 @@ const EditDeleteLogs = () => {
         {/* Filters and Controls */}
         {!isMobile ? (
           // Desktop View Controls
-          <Box sx={{
-            display: 'flex',
-            gap: 0.5,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: 1,
-            mx: 1,
-            flexWrap: 'wrap',
-          }}>
-            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-              <TextField
-                select
-                label="User Level"
-                value={selectedUserLevel}
-                onChange={(e) => { setSelectedUserLevel(e.target.value); setCurrentPage(0); }}
-                size="small"
-                sx={{ width: 180 }}
-              >
-                {userLevels.map(level => (
-                  <MenuItem key={level.user_level_id} value={level.user_level_id}>
-                    {level.user_level_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{
+              display: 'flex',
+              gap: 0.5,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 1,
+              mx: 1,
+              flexWrap: 'wrap',
+            }}>
+              <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                <TextField
+                  select
+                  label="User Level"
+                  value={selectedUserLevel}
+                  onChange={(e) => { setSelectedUserLevel(e.target.value); setCurrentPage(0); }}
+                  size="small"
+                  sx={{ width: 180 }}
+                >
+                  {userLevels.map(level => (
+                    <MenuItem key={level.user_level_id} value={level.user_level_id}>
+                      {level.user_level_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexGrow: 1 }}>
-              <TextField
-                variant="outlined"
-                placeholder="Search logs..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                size="small"
-                sx={{ flex: 1, minWidth: 200 }}
-              />
+
               <Button
                 style={{ display: (userType == 3 || userType == 4) ? 'inline-flex' : 'none' }}
                 variant="contained"
@@ -380,6 +391,14 @@ const EditDeleteLogs = () => {
                 {showFilters ? 'CANCEL' : 'ADD POSITION'}
               </Button>
             </Box>
+            <SearchPdfCsv // chatgpt : move this component below to `add posistion` and menuitem line's next line
+              searchText={searchText}
+              setSearchText={setSearchText}
+              logs={logs}
+              colArr={colArr}
+              keyArr={keyArr}
+              isLoading={loading}
+            />
           </Box>
         ) : (
           // Mobile View  Controls
@@ -415,20 +434,13 @@ const EditDeleteLogs = () => {
             </Box>
 
             {/* Search Field Below */}
-            <TextField
-              variant="outlined"
-              placeholder="Search logs..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
+            <SearchPdfCsv
+              searchText={searchText}
+              setSearchText={setSearchText}
+              logs={logs}
+              colArr={colArr}
+              keyArr={keyArr}
+              isLoading={loading}
             />
           </Box>
 

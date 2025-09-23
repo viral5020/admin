@@ -27,6 +27,37 @@ import LedgerDetailsDialog from "./Ledgerdialog";
 import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+  "Name",
+  "Login id",
+  "Parent",
+  "Percentage",
+  "T Master",
+  "T User",
+  "T Broker",
+  "Login Time",
+  "Login ip",
+  "Join Date",
+  "Status",
+]
+
+const keyArr = [
+  // "user_id",
+  "user_full_name",
+  "user_name",
+  "master",
+  "percentage",
+  "masters_under",
+  "users_under",
+  "brokers_under",
+  "login_time",
+  "login_ip",
+  "creation_time",
+  "user_status",
+]
+
 
 const Masterlisting = ({
   filterShow = true,
@@ -613,18 +644,13 @@ const Masterlisting = ({
             <FilterListIcon />
           </IconButton>
         )}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            fontSize: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
+        <SearchPdfCsv
+          searchText={searchText}
+          setSearchText={setSearchText}
+          logs={filteredData}
+          colArr={colArr}
+          keyArr={keyArr}
+          isLoading={loading}
         />
       </div>
 

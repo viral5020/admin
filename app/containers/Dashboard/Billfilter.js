@@ -33,6 +33,20 @@ import { formatScriptIds } from './helpers/utilFunc';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import Summaryreportfilter from './summaryreportfilter';
 import ValanFilter from './ValanFilter';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Sr. No",
+    "User Name",
+    "Bill Amount",
+]
+
+const keyArr = [
+    "sr_no",
+    "user_name",
+    "bill_amount",
+]
+
 
 const Billfilter = () => {
     const theme = useTheme();
@@ -209,20 +223,13 @@ const Billfilter = () => {
 
                     {/* Search */}
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1, flexWrap: 'nowrap' }}>
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 

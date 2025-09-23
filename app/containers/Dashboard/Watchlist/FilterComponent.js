@@ -338,11 +338,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
 
     const showToast = (message) => {
         if (message.includes("Market Added")) {
-            toast.success(message, { containerId: "mobile_add_market" });
+            toast.success(message, { ...(isMobile ? { containerId: "mobile_add_market" } : {}) });
         } else if (message.includes("Market Already Added")) {
-            toast.warn(message, { containerId: "mobile_add_market" });
+            toast.warn(message, { ...(isMobile ? { containerId: "mobile_add_market" } : {}) });
         } else {
-            toast.error(message, { containerId: "mobile_add_market" });
+            toast.error(message, { ...(isMobile ? { containerId: "mobile_add_market" } : {}) });
         }
     };
 

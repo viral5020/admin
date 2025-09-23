@@ -163,14 +163,16 @@ const Adminloginlist = () => {
         autoTable(doc, {
             startY: 20,
             head: [["Sr no", "Device Type", "Brand", "Extra Details", "First Seen", "Last Seen"]],
-            body: logs.map((log) => [
-                log.sr_no ?? "-",
-                log.type ?? "-",
-                log.model ?? "-",
-                log.extra_details ?? "-",
-                log.first_seen ?? "-",
-                log.last_seen ?? "-",
-            ]),
+            body: logs
+                .map((log) => [
+                    log.sr_no ?? "-",  // chatgpt : if log.key has html content then it should be vvierwed as html tags
+                    log.type ?? "-",
+                    log.model ?? "-",
+                    log.extra_details ?? "-",
+                    log.first_seen ?? "-",
+                    log.last_seen ?? "-",
+                ]),
+
         });
         doc.save("admin_logs.pdf");
     };

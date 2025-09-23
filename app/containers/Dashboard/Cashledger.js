@@ -42,6 +42,24 @@ import BackToTop from './helpers/BackToTop';
 import { cashEntryAPI, deleteReceiptAPI, editReceiptAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import ClientMasterBrokerFilter2 from './filters/Clientmasterbrokerfilter2';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Name",
+    "Date",
+    "Debit",
+    "Credit",
+    "Remark",
+]
+
+const keyArr = [
+    "user",
+    "account_date_time",
+    "debit",
+    "credit",
+    "remark",
+]
+
 
 const Cashledger = ({
     filterShow = true,
@@ -261,22 +279,13 @@ const Cashledger = ({
                             mb: 2.5,
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon
-                                            sx={{ color: theme.palette.text.secondary }}
-                                        />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 

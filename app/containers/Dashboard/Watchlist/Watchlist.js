@@ -39,7 +39,6 @@ import { cloneDeep } from 'lodash';
 import SocketContext from '../Socket/SocketContext';
 import { formatSelectedKeys } from '../helpers/utilFunc';
 import BottomTradePopup from './BottomTradePopup';
-import toast from 'react-toastify';
 import { toastTime } from './constant';
 import RemoveCircleSharpIcon from '@mui/icons-material/RemoveCircleSharp';
 import ReportIcon from '@mui/icons-material/Report';
@@ -47,6 +46,7 @@ import Star from '@mui/icons-material/Star';
 import StarBorder from '@mui/icons-material/StarBorder';
 import Loader from '../Components/Loader';
 import { toastObj } from '../helpers/helper';
+import { toast } from "react-toastify";
 
 
 const generateCandleData = () => {
@@ -417,40 +417,56 @@ function Watchlist() {
     const toast_id = Date.now();
 
     const toastId = toast(
-      <Box sx={{ ...toastBoxCss, background: isDarkMode ? '#333' : '#fff', color: isDarkMode ? '#fff' : '#000', }}>
-        {actionIcon === 'removed'
-          ? <StarBorder sx={{ color: 'gray', mr: 0.8 }} />
-          : actionIcon === 'added'
-            ? <Star sx={{ color: 'gold', mr: 0.8 }} />
-            : actionIcon === 'delete'
-              ? <RemoveCircleSharpIcon sx={{ color: 'error.main', mr: 0.8 }} />
-              : actionIcon === 'error'
-                ? <ReportIcon sx={{ color: 'error.main', mr: 0.8 }} />
-                : ''}
+      <Box
+      // sx={{
+      //   ...toastBoxCss,
+      //   background: isDarkMode ? "#333" : "#fff",
+      //   color: isDarkMode ? "#fff" : "#000",
+      // }}
+      >
+        {actionIcon === "removed" ? (
+          <StarBorder sx={{ color: "gray", mr: 0.8 }} />
+        ) : actionIcon === "added" ? (
+          <Star sx={{ color: "gold", mr: 0.8 }} />
+        ) : actionIcon === "delete" ? (
+          <RemoveCircleSharpIcon sx={{ color: "error.main", mr: 0.8 }} />
+        ) : actionIcon === "error" ? (
+          <ReportIcon sx={{ color: "error.main", mr: 0.8 }} />
+        ) : (
+          ""
+        )}
 
-        <Typography sx={{ fontSize: '0.9rem' }}>
-          {/* {scriptName} Removed */}
-          {msg}
-        </Typography>
-        {onUndo && <Button
-          size="small"
-          sx={{ color: isDarkMode ? '#90caf9' : '#2196f3', ml: 2, textTransform: 'none', p: 0, backgroundColor: '#90caf933' }}
-          onClick={() => {
-            didUndo = true;
-            onUndo();
-            toast.dismiss(toast_id);
-          }}
-        >
-          Undo
-        </Button>}
-      </Box>
-      , {
-        id: toast_id, // optional: prevent duplicate toasts
-        duration: toastTime,
-        position: 'top-right',
-        ...toastObj
-      });
-  };
+        <Typography sx={{ fontSize: "0.9rem", display: 'inline' }}>{msg}</Typography>
+
+        {onUndo && (
+          <Button
+            size="small"
+            sx={{
+              color: isDarkMode ? "#90caf9" : "#2196f3",
+              ml: 2,
+              textTransform: "none",
+              p: 0,
+              backgroundColor: "#90caf933",
+            }}
+            onClick={() => {
+              didUndo = true;
+              onUndo();
+              // toast.dismiss(toastId); // dismiss using react-toastify API
+            }}
+          >
+            {didUndo ? 'Undone' : 'Undo'}
+          </Button>
+        )}
+      </Box>,
+      {
+        // toastId, // ✅ use toastId here instead of `id`
+        autoClose: toastTime, // ✅ react-toastify uses autoClose instead of duration
+        position: "top-right",
+        ...toastObj,
+      }
+    );
+  }
+
 
   async function handleStar(stockData, e) {
     let starBtn;

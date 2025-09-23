@@ -20,6 +20,22 @@ import { addClientBlockScriptAPI, deleteClientBlockScriptAPI, fetchBlockedAllowe
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import Blockedallowedscriptfilter from './Utility/Blockedallowedscriptfilter';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Client Full Name",
+    "Market Type",
+    "Script",
+    "Datetime",
+]
+
+const keyArr = [
+    "user_full_name",
+    "market_type_name",
+    "script_name",
+    "time",
+]
+
 
 const Blockedallowedscript = () => {
     const theme = useTheme();
@@ -231,19 +247,14 @@ const Blockedallowedscript = () => {
                     mb: 1,
                 }}
             >
-                <TextField
-                    size="small"
-                    placeholder="Search by Client Full Name"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    fullWidth
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            height: 28,
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'black' },
-                        },
-                        '& input': { padding: '0 8px' },
-                    }}
+                <SearchPdfCsv
+                    placeHolder='Search by Client Full Name'
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={logs}
+                    colArr={colArr}
+                    keyArr={keyArr}
+                    isLoading={loading}
                 />
             </Box>
 

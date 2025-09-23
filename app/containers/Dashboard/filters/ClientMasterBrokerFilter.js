@@ -7,7 +7,7 @@ import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 import { clone } from 'lodash';
 import axiosInstance from '../API/axiosconfig';
-import { fetchOptionsAPI } from '../API/API';
+import { fetchOptionsAPI, getDefaultParams } from '../API/API';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -53,27 +53,19 @@ const ClientMasterBrokerFilter = ({
     }, []);
 
     // Autocomplete handlers
-    function handleFetch(term, type) {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        // if (!term) return;
-        let params = {
-            is_app: 1,
-            login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
-        }
-
-        const url = 'http://128.199.126.171/~goldorg/ajaxfiles'
+    async function handleFetch(term, type) {
+        // if (!term) return;.
 
         switch (type) {
             case 'client':
                 // console.log('TTT term', term);
-                fetchOptions(`${url}/get_client_name_search`, { ...params, term }, setClientOptions);
+                fetchOptions(`/ajaxfiles/get_client_name_search`, { term }, setClientOptions);
                 break;
             case 'master':
-                fetchOptions(`${url}/get_master_name_search`, { ...params, term }, setMasterOptions);
+                fetchOptions(`/ajaxfiles/get_master_name_search`, { term }, setMasterOptions);
                 break;
             case 'broker':
-                fetchOptions(`${url}/get_broker_name_search`, { ...params, term, term2: 2 }, setBrokerOptions);
+                fetchOptions(`/ajaxfiles/get_broker_name_search`, { term, term2: 2 }, setBrokerOptions);
                 break;
             default:
                 break;

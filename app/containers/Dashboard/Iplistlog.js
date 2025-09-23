@@ -34,6 +34,21 @@ import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
 import { ipaddresslogAPI, tradeAutosquareofAPI, tradeEditDeleteLogLogsAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Trade Ip Address",
+    "User Count",
+    "Trades",
+    "Start Date",
+]
+
+const keyArr = [
+    "trade_ip_address",
+    "user_count",
+    "trades",
+    "start_date",
+]
 
 
 
@@ -70,50 +85,50 @@ const Iplistlog = () => {
     const [isAdminOnly, setIsAdminOnly] = useState(false);
 
 
-   const fetchLogs = async () => {
-  try {
-    setLoading(true);
+    const fetchLogs = async () => {
+        try {
+            setLoading(true);
 
-    const scriptIds = formatScriptIds?.(script);
+            const scriptIds = formatScriptIds?.(script);
 
-    const result = await ipaddresslogAPI(
-      currentPage,
-      pageSize,
-      searchText,
-      market,
-      scriptIds,
-      master,
-      client,
-      end_date,
-      start_date,
-      is_deleted,
-      is_updated,
-      isAdminOnly,
-    );
+            const result = await ipaddresslogAPI(
+                currentPage,
+                pageSize,
+                searchText,
+                market,
+                scriptIds,
+                master,
+                client,
+                end_date,
+                start_date,
+                is_deleted,
+                is_updated,
+                isAdminOnly,
+            );
 
-    // Guard shape
-    const data = Array.isArray(result?.aaData) ? result.aaData : [];
+            // Guard shape
+            const data = Array.isArray(result?.aaData) ? result.aaData : [];
 
-    if (isMobile) {
-      if (isFilterChange || currentPage === 0) {
-        setLogs(data);
-      } else {
-        setLogs(prev => [...prev, ...data]);
-      }
-    } else {
-      setLogs(data);
-    }
+            if (isMobile) {
+                if (isFilterChange || currentPage === 0) {
+                    setLogs(data);
+                } else {
+                    setLogs(prev => [...prev, ...data]);
+                }
+            } else {
+                setLogs(data);
+            }
 
-    setTotalRecords(Number(result?.iTotalRecords) || 0);
-    setIsFilterChange(false);
-  } catch (err) {
-    console.error("Failed to fetch logs:", err);
-    setLogs([]);            // keep UI stable
-    setTotalRecords(0);
-  } finally {
-    setLoading(false);
-  }
-};
+            setTotalRecords(Number(result?.iTotalRecords) || 0);
+            setIsFilterChange(false);
+        } catch (err) {
+            console.error("Failed to fetch logs:", err);
+            setLogs([]);            // keep UI stable
+            setTotalRecords(0);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
@@ -155,11 +170,11 @@ const Iplistlog = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <TradeEditDeleteLogFilter    
-                                start_date={start_date}
-                                setStart_date={setStart_date}
-                                onApply={onFilterApply}
-                            />
+                    <TradeEditDeleteLogFilter
+                        start_date={start_date}
+                        setStart_date={setStart_date}
+                        onApply={onFilterApply}
+                    />
 
 
                     <Box
@@ -174,20 +189,13 @@ const Iplistlog = () => {
                         }}
                     >
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 
@@ -200,30 +208,30 @@ const Iplistlog = () => {
                             <CircularProgress />
                         </Box>
                     ) : (<>
-                            <TableContainer>
-                                <Table stickyHeader size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Trade Ip Address</TableCell>
-                                            <TableCell>User Count</TableCell>
-                                            <TableCell>Trades</TableCell>
-                                            <TableCell>Start Date</TableCell>
+                        <TableContainer>
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Trade Ip Address</TableCell>
+                                        <TableCell>User Count</TableCell>
+                                        <TableCell>Trades</TableCell>
+                                        <TableCell>Start Date</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {logs.map((log, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell>{log?.trade_ip_address ?? "-"}</TableCell>
+                                            <TableCell>
+                                                <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
+                                            </TableCell>
+                                            <TableCell>{log?.trades ?? "-"}</TableCell>
+                                            <TableCell>{log?.start_date ?? "-"}</TableCell>
                                         </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {logs.map((log, i) => (
-                                            <TableRow key={i}>
-                                                <TableCell>{log?.trade_ip_address ?? "-"}</TableCell>
-                                                <TableCell>
-                                                    <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
-                                                </TableCell>
-                                                <TableCell>{log?.trades ?? "-"}</TableCell>
-                                                <TableCell>{log?.start_date ?? "-"}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
 
 
 
@@ -259,7 +267,7 @@ const Iplistlog = () => {
                                 <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                             </Box>
                             <TradeEditDeleteLogFilter
-                               
+
                                 start_date={start_date}
                                 setStart_date={setStart_date}
                                 onApply={onFilterApply}
@@ -296,45 +304,45 @@ const Iplistlog = () => {
                     </Box>
                 ) : (
                     <>
-                                {logs.map((log, index) => (
-                                  <Card
-                                    key={index}
-                                    sx={{
-                                      mb: 0.5,
-                                      mx: 0.5,
-                                      borderRadius: 1,
-                                      border: "1px solid transparent", // important
-                                      backgroundImage: `
+                        {logs.map((log, index) => (
+                            <Card
+                                key={index}
+                                sx={{
+                                    mb: 0.5,
+                                    mx: 0.5,
+                                    borderRadius: 1,
+                                    border: "1px solid transparent", // important
+                                    backgroundImage: `
       linear-gradient(#fff, #fff), 
       linear-gradient(to right, #2196f3, #21cbf3)
     `,
-                                      backgroundOrigin: "border-box",
-                                      backgroundClip: "content-box, border-box",
-                                      boxShadow: "none",
-                                    }}
-                                  >
-                                    <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-                                      {/* All in one line */}
-                                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
+                                    backgroundOrigin: "border-box",
+                                    backgroundClip: "content-box, border-box",
+                                    boxShadow: "none",
+                                }}
+                            >
+                                <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+                                    {/* All in one line */}
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
-                                          {log?.trade_ip_address ?? "-"}
+                                            {log?.trade_ip_address ?? "-"}
                                         </Typography>
 
                                         <Typography variant="body2" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
-                                          User Count: <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
+                                            User Count: <strong>{log?.user_count?.toLocaleString() ?? "0"}</strong>
                                         </Typography>
 
                                         <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-                                          {log?.trades ?? "-"}
+                                            {log?.trades ?? "-"}
                                         </Typography>
 
                                         <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
-                                          {log?.start_date ?? "-"}
+                                            {log?.start_date ?? "-"}
                                         </Typography>
-                                      </Box>
-                                    </CardContent>
-                                  </Card>
-                                ))}
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        ))}
 
 
                         {/* LOAD MORE */}

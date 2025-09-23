@@ -22,6 +22,7 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
 
 
 const RejectionLogs = ({
@@ -60,6 +61,30 @@ const RejectionLogs = ({
   const rawData = sessionStorage.getItem("data");
   const parsedData = JSON.parse(rawData);
   const userType = parseInt(parsedData.user_type, 10);
+
+  const colArr = [
+    ...(userType !== 1 ? ["Client"] : []),
+    "Type",
+    "Datetime",
+    "Script",
+    "Trade Type",
+    "Qty",
+    "Lot",
+    "Rate",
+    "Message",
+  ]
+
+  const keyArr = [
+    ...(userType !== 1 ? ["full_name"] : []),
+    "type",
+    "datetime",
+    "script_name",
+    "trade_type",
+    "trade_qty",
+    "trade_lot",
+    "trade_rate",
+    "log_message",
+  ]
 
   const fetchPageData = async () => {
     setLoading(true);
@@ -195,7 +220,7 @@ const RejectionLogs = ({
           borderRadius: 1,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
           {isMobile && filterShow && (
             <IconButton
               color="primary"
@@ -213,13 +238,13 @@ const RejectionLogs = ({
             </Select>
           </FormControl>
 
-          <TextField
-            size="small"
-            placeholder="Search orders"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            fullWidth
-            sx={{ ml: 1 }}
+          <SearchPdfCsv
+            searchText={searchText}
+            setSearchText={setSearchText}
+            logs={logs}
+            colArr={colArr}
+            keyArr={keyArr}
+            isLoading={loading}
           />
         </Box>
       </Box>

@@ -25,6 +25,38 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import Summaryreportfilter from "./summaryreportfilter";
 import LedgerDetailsDialog from "./Ledgerdialog";
 import { formatScriptIds } from "./helpers/utilFunc";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+
+const colArr = [
+  "Serial No",
+  "Name",
+  "Code",
+  // "Ledger",
+  // "All",
+  // "Outstanding",
+  "Net MTM",
+  "Total MTM",
+  "Downline MTM",
+  "Upline MTM",
+  "Self MTM",
+  // "Net Position",
+]
+
+const keyArr = [
+  // "user_id",
+  "index",
+  "user_name",
+  "user_code",
+  // "mcx_pdf",
+  // "nse_pdf",
+  { isDesimal: true, name: "netm2m" },
+  { isDesimal: true, name: "totalm2m" },
+  { isDesimal: true, name: "downline_amount" },
+  { isDesimal: true, name: "upline_amount" },
+  { isDesimal: true, name: "self_m2m" },
+  // "net_pdf"
+]
 
 const Summary_report = () => {
   const theme = useTheme();
@@ -165,15 +197,13 @@ const Summary_report = () => {
               {/* <Typography variant="subtitle1" sx={{ flex: 0, mr: 1 }}>
                 Filters
               </Typography> */}
-              <Box sx={{ flex: 1 }}>
-                <TextField
-                  placeholder="Search by name or code"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  size="small"
-                  fullWidth
-                />
-              </Box>
+              <SearchPdfCsv
+                searchText={searchQuery}
+                setSearchText={setSearchQuery}
+                logs={paginatedData}
+                colArr={colArr}
+                keyArr={keyArr}
+              />
             </Box>
 
             <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
@@ -231,15 +261,13 @@ const Summary_report = () => {
             />
 
             {/* Search row desktop */}
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                placeholder="Search by name or code"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="small"
-                fullWidth
-              />
-            </Box>
+            <SearchPdfCsv
+              searchText={searchQuery}
+              setSearchText={setSearchQuery}
+              logs={paginatedData}
+              colArr={colArr}
+              keyArr={keyArr}
+            />
           </>
         )}
       </Box>

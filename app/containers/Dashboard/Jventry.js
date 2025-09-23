@@ -45,6 +45,32 @@ import ClientMasterBrokerFilter3 from './filters/ClientMasterBrokerFilter3';
 import DownlineFilter from './filters/ClientMasterBrokerFilter3';
 import { Tooltip } from '@mui/material';
 import { fetchJVAPI } from './API/API';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Sr No",
+    "From Account",
+    "To Account",
+    "Name Dis",
+    "Datetime Date",
+    "Cash Type",
+    "Debit",
+    "Credit",
+    "Remark",
+]
+
+const keyArr = [
+    "srno",
+    { isParse: true, key: 'user_id', name: "from_account" },
+    { isParse: true, key: 'user_id', name: "to_account" },
+    "name_dis",
+    "datetime_Date",
+    "cash_type",
+    "debit",
+    "credit",
+    "remark",
+]
+
 
 const Jventry = () => {
     const theme = useTheme();
@@ -384,20 +410,13 @@ const Jventry = () => {
                             mb: 2.5,
                         }}
                     >
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 
@@ -676,14 +695,13 @@ const Jventry = () => {
                         </Drawer>
 
                         <FilterBtn setFilterOpen={setFilterDrawer} />
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }}
-                            InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: theme.palette.text.secondary }} /></InputAdornment> }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 

@@ -34,7 +34,19 @@ import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
 import { tradeAutosquareofAPI, tradeEditDeleteLogLogsAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
 
+const colArr = [
+    "Client",
+    "Amount",
+    "Date / Time",
+]
+
+const keyArr = [
+    "client_full_name",
+    "amount",
+    "datetime",
+]
 
 
 const Autosquareuplog = ({
@@ -182,20 +194,13 @@ const Autosquareuplog = ({
                         }}
                     >
 
-                        <TextField
-                            variant="outlined"
-                            placeholder="Search logs..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            size="small"
-                            sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                        <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                    </InputAdornment>
-                                ),
-                            }}
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
                         />
                     </Box>
 
@@ -277,20 +282,13 @@ const Autosquareuplog = ({
                     )}
                     <FilterBtn setFilterOpen={setFilterDrawer} />
 
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        size="small"
-                        sx={{ flex: 1, minWidth: 200 }} // takes all available space
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                            ),
-                        }}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
 

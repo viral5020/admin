@@ -1,0 +1,403 @@
+now do for this
+
+PART 2 --------------
+
+export const rolloverPositions = async ({
+  password,
+  market,
+  script,
+  client,
+  master,
+  broker,
+  exparyDate,
+}) => {
+  const defaultParams = await getDefaultParams();
+  const payload = {
+    password,
+    market_type_id: market,
+    script_id: script,
+    user_id: client,
+    master_user_id: master,
+    broker_id: broker,
+    expiry_date: exparyDate,
+  };
+  try {
+    const res = await axiosInstance.post('ajaxfiles/trade_roll_over_all', {
+      ...defaultParams,
+      ...payload,
+    });
+    if (res.data.success) {
+      return res.data;
+    } else {
+      throw new Error(res.data.message || 'Failed to roll over positions');
+    }
+  } catch (err) {
+    console.error('Error in rolloverPositions:', err.message || err);
+    throw err;
+  }
+};
+
+function isChanged(apiData) {
+  const data = sessionStorage.getItem('notification');
+  // console.log('JSON.stringify(apiData) == data', JSON.stringify(apiData) == data)
+  // console.log('data', data)
+  // console.log('aaaa', JSON.stringify(apiData))
+  if (JSON.stringify(apiData) == data) {
+    return;
+  } else {
+    // window.location.href !== "http://localhost:3000/login" ? window.location.reload() : null;
+  }
+}
+
+export const checkLoginAPI = async (isJustLogin, user_id, auth_key) => {
+  // console.log("REMAIN THIS CONSOLE LOG HERE, OTHERWISE SOMETIMES THIS API IS NOT CALLED");
+  let defaultParams = await getDefaultParams();
+  // console.log('beofre isJustLogin defaultParams', defaultParams);
+  if (isJustLogin) {
+    // console.log("inside isJustLogin");
+    defaultParams = { ...defaultParams, login_user_id: user_id, auth_key }
+    // console.log('defaultParams', defaultParams);
+  }
+  // console.log('after isJustLogin defaultParams', defaultParams);
+  if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) {
+    // console.log("cannt get defaultParams");
+    return
+  };
+  // console.log("if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;")
+  try {
+    const response = await axiosInstance.post("/ajaxfiles/check_login", { ...defaultParams });
+    // console.log('check_login==', response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in checkLogin:", error);
+    throw error;
+  }
+};
+
+export const fetchNotificationAPI = async (isJustLogin, user_id, auth_key) => {
+  let defaultParams = await getDefaultParams();
+  // console.log("fetchNotificationAPI.........");
+  if (isJustLogin) {
+    defaultParams = { ...defaultParams, login_user_id: user_id, auth_key }
+  }
+  if (!(defaultParams?.auth_key || defaultParams?.login_user_id)) return;
+  try {
+    const response = await axiosInstance.post("/ajaxfiles/setting/fetch_notification", { ...defaultParams });
+    // isChanged(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in checkLogin:", error);
+    throw error;
+  }
+};
+
+// stored in sessionstorage > first_password_changed === 0 > navigate to changePassword
+export const getWatchListDataAPI = async () => {
+  try {
+    const defaultParams = await getDefaultParams();
+    const response = await axiosInstance.post('ajaxfiles/market_watch_list1', { ...defaultParams });
+    return response.data;
+  } catch (error) {
+    console.error('Error in getting watchlist data:', error);
+    throw error;
+  }
+}
+
+export async function getMarketWatchFilterAPI() {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post('/ajaxfiles/get_market_watch_filter2', { ...defaultParams });
+    return response.data;
+  } catch (error) {
+    console.error('getMarketWatchFilterAPI error:', error);
+    throw error;
+  }
+}
+
+export async function getMarketWiseScriptForexAPI(marketId) {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post('/ajaxfiles/get_market_wise_script_forex', { ...defaultParams, market_type_id: marketId });
+    return response.data;
+  } catch (error) {
+    console.error('getMarketWiseScriptForexAPI error:', error);
+    throw error;
+  }
+}
+
+export async function getScriptWiseExpiryForexAPI(marketId, scriptId) {
+  const defaultParams = await getDefaultParams();
+  try {
+    const response = await axiosInstance.post('/ajaxfiles/get_script_wise_expiry_forex', {
+      ...defaultParams,
+      market_type_id: marketId,
+      script_id: scriptId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('getMarketWiseScriptForexAPI error:', error);
+    throw error;
+  }
+}
+
+export const getForexWatchListDataAPI = async () => {
+  // console.log("getForexWatchListDataAPI getForexWatchListDataAPI")
+  try {
+    const defaultParams = await getDefaultParams();
+    const response = await axiosInstance.post('ajaxfiles/market_watch_list_forex', { ...defaultParams });
+    return response.data;
+  } catch (error) {
+    console.error('Error in getting watchlist data:', error);
+    throw error;
+  }
+}
+
+export const addPosition = async (payload) => {
+  try {
+    const defaultParams = await getDefaultParams();
+    // const response = await axiosInstance.post('ajaxfiles/setting/set_user_type_qty_single', { ...defaultParams, ...payload });
+    return response.data;
+  } catch (error) {
+    console.error('Error in Add Postion data:', error);
+    throw error;
+  }
+}
+
+export const updateTrade = async ({ trade_id, trade_rate, trade_lot, trade_qty, device_type = 0 }) => {
+  try {
+    const defaultParams = await getDefaultParams();
+    const response = await axiosInstance.post('ajaxfiles/trade_edit', {
+      trade_id,
+      trade_rate,
+      trade_lot,
+      trade_qty,
+      device_type,
+      ...defaultParams, // Optional: add auth tokens, etc., if required
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error in updating trade:', error);
+    throw error;
+  }
+};
+
+export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) => {
+  try {
+    // Retrieve user credentials from sessionStorage
+    const rawData = sessionStorage.getItem("data");
+    if (!rawData) {
+      throw new Error("User data not found in sessionStorage.");
+    }
+    let parsedData;
+    try {
+      parsedData = JSON.parse(rawData);
+    } catch (err) {
+      throw new Error("Failed to parse user data from sessionStorage.");
+    }
+    const userId = parsedData.user_id;
+    const authKey = parsedData.auth_key;
+    if (!userId || !authKey) {
+      throw new Error("User credentials are missing.");
+    }
+    const defaultParams = await getDefaultParams();
+    const response = await axiosInstance.post('ajaxfiles/trade_delete', {
+      ...defaultParams,
+      trade_id,
+      password,
+      device_type,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting trade:', error);
+    throw error;
+  }
+};
+
+export const fetchPositionsAPI = async ({
+  login_user_id,
+  auth_key,
+  all_outstanding,
+  expiry_date,
+  group_by,
+  market_type_id,
+  script_id,
+  broker_id,
+  master_user_id,
+  user_id
+}) => {
+  const defaultParams = await getDefaultParams();
+  const payload = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 100000,
+    sSearch: "",
+    all_outstanding,
+    expiry_date,
+    group_by,
+    market_type_id,
+    script_id,
+    broker_id,
+    master_user_id,
+    user_id
+  };
+  console.log("🔹 Fetching positions:", payload);
+  const response = await axiosInstance.post(
+    "datatables/position_book_list_forex",
+    payload
+  );
+  return response.data; // let component decide what to do
+};
+
+export const fetchforexTradesDataAPI = async (userId, authKey, scriptId) => {
+  if (!scriptId) return [];
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    isTodayTrade: "today",
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: 10,
+    script_id: scriptId,
+    sSearch: "",
+  };
+  try {
+    const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
+    return data?.aaData || [];
+  } catch (error) {
+    console.error("Failed to fetch trades:", error);
+    return [];
+  }
+};
+
+export const fetchSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
+  };
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/summary_report", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+export const fetchSelfplAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
+  };
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/self_profit_and_loss_report", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+export const fetchforexSummaryReportAPI = async (user_id, master_user_id, broker_id, end_date, start_end, market_type_id, script_id, valan_id) => {
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    ...defaultParams,
+    broker_id,
+    master_user_id,
+    user_id,
+    end_date,
+    start_end,
+    market_type_id,
+    script_id,
+    valan_id,
+  };
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/summary_report_forex", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch summary report:", error);
+    return [];
+  }
+};
+
+export const fetchMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
+  if (!userId || !authKey) return [];
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    broker_id: broker?.id,
+    master_user_id: master?.id,
+    user_id: client?.id,
+    ...defaultParams,
+  };
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/margin_management_list", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch margin management list:", error);
+    return [];
+  }
+};
+
+export const fetchforexMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
+  if (!userId || !authKey) return [];
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    broker_id: broker?.id,
+    master_user_id: master?.id,
+    user_id: client?.id,
+    ...defaultParams,
+  };
+  try {
+    const { data } = await axiosInstance.post("ajaxfiles/margin_management_forex_list", formData);
+    return data?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch margin management list:", error);
+    return [];
+  }
+};
+
+export const tradePlaceAPI = async (dataObj) => {
+  const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  console.log('dataObj', dataObj);
+  const defaultParams = await getDefaultParams();
+  const payload = {
+    ...defaultParams,
+    device_type: 0,
+    market_type_id: dataObj.market_type_id,
+    script_id: dataObj.script_id,
+    script_expiry_id: dataObj.script_expiry_id,
+    trade_rate: dataObj.price,
+    trade_qty: dataObj.qty,
+    trade_lot: dataObj.lot,
+    trade_type: dataObj.market, // market, lot ,stock loss.. > market price has value and disablabled
+    trade_type_x: dataObj.tradeType, // buy sell
+    check_script_name: dataObj.script_expiry_type ? `${dataObj.script_name}-${dataObj.script_expiry_type}` : dataObj.script_name, // HOW THIS SHOULD BE SET
+    user_id: (dataStored?.user_type != 1 && dataStored?.user_type != 2) ? dataObj.client.id : undefined,
+  };
+
+  try {
+    const response = await axiosInstance.post('/ajaxfiles/trade_place', payload);
+    // const response = await axiosInstance.post('/ajaxfiles/trade_place', errorPayload);
+    console.log('Trade response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error in tradePlaceAPI:', error);
+    throw error;
+  }
+};

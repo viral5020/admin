@@ -17,6 +17,20 @@ import { formatScriptIds } from './helpers/utilFunc';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import BackToTop from './helpers/BackToTop';
 import FilterBtn from './filters/FilterBtn';
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+    "Username",
+    "IP Address",
+    "Log Time",
+]
+
+const keyArr = [
+    "username",
+    "ip_address",
+    "log_time",
+]
+
 
 const Usereditlog = () => {
     const theme = useTheme();
@@ -218,21 +232,14 @@ const Usereditlog = () => {
                     />
                 }
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
-                    <FilterBtn setFilterOpen={setFilterDrawer} />
-                    <TextField
-                        variant="outlined"
-                        placeholder="Search logs..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        size="small"
-                        sx={{ flex: 1, minWidth: 200 }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{ position: 'relative', top: '-5px' }}>
-                                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                            ),
-                        }}
+                    {isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
+                    <SearchPdfCsv
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        logs={logs}
+                        colArr={colArr}
+                        keyArr={keyArr}
+                        isLoading={loading}
                     />
                 </Box>
 

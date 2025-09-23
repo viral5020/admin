@@ -6,7 +6,7 @@ import AutocompleteFilter from './AutocompleteFilter';
 import { useTheme } from '@emotion/react';
 import { forex_comex_market } from '../helpers/utilFunc';
 import axiosInstance from '../API/axiosconfig';
-import { fetchOptionsAPI } from '../API/API';
+import { fetchOptionsAPI, getDefaultParams } from '../API/API';
 import AutoSuggestFilter from './AutoSuggestFilter';
 
 
@@ -68,23 +68,15 @@ const MarketScriptNameFilter = ({
   };
 
 
-  function handleFetch(term, type, val) {
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  async function handleFetch(term, type, val) {
     // if (!term) return;
-    let params = {
-      is_app: 1,
-      login_user_id: dataStored?.user_id,
-      auth_key: dataStored?.auth_key,
-    }
-
-    const url = 'http://128.199.126.171/~goldorg/ajaxfiles'
 
     switch (type) {
       case 'market':
-        !isForex ? fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setMarketOptions) : null;
+        !isForex ? fetchOptions(`/ajaxfiles/get_market_name_search`, { term }, setMarketOptions) : null;
         break;
       case 'script':
-        isForex && !market && !val ? setScriptOptions([]) : fetchOptions(`${url}/get_script_name_search`, { ...params, term, market: val?.id || market?.id, }, setScriptOptions);
+        isForex && !market && !val ? setScriptOptions([]) : fetchOptions(`/ajaxfiles/get_script_name_search`, { term, market: val?.id || market?.id, }, setScriptOptions);
         break;
       default:
         break;
