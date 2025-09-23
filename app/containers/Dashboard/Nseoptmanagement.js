@@ -286,10 +286,11 @@ const Nseoptmanagement = () => {
                                                 {/* Action column */}
                                                 <TableCell>
                                                     <Button
-                                                        variant="outlined"
+                                                        variant="contained"
                                                         color="error"
                                                         size="small"
                                                         onClick={() => handleRemove(row.script_expiry_option_id)}
+                                                        sx={{ borderRadius: 1 }}
                                                     >
                                                         Remove
                                                     </Button>

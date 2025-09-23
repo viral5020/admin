@@ -217,8 +217,21 @@ const Usereditlog = () => {
                         onApply={onFilterApply}
                     />
                 }
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
-                    <FilterBtn setFilterOpen={setFilterDrawer} />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 2,
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 2.5,
+                        mx: 1,
+                    }}
+                >
+                    {/* Filter button only on mobile */}
+                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                        <FilterBtn setFilterOpen={setFilterDrawer} />
+                    </Box>
+
                     <TextField
                         variant="outlined"
                         placeholder="Search logs..."
@@ -235,6 +248,7 @@ const Usereditlog = () => {
                         }}
                     />
                 </Box>
+
 
                 {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
 
@@ -263,9 +277,9 @@ const Usereditlog = () => {
                                             <TableCell>{log?.ip_address ?? "-"}</TableCell>
                                             <TableCell>{log?.log_time ?? "-"}</TableCell>
                                             <TableCell>
-                                                <Button size="small" variant="outlined" onClick={() => handleBasicClick(log)}>Basic</Button>
-                                                <Button size="small" variant="outlined" color="secondary" onClick={() => handleBrokerageClick(log)}>Brokerage</Button>
-                                                <Button size="small" variant="outlined" color="success" onClick={() => handleMarketClick(log)}>Market</Button>
+                                                <Button size="small" variant="contained" onClick={() => handleBasicClick(log)} sx={{ borderRadius: 1, mr: 1 }}>Basic</Button>
+                                                <Button size="small" variant="contained" color="secondary" onClick={() => handleBrokerageClick(log)} sx={{ borderRadius: 1, mr: 1 }}>Brokerage</Button>
+                                                <Button size="small" variant="contained" color="success" onClick={() => handleMarketClick(log)} sx={{ borderRadius: 1 }}>Market</Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}

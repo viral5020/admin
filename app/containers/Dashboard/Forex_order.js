@@ -33,7 +33,7 @@ import ForexFilter from './forexfilter';
 import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
-import { deleteTrade, fetchforexOrdersAPI, updateTrade } from './API/API';
+import { deleteTrade, fetchforexOrdersAPI, fetchforexTradesDataAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import Pagination from './filters/Pagination';
 
@@ -139,7 +139,7 @@ const Forex_order = () => {
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchPageData = async () => {
+  const fetchPageData = async (filterType = "today", searchValue = "") => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
@@ -585,13 +585,15 @@ const Forex_order = () => {
                 <tr>
                   {[
                     "Device",
-                    "Time",
-                    ...(userType !== 1 ? ["Client"] : []),
+                    "Status",
+                    ...(userType !== 1 ? ["Client Name"] : []),
+                    ...(userType !== 1 ? ["Client Code"] : []),
                     "Script",
                     "B/S",
                     "Order Type",
                     "Qty (Lot)",
                     "Order Price",
+                    "Time",
                     "Status",
                     "O. Time",
                     "Comm Amt",
@@ -618,27 +620,53 @@ const Forex_order = () => {
               </thead>
               <tbody>
                 {orders.map((item, index) => {
-                  // let rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                  // if (item.trd_type === "Buy") rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                  // if (item.trd_type === "Sell") rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-
-                  const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+                  const market = item.mrkt_t_name?.toUpperCase?.() || "DEFAULT";
                   let backgroundColor = "#9e9e9e";
-                  if (market === "NSEFUT") backgroundColor = "#1976d2";
-                  else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
-                  else if (market === "MCXFUT") backgroundColor = "#8e24aa";
-                  else if (market === "NYSE") backgroundColor = "#f57c00";
+                  if (market === "NSEFUT") backgroundColor = "#5a88adff";
+                  else if (market === "GLOBAL FUTURES") backgroundColor = "#519253ff";
+                  else if (market === "MCXFUT") backgroundColor = "#895d91ff";
+                  else if (market === "NYSE") backgroundColor = "#dbad68ff";
+                  else if (market === "COMEX") backgroundColor = "#974991ff";
 
                   const [scriptPrefix, ...scriptRest] = item.scrp_name.split(" ");
                   const scriptSuffix = scriptRest.join(" ");
 
+                  // Left line color
+                  const leftLineColor = item.trd_type === "Buy" ? "#0288d1" : item.trd_type === "Sell" ? "#d32f2f" : "transparent";
+
+                  // Slightly darker fade gradient
+                  const rowGradient = item.trd_type === "Buy"
+                    ? "linear-gradient(to right, rgba(2,136,209,0.15), rgba(255,255,255,0))"
+                    : item.trd_type === "Sell"
+                      ? "linear-gradient(to right, rgba(211,47,47,0.15), rgba(255,255,255,0))"
+                      : "none";
+
                   return (
-                    <tr key={item.trd_id || index} >
+                    <tr
+                      key={item.trd_id || index}
+                      style={{
+                        borderLeft: `4px solid ${leftLineColor}`,
+                        background: rowGradient,
+                      }}
+                    >
                       <td dangerouslySetInnerHTML={{ __html: item.d_type_html }} />
-                      <td>{item.trd_matchdtime}</td>
-                      {userType !== 1 && <td>{item.client_full_name}</td>}
+                      <td
+                        style={{
+                          color:
+                            item.status === "Executed" ? "#2e7d32" : // green for executed
+                              item.status === "Pending Order" ? "#fbc02d" : // yellow for pending
+                                "#000", // default color
+                          fontSize: 13.5,
+                          fontWeight: "bold",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {item.status}
+                      </td>
+                      {userType !== 1 && <td>{item.client_full_name_dis}</td>}
+                      {userType !== 1 && <td>{item.client_name_dis}</td>}
                       <td>
-                        <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.2 }}>
                           <Box component="span">
                             <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
                               {scriptPrefix}
@@ -658,7 +686,7 @@ const Forex_order = () => {
                               display: "inline-block",
                             }}
                           >
-                            {item.mrkt_name}
+                            {item.mrkt_t_name}
                           </Box>
                         </Box>
                       </td>
@@ -676,7 +704,32 @@ const Forex_order = () => {
                       >
                         {item.trd_type}
                       </td>
-                      <td>{item.trd_type2}</td>
+                      <td>
+                        <Box
+                          component="span"
+                          sx={{
+                            fontSize: "10px",       // small font
+                            px: 1,                  // horizontal padding
+                            py: 0.3,                // vertical padding
+                            borderRadius: "8px",    // rounded corners
+                            backgroundColor:
+                              item.trd_type2 === "Exit Position" ? "#ffd54f" :
+                                item.trd_type2 === "Exit All" ? "#cf6363ff" :
+                                  item.trd_type2 === "Buy Limit" ? "#6c7eb8ff" :
+                                    item.trd_type2 === "Exit auto" ? "#81d4fa" :
+                                      item.trd_type2 === "Exit Intraday" ? "#ce93d8" :
+                                        item.trd_type2 === "Market" ? "#a5d6a7" :
+                                          item.trd_type2 === "BF" ? "#ffcc80" :
+                                            "#ffffff",
+                            color: "#000000ff",
+                            fontWeight: "bold",
+                            display: "inline-block",
+                            textAlign: "center",
+                          }}
+                        >
+                          {item.trd_type2}
+                        </Box>
+                      </td>
                       <td>
                         <Box component="span" sx={{ fontWeight: 700 }}>
                           {item.trd_qty}
@@ -688,7 +741,7 @@ const Forex_order = () => {
                       <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
                         {item.trd_rate}
                       </td>
-                      <td>{item.status}</td>
+                      <td>{item.trd_matchedtime}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_commision_amount}</td>
                       {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
@@ -720,7 +773,7 @@ const Forex_order = () => {
                             }}
                             onClick={() => {
                               setCancelItem(item);
-                              setCancelDialogOpen(true); // Always show confirmation
+                              setCancelDialogOpen(true);
                             }}
                           >
                             Cancel
@@ -731,6 +784,7 @@ const Forex_order = () => {
                   );
                 })}
               </tbody>
+
             </table>
           </Box>
 

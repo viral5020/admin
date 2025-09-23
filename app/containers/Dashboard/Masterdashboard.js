@@ -51,7 +51,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
-import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
+import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTopGainersLosersAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -298,6 +298,11 @@ function Masterdashboard() {
     const [loadingTrades, setLoadingTrades] = useState(false);
     const [tradesError, setTradesError] = useState(null);
 
+
+    const [topGainers, setTopGainers] = useState([]);
+    const [topLosers, setTopLosers] = useState([]);
+
+
     const [expanded, setExpanded] = useState(false);
 
     const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -376,10 +381,10 @@ function Masterdashboard() {
     const Fullscreen = useMediaQuery(theme.breakpoints.down("sm"));
     const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const pendingPaginatedOrders = filteredPendingOrders.slice(
-        pendingCurrentPage * pendingRowsPerPage,
-        (pendingCurrentPage + 1) * pendingRowsPerPage
-    );
+    // const pendingPaginatedOrders = filteredPendingOrders.slice(
+    //     pendingCurrentPage * pendingRowsPerPage,
+    //     (pendingCurrentPage + 1) * pendingRowsPerPage
+    // );
 
     const handlePendingFilterChange = (event) => {
         const newFilter = event.target.value;
@@ -397,13 +402,13 @@ function Masterdashboard() {
         setVisibleLogCount((prev) => prev + 10);
     };
 
-    const pendingVisibleOrders = pendingOrders.slice(0, pendingVisibleCount);
+    // const pendingVisibleOrders = pendingOrders.slice(0, pendingVisibleCount);
 
     const handleLoadMore = () => {
         setVisibleCount((prev) => prev + 10);
     };
 
-    const visibleOrders = orders.slice(0, visibleCount);
+    // const visibleOrders = orders.slice(0, visibleCount);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -644,10 +649,10 @@ function Masterdashboard() {
         setExpanded((prev) => !prev);
     };
 
-    const paginatedOrders = orders.slice(
-        currentPage * itemsPerPage,
-        (currentPage + 1) * itemsPerPage
-    );
+    // const paginatedOrders = orders.slice(
+    //     currentPage * itemsPerPage,
+    //     (currentPage + 1) * itemsPerPage
+    // );
 
     const paginatedLogs = useMemo(() => {
         const start = logCurrentPage * logPageSize;
@@ -659,6 +664,22 @@ function Masterdashboard() {
         () => filteredLogs.slice(0, visibleLogCount),
         [filteredLogs, visibleLogCount]
     );
+
+    useEffect(() => {
+        const dataStored = JSON.parse(sessionStorage.getItem("data"));
+        if (!dataStored) return;
+
+        const loadData = async () => {
+            const { topGainers, topLosers } = await fetchTopGainersLosersAPI(
+                dataStored.user_id,
+                dataStored.auth_key
+            );
+            setTopGainers(topGainers);
+            setTopLosers(topLosers);
+        };
+
+        loadData();
+    }, []);
 
 
     function getMarginDataFromSessionStorage() {
@@ -1904,31 +1925,24 @@ function Masterdashboard() {
                 {/*--------------------- LAST 3 CARDS ---------------------*/}
                 <Grid item xs={12}>
                     <Grid container spacing={0.5}>
-                        {['Scripts in Trends', 'Top Gainers', 'Top Losers'].map((title, index) => {
-                            const headerColor = '#fff';
+                        {["Scripts in Trends", "Top Gainers", "Top Losers"].map((title, index) => {
+                            const headerColor = "#fff";
                             const gradientBg =
                                 index === 1
-                                    ? 'linear-gradient(to right,rgb(11, 122, 43), #d0f0d2)'
+                                    ? "linear-gradient(to right,rgb(11, 122, 43), #d0f0d2)"
                                     : index === 2
-                                        ? 'linear-gradient(to right,rgb(189, 29, 11),rgb(219, 182, 185))'
-                                        : 'linear-gradient(to right,rgb(10, 57, 90),rgb(184, 207, 226))';
+                                        ? "linear-gradient(to right,rgb(189, 29, 11),rgb(219, 182, 185))"
+                                        : "linear-gradient(to right,rgb(10, 57, 90),rgb(184, 207, 226))";
 
                             const shadowColor =
                                 index === 1
-                                    ? 'rgba(76, 175, 80, 0.5)' // green shadow
+                                    ? "rgba(76, 175, 80, 0.5)"
                                     : index === 2
-                                        ? 'rgba(244, 67, 54, 0.5)' // red shadow
-                                        : 'rgba(33, 150, 243, 0.5)'; // blue shadow
+                                        ? "rgba(244, 67, 54, 0.5)"
+                                        : "rgba(33, 150, 243, 0.5)";
 
-                            const stocks = index === 0
-                                ? trendStocks
-                                : index === 1
-                                    ? [
-                                        { name: 'ADANIPORTS', ltp: '₹845.30', change: '+4.2%', qty: 75, rate: '830.00', id: '#31452391', time: '12-07-2025 05:35:10', commission: 0 },
-                                    ]
-                                    : [
-                                        { name: 'WIPRO', ltp: '₹412.40', change: '-₹12.50', qty: 100, rate: '425.00', id: '#31452392', time: '12-07-2025 06:01:23', commission: 0 },
-                                    ];
+                            const stocks =
+                                index === 0 ? trendStocks : index === 1 ? topGainers : topLosers;
 
                             return (
                                 <Grid key={index} item xs={12} md={4}>
@@ -1936,9 +1950,9 @@ function Masterdashboard() {
                                         elevation={3}
                                         sx={{
                                             height: boxHeight,
-                                            overflowY: 'auto',
-                                            scrollbarWidth: 'none',
-                                            '&::-webkit-scrollbar': { display: 'none' },
+                                            overflowY: "auto",
+                                            scrollbarWidth: "none",
+                                            "&::-webkit-scrollbar": { display: "none" },
                                             borderRadius: 2,
                                             boxShadow: `0 0 10px ${shadowColor}`,
                                         }}
@@ -1947,10 +1961,10 @@ function Masterdashboard() {
                                             variant="h6"
                                             fontWeight={700}
                                             sx={{
-                                                position: 'sticky',
+                                                position: "sticky",
                                                 top: 0,
                                                 background: gradientBg,
-                                                backdropFilter: 'blur(6px)',
+                                                backdropFilter: "blur(6px)",
                                                 zIndex: 1,
                                                 py: 0.5,
                                                 px: 1,
@@ -1958,101 +1972,137 @@ function Masterdashboard() {
                                                 borderTopRightRadius: 8,
                                                 borderBottom: `1px solid ${theme.palette.divider}`,
                                                 color: headerColor,
-                                                fontSize: '1rem',
-                                                letterSpacing: '0.3px',
+                                                fontSize: "1rem",
+                                                letterSpacing: "0.3px",
                                             }}
                                         >
                                             {title}
                                         </Typography>
 
-                                        {stocks.map((stock, idx) => {
-                                            const isPositive = stock.per >= 0;
-                                            const changeColor = isPositive ? '#2196f3' : '#f44336';
+                                        {loading && index !== 0 ? (
+                                            <Box
+                                                display="flex"
+                                                justifyContent="center"
+                                                alignItems="center"
+                                                height="100%"
+                                            >
+                                                <CircularProgress size={28} />
+                                            </Box>
+                                        ) : (
+                                            stocks.map((stock, idx) => {
+                                                const stockName =
+                                                    stock.name || stock.ScriptName || stock.InstrumentIdentifier || "--";
+                                                const ltp = stock.ltp || stock.LastTradePrice || 0;
+                                                const per = stock.per ?? stock.PriceChangePercentage ?? 0;
+                                                const rateChange = stock.rateChange ?? stock.PriceChange ?? 0;
 
-                                            return (
-                                                <Paper
-                                                    key={idx}
-                                                    elevation={1}
-                                                    onClick={() => {
-                                                        setSelectedStock({
-                                                            script_id: stock.Id,
-                                                            name: stock.name,
-                                                            ltp: stock.ltp,
-                                                            per: stock.per,
-                                                            rateChange: stock.rateChange,
-                                                            data: generateCandleData(stock.name),
-                                                        });
-                                                        setCandleOpen(true);
-                                                    }}
-                                                    sx={{
-                                                        mb: 0.5,
-                                                        mt: 0.5,
-                                                        mr: 0.5,
-                                                        ml: 0.5,
-                                                        borderRadius: 1,
-                                                        cursor: 'pointer',
-                                                        border: `1px solid ${changeColor}`,
-                                                        boxShadow: `0 2px 5px ${shadowColor}`,
-                                                        transition: 'transform 0.12s ease, box-shadow 0.12s ease',
-                                                        '&:hover': {
-                                                            transform: 'scale(1.01)',
-                                                            boxShadow: `0 4px 12px ${shadowColor}`,
-                                                        },
-                                                    }}
-                                                >
-                                                    <Box display="flex" alignItems="center" px={0.5}>
-                                                        {/* Square avatar */}
-                                                        <Avatar
-                                                            variant="square"
-                                                            sx={{
-                                                                bgcolor: changeColor,
-                                                                width: 32,
-                                                                height: 32,
-                                                                mr: 1,
-                                                                fontSize: 14,
-                                                                fontWeight: 600,
-                                                            }}
-                                                        >
-                                                            {stock.name.charAt(0)}
-                                                        </Avatar>
+                                                const isPositive = Number(per) >= 0;
+                                                const changeColor = isPositive ? "#2196f3" : "#f44336";
 
-                                                        {/* Main content */}
-                                                        <Box flexGrow={1}>
-                                                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                                    {stock.name}
-                                                                </Typography>
-                                                                <Typography variant="body2" fontWeight={600}>
-                                                                    ₹{Number(stock.ltp).toLocaleString()}
-                                                                </Typography>
-                                                            </Box>
+                                                return (
+                                                    <Paper
+                                                        key={idx}
+                                                        elevation={1}
+                                                        onClick={() => {
+                                                            setSelectedStock({
+                                                                script_id: stock.Id || stock.InstrumentIdentifier,
+                                                                name: stockName,
+                                                                ltp,
+                                                                per,
+                                                                rateChange,
+                                                                data: generateCandleData(stockName),
+                                                            });
+                                                            setCandleOpen(true);
+                                                        }}
+                                                        sx={{
+                                                            mb: 0.5,
+                                                            mt: 0.5,
+                                                            mx: 0.5,
+                                                            borderRadius: 1,
+                                                            cursor: "pointer",
+                                                            border: `1px solid ${changeColor}`,
+                                                            boxShadow: `0 2px 5px ${shadowColor}`,
+                                                            transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                                                            "&:hover": {
+                                                                transform: "scale(1.01)",
+                                                                boxShadow: `0 4px 12px ${shadowColor}`,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Box display="flex" alignItems="center" px={0.5}>
+                                                            <Avatar
+                                                                variant="square"
+                                                                sx={{
+                                                                    bgcolor: changeColor,
+                                                                    width: 32,
+                                                                    height: 32,
+                                                                    mr: 1,
+                                                                    fontSize: 14,
+                                                                    fontWeight: 600,
+                                                                }}
+                                                            >
+                                                                {stockName.charAt(0)}
+                                                            </Avatar>
 
-                                                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                                                                <Typography
-                                                                    variant="body2"
-                                                                    color={isPositive ? 'success.main' : 'error.main'}
-                                                                    fontWeight={600}
+                                                            <Box flexGrow={1}>
+                                                                {/* First row: Name + LTP */}
+                                                                <Box
+                                                                    display="flex"
+                                                                    justifyContent="space-between"
+                                                                    alignItems="center"
+                                                                    flexWrap="nowrap"
+                                                                    minWidth={0}
                                                                 >
-                                                                    {isPositive ? `+${stock.per}%` : `${stock.per}%`}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant="body2"
-                                                                    color={isPositive ? 'success.main' : 'error.main'}
-                                                                    fontWeight={600}
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        fontWeight={600}
+                                                                        noWrap
+                                                                        sx={{ textOverflow: "ellipsis", overflow: "hidden" }}
+                                                                    >
+                                                                        {stockName}
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        fontWeight={600}
+                                                                        sx={{ ml: 1, flexShrink: 0 }}
+                                                                    >
+                                                                        ₹{Number(ltp).toLocaleString()}
+                                                                    </Typography>
+                                                                </Box>
+
+                                                                {/* Second row: % change + rateChange */}
+                                                                <Box
+                                                                    display="flex"
+                                                                    justifyContent="space-between"
+                                                                    alignItems="center"
                                                                 >
-                                                                    ₹{Number(stock.rateChange).toLocaleString()}
-                                                                </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color={isPositive ? "success.main" : "error.main"}
+                                                                        fontWeight={600}
+                                                                    >
+                                                                        {isPositive ? `+${per}%` : `${per}%`}
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color={isPositive ? "success.main" : "error.main"}
+                                                                        fontWeight={600}
+                                                                    >
+                                                                        ₹{Number(rateChange).toLocaleString()}
+                                                                    </Typography>
+                                                                </Box>
                                                             </Box>
                                                         </Box>
-                                                    </Box>
-                                                </Paper>
-                                            );
-                                        })}
+                                                    </Paper>
+                                                );
+                                            })
+                                        )}
                                     </Paper>
                                 </Grid>
                             );
                         })}
                     </Grid>
+
                 </Grid>
 
 
@@ -2214,7 +2264,9 @@ function Masterdashboard() {
                         {tabValue === 1 && selectedStock && (
                             <>
                                 {loadingTrades ? (
-                                    <Typography sx={{ p: 2 }}>Loading...</Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <CircularProgress size={28} color="secondary" />
+                                    </Box>
                                 ) : tradesError ? (
                                     <Typography color="error" sx={{ p: 2 }}>{tradesError}</Typography>
                                 ) : tradesData.length === 0 ? (
@@ -2541,8 +2593,8 @@ function Masterdashboard() {
                             <>
                                 {/* Content */}
                                 {loading ? (
-                                    <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-                                        <CircularProgress />
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <CircularProgress size={28} color="secondary" />
                                     </Box>
                                 ) : filteredPositions.length === 0 ? (
                                     <Typography sx={{ p: 2 }}>No position data found.</Typography>
@@ -2825,43 +2877,39 @@ function Masterdashboard() {
 
             <Grid container spacing={1} sx={{ pt: 3, alignItems: 'flex-start' }}>
                 {/*--------------------- Bulk Trading ---------------------- */}
-                <Grid item sx={{ width: 'auto', minWidth: 200 }}> {/* increase min width */}
-                    <Paper elevation={0} sx={glassStyles}>
-                        <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            <Box>
-                                {!isMobile ? (
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            fontWeight={700}
-                                            textAlign="center"
-                                            sx={{ m: 0, p: 0 }}
-                                        >
-                                            Bulk Trading
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', m: 0, p: 0 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            fontWeight={700}
-                                            textAlign="left"
-                                            sx={{ m: 0, p: 0, lineHeight: 1.2 }}
-                                        >
-                                            Bulk Trading
-                                        </Typography>
-                                    </Box>
-                                )}
+                <Grid item sx={{ width: 'auto', minWidth: 200 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            ...glassStyles,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: '100%'
+                        }}
+                    >
+                        <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 0.5, flexGrow: 1 }}>
+
+                            {/* Header - fixed top left */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', p: 0, m: 0 }}>
+                                <Typography
+                                    variant="subtitle1"
+                                    fontWeight={700}
+                                    textAlign="left"
+                                    sx={{ m: 0, p: 0, lineHeight: 1 }}
+                                >
+                                    Bulk Trading
+                                </Typography>
                             </Box>
 
                             <Divider sx={{ my: 0.5 }} />
 
-                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                            {/* Form controls */}
+                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mt: 2.5 }}>
                                 <TextField
                                     label="Enter Number of Orders"
                                     variant="outlined"
                                     size="small"
-                                    sx={{ flexGrow: 1, minWidth: 150 }} // makes it expand to fit label
+                                    sx={{ flexGrow: 1, minWidth: 150 }}
                                     value={value}
                                     onChange={(e) => setValue(e.target.value)}
                                     type="number"
@@ -2874,7 +2922,7 @@ function Masterdashboard() {
                                         width: 40,
                                         height: 40,
                                         minWidth: 0,
-                                        padding: 0,
+                                        p: 0,
                                         lineHeight: 1,
                                         display: 'flex',
                                         alignItems: 'center',
@@ -2887,6 +2935,7 @@ function Masterdashboard() {
                         </Box>
                     </Paper>
                 </Grid>
+
 
                 {/* Dialog rendering BulkTrading component */}
                 <Dialog
@@ -2918,7 +2967,7 @@ function Masterdashboard() {
 
                 {/*--------------------- Cash Entry ---------------------- */}
                 <Grid item xs={12} sm sx={{ p: 1, m: 0 }}> {/* small spacing, flexible width */}
-                    <Paper elevation={0} sx={{ ...glassStyles, p: 1, m: 0 }}>
+                    <Paper elevation={0} sx={{ ...glassStyles, p: 1, m: 0, height: 160 }}>
                         <Box sx={{ p: 1, m: 0 }}>
                             <Box sx={{ p: 0, m: 0 }}>
                                 {!isMobile ? (
@@ -3049,46 +3098,73 @@ function Masterdashboard() {
 
                 {/* Small Panel on the right (30%) */}
                 <Grid item xs={12} md={4.5}>
-                    <Paper elevation={0} sx={{ ...glassStyles, height: '100%', p: 2 }}>
-                        <Typography variant="subtitle1" fontWeight={700} mb={1}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            height: '100%',
+                            p: 3,
+                            borderRadius: 3,
+                            backdropFilter: 'blur(10px)',
+                            border: `1px solid ${theme.palette.divider}`,
+                            backgroundColor: theme.palette.background.paper,
+                        }}
+                    >
+                        <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            mb={1}
+                            color={theme.palette.text.primary}
+                        >
                             Utility
                         </Typography>
-                        <Divider sx={{ mb: 1 }} />
+                        <Divider sx={{ mb: 2, borderColor: theme.palette.divider }} />
 
                         <Box
                             display="flex"
                             flexDirection="column"
-                            gap={1}
+                            gap={0.5}
                             sx={{
-                                height: 220,
+                                height: 240,
                                 overflowY: 'auto',
-                                pr: 0.5,
+                                pr: 1,
                                 scrollbarWidth: 'none',
                                 '&::-webkit-scrollbar': { display: 'none' },
                             }}
                         >
                             {quickLinks.map((item, idx) => (
-                                <Box
+                                <Paper
                                     key={idx}
+                                    elevation={0}
                                     sx={{
-                                        cursor: "pointer",
-                                        "&:hover .title": { textDecoration: "underline" },
+                                        p: 1,
+                                        cursor: 'pointer',
+                                        borderRadius: 2,
+                                        border: `1px solid ${theme.palette.divider}`,
+                                        backgroundColor: theme.palette.background.default,
+                                        color: theme.palette.text.primary,
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: `0 0 10px ${theme.palette.action.selected}`,
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: `0 0 20px ${theme.palette.primary.light}`,
+                                            borderColor: theme.palette.primary.main,
+                                            backgroundColor:
+                                                theme.palette.mode === 'light'
+                                                    ? theme.palette.grey[100]
+                                                    : theme.palette.grey[800],
+                                        },
                                     }}
                                     onClick={() => navigate(item.url)}
                                 >
-                                    <Typography
-                                        className="title"
-                                        variant="body2"
-                                        fontWeight={600}
-                                        sx={{ lineHeight: 1.2 }}
-                                    >
+                                    <Typography variant="body1" fontWeight={600} sx={{ lineHeight: 1.3 }}>
                                         {item.title}
                                     </Typography>
-                                </Box>
+                                </Paper>
                             ))}
                         </Box>
                     </Paper>
                 </Grid>
+
             </Grid>
         </Box >
     );

@@ -73,8 +73,8 @@ const ValanFilter = ({ valanId, setValanId, isDarkMode }) => {
             {...params}
             placeholder="Start typing to search..."
             label="Valan ID"
-            fullWidth
-            sx={getInputBoxStyle(isDarkMode)}
+            sx={{ ...getInputBoxStyle(isDarkMode), width: 250 }}
+
             InputProps={{
               ...params.InputProps,
               endAdornment: (

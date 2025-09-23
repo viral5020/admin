@@ -18,6 +18,8 @@ import {
 import { useTheme } from "@emotion/react";
 import axios from "axios";
 import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI, fetchOrdersByUserAPI, fetchPositionsByUserAPI } from "./API/API";
+import OrderBook from "./OrderBook";
+import OrderPage1 from "./Positions";
 
 const UserTablePage = () => {
     const theme = useTheme();
@@ -25,6 +27,7 @@ const UserTablePage = () => {
     // Dropdown state
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUserId, setselectedUserId] = useState(null);
 
     // Orders & Positions
     const [orders, setOrders] = useState([]);
@@ -89,34 +92,6 @@ const UserTablePage = () => {
         fetchUsers();
     }, []);
 
-    // Fetch Orders
-    const fetchOrders = async () => {
-        setLoadingOrders(true);
-        try {
-            const rows = await fetchOrdersByUserAPI({ target_user_id: selectedUser?.id, pageSize: 50, start: 0 });
-            setOrders(rows);
-        } catch (err) {
-            console.error("Orders fetch error:", err);
-            setOrders([]);
-        } finally {
-            setLoadingOrders(false);
-        }
-    };
-
-    // Fetch Positions
-    const fetchPositions = async () => {
-        setLoadingPositions(true);
-        try {
-            const rows = await fetchPositionsByUserAPI({ target_user_id: selectedUser?.id, pageSize: 100000, start: 0 });
-            setPositions(rows);
-        } catch (err) {
-            console.error("Positions fetch error:", err);
-            setPositions([]);
-        } finally {
-            setLoadingPositions(false);
-        }
-    };
-
     // Fetch Logs
     const fetchLogs = async () => {
         setLoadingLogs(true);
@@ -171,7 +146,7 @@ const UserTablePage = () => {
             const data = await fetchSummaryAPI({
                 login_user_id: userData?.user_id,
                 auth_key: userData?.auth_key,
-                view_user_id: userData?.id || "",
+                view_user_id: selectedUser?.id || "",
                 tab
             });
 
@@ -184,18 +159,15 @@ const UserTablePage = () => {
         }
     };
 
-
-
     const handleSubmit = () => {
-        if (!selectedUser) return; // extra safety
-        setIsUserSelected(true);   // show the rest of the content
+        if (!selectedUser) return;
+        setIsUserSelected(true);
 
-        fetchOrders();
-        fetchPositions();
         fetchLogs();
-        !userData?.investor_status ? fetchProfile() : '';
+        if (!userData?.investor_status) fetchProfile();
         fetchSummary();
     };
+
 
     return (
         <Box sx={{ p: 3, minHeight: "100vh", backgroundColor: theme.palette.background.default }}>
@@ -205,10 +177,9 @@ const UserTablePage = () => {
                     options={users}
                     getOptionLabel={(option) => option?.text || option || ""}
                     value={selectedUser}
-                    onChange={(e, val) => setSelectedUser(val)}
+                    onChange={(e, val) => setSelectedUser(val)}  // ✅ single source of truth
                     onInputChange={(e, val, reason) => reason === "input" && fetchUsers(val)}
                     renderInput={(params) => <TextField {...params} label="Select User" size="small" />}
-                    sx={{ flex: 1 }}
                 />
                 <Button
                     variant="contained"
@@ -410,365 +381,22 @@ const UserTablePage = () => {
                     {/* Orders Table */}
                     <Paper sx={{ ...glassStyles, mb: 3, p: 1, overflowX: "auto" }}>
                         <Typography variant="h6" sx={{ mb: 1 }}>Orders</Typography>
-                        {loadingOrders ? (
-                            <Box textAlign="center" p={2}>Loading Orders...</Box>
-                        ) : (
-                            <table
-                                className="table table-striped table-bordered"
-                                style={{
-                                    minWidth: "1850px",
-                                    fontSize: "12px",
-                                    margin: 0,
-                                    backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-                                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                                }}
-                            >
-                                <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
-                                    <tr>
-                                        {[
-                                            "Device",
-                                            "Time",
-                                            ...(userType !== 1 ? ["Client"] : []),
-                                            "Script",
-                                            "B/S",
-                                            "Order Type",
-                                            "Qty (Lot)",
-                                            "Order Price",
-                                            "Status",
-                                            "O. Time",
-                                            "Comm Amt",
-                                            ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
-                                            ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
-                                            ...(userType !== 2 ? ["Action"] : [])
-                                        ].map((header) => (
-                                            <th
-                                                key={header}
-                                                style={{
-                                                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                                                    fontWeight: 600,
-                                                    padding: '8px 12px',
-                                                    textAlign: 'left',
-                                                    whiteSpace: 'nowrap',
-                                                    borderBottom: '1px solid #ccc',
-                                                    backgroundColor: theme.palette.background.paper,
-                                                }}
-                                            >
-                                                {header}
-                                            </th>
-                                        ))}
-                                    </tr>
-
-                                </thead>
-                                <tbody>
-                                    {orders.map((item, index) => {
-                                        // let rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                                        // if (item.trd_type === "Buy") rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                                        // if (item.trd_type === "Sell") rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-
-                                        const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
-                                        let backgroundColor = "#9e9e9e";
-                                        if (market === "NSEFUT") backgroundColor = "#1976d2";
-                                        else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
-                                        else if (market === "MCXFUT") backgroundColor = "#8e24aa";
-                                        else if (market === "NYSE") backgroundColor = "#f57c00";
-
-                                        const [scriptPrefix, ...scriptRest] = item.scrp_name.split(" ");
-                                        const scriptSuffix = scriptRest.join(" ");
-
-                                        return (
-                                            <tr key={item.trd_id || index} >
-                                                <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                                                <td>{item.trd_matchedtime}</td>
-                                                {userType !== 1 && <td>{item.client_full_name}</td>}
-                                                <td>
-                                                    <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                        <Box component="span">
-                                                            <Box component="span" sx={{ fontSize: "12px", fontWeight: "bold" }}>
-                                                                {scriptPrefix}
-                                                            </Box>{" "}
-                                                            <Box component="span" sx={{ fontSize: "10px" }}>
-                                                                {scriptSuffix}
-                                                            </Box>
-                                                        </Box>
-                                                        <Box
-                                                            component="span"
-                                                            sx={{
-                                                                fontSize: "10px",
-                                                                px: 1,
-                                                                borderRadius: "8px",
-                                                                backgroundColor,
-                                                                color: "#fff",
-                                                                display: "inline-block",
-                                                            }}
-                                                        >
-                                                            {item.mrkt_name}
-                                                        </Box>
-                                                    </Box>
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        color:
-                                                            item.trd_type === "Buy"
-                                                                ? theme.palette.success.main
-                                                                : item.trd_type === "Sell"
-                                                                    ? theme.palette.error.main
-                                                                    : theme.palette.text.primary,
-                                                        textTransform: "uppercase",
-                                                        fontWeight: 700,
-                                                    }}
-                                                >
-                                                    {item.trd_type}
-                                                </td>
-                                                <td>{item.trd_type2}</td>
-                                                <td>
-                                                    <Box component="span" sx={{ fontWeight: 700 }}>
-                                                        {item.trd_qty}
-                                                    </Box>{" "}
-                                                    <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                                                        ({item.trd_lot})
-                                                    </Box>
-                                                </td>
-                                                <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                                                    {item.trd_rate}
-                                                </td>
-                                                <td>{item.trd_status}</td>
-                                                <td>{item.trd_time}</td>
-                                                <td>{item.trd_comm_amnt}</td>
-                                                {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
-                                                {[3, 4, 5].includes(userType) && <td>{item.trade_ip_address}</td>}
-                                                {userType !== 2 && (
-                                                    <td>
-                                                        <button
-                                                            style={{
-                                                                marginRight: '8px',
-                                                                padding: '4px 8px',
-                                                                backgroundColor: '#1976d2',
-                                                                color: '#fff',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                            }}
-                                                            onClick={() => handleModify(item)}
-                                                        >
-                                                            Modify
-                                                        </button>
-
-                                                        <button
-                                                            style={{
-                                                                padding: '4px 8px',
-                                                                backgroundColor: '#d32f2f',
-                                                                color: '#fff',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                            }}
-                                                            onClick={() => {
-                                                                setCancelItem(item);
-                                                                setCancelDialogOpen(true); // Always show confirmation
-                                                            }}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </td>
-                                                )}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
+                        <OrderBook
+                            filterShow={false}
+                            view_user_id={selectedUser?.id || ""}   // ✅ correct
+                        />
                     </Paper>
+
+
 
                     {/* Positions Table */}
 
-                    <Paper sx={{ ...glassStyles, p: 1, overflowX: "auto" }}>
+                    <Paper sx={{ ...glassStyles, mb: 3, p: 1, overflowX: "auto" }}>
                         <Typography variant="h6" sx={{ mb: 1 }}>Positions</Typography>
-                        {loadingPositions ? (
-                            <Box textAlign="center" p={2}>Loading Positions...</Box>
-                        ) : (
-                            <table
-                                style={{
-                                    minWidth: "1350px",
-                                    fontSize: "12px",
-                                    borderCollapse: "collapse",
-                                    width: "100%",
-                                    border: "1px solid #ddd",
-                                }}
-                            >
-                                <thead>
-                                    <tr>
-                                        {[
-                                            ...(userType !== 1 ? ["Client"] : []),
-                                            "Script",
-                                            "Total Buy",
-                                            "Buy Avg Rate",
-                                            "Total Sell",
-                                            "Sell Avg Rate",
-                                            "Net Qty",
-                                            "Last Trade Price",
-                                            "MTM",
-                                            "Auto Closed Date",
-                                            "Close Btn",
-                                        ].map((heading, i) => (
-                                            <th
-                                                key={i}
-                                                style={{
-                                                    backgroundColor: theme.palette.mode === "dark" ? "#333" : "#f4f4f4",
-                                                    color: theme.palette.mode === "dark" ? "#fff" : "#333",
-                                                    textAlign: "left",
-                                                    padding: "6px 10px",
-                                                    position: "sticky",
-                                                    top: 0,
-                                                    zIndex: 2,
-                                                    fontWeight: "600",
-                                                    fontSize: "13px",
-                                                    borderBottom: "2px solid #ccc",
-                                                }}
-                                            >
-                                                {heading}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {positionData.map((row, index) => {
-                                        const isEven = index % 2 === 0;
-                                        const rowBgColor =
-                                            theme.palette.mode === "dark"
-                                                ? isEven
-                                                    ? "#2a2a2a"
-                                                    : "#1f1f1f"
-                                                : isEven
-                                                    ? "#fafafa"
-                                                    : "#ffffff";
-
-                                        const marketColors = {
-                                            NSEFUT: "#1976d2",
-                                            MCXFUT: "#388e3c",
-                                            "GLOBAL FUTURES": "#f57c00",
-                                        };
-                                        const chipColor = marketColors[row.market_type_name] || "#757575";
-
-                                        // MTM color
-                                        const mtmValue = row.mtm ?? 0;
-                                        const mtmColor = mtmValue > 0 ? "green" : mtmValue < 0 ? "red" : "#666";
-
-                                        return (
-                                            <tr
-                                                key={index}
-                                                style={{
-                                                    backgroundColor: rowBgColor,
-                                                    cursor: "pointer",
-                                                    transition: "background 0.2s ease",
-                                                }}
-                                                onClick={() => openDrawer(row)}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.palette.mode === "dark" ? "#333" : "#f1f7ff")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = rowBgColor)}
-                                            >
-                                                {/* Script + Market Chip */}
-                                                <td style={{ padding: "6px 10px" }}>
-                                                    {userType !== 1 ? (
-                                                        <span dangerouslySetInnerHTML={{ __html: row.full_name }} />
-                                                    ) : null}
-                                                </td>
-
-                                                <td style={{ padding: "6px 10px" }}>
-                                                    <div
-                                                        style={{
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            maxWidth: "200px",
-                                                            overflow: "hidden",
-                                                        }}
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
-                                                                whiteSpace: "nowrap",
-                                                                fontWeight: 500,
-                                                                color: theme.palette.mode === "dark" ? "#fff" : "#222",
-                                                            }}
-                                                            dangerouslySetInnerHTML={{ __html: row.script_name }}
-                                                        />
-                                                        <span
-                                                            style={{
-                                                                backgroundColor: chipColor,
-                                                                color: "#fff",
-                                                                padding: "1px 6px",
-                                                                borderRadius: "12px",
-                                                                fontSize: "10px",
-                                                                whiteSpace: "nowrap",
-                                                                marginLeft: "6px",
-                                                            }}
-                                                        >
-                                                            {row.market_type_name}
-                                                        </span>
-                                                    </div>
-                                                </td>
-
-                                                {/* Numeric data */}
-                                                <td style={{ padding: "6px 10px" }}>{row.total_buy?.toLocaleString()}</td>
-                                                <td style={{ padding: "6px 10px" }}>{row.buy_avg_rate?.toLocaleString()}</td>
-                                                <td style={{ padding: "6px 10px" }}>{row.total_sell?.toLocaleString()}</td>
-                                                <td style={{ padding: "6px 10px" }}>{row.sell_avg_rate?.toLocaleString()}</td>
-                                                <td
-                                                    style={{
-                                                        padding: "6px 10px",
-                                                        color: row.net_qty > 0 ? "green" : row.net_qty < 0 ? "red" : "#666",
-                                                        fontWeight: row.net_qty !== 0 ? "bold" : "normal",
-                                                    }}
-                                                >
-                                                    {row.net_qty?.toLocaleString()}
-                                                </td>
-                                                <td style={{ padding: "6px 10px" }}>
-                                                    {row.net_qty > 0
-                                                    }
-                                                </td>
-
-                                                {/* MTM */}
-                                                <td style={{ padding: "2px 8px" }}>
-                                                    <span
-                                                        style={{ fontWeight: "bold" }}
-                                                        dangerouslySetInnerHTML={{ __html: row.mym_html }}
-                                                    />
-                                                </td>
-
-                                                <td style={{ padding: "6px 10px", fontSize: "11px", color: "#666" }}>
-                                                    {row.trade_auto_closed_date}
-                                                </td>
-
-                                                {/* Close Button */}
-                                                <td style={{ padding: "6px 10px" }}>
-                                                    {row.net_qty !== 0 ? (
-                                                        <Button
-                                                            style={{
-                                                                backgroundColor: "#d32f2f",
-                                                                border: "none",
-                                                                color: "#fff",
-                                                                padding: "3px 10px",
-                                                                borderRadius: "6px",
-                                                                cursor: "pointer",
-                                                                fontSize: "11px",
-                                                                fontWeight: "500",
-                                                            }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                openClose(row);
-                                                            }}
-                                                        >
-                                                            Close
-                                                        </Button>
-                                                    ) : (
-                                                        <span style={{ color: "#aaa" }}>-</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
+                        <OrderPage1
+                            filterShow={false}
+                            view_user_id={selectedUserId?.view_user_id} // pass selectedUser ID here
+                        />
                     </Paper>
                 </>
             )}

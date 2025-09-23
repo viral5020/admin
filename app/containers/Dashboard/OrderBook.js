@@ -65,10 +65,12 @@ const OrderBook = ({
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelItem, setCancelItem] = useState(null);
   const [password, setPassword] = useState('');
-
+  const [selectedMarket, setSelectedMarket] = useState(null);
+  const [selectedScripts, setSelectedScripts] = useState([]);
 
 
   const showToast = (message, type = 'info') => {
@@ -173,49 +175,85 @@ const OrderBook = ({
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchOrders = async (type = "today", searchValue = "") => {
+  const fetchOrders = async (page = currentPage, size = pageSize, filter = filterType, search = debouncedSearchText) => {
+    const dataStored = sessionStorage.getItem("data") ? JSON.parse(sessionStorage.getItem("data")) : null;
+    if (!dataStored) return;
+
     setLoading(true);
-    const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const result = await fetchOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
-    setOrders(result);
-    setLoading(false);
+    try {
+      const result = await fetchOrdersAPI({
+        userId: dataStored.user_id,
+        authKey: dataStored.auth_key,
+        filterType: filter,
+        searchValue: search,
+        currentPage: page,
+        pageSize: size,
+        end_date,
+        start_end,
+        marketId: market?.id || null,
+        scriptIds: formatScriptIds(script),
+        brokerId: broker?.id || null,
+        masterUserId: master?.id || null,
+        clientId: client?.id || null,
+        status,
+        orderType,
+      });
+
+      setOrders(result.aaData || []);
+      setTotalRecords(result.iTotalRecords || 0);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to fetch orders.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-
   function onFilterApply() {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
-    toggleDrawer(false)();
+    setCurrentPage(0); // Reset pagination to first page
+    fetchOrders(0, pageSize, filterType, debouncedSearchText); // Call API with filters
+    toggleDrawer(false)(); // Close drawer if mobile
   }
 
   useEffect(() => {
     console.log('orders.length', orders.length);
-  }, [orders])
-  // # Pagination useEffects
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  }, [fetchOrders])
 
-  useEffect(() => {
-    setTotalPages(Math.ceil(totalRecords / pageSize));
-  }, [pageSize, totalRecords])
+  // Fetch on mount
+  useEffect(() => { fetchOrders(0); }, []);
 
-  useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
-  }, [filterType, debouncedSearchText]);
+  // Update total pages when total records or pageSize changes
+  useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
 
-  useEffect(() => {
-    !isFirstRender && fetchOrders();
-  }, [currentPage, pageSize]);
+  // Fetch when filter, search, page, or pageSize changes
+  useEffect(() => { fetchOrders(currentPage, pageSize, filterType, debouncedSearchText); }, [currentPage, pageSize, filterType, debouncedSearchText]);
 
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchOrders();
-  }, [isFilterChange])
 
-  useEffect(() => {
-    fetchOrders(filterType, debouncedSearchText);
-  }, [filterType, debouncedSearchText]);
+  // // # Pagination useEffects
+  // useEffect(() => {
+  //   fetchOrders();
+  // }, []);
+
+  // useEffect(() => {
+  //   setTotalPages(Math.ceil(totalRecords / pageSize));
+  // }, [pageSize, totalRecords])
+
+  // useEffect(() => {
+  //   !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+  //   setCurrentPage(0);
+  // }, [filterType, debouncedSearchText]);
+
+  // useEffect(() => {
+  //   !isFirstRender && fetchOrders();
+  // }, [currentPage, pageSize]);
+
+  // useEffect(() => {
+  //   isFilterChange && !isFirstRender && fetchOrders();
+  // }, [isFilterChange])
+
+  // useEffect(() => {
+  //   fetchOrders(filterType, debouncedSearchText);
+  // }, [filterType, debouncedSearchText]);
 
 
   const [open, setOpen] = useState(false);
@@ -659,7 +697,7 @@ const OrderBook = ({
             <table
               className="table table-striped table-bordered"
               style={{
-                minWidth: "1850px",
+                minWidth: "1990px",
                 fontSize: "12px",
                 margin: 0,
                 backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
@@ -670,14 +708,16 @@ const OrderBook = ({
                 <tr>
                   {[
                     "Device",
-                    "Time",
-                    ...(userType !== 1 ? ["Client"] : []),
+                    "Status",
+
+                    ...(userType !== 1 ? ["Client Name"] : []),
+                    ...(userType !== 1 ? ["Client Code"] : []),
                     "Script",
                     "B/S",
                     "Order Type",
                     "Qty (Lot)",
                     "Order Price",
-                    "Status",
+                    "Time",
                     "O. Time",
                     "Comm Amt",
                     ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
@@ -704,25 +744,52 @@ const OrderBook = ({
               </thead>
               <tbody>
                 {orders.map((item, index) => {
-                  // let rowBgColor = theme.palette.mode === "dark" ? "#333" : "#f5f5f5";
-                  // if (item.trd_type === "Buy") rowBgColor = theme.palette.mode === "dark" ? "#264653" : "#e0f7fa";
-                  // if (item.trd_type === "Sell") rowBgColor = theme.palette.mode === "dark" ? "#6d2c41" : "#fce4ec";
-
                   const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
                   let backgroundColor = "#9e9e9e";
-                  if (market === "NSEFUT") backgroundColor = "#1976d2";
-                  else if (market === "GLOBAL FUTURES") backgroundColor = "#388e3c";
-                  else if (market === "MCXFUT") backgroundColor = "#8e24aa";
-                  else if (market === "NYSE") backgroundColor = "#f57c00";
+                  if (market === "NSEFUT") backgroundColor = "#5a88adff";
+                  else if (market === "GLOBAL FUTURES") backgroundColor = "#519253ff";
+                  else if (market === "MCXFUT") backgroundColor = "#895d91ff";
+                  else if (market === "NYSE") backgroundColor = "#dbad68ff";
+                  else if (market === "COMEX") backgroundColor = "#974991ff";
 
                   const [scriptPrefix, ...scriptRest] = item.scrp_name.split(" ");
                   const scriptSuffix = scriptRest.join(" ");
 
+                  // Left line color
+                  const leftLineColor = item.trd_type === "Buy" ? "#0288d1" : item.trd_type === "Sell" ? "#d32f2f" : "transparent";
+
+                  // Slightly darker fade gradient
+                  const rowGradient = item.trd_type === "Buy"
+                    ? "linear-gradient(to right, rgba(2,136,209,0.15), rgba(255,255,255,0))"
+                    : item.trd_type === "Sell"
+                      ? "linear-gradient(to right, rgba(211,47,47,0.15), rgba(255,255,255,0))"
+                      : "none";
+
                   return (
-                    <tr key={item.trd_id || index} >
+                    <tr
+                      key={item.trd_id || index}
+                      style={{
+                        borderLeft: `4px solid ${leftLineColor}`,
+                        background: rowGradient,
+                      }}
+                    >
                       <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
-                      <td>{item.trd_matchedtime}</td>
-                      {userType !== 1 && <td>{item.client_full_name}</td>}
+                      <td
+                        style={{
+                          color:
+                            item.trd_status === "Executed" ? "#2e7d32" : // green for executed
+                              item.trd_status === "Pending Order" ? "#fbc02d" : // yellow for pending
+                                "#000", // default color
+                          fontSize: 13.5,
+                          fontWeight: "bold",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {item.trd_status}
+                      </td>
+
+                      {userType !== 1 && <td>{item.client_full_name_dis}</td>}
+                      {userType !== 1 && <td>{item.client_name_dis}</td>}
                       <td>
                         <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Box component="span">
@@ -762,7 +829,33 @@ const OrderBook = ({
                       >
                         {item.trd_type}
                       </td>
-                      <td>{item.trd_type2}</td>
+                      <td>
+                        <Box
+                          component="span"
+                          sx={{
+                            fontSize: "10px",       // small font
+                            px: 1,                  // horizontal padding
+                            py: 0.3,                // vertical padding
+                            borderRadius: "8px",    // rounded corners
+                            backgroundColor:
+                              item.trd_type2 === "Exit Position" ? "#ffd54f" :
+                                item.trd_type2 === "Exit All" ? "#cf6363ff" :
+                                  item.trd_type2 === "Buy Limit" ? "#6c7eb8ff" :
+                                    item.trd_type2 === "Exit auto" ? "#81d4fa" :
+                                      item.trd_type2 === "Exit Intraday" ? "#ce93d8" :
+                                        item.trd_type2 === "Market" ? "#a5d6a7" :
+                                          item.trd_type2 === "BF" ? "#ffcc80" :
+                                            "#ffffff",
+                            color: "#000000ff",
+                            fontWeight: "bold",
+                            display: "inline-block",
+                            textAlign: "center",
+                          }}
+                        >
+                          {item.trd_type2}
+                        </Box>
+                      </td>
+
                       <td>
                         <Box component="span" sx={{ fontWeight: 700 }}>
                           {item.trd_qty}
@@ -772,9 +865,9 @@ const OrderBook = ({
                         </Box>
                       </td>
                       <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                        {item.trd_rate}
+                        {item.net_rate}
                       </td>
-                      <td>{item.trd_status}</td>
+                      <td>{item.trd_matchedtime}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_comm_amnt}</td>
                       {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
@@ -783,7 +876,7 @@ const OrderBook = ({
                         <td>
                           {item.modify === true || item.cancel === true ? (
                             <>
-                              {item.modify === true ? (
+                              {item.modify === true && (
                                 <button
                                   style={{
                                     marginRight: '8px',
@@ -798,9 +891,9 @@ const OrderBook = ({
                                 >
                                   Modify
                                 </button>
-                              ) : null}
+                              )}
 
-                              {item.cancel === true ? (
+                              {item.cancel === true && (
                                 <button
                                   style={{
                                     padding: '4px 8px',
@@ -812,12 +905,12 @@ const OrderBook = ({
                                   }}
                                   onClick={() => {
                                     setCancelItem(item);
-                                    setCancelDialogOpen(true); // Always show confirmation
+                                    setCancelDialogOpen(true);
                                   }}
                                 >
                                   Cancel
                                 </button>
-                              ) : null}
+                              )}
                             </>
                           ) : (
                             <span style={{ color: '#888', fontStyle: 'italic' }}>N.A</span>
@@ -828,6 +921,7 @@ const OrderBook = ({
                   );
                 })}
               </tbody>
+
             </table>
           </Box>
 

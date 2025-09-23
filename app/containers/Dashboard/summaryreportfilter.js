@@ -45,11 +45,9 @@ const Summaryreportfilter = ({
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
         {/* ✅ Use the new ValanFilter component */}
-        <ValanFilter
-          valanId={valanId}
-          setValanId={setValanId}
-          isDarkMode={isDarkMode}
-        />
+        <Grid item xs="auto">
+          <ValanFilter valanId={valanId} setValanId={setValanId} isDarkMode={isDarkMode} />
+        </Grid>
 
         {/* Market & Script Filter */}
         <MarketScriptNameFilter
