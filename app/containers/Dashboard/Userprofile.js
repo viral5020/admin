@@ -383,7 +383,7 @@ const UserTablePage = () => {
                         <Typography variant="h6" sx={{ mb: 1 }}>Orders</Typography>
                         <OrderBook
                             filterShow={false}
-                            view_user_id={selectedUser?.id || ""}   // ✅ correct
+                            user_id={selectedUser?.id || ""}   // ✅ correct
                         />
                     </Paper>
 
@@ -396,7 +396,7 @@ const UserTablePage = () => {
                         <OrderPage1
                             filterShow={false}
                             filterShow1={false}
-                            view_user_id={selectedUser?.id} // pass selectedUser ID here
+                            user_id={selectedUser?.id} // pass selectedUser ID here
                         />
                     </Paper>
                 </>

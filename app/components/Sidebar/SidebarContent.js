@@ -26,8 +26,9 @@ function SidebarContent(props) {
   };
 
   useEffect(() => {
+    console.log("BBBBBBBBB")
     !userData?.investor_status ? viewUserProfile() : '';
-
+    console.log("AAAAAAAAA")
     const mainContent = document.getElementById('sidebar');
     mainContent.addEventListener('scroll', handleScroll);
     return () => {
@@ -68,7 +69,7 @@ function SidebarContent(props) {
 
     console.log('result', result);
 
-    setProfileData(result.data);
+    setProfileData(result);
     // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);
     return result.data;
   }
@@ -87,11 +88,11 @@ function SidebarContent(props) {
           >
             <Avatar
               alt={dummy.user.name}
-              src={`${profileData?.profile_image}?${Date.now()}` || dummy.user.avatar}
+              src={`${profileData?.profile?.profile_image}?${Date.now()}` || dummy.user.avatar}
               className={cx(classes.avatar, classes.bigAvatar)}
             />
             <div>
-              <h4>{profileData?.user_name}</h4>
+              <h4>{profileData?.profile?.user_name}</h4>
               <Button size="small" onClick={openMenuStatus}>
                 <i className={cx(classes.dotStatus, setStatus(status))} />
                 {status}

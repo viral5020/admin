@@ -71,7 +71,7 @@ const OrderPage1 = ({
     setFilterShow = () => { },
     filterShow1 = true,
     setFilterShow1 = () => { },
-    view_user_id
+    user_id
 }) => {
     // console.log("filterShow=", filterShow);
     const theme = useTheme();
@@ -238,7 +238,7 @@ const OrderPage1 = ({
 
     const fetchPositions = async () => {
         setLoading(true);
-        const result = await apifetchPositions(view_user_id);
+        const result = await apifetchPositions(user_id);
         setPositionData(result);
         setLoading(false);
     };

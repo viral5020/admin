@@ -37,7 +37,7 @@ import Pagination from './filters/Pagination';
 const OrderBook = ({
   filterShow = true,
   setFilterShow = () => { },
-  view_user_id
+  user_id
 }) => {
   console.log("filterShow=", filterShow);
 
@@ -193,7 +193,7 @@ const OrderBook = ({
         clientId: client?.id || null,
         status,
         orderType,
-        view_user_id
+        view_user_id: user_id
       });
 
       setOrders(result.aaData || []);

@@ -54,7 +54,7 @@ export async function getIP() {
   }
 };
 
-export const apifetchPositions = async (view_user_id) => {
+export const apifetchPositions = async (user_id) => {
   const defaultParams = await getDefaultParams();
   try {
     const response = await axiosInstance.post("/datatables/position_book_list", {
@@ -63,7 +63,7 @@ export const apifetchPositions = async (view_user_id) => {
       iDisplayStart: 0,
       iDisplayLength: -1,
       sSearch: "",
-      ...(view_user_id ? { view_user_id } : {})
+      ...(user_id ? { user_id } : {})
     });
     if (response.data && response.data.aaData) {
       return response.data.aaData;
@@ -109,7 +109,7 @@ export const fetchOrdersAPI = async ({
   clientId = "",
   status = "",
   orderType = "",
-  view_user_id,
+  user_id,
 }) => {
   const defaultParams = await getDefaultParams();
 
@@ -130,7 +130,7 @@ export const fetchOrdersAPI = async ({
     is_pending: status === "is_pending" ? "is_pending" : "",
     is_executed: status === "is_executed" ? "is_executed" : "",
     trade_type: orderType || "",
-    ...(view_user_id ? { view_user_id } : {}),
+    ...(user_id ? { user_id } : {}),
   };
 
   try {
