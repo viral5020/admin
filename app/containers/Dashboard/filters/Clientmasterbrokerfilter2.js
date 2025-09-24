@@ -63,9 +63,10 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
     }, [userType]);
 
     return (
-        <Grid container spacing={2}>
+        // <Grid container spacing={2}>
+        <>
             {/* User Type Dropdown */}
-            <Grid item xs={12} sm={6} md={3}>
+            {setUserType && <Grid item xs={12} sm={6} md={3}>
                 <Autocomplete
                     options={userTypeOptions}
                     getOptionLabel={(option) => option.label}
@@ -76,10 +77,10 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
                     )}
                     fullWidth
                 />
-            </Grid>
+            </Grid>}
 
             {/* Dependent Dropdown */}
-            <Grid item xs={12} sm={6} md={3}>
+            {setSelectedUser && <Grid item xs={12} sm={6} md={3}>
                 <Autocomplete
                     options={options}
                     getOptionLabel={(option) => typeof option === "string" ? option : option?.text || ""}
@@ -104,8 +105,9 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
                     fullWidth
                     disabled={!userType}
                 />
-            </Grid>
-        </Grid>
+            </Grid>}
+        </>
+        // </Grid>
     );
 };
 
