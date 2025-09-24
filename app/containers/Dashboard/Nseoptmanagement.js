@@ -283,7 +283,16 @@ const Nseoptmanagement = () => {
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((row, i) => (
-                                            <TableRow key={i}>
+                                            <TableRow key={i} style={{
+                                                backgroundColor:
+                                                    i % 2 === 0
+                                                        ? theme.palette.mode === "dark"
+                                                            ? "#333" // dark mode stripe (even rows)
+                                                            : "#fff" // light mode stripe (even rows)
+                                                        : theme.palette.mode === "dark"
+                                                            ? "#222" // darker alt for dark mode (odd rows)
+                                                            : "#e0e0e0", // darker grey for light mode (odd rows)
+                                            }}>
                                                 <TableCell>{row.option_check_script_name ?? '-'}</TableCell>
                                                 <TableCell>{row.option_type ?? '-'}</TableCell>
                                                 <TableCell>{row.option_strike_rate ?? '-'}</TableCell>

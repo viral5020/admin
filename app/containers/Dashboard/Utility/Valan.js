@@ -209,9 +209,7 @@ const Valan = () => {
                         />
                     </Box>
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign='center'>No Logs Found</Typography>
-                    )}
+
                     {/** Keep everything here as-is including search bar, table, and pagination */}
                     {loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -240,7 +238,17 @@ const Valan = () => {
                                 </TableHead>
                                 <TableBody>
                                     {logs.map((row, i) => (
-                                        <TableRow key={i}>
+                                        <TableRow key={i}
+                                            style={{
+                                                backgroundColor:
+                                                    i % 2 === 0
+                                                        ? theme.palette.mode === "dark"
+                                                            ? "#333" // dark mode stripe (even rows)
+                                                            : "#fff" // light mode stripe (even rows)
+                                                        : theme.palette.mode === "dark"
+                                                            ? "#222" // darker alt for dark mode (odd rows)
+                                                            : "#e0e0e0", // darker grey for light mode (odd rows)
+                                            }}>
                                             <TableCell>{row.market_type_name ?? '-'}</TableCell>
                                             <TableCell>{row.valan_name ?? '-'}</TableCell>
                                             <TableCell>{row.start_date ?? '-'}</TableCell>
@@ -257,6 +265,9 @@ const Valan = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            {logs.length === 0 && !loading && (
+                                <Typography textAlign='center'>No Logs Found</Typography>
+                            )}
                         </TableContainer>
 
 

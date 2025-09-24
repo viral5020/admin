@@ -229,12 +229,7 @@ const Billfilter = () => {
                         />
                     </Box>
 
-                    {/* Validation message */}
-                    {(!valanId || !amount) && (
-                        <Typography textAlign="center" color="error" sx={{ mt: 2 }}>
-                            Please select Valan and enter Amount
-                        </Typography>
-                    )}
+
 
                     {loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -289,6 +284,12 @@ const Billfilter = () => {
                                         ))}
                                     </TableBody>
                                 </Table>
+                                {/* Validation message */}
+                                {(!valanId || !amount) && (
+                                    <Typography textAlign="center" color="error" sx={{ mt: 2 }}>
+                                        Please select Valan and enter Amount
+                                    </Typography>
+                                )}
                             </TableContainer>
 
                             {/* Pagination */}

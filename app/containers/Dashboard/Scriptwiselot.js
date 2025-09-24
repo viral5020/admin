@@ -207,7 +207,7 @@ const Scriptwiselot = () => {
                         />
                     </Box>
 
-                    {logs.length === 0 && !loading && <Typography textAlign="center">No Logs Found</Typography>}
+
 
                     {loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -235,7 +235,17 @@ const Scriptwiselot = () => {
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((row, i) => (
-                                            <TableRow key={i}>
+                                            <TableRow key={i}
+                                                style={{
+                                                    backgroundColor:
+                                                        i % 2 === 0
+                                                            ? theme.palette.mode === "dark"
+                                                                ? "#333" // dark mode stripe (even rows)
+                                                                : "#fff" // light mode stripe (even rows)
+                                                            : theme.palette.mode === "dark"
+                                                                ? "#222" // darker alt for dark mode (odd rows)
+                                                                : "#e0e0e0", // darker grey for light mode (odd rows)
+                                                }}>
                                                 <TableCell>{row.market_type_name ?? '-'}</TableCell>
                                                 <TableCell>{row.script_name ?? '-'}</TableCell>
                                                 <TableCell>{row.script_lot_qty ?? '-'}</TableCell>
@@ -243,6 +253,7 @@ const Scriptwiselot = () => {
                                         ))}
                                     </TableBody>
                                 </Table>
+                                {logs.length === 0 && !loading && <Typography textAlign="center">No Logs Found</Typography>}
                             </TableContainer>
 
                             <Pagination

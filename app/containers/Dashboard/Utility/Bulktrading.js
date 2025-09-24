@@ -327,7 +327,7 @@ const Bulktrading = ({
             }
 
             {/* Main logs table */}
-            {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
+
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                     <CircularProgress />
@@ -365,6 +365,7 @@ const Bulktrading = ({
                                     ))}
                                 </TableBody>
                             </Table>
+                            {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
                         </TableContainer>
 
                         {/* Trade dialog */}

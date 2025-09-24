@@ -208,14 +208,13 @@ const Tradeditdeleteold = () => {
                         />
                     </Box>
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign='center'>No Logs Found</Typography>
-                    )}
+
                     {/** Keep everything here as-is including search bar, table, and pagination */}
                     {loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                             <CircularProgress />
                         </Box>
+
                     ) : (<>
                         <TableContainer
                             sx={{
@@ -237,6 +236,7 @@ const Tradeditdeleteold = () => {
                                     backgroundColor: '#555',
                                 },
                             }}
+
                         >
 
                             <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
@@ -315,7 +315,9 @@ const Tradeditdeleteold = () => {
                                 </TableBody>
 
                             </Table>
-
+                            {logs.length === 0 && !loading && (
+                                <Typography textAlign='center'>No Logs Found</Typography>
+                            )}
                         </TableContainer>
 
 

@@ -276,7 +276,17 @@ const Expiryvalidation = () => {
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((row, i) => (
-                                            <TableRow key={i}>
+                                            <TableRow key={i}
+                                                style={{
+                                                    backgroundColor:
+                                                        i % 2 === 0
+                                                            ? theme.palette.mode === "dark"
+                                                                ? "#333" // dark mode stripe (even rows)
+                                                                : "#fff" // light mode stripe (even rows)
+                                                            : theme.palette.mode === "dark"
+                                                                ? "#222" // darker alt for dark mode (odd rows)
+                                                                : "#e0e0e0", // darker grey for light mode (odd rows)
+                                                }}>
                                                 <TableCell>{row.market_type_name ?? '-'}</TableCell>
                                                 <TableCell>{row.script_name ?? '-'}</TableCell>
                                                 <TableCell>{row.expiry_validation_id ?? '-'}</TableCell>

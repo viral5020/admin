@@ -194,9 +194,7 @@ const TradeEditDeleteLog = () => {
                         keyArr={keyArr}
                     />
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign='center'>No Logs Found</Typography>
-                    )}
+
                     {/** Keep everything here as-is including search bar, table, and pagination */}
                     {loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -249,7 +247,21 @@ const TradeEditDeleteLog = () => {
                                         const remainingScriptName = rest.join(' ');
 
                                         return (
-                                            <TableRow key={i}>
+                                            <TableRow
+                                                key={i}
+                                                sx={{
+                                                    backgroundColor: i % 2 === 0
+                                                        ? theme.palette.mode === "dark"
+                                                            ? "#333"   // even rows (dark mode)
+                                                            : "#fff"   // even rows (light mode)
+                                                        : theme.palette.mode === "dark"
+                                                            ? "#222"   // odd rows (dark mode)
+                                                            : "#e0e0e0", // odd rows (light mode)
+                                                    "&:hover": {
+                                                        backgroundColor: theme.palette.mode === "dark" ? "#444" : "#f5f5f5", // hover effect
+                                                    }
+                                                }}
+                                            >
                                                 <TableCell sx={{ color: 'black' }}>
                                                     <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
                                                         {log.log_type}
@@ -296,12 +308,15 @@ const TradeEditDeleteLog = () => {
                                                 <TableCell>{log.added_by ?? '-'}</TableCell>
                                                 <TableCell>{log.added_datetime ?? '-'}</TableCell>
                                             </TableRow>
+
                                         );
                                     })}
                                 </TableBody>
 
                             </Table>
-
+                            {logs.length === 0 && !loading && (
+                                <Typography textAlign='center'>No Logs Found</Typography>
+                            )}
                         </TableContainer>
 
 

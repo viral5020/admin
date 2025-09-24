@@ -256,10 +256,6 @@ const Adminloginlist = () => {
                        
                     </Box> */}
 
-                    {logs.length === 0 && !loading && (
-                        <Typography textAlign="center">No Logs Found</Typography>
-                    )}
-
                     {loading ? (
                         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                             <CircularProgress />
@@ -321,6 +317,9 @@ const Adminloginlist = () => {
                                         ))}
                                     </TableBody>
                                 </Table>
+                                {logs.length === 0 && !loading && (
+                                    <Typography textAlign="center">No Logs Found</Typography>
+                                )}
                             </TableContainer>
 
                             <Pagination

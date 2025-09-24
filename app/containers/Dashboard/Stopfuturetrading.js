@@ -253,23 +253,26 @@ const Stopfuturetrading = () => {
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((row, i) => (
-                                            <TableRow key={i}>
+                                            <TableRow key={i}
+                                                style={{
+                                                    backgroundColor:
+                                                        i % 2 === 0
+                                                            ? theme.palette.mode === "dark"
+                                                                ? "#333" // dark mode stripe (even rows)
+                                                                : "#fff" // light mode stripe (even rows)
+                                                            : theme.palette.mode === "dark"
+                                                                ? "#222" // darker alt for dark mode (odd rows)
+                                                                : "#e0e0e0", // darker grey for light mode (odd rows)
+                                                }}>
                                                 <TableCell>{row.market_name ?? '-'}</TableCell>
                                                 <TableCell>{row.full_name ?? '-'}</TableCell>
                                                 <TableCell>{row.expiry_original_format ?? '-'}</TableCell>
                                                 <TableCell>{row.added_datetime ?? '-'}</TableCell>
                                                 <TableCell align="center">
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{
-                                                            color: 'error.main',
-                                                            fontWeight: 600,
-                                                            cursor: 'pointer',
-                                                            '&:hover': { textDecoration: 'underline' },
-                                                        }}
-                                                        onClick={() => handleDelete(row.future_id)}
-                                                    >
-                                                        Delete
+                                                    <Typography style={{ textAlign: 'center' }}>
+                                                        <Button size="small" variant="contained" color="error" sx={{ borderRadius: 1 }} onClick={() => handleDelete(row.future_id)}>
+                                                            Delete
+                                                        </Button>
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>

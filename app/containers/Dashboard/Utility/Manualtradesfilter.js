@@ -199,6 +199,14 @@ const Manualtradesfilter = ({
                     >
                         Submit
                     </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleClear}
+                        sx={{ borderRadius: 1, ml: 1 }}
+                    >
+                        Clear
+                    </Button>
                 </Grid>
             )}
         </Grid>

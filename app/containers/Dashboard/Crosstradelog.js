@@ -278,7 +278,7 @@ const Crosstradelog = () => {
                     />
                 </Box>
 
-                {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
+
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                         <CircularProgress />
@@ -319,6 +319,7 @@ const Crosstradelog = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
                         </TableContainer>
 
                         {/* Pagination */}

@@ -411,7 +411,17 @@ const RejectionLogs = ({
                     const scriptSuffix = rest.join(" ");
 
                     return (
-                      <tr key={index}>
+                      <tr key={index}
+                        style={{
+                          backgroundColor:
+                            index % 2 === 0
+                              ? theme.palette.mode === "dark"
+                                ? "#333" // dark mode stripe (even rows)
+                                : "#fff" // light mode stripe (even rows)
+                              : theme.palette.mode === "dark"
+                                ? "#222" // darker alt for dark mode (odd rows)
+                                : "#e0e0e0", // darker grey for light mode (odd rows)
+                        }}>
                         {/* <td>
                           {userType !== 1 ? log.full_name : null}
                         </td> */}

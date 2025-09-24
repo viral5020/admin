@@ -319,13 +319,23 @@ const Blockedallowedscript = () => {
                                 </thead>
                                 <tbody>
                                     {logs.map((log, index) => (
-                                        <tr key={index}>
+                                        <tr key={index}
+                                            style={{
+                                                backgroundColor:
+                                                    index % 2 === 0
+                                                        ? theme.palette.mode === "dark"
+                                                            ? "#333" // dark mode stripe (even rows)
+                                                            : "#fff" // light mode stripe (even rows)
+                                                        : theme.palette.mode === "dark"
+                                                            ? "#222" // darker alt for dark mode (odd rows)
+                                                            : "#e0e0e0", // darker grey for light mode (odd rows)
+                                            }}>
                                             <td>{log.user_full_name}</td>
                                             <td>{log.market_type_name}</td>
                                             <td>{log.script_name}</td>
                                             <td>{log.time}</td>
                                             <td style={{ textAlign: 'center' }}>
-                                                <Button size="small" variant="outlined" color="error" onClick={() => handleOpenConfirm(log)}>
+                                                <Button size="small" variant="contained" color="error" sx={{ borderRadius: 1 }} onClick={() => handleOpenConfirm(log)}>
                                                     Delete
                                                 </Button>
                                             </td>

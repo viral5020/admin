@@ -14,6 +14,7 @@ import {
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import Pagination from './filters/Pagination';
 
 
 const colArr = [
@@ -39,8 +40,13 @@ const Forexmarginmanagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const [currentPage, setCurrentPage] = useState(0);
+
   const rowsPerPage = 10;
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   // 🔹 These now hold objects like { text: "Client Name" }
   const [client, setClient] = useState(null);
@@ -311,7 +317,18 @@ const Forexmarginmanagement = () => {
             </tr>
           ) : (
             paginatedData.map((row, index) => (
-              <tr key={row.user_code || index}>
+              <tr key={row.user_code || index}
+                style={{
+                  backgroundColor:
+                    index % 2 === 0
+                      ? theme.palette.mode === "dark"
+                        ? "#333" // dark mode stripe (even rows)
+                        : "#fff" // light mode stripe (even rows)
+                      : theme.palette.mode === "dark"
+                        ? "#222" // darker alt for dark mode (odd rows)
+                        : "#e0e0e0", // darker grey for light mode (odd rows)
+                }}
+              >
                 <td>{row.user_details}</td>
                 <td>{row.forex_margin ?? 0}</td>
                 <td>{row.comex_margin ?? 0}</td>
@@ -321,6 +338,15 @@ const Forexmarginmanagement = () => {
           )}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setPageSize}
+        pageSize={pageSize}
+      />
     </div>
   );
 };
