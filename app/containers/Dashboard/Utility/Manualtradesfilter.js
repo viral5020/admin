@@ -149,76 +149,7 @@ const Manualtradesfilter = ({
                     sx={{ width: 100 }}
                 />
 
-                {/* Trade Inputs */}
 
-                <Grid item>
-                    <TextField
-                        label="Price"
-                        size="small"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        sx={{ width: 100 }}
-                    />
-                </Grid>
-
-                {/* Client/Master/Broker Filter */}
-                <Clientmanualfilter
-                    client={client}
-                    setClient={setClient}
-                    master={master}
-                    setMaster={setMaster}
-                    broker={broker}
-                    setBroker={setBroker}
-                />
-
-                {/* Trade type (Buy/Sell) */}
-                <Grid item>
-                    <FormControl>
-                        <RadioGroup row value={pair} onChange={(e) => setPair(e.target.value)}>
-                            <FormControlLabel value="0" control={<Radio size="small" />} label="Buy" />
-                            <FormControlLabel value="1" control={<Radio size="small" />} label="Sell" />
-                        </RadioGroup>
-                    </FormControl>
-                </Grid>
-
-                {/* Brokerage toggle */}
-                <Grid item>
-                    <FormControl>
-                        <RadioGroup row value={brokerage} onChange={(e) => setBrokerage(e.target.value)}>
-                            <FormControlLabel value="0" control={<Radio size="small" />} label="With Brokerage" />
-                            <FormControlLabel value="1" control={<Radio size="small" />} label="Without Brokerage" />
-                        </RadioGroup>
-                    </FormControl>
-                </Grid>
-
-                {/* Buttons */}
-                {onApply && (
-                    <Grid item>
-                        <Button onClick={onApply}>Apply</Button>
-                    </Grid>
-                )}
-                {onSubmit && (
-                    <Grid item>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={onSubmit}
-                            sx={{ borderRadius: 1 }}
-                        >
-                            Submit
-                        </Button>
-                    </Grid>
-                )}
-                <Grid item>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={handleClear}
-                        sx={{ borderRadius: 1, ml: 1 }}
-                    >
-                        Clear
-                    </Button>
-                </Grid>
 
             </Grid>
 

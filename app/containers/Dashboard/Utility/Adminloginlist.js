@@ -204,7 +204,15 @@ const Adminloginlist = () => {
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {/* Top Buttons */}
-                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                    <Box sx={{ display: "flex", gap: 0.5, mb: 2 }}>
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
+                        />
                         <Button
                             variant="contained"
                             color="error"
@@ -213,7 +221,7 @@ const Adminloginlist = () => {
                         >
                             Delete All
                         </Button>
-
+                        {/* 
                         <Button
                             variant="contained"
                             color="primary"
@@ -230,12 +238,12 @@ const Adminloginlist = () => {
                             sx={{ borderRadius: 1, textTransform: "capitalize" }}
                         >
                             Export PDF
-                        </Button>
+                        </Button> */}
                     </Box>
 
 
                     {/* Search */}
-                    <Box
+                    {/* <Box
                         sx={{
                             display: "flex",
                             gap: 2,
@@ -245,15 +253,8 @@ const Adminloginlist = () => {
                             mx: 1,
                         }}
                     >
-                        <SearchPdfCsv
-                            searchText={searchText}
-                            setSearchText={setSearchText}
-                            logs={logs}
-                            colArr={colArr}
-                            keyArr={keyArr}
-                            isLoading={loading}
-                        />
-                    </Box>
+                       
+                    </Box> */}
 
                     {logs.length === 0 && !loading && (
                         <Typography textAlign="center">No Logs Found</Typography>

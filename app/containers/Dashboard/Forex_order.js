@@ -594,7 +594,6 @@ const Forex_order = () => {
                     "Qty (Lot)",
                     "Order Price",
                     "Time",
-                    "Status",
                     "O. Time",
                     "Comm Amt",
                     ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
@@ -741,7 +740,7 @@ const Forex_order = () => {
                       <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
                         {item.trd_rate}
                       </td>
-                      <td>{item.trd_matchedtime}</td>
+                      <td>{item.trd_matchdtime}</td>
                       <td>{item.trd_time}</td>
                       <td>{item.trd_commision_amount}</td>
                       {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
