@@ -89,6 +89,7 @@ const Brokrageref = ({ filterShow = true }) => {
         <Box sx={{ p: 2 }}>
 
             {/* Desktop Filters */}
+            {/* Desktop & Mobile Filters */}
             {filterShow && (
                 <Box
                     sx={{
@@ -98,18 +99,18 @@ const Brokrageref = ({ filterShow = true }) => {
                         borderRadius: 2,
                         mb: 2,
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 2, // spacing between the two filters
-                        flexWrap: 'wrap', // optional: allows wrapping on small screens
+                        flexDirection: isMobile ? 'column' : 'row', // stack on mobile
+                        alignItems: 'stretch', // stretch items to full width on mobile
+                        gap: 2, // spacing between items
                     }}
                 >
                     {/* Valan Filter */}
-                    <Box sx={{ flex: 1, minWidth: 200 }}>
+                    <Box sx={{ width: isMobile ? '100%' : 'auto', flex: isMobile ? 'unset' : 1 }}>
                         <ValanFilter valanId={valanId} setValanId={setValanId} />
                     </Box>
 
                     {/* Trade Edit/Delete Log Filter */}
-                    <Box sx={{ flex: 3.2, marginTop: 1.6 }}>
+                    <Box sx={{ width: isMobile ? '100%' : 'auto', flex: isMobile ? 'unset' : 3.2, mt: isMobile ? 2 : 0 }}>
                         <TradeEditDeleteLogFilter
                             setClient={setClient}
                             setMaster={setMaster}
@@ -123,6 +124,7 @@ const Brokrageref = ({ filterShow = true }) => {
                     </Box>
                 </Box>
             )}
+
 
 
             {/* Confirmation Dialog */}

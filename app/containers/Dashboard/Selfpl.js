@@ -14,6 +14,7 @@ import {
     Grid,
     Drawer,
     useMediaQuery,
+    Button,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ValanFilter from "./ValanFilter";
@@ -134,14 +135,14 @@ const Selfpl = () => {
     };
 
     // Fetch data only when valanId changes
-    useEffect(() => {
-        if (valanId) {
-            fetchSummaryReportData();
-        } else {
-            setReportData([]);
-            setFilteredData([]);
-        }
-    }, [valanId]);
+    // useEffect(() => {
+    //     if (valanId) {
+    //         fetchSummaryReportData();
+    //     } else {
+    //         setReportData([]);
+    //         setFilteredData([]);
+    //     }
+    // }, [valanId]);
 
     // Filter search
     useEffect(() => {
@@ -182,9 +183,22 @@ const Selfpl = () => {
                 }}
             >
                 {/* Filters */}
-                <Box sx={{ width: 300 }}>
+                {/* <Box sx={{ width: 300 }}>
                     <ValanFilter valanId={valanId} setValanId={setValanId} />
+                </Box> */}
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center", width: 300 }}>
+                    <ValanFilter valanId={valanId} setValanId={setValanId} />
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={fetchSummaryReportData}
+                        disabled={!valanId || loading}
+                        sx={{ borderRadius: 1, mb: 0.5 }}
+                    >
+                        {loading ? "Submit" : "Submit"}
+                    </Button>
                 </Box>
+
 
                 <Box sx={{ mt: 1 }}>
                     <SearchPdfCsv
@@ -296,7 +310,17 @@ const Selfpl = () => {
                                     </tr>
                                 ) : (
                                     paginatedData.map((row, idx) => (
-                                        <tr key={row.sr_no}>
+                                        <tr key={row.sr_no}
+                                            style={{
+                                                backgroundColor:
+                                                    row.sr_no % 2 === 0
+                                                        ? theme.palette.mode === "dark"
+                                                            ? "#333" // dark mode stripe (even rows)
+                                                            : "#fff" // light mode stripe (even rows)
+                                                        : theme.palette.mode === "dark"
+                                                            ? "#222" // darker alt for dark mode (odd rows)
+                                                            : "#e0e0e0", // darker grey for light mode (odd rows)
+                                            }}>
                                             {/* <td>{idx + 1 + currentPage * rowsPerPage}</td> */}
                                             <td>{row.sr_no}</td>
                                             <td>{row.user_name}</td>
