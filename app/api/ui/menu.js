@@ -1,16 +1,25 @@
 console.log("Menu.js running...");
 
 export function getSibarContent(authData) {
+  // console.log('authData', authData);
   // console.log("Entered in getSibarContent()...");
-  const { userData, notificationData, emp_permission } = authData;
-  // const auth = useSelector((state) => state.auth);
+  if (!authData) {
+    var userData2 = JSON.parse(sessionStorage.getItem("data"));
+    var notificationData2 = JSON.parse(sessionStorage.getItem("notification"));
 
-  // const userData = JSON.parse(sessionStorage.getItem("data"));
+    if (!notificationData2 || !userData2) {
+      return;
+    }
+  }
+
+  const userData = authData?.userData ?? userData2;
+  const notificationData = authData?.notificationData ?? notificationData2;
+  const emp_permission = authData?.emp_permission ?? userData2?.isEmployeePermission;
+
   const userType = parseInt(userData?.user_type, 10);
   const { isEmployeeLogin } = userData;
   // console.log('userType:', userType);
 
-  // const notificationData = JSON.parse(sessionStorage.getItem("notification"));
   const isStock = notificationData?.isStock;
   const isForex = notificationData?.isForex;
 
@@ -270,7 +279,7 @@ export function getSibarContent(authData) {
     });
   }
 
-  // Utility Menu
+  // ---------- Utility  ----------
   if (userType !== 2 && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && emp_permission?.includes('UTILITY')))) {
     menu.push({
       key: 'utility',
@@ -474,6 +483,7 @@ export function getSibarContent(authData) {
     });
   }
 
+  // ---------- SETTING ----------
   if (
     (userType !== 1 && userType !== 2) && (isStock || isForex)
     && (!isEmployeeLogin || (userType == 4 && isEmployeeLogin && emp_permission?.includes('SETTING')))
