@@ -256,14 +256,16 @@ const Bulktrading = ({
 
             {/* Bulk trade list input */}
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                <TextField
-                    type="number"
-                    label="Number of Orders"
-                    value={noOfTrades}
-                    onChange={(e) => setNoOfTrades(e.target.value)}
-                    size="small"
-                    InputProps={{ inputProps: { min: 1 } }}
-                />
+                {filterShow && (
+                    <TextField
+                        type="number"
+                        label="Number of Orders"
+                        value={noOfTrades}
+                        onChange={(e) => setNoOfTrades(e.target.value)}
+                        size="small"
+                        InputProps={{ inputProps: { min: 1 } }}
+                    />
+                )}
             </Box>
 
             {/* Filter */}
@@ -297,25 +299,27 @@ const Bulktrading = ({
                 </Drawer>
 
                 : <Box>
-                    <TradeEditDeleteLogFilter
-                        after_date_date={after_date}
-                        before_date={before_date}
-                        setbefore_date={setbefore_date}
-                        setafter_date={setafter_date}
-                        market={market}
-                        script={script}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        client={client}
-                        master={master}
-                        setClient={setClient}
-                        setMaster={setMaster}
-                        onApply={onFilterApply}
-                    />
+                    {filterShow && (
+                        <TradeEditDeleteLogFilter
+                            after_date_date={after_date}
+                            before_date={before_date}
+                            setbefore_date={setbefore_date}
+                            setafter_date={setafter_date}
+                            market={market}
+                            script={script}
+                            setScript={setScript}
+                            setMarket={setMarket}
+                            client={client}
+                            master={master}
+                            setClient={setClient}
+                            setMaster={setMaster}
+                            onApply={onFilterApply}
+                        />
+                    )}
                 </Box>
             }
 
-            {filterShow && !isMobile &&
+            {!isMobile &&
                 <SearchPdfCsv
                     searchText={searchText}
                     setSearchText={setSearchText}

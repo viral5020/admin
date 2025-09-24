@@ -203,7 +203,7 @@ const exampleStock = {
     longDescription: "Reliance Industries Limited is a Fortune 500 company and the largest private sector corporation in India. It operates in multiple segments including oil and gas exploration, refining and marketing, petrochemicals, retail, digital services, and financial services. The company has consistently delivered strong revenue and profit growth, supported by its diversified business model and robust execution capabilities.",
 };
 
-const boxHeight = 300;
+const boxHeight = 280;
 
 function Masterdashboard() {
 
@@ -1225,7 +1225,7 @@ function Masterdashboard() {
                                 overflowY: 'auto',
                             }}
                         >
-                            <Mtmalerts />
+                            <Mtmalerts filterShow={false} />
                         </Box>
                     </Paper>
                 </Grid>

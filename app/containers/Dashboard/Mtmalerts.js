@@ -282,7 +282,9 @@ const Mtmalerts = ({
                     )}
 
 
-                    <BackToTop />
+                    {filterShow && (
+                        <BackToTop />
+                    )}
                 </>
             )}
         </>

@@ -445,7 +445,9 @@ const Cashledger = ({
                     )}
 
                     <ToastContainer position="top-right" autoClose={3000} />
-                    <BackToTop />
+                    {filterShow && (
+                        <BackToTop />
+                    )}
                 </Paper>
             ) : (
                 <>
@@ -736,7 +738,10 @@ const Cashledger = ({
                         pageSize={pageSize}
                     />
                     <ToastContainer position="top-right" autoClose={3000} />
-                    <BackToTop />
+
+                    {filterShow && (
+                        <BackToTop />
+                    )}
                 </>
             )}
         </>

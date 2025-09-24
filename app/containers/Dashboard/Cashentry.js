@@ -779,7 +779,9 @@ const Cashentry = ({
 
                     <Pagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} setPageSize={setPageSize} pageSize={pageSize} />
                     <ToastContainer position="top-right" autoClose={3000} />
-                    <BackToTop />
+                    {filterShow && (
+                        <BackToTop />
+                    )}
                 </>
             )}
         </>

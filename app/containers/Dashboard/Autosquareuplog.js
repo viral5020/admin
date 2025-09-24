@@ -366,8 +366,9 @@ const Autosquareuplog = ({
                                 </Box>
                             )
                         )}
-
-                        <BackToTop />
+                        {filterShow && (
+                            <BackToTop />
+                        )}
                     </>
                 )}
             </>

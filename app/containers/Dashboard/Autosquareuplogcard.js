@@ -290,7 +290,9 @@ const Autosquareuplogcard = ({
                     )}
 
 
-                    <BackToTop />
+                    {filterShow && (
+                        <BackToTop />
+                    )}
                 </>
             )}
         </>
