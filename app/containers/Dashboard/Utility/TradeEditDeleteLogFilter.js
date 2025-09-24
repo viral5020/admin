@@ -3,6 +3,7 @@ import DateFilter from '../filters/DateFilter';
 import MarketScriptNameFilter from '../filters/MarketScriptNameFilter';
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
 import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material';
+import ClientMasterBrokerFilter2 from '../filters/Clientmasterbrokerfilter2';
 
 const TradeEditDeleteLogFilter = ({
     setEnd_date,
@@ -39,7 +40,11 @@ const TradeEditDeleteLogFilter = ({
     setBroker,
     isAdminOnly,
     setIsAdminOnly,
-    onApply
+    userType,
+    setUserType,
+    selectedUser,
+    setSelectedUser,
+    onApply,
 }) => {
     const theme = useTheme();
 
@@ -123,6 +128,14 @@ const TradeEditDeleteLogFilter = ({
                     showClient={Boolean(setClient)}
                     showBroker={Boolean(setBroker)}
                     showMaster={Boolean(setMaster)}
+                />
+
+                <ClientMasterBrokerFilter2
+                    sx={{ width: "100%" }}
+                    userType={userType}
+                    setUserType={setUserType}
+                    selectedUser={selectedUser}
+                    setSelectedUser={setSelectedUser}
                 />
 
                 {setIsAdminOnly &&
