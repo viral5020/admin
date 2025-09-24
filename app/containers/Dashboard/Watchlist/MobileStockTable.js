@@ -38,10 +38,10 @@ import BottomTradePopup from './BottomTradePopup';
 
 function splitScriptAndDate(fullText) {
     const parts = fullText?.trim().split(' ');
-    if (parts?.length < 4) return { scriptName: fullText, date: '' };
+    if (parts?.length < 2) return { scriptName: fullText, date: '' };
 
-    const date = parts?.slice(-3).join(' ');
-    const scriptName = parts?.slice(0, -3).join(' ');
+    const date = parts?.slice(-1);
+    const scriptName = parts?.slice(0, -1);
 
     return { scriptName, date };
 }
@@ -106,6 +106,7 @@ const MobileStockTable = ({
     handleBidAskClick,
     setRemoveMarket,
     handleStar,
+    setRemoveFavorite,
     showToast,
     // setBuySellPopup,
     // buySellPopup,
@@ -207,7 +208,11 @@ const MobileStockTable = ({
                                 fontSize: '0.85rem',
                                 color: '#fff',
                             }}
-                            onClick={(e) => handleStar(item, e)}
+                            onClick={(e) => {
+                                item.isFavorite
+                                    ? setRemoveFavorite(item)
+                                    : handleStar(item, e)
+                            }}
                         >
                             {/* Star */}
                             {item.isFavorite ? <StarSharpIcon sx={{ fontSize: '2rem', color: "grey" }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}

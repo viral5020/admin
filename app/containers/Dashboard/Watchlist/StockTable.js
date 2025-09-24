@@ -27,6 +27,8 @@ import BottomTradePopup from './BottomTradePopup';
 import { roundToTwoIN } from '../helpers/utilFunc';
 import { toastTime } from './constant';
 import { favouriteActionAPI, removeMarketWatchAPI } from '../API/API';
+import { keyframes } from "@mui/system";
+
 
 const colors = {
   positive: {
@@ -183,7 +185,7 @@ const logoCss = {
   // width: '1.7rem',
 }
 
-function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handleBidAskClick, showToast, handleStar, setRemoveMarket, marketName, }) {
+function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handleBidAskClick, showToast, handleStar, setRemoveFavorite, setRemoveMarket, marketName, }) {
   const theme = useTheme();
   const isMobile = useMUIQuery(theme.breakpoints.down('sm'));
   const isDarkMode = theme.palette.mode === 'dark';
@@ -276,19 +278,22 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
     } else {
       state = changeVal > 0 ? "positive" : changeVal < 0 ? "negative" : "neutral";
     }
-
+    const popupAnim = keyframes`
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    `;
     return (
       <Box
         component="span"
         sx={{
           color: colors[state][isDarkMode ? "dark" : "light"],
           backgroundColor: backgrounds[state][isDarkMode ? "dark" : "light"],
-
           borderRadius: 1,
           px: 0.6,
           py: 0.3,
-          display: 'inline-flex',
-          alignItems: 'center',
+          display: "inline-flex",
+          alignItems: "center",
           fontWeight: 600,
           mr: showIcon ? 1 : 0,
         }}
@@ -301,7 +306,17 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
           ) : (
             <TrendingFlat fontSize="inherit" sx={{ mr: 0.5 }} />
           ))}
-        {showPR ? roundedVal + '%' : roundedVal}
+        {/* {showPR ? roundedVal + "%" : roundedVal} */}
+        <Box
+          component="span"
+          key={val} // re-triggers when val changes
+          sx={{
+            display: "inline-block",
+            animation: columnId === 'askRate' || columnId === 'bidRate' ? `${popupAnim} 1s ease-in-out` : '',
+          }}
+        >
+          {showPR ? roundedVal + "%" : roundedVal}
+        </Box>
       </Box>
     );
   };
@@ -531,7 +546,13 @@ function StockTable({ searchText, setIsStockOpen, dummyData, setDummyData, handl
 
                     {/* Star Icon */}
                     <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} key={'star' + stock.market_watch_id}>
-                      <IconButton onClick={(e) => handleStar(stock, e)} sx={{ pl: 2 }}>
+                      <IconButton
+                        onClick={(e) => {
+                          stock.isFavorite
+                            ? setRemoveFavorite(stock)
+                            : handleStar(stock, e)
+                        }}
+                        sx={{ pl: 2 }}>
                         {stock.isFavorite ? (
                           <Star sx={{ color: 'gold' }} />
                         ) : (

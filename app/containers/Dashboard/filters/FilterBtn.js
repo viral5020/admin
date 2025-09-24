@@ -2,9 +2,9 @@ import { useTheme } from '@emotion/react';
 import { Button } from '@mui/material';
 import React from 'react'
 import FilterListIcon from '@mui/icons-material/FilterList';
-import AddIcon from '@mui/icons-material/Add';
 
-const FilterBtn = ({ setFilterOpen, icon }) => {
+
+const FilterBtn = ({ setFilterOpen, Icon, onClick }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
 
@@ -13,12 +13,8 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
             <Button
                 variant="outlined"
                 size="small"
-                startIcon={
-                    icon === 'add'
-                        ? <AddIcon sx={{ position: 'relative', left: '4px', fontSize: '20px !important' }} />
-                        : <FilterListIcon sx={{ position: 'relative', left: '4px' }} />
-                }
-                onClick={() => setFilterOpen(true)}
+                startIcon={Icon ? Icon : <FilterListIcon sx={{ position: 'relative', left: '4px' }} />}
+                onClick={() => onClick ? onClick() : setFilterOpen(true)}
                 sx={{
                     // p: '9px',
                     height: '100%',
@@ -30,6 +26,7 @@ const FilterBtn = ({ setFilterOpen, icon }) => {
                     // py: 0,
                     minHeight: '10px',
                     minWidth: '35px',
+                    maxWidth: '40px',
                     '& .MuiButton-startIcon': {
                         marginRight: '6px', // Adjust icon spacing if needed
                     },

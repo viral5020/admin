@@ -98,7 +98,7 @@ function formatDate(str) {
 }
 
 function setKeysOfScriptData(item) {
-  const scriptName = `${item.script_name} ${formatDate(item.script_expiry_orginal_format)}`;
+  const scriptName = `${item.script_name} ${item.script_expiry_orginal_format}`;
   // const maxOrder = parseInt(item.max_order, 10) || 0;
   // const qty = parseInt(item.quantity, 10) || 0;
 
@@ -151,6 +151,7 @@ function Watchlist() {
   const [oldDummyData, setOldDummyData] = useState();
 
   const [removeMarket, setRemoveMarket] = useState(false);
+  const [removeFavorite, setRemoveFavorite] = useState(false);
 
   const [socketData, setSocketData] = useState();
   const socketContext = useContext(SocketContext);
@@ -482,6 +483,9 @@ function Watchlist() {
       const response = await favouriteActionAPI(stockData.market_watch_id, 'remove')
       if (response.message === 'remove Successfully') {
         showToast(`${stockData.scriptName} removed from favorites.`, false, 'removed')
+
+        console.log('stockdata', stockData);
+        console.log('dummyData', dummyData);
       } else {
         isError = true;
         showToast(`${response.message}.`, false, 'error');
@@ -495,15 +499,24 @@ function Watchlist() {
         showToast(`${response.message}.`, false, 'error');
       }
     }
-    starBtn.disabled = false;
+    !!e ? starBtn.disabled = false : '';
     console.log('isError', isError);
-    !isError ? setDummyData(prevData =>
-      prevData.map(stock => {
-        return stock.script_id === stockData.script_id
-          ? { ...stock, isFavorite: !stock.isFavorite }
-          : stock;
-      })
-    ) : null;
+    if (!isError) {
+      setDummyData(prevData =>
+        prevData.map(stock => {
+          return stock.script_id === stockData.script_id
+            ? { ...stock, isFavorite: !stock.isFavorite }
+            : stock;
+        })
+      );
+
+      if (isFavoritePage) {
+        setDummyData(prevData => prevData.filter(
+          (stock) => stock.script_id !== stockData.script_id
+        ));
+      }
+    }
+    setRemoveFavorite(false);
   }
 
   // useEffect(() => {
@@ -586,16 +599,17 @@ function Watchlist() {
         newData[i].isAskChanged = false;
       }
 
+      // console.log("newItem['bidRate']", newItem['bidRate']);
       if (newItem['bidRate'] > oldItem['bidRate']) {
-        newData[i].isAskUp = true;
+        newData[i].isBidUp = true;
       } else if ((newItem['bidRate'] < oldItem['bidRate'])) {
-        newData[i].isAskUp = false;
+        newData[i].isBidUp = false;
       }
 
       if (newItem['askRate'] > oldItem['askRate']) {
-        newData[i].isBidUp = true;
+        newData[i].isAskUp = true;
       } else if (newItem['askRate'] < oldItem['askRate']) {
-        newData[i].isBidUp = false;
+        newData[i].isAskUp = false;
       }
 
 
@@ -723,6 +737,7 @@ function Watchlist() {
                         showToast={showToast}
                         handleStar={handleStar}
                         setRemoveMarket={setRemoveMarket}
+                        setRemoveFavorite={setRemoveFavorite}
                       />
 
                       :
@@ -738,6 +753,7 @@ function Watchlist() {
                         showToast={showToast}
                         handleStar={handleStar}
                         setRemoveMarket={setRemoveMarket}
+                        setRemoveFavorite={setRemoveFavorite}
                       />}
                   </AccordionDetails>
                 </Accordion>
@@ -818,6 +834,32 @@ function Watchlist() {
           </Button>
           <Button onClick={() => handleRemove(removeMarket, removeMarket?.idx)} variant="contained" color="error" autoFocus>
             Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog
+        open={!!removeFavorite}
+        onClose={() => setRemoveFavorite(false)}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title" sx={{ mb: 2 }}>
+          Confirm Unfavorite
+        </DialogTitle>
+        <DialogContent>
+          <Typography id="confirm-dialog-description">
+            Are you sure you want to remove <b>{removeFavorite?.scriptName}</b> from Favorites ?<br />
+            {/* This action cannot be undone. */}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setRemoveFavorite(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={() => handleStar(removeFavorite)} variant="contained" color="error" autoFocus>
+            Unfavorite
           </Button>
         </DialogActions>
       </Dialog>

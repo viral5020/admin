@@ -21,7 +21,9 @@ import { toast, ToastContainer } from "react-toastify";
 import { functionsIn } from 'lodash';
 import { forex_comex_market } from '../helpers/utilFunc';
 import { toastObj } from '../helpers/helper';
-
+import AddIcon from '@mui/icons-material/Add';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { useNavigate } from 'react-router-dom';
 
 function changeFormat(arr) {
     const result = {};
@@ -45,6 +47,7 @@ function changeFormat(arr) {
 
 
 const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isForex, setDummyData, socket, getScriptKey, marketNames, setMarketNames, setKeysOfScriptData }) => {
+    const navigate = useNavigate();
     const [filterOpen, setFilterOpen] = useState(false);
     const [dataObj, setDataObj] = useState(false);
 
@@ -445,7 +448,7 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                                 color="secondary"
                                 size="small"
                                 sx={{ borderRadius: 1 }}
-                                onClick={() => window.location.href = 'http://localhost:3000/app/dashboard/favorite-list'}
+                                onClick={() => navigate('/app/dashboard/favorite-list')}
                             >
                                 Favorite List
                             </Button>
@@ -457,7 +460,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 <Grid item xs={12} sm={6} md={isMobile ? 12 : 4} lg={isMobile ? 12 : 3}>
                     <Box sx={{ display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: 1 }}>
 
-                        {isMobile && <FilterBtn setFilterOpen={setFilterOpen} icon='add' />}
+                        {isMobile &&
+                            <FilterBtn
+                                setFilterOpen={setFilterOpen}
+                                Icon={<AddIcon sx={{ position: 'relative', left: '4px', fontSize: '20px !important' }} />}
+                            />}
                         {/* {isMobile && <FilterBtn />} */}
 
                         <TextField
@@ -498,6 +505,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                                 ),
                             }}
                         />
+                        {isMobile &&
+                            <FilterBtn
+                                Icon={<FavoriteIcon sx={{ position: 'relative', left: '4px' }} />}
+                                onClick={() => navigate('/app/dashboard/favorite-list')}
+                            />}
                     </Box>
                 </Grid>
             </Grid>
