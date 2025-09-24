@@ -689,13 +689,13 @@ const Employeelisting = ({
                             {[
                                 "User Name",
                                 "User Code",
-
                                 "Emp permission",
+                                "Status",
+                                "Actions",
                                 "Login IP",
                                 "Login Time",
                                 "Joining Date",
-                                "Status",
-                                "Actions",
+
                             ].map((header) => (
                                 <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
                                     {header}
@@ -721,13 +721,20 @@ const Employeelisting = ({
                                 <tr key={row.user_name || index}>
                                     <td dangerouslySetInnerHTML={{ __html: row.user_full_name || "" }} />
                                     <td>{row.user_name || "-"}</td>
-
                                     <td>{row.emp_permission || "-"}</td>
+                                    <td
+                                        style={{
+                                            color: row.user_status === 1 ? "#28a745" : "#ec081fff",
+                                            fontWeight: 900,
+                                        }}
+                                    >
+                                        {row.user_status === 1 ? "Active" : "Inactive"}
+                                    </td>
+                                    <td>{renderActions(row)}</td>
                                     <td>{row.last_login_ip || "-"}</td>
                                     <td>{row.last_login_time || "-"}</td>
                                     <td>{row.creation_time || "-"}</td>
-                                    <td>{row.user_status == 1 ? "Active" : "Inactive"}</td>
-                                    <td>{renderActions(row)}</td>
+
                                 </tr>
                             ))
                         )}
