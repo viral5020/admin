@@ -590,7 +590,7 @@ const OrderPage1 = ({
     ];
 
     const ClientWiseOptions = [
-        { label: ' Scritp name', value: 't.scritp_name' },
+        { label: ' Script name', value: 't.scritp_name' },
         { label: 'User Name', value: 'u.user_full_name' }
     ]
 

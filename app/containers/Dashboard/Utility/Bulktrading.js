@@ -239,15 +239,19 @@ const Bulktrading = ({
 
             {/* Search */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2.5, mx: 1 }}>
-                {filterShow && isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
-                <SearchPdfCsv
-                    searchText={searchText}
-                    setSearchText={setSearchText}
-                    logs={logs}
-                    colArr={colArr}
-                    keyArr={keyArr}
-                    isLoading={loading}
-                />
+                {filterShow && isMobile &&
+                    <>
+                        <FilterBtn setFilterOpen={setFilterDrawer} />
+                        <SearchPdfCsv
+                            searchText={searchText}
+                            setSearchText={setSearchText}
+                            logs={logs}
+                            colArr={colArr}
+                            keyArr={keyArr}
+                            isLoading={loading}
+                        />
+                    </>
+                }
             </Box>
 
             {/* Bulk trade list input */}
@@ -309,6 +313,17 @@ const Bulktrading = ({
                         onApply={onFilterApply}
                     />
                 </Box>
+            }
+
+            {filterShow && !isMobile &&
+                <SearchPdfCsv
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={logs}
+                    colArr={colArr}
+                    keyArr={keyArr}
+                    isLoading={loading}
+                />
             }
 
             {/* Main logs table */}
