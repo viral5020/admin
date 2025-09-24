@@ -238,10 +238,69 @@ const OrderPage1 = ({
 
     const fetchPositions = async () => {
         setLoading(true);
-        const result = await apifetchPositions(user_id);
-        setPositionData(result);
-        setLoading(false);
+
+        try {
+            const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+            const result = await apifetchPositions({
+                login_user_id: dataStored.user_id,
+                auth_key: dataStored.auth_key,
+                all_outstanding,
+                expiry_date: exparyDate,
+                group_by: client_wise_value,
+                market_type_id: market?.id,
+                script_id: formatScriptIds(script),
+                broker_id: broker?.id,
+                master_user_id: master?.id,
+                user_id: client?.id,
+            });
+
+            const aaData = result?.aaData || [];
+
+            setPositionData(aaData);
+            setPositionDataNew(result?.dataList || []);
+
+            // Extract flat script list
+            const flat1 = aaData
+                .filter(e => parseInt(e.net_qty) !== 0)
+                .map(e => e.check_script_name)
+                .filter((v, i, a) => a.indexOf(v) === i);
+            setfFlat(flat1);
+
+            // Emit to socket
+            socket.emit("positionReport", {
+                userId: dataStored.user_id,
+                scripts: flat1,
+            });
+
+            // Totals calculation
+            const flag_total = dataStored.user_type !== 1 ? -1 : 1;
+            const total_grand =
+                (result.downline_grand + result.upline_grand + result.self_grand) * flag_total;
+
+            setTotals(prev => ({
+                ...prev,
+                upline_grand: result.upline_grand ?? 0,
+                downline_grand: result.downline_grand ?? 0,
+                self_grand: result.self_grand ?? 0,
+                total_qty: result.total_qty ?? 0,
+                totalMTM: total_grand ?? 0,
+                limit: dataStored.user_type === 1 ? result.limit ?? 0 : 0,
+                net:
+                    dataStored.user_type === 1
+                        ? (result.self_grand + (result.limit ?? 0))
+                        : undefined,
+                limit1: dataStored.user_type === 1 ? result.limit ?? 0 : 0,
+            }));
+        } catch (err) {
+            console.error("❌ Error fetching position data:", err);
+            setPositionData([]);
+            setPositionDataNew([]);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     useEffect(() => {
 
@@ -1050,7 +1109,7 @@ const OrderPage1 = ({
             <SearchPdfCsv
                 searchText={searchText}
                 setSearchText={setSearchText}
-                logs={positionData.slice(0, 5)}
+                logs={positionData}
                 colArr={colArr}
                 keyArr={keyArr}
             />

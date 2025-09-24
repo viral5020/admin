@@ -381,7 +381,7 @@ const Cashentry = ({
                                     <IconButton
                                         onClick={() => setFormOpen((prev) => !prev)}
                                         sx={{
-                                            ml: 0.5, // very small margin to avoid sticking visually
+                                            mb: 7,
                                             bgcolor: "secondary.main",
                                             color: "white",
                                             "&:hover": { bgcolor: "secondary.dark" },
@@ -391,6 +391,7 @@ const Cashentry = ({
                                         <AddIcon />
                                     </IconButton>
                                 </Tooltip>
+
                             </Box>
 
                             <Collapse in={formOpen}>

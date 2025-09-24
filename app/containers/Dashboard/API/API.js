@@ -55,27 +55,50 @@ export async function getIP() {
   }
 };
 
-export const apifetchPositions = async (user_id) => {
+export const apifetchPositions = async ({
+  login_user_id,
+  auth_key,
+  all_outstanding,
+  expiry_date,
+  group_by,
+  market_type_id,
+  script_id,
+  broker_id,
+  master_user_id,
+  user_id,
+} = {}) => {
   const defaultParams = await getDefaultParams();
+
+  const payload = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: 0,
+    iDisplayLength: -1,
+    sSearch: "",
+    all_outstanding,
+    expiry_date,
+    group_by,
+    market_type_id,
+    script_id,
+    broker_id,
+    master_user_id,
+    user_id,
+  };
+
+  console.log("🔹 Fetching positions:", payload);
+
   try {
-    const response = await axiosInstance.post("/datatables/position_book_list", {
-      ...defaultParams,
-      sEcho: 1,
-      iDisplayStart: 0,
-      iDisplayLength: -1,
-      sSearch: "",
-      ...(user_id ? { user_id } : {})
-    });
-    if (response.data && response.data.aaData) {
-      return response.data.aaData;
-    } else {
-      return [];
-    }
+    const response = await axiosInstance.post(
+      "/datatables/position_book_list",
+      payload
+    );
+    return response.data; // return full response, let component handle
   } catch (error) {
-    console.error("Error fetching position data:", error);
-    return [];
+    console.error("❌ Error fetching position data:", error);
+    return { aaData: [] }; // safe fallback
   }
 };
+
 
 // ---------- PART 1 --------------
 

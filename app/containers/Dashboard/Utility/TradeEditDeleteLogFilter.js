@@ -100,6 +100,13 @@ const TradeEditDeleteLogFilter = ({
                         </FormGroup>
                     </Grid>
                 }
+                <ClientMasterBrokerFilter2
+                    sx={{ width: "100%" }}
+                    userType={userType}
+                    setUserType={setUserType}
+                    selectedUser={selectedUser}
+                    setSelectedUser={setSelectedUser}
+                />
 
                 {setStart_date && <DateFilter label="From Date" value={start_date} onChange={setStart_date} />}
                 {setEnd_date && <DateFilter label="To Date" value={end_date} onChange={setEnd_date} />}
@@ -130,13 +137,6 @@ const TradeEditDeleteLogFilter = ({
                     showMaster={Boolean(setMaster)}
                 />
 
-                <ClientMasterBrokerFilter2
-                    sx={{ width: "100%" }}
-                    userType={userType}
-                    setUserType={setUserType}
-                    selectedUser={selectedUser}
-                    setSelectedUser={setSelectedUser}
-                />
 
                 {setIsAdminOnly &&
                     <Grid item xs={12} sm={6} md={3} lg={2.4}>

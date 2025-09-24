@@ -248,28 +248,18 @@ const Cashledger = ({
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {filterShow && (
-                        <Box sx={{ mb: 3 }}>
-                            <ClientMasterBrokerFilter2
-                                sx={{ width: "100%" }}
-                                userType={userType}
-                                setUserType={setUserType}
-                                selectedUser={selectedUser}
-                                setSelectedUser={setSelectedUser}
-                            />
-                        </Box>
+                        <TradeEditDeleteLogFilter
+                            userType={userType}
+                            setUserType={setUserType}
+                            selectedUser={selectedUser}
+                            setSelectedUser={setSelectedUser}
+                            entry_date={entryAfter_date}
+                            setentry_date={setEntryAfter_date}
+                            entrybefore_date={entryBefore_date}
+                            setentrybefore_date={setEntryBefore_date}
+                            onApply={onFilterApply}
+                        />
                     )}
-                    {filterShow && (
-                        <Box sx={{ mb: 3 }}>
-                            <TradeEditDeleteLogFilter
-                                entry_date={entryAfter_date}
-                                setentry_date={setEntryAfter_date}
-                                entrybefore_date={entryBefore_date}
-                                setentrybefore_date={setEntryBefore_date}
-                                onApply={onFilterApply}
-                            />
-                        </Box>
-                    )}
-
                     <Box
                         sx={{
                             display: "flex",

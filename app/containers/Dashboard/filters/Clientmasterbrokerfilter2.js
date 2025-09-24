@@ -59,7 +59,7 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
     // fetch initial options when userType changes
     useEffect(() => {
         if (userType) fetchOptions(userType.value, ""); // empty string initially
-        setSelectedUser(null);
+        setSelectedUser?.(null);
     }, [userType]);
 
     return (
