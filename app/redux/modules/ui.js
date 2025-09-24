@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import menuContent from 'dan-api/ui/menu';
-import { getSibarContent } from 'dan-api/ui/newMenu';
+import { getSibarContent } from 'dan-api/ui/menu';
 
 const initialState = {
   /* Settings for Themes and layout */
@@ -98,13 +98,15 @@ const uiSlice = createSlice({
     },
 
 
-
-
     openAction: (state, action) => {
       const { initialLocation, key } = action.payload;
       // console.log('initialLocation, key', initialLocation, key);
       // Set initial open parent menu
       const dataMenu = getSibarContent();
+      // console.log('dataMenu', dataMenu);
+
+      if (!dataMenu) return;
+
       const activeParent = setNavCollapse(
         // getMenus(menuContent),
         getMenus(dataMenu),

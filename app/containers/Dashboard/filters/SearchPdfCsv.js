@@ -22,7 +22,7 @@ const SearchPdfCsv = ({ setSearchText, searchText, logs, keyArr, colArr }) => {
     const location = useLocation();
     const title = humanize(getLastPath(location.pathname))
 
-    console.log('logs', logs);
+    // console.log('logs', logs);
 
     // Export CSV
     const handleExportCSV = () => {

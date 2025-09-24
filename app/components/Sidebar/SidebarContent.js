@@ -26,9 +26,9 @@ function SidebarContent(props) {
   };
 
   useEffect(() => {
-    console.log("BBBBBBBBB")
+    // console.log("BBBBBBBBB")
     !userData?.investor_status ? viewUserProfile() : '';
-    console.log("AAAAAAAAA")
+    // console.log("AAAAAAAAA")
     const mainContent = document.getElementById('sidebar');
     mainContent.addEventListener('scroll', handleScroll);
     return () => {
@@ -67,7 +67,7 @@ function SidebarContent(props) {
   async function viewUserProfile() {
     const result = await fetchProfileAPI();
 
-    console.log('result', result);
+    // console.log('result', result);
 
     setProfileData(result);
     // console.log('✅ from sidebarContent.js\nUser Profile:', result.data);

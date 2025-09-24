@@ -6,6 +6,7 @@ import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 export async function getDefaultParams() {
   const dataStored = JSON.parse(sessionStorage.getItem("data"));
+  if (!dataStored) return;
   const { ip_address, user_agent } = await getUserInfo();
   const { isEmployeeLogin, isEmployeeLoginId, login_string, investor_status } = dataStored;
   const emp_para = { isEmployeeLogin, isEmployeeLoginId, login_string };
@@ -3424,3 +3425,21 @@ export const removeExpiryValidation = async (row, setLogs) => {
     toast.error("An error occurred while removing the entry.", { position: "top-right", autoClose: 3000 });
   }
 };
+
+export async function exportTradeApi(payload) {
+  try {
+    const defaultParams = await getDefaultParams();
+    console.log("⬇ Export Payload:", payload);
+
+    const response = await axiosInstance.post(
+      "/ajaxfiles/download_csv_trade_book",
+      { ...defaultParams, ...payload },
+      { responseType: "blob" } // ⬅️ important for CSV/Excel downloads
+    );
+
+    return response;
+  } catch (error) {
+    console.error("❌ Trade export failed:", error);
+    throw error;
+  }
+}
