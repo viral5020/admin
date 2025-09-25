@@ -2019,15 +2019,16 @@ console.log("API.js runn.......");
 const apiCache = new Map();
 
 export const fetchOptionsAPI = async (url, params) => {
-  const defaultParams = await getDefaultParams();
-
   const key = `${url}:${JSON.stringify(params)}`;
+
   // If we already have cached response, return it
   if (apiCache.has(key)) {
     // console.log("Returning cached response for:", key);
     return apiCache.get(key);
   }
+
   // Otherwise, call the API
+  const defaultParams = await getDefaultParams();
   try {
     const { data } = await axiosInstance.post(url, { ...params, ...defaultParams });
     // Save response in cache

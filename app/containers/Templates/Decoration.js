@@ -58,7 +58,7 @@ function Decoration(props) {
           getBgPosition(bgPosition),
         )}
       >
-        { decoration && renderDecor(mode, bgPosition) }
+        {decoration && renderDecor(mode, bgPosition)}
       </div>
     </div>
   );

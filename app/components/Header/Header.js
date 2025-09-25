@@ -163,15 +163,15 @@ function Header(props) {
               </Tooltip>
             </div> */}
           <Typography
-  component="h2"
-  className={classes.header_Title}
-  sx={{
-    pl: isLgUp && !sidebarOpen ? 2 : 0,
-    fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" }, // smaller on mobile
-  }}
->
-  {title}
-</Typography>
+            component="h2"
+            className={classes.header_Title}
+            sx={{
+              pl: isLgUp && !sidebarOpen ? 2 : 0,
+              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" }, // smaller on mobile
+            }}
+          >
+            {title}
+          </Typography>
 
         </div>
         {/* )} */}

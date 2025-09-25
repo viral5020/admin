@@ -100,7 +100,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
     [`&.${classes.left}`]: {
       [`& .${classes.menuButton}`]: {
         [theme.breakpoints.up('lg')]: {
-          marginLeft: -20
+          marginLeft: -7
         }
       },
       [theme.breakpoints.up('lg')]: {
