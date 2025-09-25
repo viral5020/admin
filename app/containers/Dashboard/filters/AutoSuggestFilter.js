@@ -93,6 +93,7 @@ const AutoSuggestFilter = ({
                 value={Array.isArray(field) ? field : field || null}
                 onInputChange={(e, val, reason) => reason === "input" && handleFetch(val)}
                 onChange={(e, val) => setField(val)}
+
                 renderOption={(props, option) => {
                     const optionText = typeof option === "string" ? option : option.text;
                     const isSelected = Array.isArray(field)

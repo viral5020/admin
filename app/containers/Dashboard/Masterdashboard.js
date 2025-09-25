@@ -796,11 +796,11 @@ function Masterdashboard() {
 
 
 
-    useEffect(() => {
-        if (positionDialogOpen) {
-            fetchPositions();
-        }
-    }, [positionDialogOpen]);
+    // useEffect(() => {
+    //     if (positionDialogOpen) {
+    //         fetchPositions();
+    //     }
+    // }, [positionDialogOpen]);
 
     useEffect(() => {
         console.log("Selected Row:", selectedRow);
@@ -949,7 +949,7 @@ function Masterdashboard() {
                 {/* Dialog with custom header */}
                 <Dialog
                     open={positionDialogOpen}
-                    onClose={() => setPositionDialogOpen(false)}
+                    onClose={() => setpositionDialogOpen(false)}
                     maxWidth="md"
                     fullWidth
                     fullScreen={fullScreen} // mobile only

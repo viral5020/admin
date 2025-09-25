@@ -50,8 +50,10 @@ const OrderBook = ({
   const [end_date, setEnd_date] = useState('');
   const [start_end, setStart_end] = useState('');
   const [orderType, setOrderType] = useState('');  // trade_type
-  const [orders, setOrders] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
+  const [logs, setLogs] = useState([]);
 
   const [filterType, setFilterType] = useState("today");
   const [searchText, setSearchText] = useState("");
@@ -119,7 +121,7 @@ const OrderBook = ({
       if (response.success) {
         showToast.success('Trade cancelled successfully', 'success');
         // Refresh orders after cancel
-        await fetchOrders(filterType, debouncedSearchText);
+        await fetchLogs(filterType, debouncedSearchText);
       } else {
         showToast(response.message || 'Failed to cancel trade', 'error');
       }
@@ -176,14 +178,14 @@ const OrderBook = ({
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  const fetchOrders = async (page = currentPage, size = pageSize, filter = filterType, search = debouncedSearchText) => {
+  const fetchLogs = async () => {
     setLoading(true);
     try {
       const result = await fetchOrdersAPI({
-        filterType: filter,
-        searchValue: search,
-        currentPage: page,
-        pageSize: size,
+        filterType,
+        searchValue: debouncedSearchText,
+        currentPage,
+        pageSize,
         end_date,
         start_end,
         marketId: market?.id || null,
@@ -193,11 +195,24 @@ const OrderBook = ({
         clientId: user_id || client?.id || null,
         status,
         orderType,
-        // user_id: user_id
       });
 
-      setOrders(result.aaData || []);
+      const data = result.aaData || [];
+
+      if (isMobile) {
+        // Mobile: append data on "load more"
+        if (isFilterChange || currentPage === 0) {
+          setLogs(data); // replace when filter/search applied or first page
+        } else {
+          setLogs(prev => [...prev, ...data]); // append on load more
+        }
+      } else {
+        // Desktop: always replace
+        setLogs(data);
+      }
+
       setTotalRecords(result.iTotalRecords || 0);
+      setIsFilterChange(false);
     } catch (err) {
       console.error(err);
       showToast('Failed to fetch orders.', 'error');
@@ -206,55 +221,38 @@ const OrderBook = ({
     }
   };
 
+
   function onFilterApply() {
     setCurrentPage(0); // Reset pagination to first page
-    fetchOrders(0, pageSize, filterType, debouncedSearchText); // Call API with filters
+    fetchLogs(0, pageSize, filterType, debouncedSearchText); // Call API with filters
     toggleDrawer(false)(); // Close drawer if mobile
   }
 
   useEffect(() => {
-    console.log('orders.length', orders.length);
-  }, [fetchOrders])
+    console.log('orders.length', logs.length);
+  }, [fetchLogs])
 
-  // Fetch on mount
+  // # Pagination useEffects
   useEffect(() => {
-    fetchOrders(0);
-  }, [user_id]);
+    fetchLogs(0);
+  }, [user_id]); // run on first render
 
-  // Update total pages when total records or pageSize changes
-  useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
-
-  // Fetch when filter, search, page, or pageSize changes
   useEffect(() => {
-    fetchOrders(currentPage, pageSize, filterType, debouncedSearchText);
-  }, [currentPage, pageSize, filterType, debouncedSearchText]);
+    setTotalPages(Math.ceil(totalRecords / pageSize));
+  }, [pageSize, totalRecords])
 
+  useEffect(() => {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
+    setCurrentPage(0);
+  }, [filterType, debouncedSearchText]);
 
-  // // # Pagination useEffects
-  // useEffect(() => {
-  //   fetchOrders();
-  // }, []);
+  useEffect(() => {
+    !isFirstRender && fetchLogs();
+  }, [currentPage, pageSize]);
 
-  // useEffect(() => {
-  //   setTotalPages(Math.ceil(totalRecords / pageSize));
-  // }, [pageSize, totalRecords])
-
-  // useEffect(() => {
-  //   !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-  //   setCurrentPage(0);
-  // }, [filterType, debouncedSearchText]);
-
-  // useEffect(() => {
-  //   !isFirstRender && fetchOrders();
-  // }, [currentPage, pageSize]);
-
-  // useEffect(() => {
-  //   isFilterChange && !isFirstRender && fetchOrders();
-  // }, [isFilterChange])
-
-  // useEffect(() => {
-  //   fetchOrders(filterType, debouncedSearchText);
-  // }, [filterType, debouncedSearchText]);
+  useEffect(() => {
+    isFilterChange && !isFirstRender && fetchLogs();
+  }, [isFilterChange])
 
 
   const [open, setOpen] = useState(false);
@@ -305,7 +303,7 @@ const OrderBook = ({
       if (response?.success) {
         showToast('Trade updated successfully.');
         handleClose();
-        await fetchOrders(filterType, debouncedSearchText);
+        await fetchLogs(filterType, debouncedSearchText);
       } else {
         showToast(response?.message || 'Failed to update trade.');
       }
@@ -518,12 +516,12 @@ const OrderBook = ({
         <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
           <CircularProgress size={28} />
         </Box>
-      ) : orders.length === 0 ? (
+      ) : logs.length === 0 ? (
         <Typography sx={{ px: 1, mt: 2 }}>No orders found </Typography>
       ) : isMobile ? (
         <>
           <SwipeableList type={ListType.IOS}>
-            {orders.map((item, index) => {
+            {logs.map((item, index) => {
               const [mainName, subName] = item.scrp_name.split(" ", 2);
               const cleanRate = item.trd_rate?.split("(")[0].trim();
               const isBuy = item.trd_type === "Buy";
@@ -669,7 +667,7 @@ const OrderBook = ({
             })}
           </SwipeableList>
 
-          {orders.length < totalRecords && (
+          {logs.length < totalRecords && (
             loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
                 <CircularProgress size={24} />
@@ -748,7 +746,7 @@ const OrderBook = ({
 
               </thead>
               <tbody>
-                {orders.map((item, index) => {
+                {logs.map((item, index) => {
                   const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
                   let backgroundColor = "#9e9e9e";
                   if (market === "NSEFUT") backgroundColor = "#5a88adff";

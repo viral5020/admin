@@ -8,6 +8,7 @@ import { forex_comex_market } from '../helpers/utilFunc';
 import axiosInstance from '../API/axiosconfig';
 import { fetchOptionsAPI, getDefaultParams } from '../API/API';
 import AutoSuggestFilter from './AutoSuggestFilter';
+import { useDebounce } from '@uidotdev/usehooks';
 
 
 const MarketScriptNameFilter = ({
@@ -20,6 +21,22 @@ const MarketScriptNameFilter = ({
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
+
+  const [marketText, setMarketText] = useState('');
+  const [scriptText, setScriptText] = useState('');
+
+  const debouncedMarketText = useDebounce(marketText, 800);
+  const debouncedScriptText = useDebounce(scriptText, 800);
+
+  useEffect(() => {
+    handleFetch(marketText, 'market');
+  }, [debouncedMarketText])
+
+  useEffect(() => {
+    handleFetch(scriptText, 'script');
+  }, [debouncedScriptText])
+
+
   const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
   const [scriptOptions, setScriptOptions] = useState([]);
 
@@ -101,8 +118,10 @@ const MarketScriptNameFilter = ({
           // }}
           inputValue={market?.text || ''}//** */
           onInputChange={(e, val, reason) => {  //** */
-            (reason === 'input') && setMarket({ text: val }); // tempararyly set market value
-            handleFetch(val, 'market');
+            if (reason === 'input') {
+              setMarket({ text: val }); // tempararyly set market value
+              setMarketText(val);
+            }
             setScript?.([]); // clear script when market changes
           }}
           onChange={(e, val) => {
@@ -160,12 +179,10 @@ const MarketScriptNameFilter = ({
           // filterSelectedOptions
           onInputChange={(e, val, reason) => {
             if (reason === 'input') {
-              handleFetch(val, 'script');
+              setScriptText(val);
             }
           }}
-          onChange={(e, val) => {
-            setScript(val);
-          }}
+          onChange={(e, val) => setScript(val)}
           renderOption={(props, option) => {
             const optionText = typeof option === 'string' ? option : option.text;
             const isSelected = Array.isArray(script)

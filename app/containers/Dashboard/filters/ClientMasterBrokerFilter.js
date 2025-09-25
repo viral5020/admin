@@ -8,6 +8,7 @@ import { useTheme } from '@emotion/react';
 import { clone } from 'lodash';
 import axiosInstance from '../API/axiosconfig';
 import { fetchOptionsAPI, getDefaultParams } from '../API/API';
+import { useDebounce } from '@uidotdev/usehooks';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -20,6 +21,27 @@ const ClientMasterBrokerFilter = ({
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
+
+    const [clientText, setClientText] = useState('')
+    const [masterText, setMasterText] = useState('')
+    const [brokerText, setBrokerText] = useState('')
+
+    const debouncedClientText = useDebounce(clientText, 800);
+    const debouncedMasterText = useDebounce(masterText, 800);
+    const debouncedBrokerText = useDebounce(brokerText, 800);
+
+    useEffect(() => {
+        handleFetch(clientText, 'client');
+    }, [debouncedClientText])
+
+    useEffect(() => {
+        handleFetch(masterText, 'master');
+    }, [debouncedMasterText])
+
+    useEffect(() => {
+        handleFetch(brokerText, 'broker');
+    }, [debouncedBrokerText])
+
 
     const [clientOptions, setClientOptions] = useState([]);
     const [masterOptions, setMasterOptions] = useState([]);
@@ -90,13 +112,11 @@ const ClientMasterBrokerFilter = ({
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
                             setClient({ text: val });
-                            console.log('val', val);
-                            handleFetch(val, 'client');
+                            setClientText(val);
                         }
                     }}
                     onChange={(e, val) => setClient(val)}
                     onBlur={() => {
-                        console.log('TTT clientOptions', clientOptions);
                         const matched = clientOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === client?.text);
                         (!matched) && setClient(null);
                     }}
@@ -121,7 +141,7 @@ const ClientMasterBrokerFilter = ({
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
                             setMaster({ text: val });
-                            handleFetch(val, 'master');
+                            setMasterText(val);
                         }
                     }}
                     onChange={(e, val) => setMaster(val)}
@@ -140,8 +160,11 @@ const ClientMasterBrokerFilter = ({
             {setBroker && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     multiple={isMultipleBroker}
+                    disableCloseOnSelect={isMultipleBroker}
                     options={brokerOptions}
-                    getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
+                    getOptionLabel={(option) =>
+                        typeof option === 'string' ? option : option?.text || ''
+                    }
                     // value={broker || null}
                     value={Array.isArray(broker) ? broker : (broker || null)}
                     // isOptionEqualToValue={(option, value) => {
@@ -153,7 +176,7 @@ const ClientMasterBrokerFilter = ({
                     onInputChange={(e, val, reason) => {
                         if (reason === 'input') {
                             // setBroker({ text: val });
-                            handleFetch(val, 'broker');
+                            setBrokerText(val);
                         }
                     }}
                     onChange={(e, val) => setBroker(val)}
@@ -189,7 +212,14 @@ const ClientMasterBrokerFilter = ({
                             </li>
                         );
                     }}
-                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Broker" size="small" sx={inputBoxStyle} />}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            placeholder="Start typing to search..."
+                            label="Broker"
+                            size="small"
+                            sx={inputBoxStyle} />
+                    )}
                     noOptionsText="No Broker found"
                     fullWidth
                     sx={inputBoxStyle}

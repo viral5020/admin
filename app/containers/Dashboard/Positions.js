@@ -49,6 +49,7 @@ import SocketContext from "./Socket/SocketContext";
 import { formatScriptIds } from "./helpers/utilFunc";
 import { toast, ToastContainer } from "react-toastify";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -75,6 +76,7 @@ const OrderPage1 = ({
 }) => {
     // console.log("filterShow=", filterShow);
     const theme = useTheme();
+    const isFirstRender = useIsFirstRender();
     // const isDarkMode = theme.palette.mode === 'dark';
     const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
 
@@ -83,6 +85,7 @@ const OrderPage1 = ({
     const [data, setPositionDataNew] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
+    const debouncedSearchText = useDebounce(searchText, 800);
     // const [filter, setFilter] = useState("today");
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerOpen1, setDrawerOpen1] = useState(false);
@@ -334,14 +337,9 @@ const OrderPage1 = ({
         prevTotals.current = { ...totals };
     }, [totals]);
 
-
     useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            fetchPositions(null, searchText.trim());
-        }, 500); // 500ms debounce
-
-        return () => clearTimeout(delayDebounce);
-    }, [searchText]);
+        !isFirstRender && fetchPositions(null, searchText.trim());
+    }, [debouncedSearchText]);
 
     useEffect(() => {
         initSocketEvents();

@@ -258,6 +258,7 @@ const Usereditlog = () => {
                                     <TableRow>
                                         {/* <TableCell>User ID</TableCell> */}
                                         <TableCell>Username</TableCell>
+                                        <TableCell>Parent</TableCell>
                                         <TableCell>IP Address</TableCell>
                                         <TableCell>Log Time</TableCell>
                                         <TableCell>Actions</TableCell>
@@ -267,7 +268,8 @@ const Usereditlog = () => {
                                     {logs.map((log, i) => (
                                         <TableRow key={i}>
                                             {/* <TableCell>{log?.user_id ?? "-"}</TableCell> */}
-                                            <TableCell>{log?.username ?? "-"}</TableCell>
+                                            <TableCell>{log?.username_full_dis ?? "-"}</TableCell>
+                                            <TableCell>{log?.parent_full_name_dis ?? "-"}</TableCell>
                                             <TableCell>{log?.ip_address ?? "-"}</TableCell>
                                             <TableCell>{log?.log_time ?? "-"}</TableCell>
                                             <TableCell>
@@ -324,21 +326,21 @@ const Usereditlog = () => {
                                     <TableBody>
                                         {basicDetails.map((item, index) => (
                                             <TableRow key={index}>
-                                                <TableCell>{item.log_type}</TableCell>
-                                                <TableCell>{item.level_names_label}</TableCell>
-                                                <TableCell>{item.alert_percnetage}</TableCell>
-                                                <TableCell>{item.mtm_limit}</TableCell>
-                                                <TableCell>{item.my_percentage}</TableCell>
-                                                <TableCell>{item.check_high_low}</TableCell>
-                                                <TableCell>{item.apply_auto_sqaure}</TableCell>
-                                                <TableCell>{item.intraday_auto_sqaure}</TableCell>
-                                                <TableCell>{item.only_position_squareoff}</TableCell>
-                                                <TableCell>{item.nseFirstSell} / {item.nseUnmatched}</TableCell>
-                                                <TableCell>{item.mcxFirstSell} / {item.mcxUnmatched}</TableCell>
-                                                <TableCell>{item.nsescriptLimit}</TableCell>
-                                                <TableCell>{item.mcxscriptLimit}</TableCell>
-                                                <TableCell>{item.nse_margin_limit}</TableCell>
-                                                <TableCell>{item.mcx_margin_limit}</TableCell>
+                                                <TableCell>{item.log_type ?? '-'}</TableCell>
+                                                <TableCell>{item.level_names_label ?? '-'}</TableCell>
+                                                <TableCell>{item.alert_percnetage ?? '-'}</TableCell>
+                                                <TableCell>{item.mtm_limit ?? '-'}</TableCell>
+                                                <TableCell>{item.my_percentage ?? '-'}</TableCell>
+                                                <TableCell>{item.check_high_low ?? '-'}</TableCell>
+                                                <TableCell>{item.apply_auto_sqaure ?? '-'}</TableCell>
+                                                <TableCell>{item.intraday_auto_sqaure ?? '-'}</TableCell>
+                                                <TableCell>{item.only_position_squareoff ?? '-'}</TableCell>
+                                                <TableCell>{item.nseFirstSell ?? '-'} / {item.nseUnmatched ?? '-'}</TableCell>
+                                                <TableCell>{item.mcxFirstSell ?? '-'} / {item.mcxUnmatched ?? '-'}</TableCell>
+                                                <TableCell>{item.nsescriptLimit ?? '-'}</TableCell>
+                                                <TableCell>{item.mcxscriptLimit ?? '-'}</TableCell>
+                                                <TableCell>{item.nse_margin_limit ?? '-'}</TableCell>
+                                                <TableCell>{item.mcx_margin_limit ?? '-'}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
