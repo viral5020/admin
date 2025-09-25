@@ -1312,7 +1312,8 @@ const OrderPage = () => {
                                     <thead>
                                         <tr>
                                             {[
-                                                ...(userType !== 1 ? ["Client"] : []),
+                                                ...(userType !== 1 ? ["Client Name"] : []),
+                                                ...(userType !== 1 ? ["Client Code"] : []),
                                                 "Script",
                                                 "Total Buy",
                                                 "Buy Avg Rate",
@@ -1381,9 +1382,16 @@ const OrderPage = () => {
                                                 >
                                                     {/* Script + Market Chip */}
                                                     <td style={{ padding: "6px 10px" }}>
-                                                        {userType !== 1 ? (
-                                                            <span dangerouslySetInnerHTML={{ __html: row.client_full_name }} />
-                                                        ) : null}
+                                                        {userType !== 1 && (
+                                                            <span>
+                                                                {row.client_full_name_dis.replace(/<\/br>/g, " ")}
+                                                            </span>
+                                                        )}
+                                                    </td>
+
+                                                    <td style={{ padding: "6px 10px" }}>
+
+                                                        {userType !== 1 && <td>{row.client_name_dis}</td>}
                                                     </td>
 
                                                     <td style={{ padding: "6px 10px" }}>

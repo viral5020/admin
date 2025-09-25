@@ -123,6 +123,7 @@ const Summary_report = () => {
   };
 
   const fetchSummaryReportData = async () => {
+
     setLoading(true);
     const result = await fetchSummaryReportAPI(
       client?.id,
@@ -146,9 +147,11 @@ const Summary_report = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchSummaryReportData();
-  }, []);
+  // useEffect(() => {
+  //   if (valanId) {
+  //     fetchSummaryReportData();
+  //   }
+  // }, [valanId]);
 
   useEffect(() => {
     const query = searchQuery.toLowerCase();
@@ -438,7 +441,13 @@ const Summary_report = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {!valanId ? (
+                  <tr>
+                    <td colSpan={12} style={{ textAlign: "left", padding: 40, fontSize: "0.9rem", }}>
+                      Please select Valan ID
+                    </td>
+                  </tr>
+                ) : loading ? (
                   <tr>
                     <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
                       <CircularProgress size={30} />
@@ -446,7 +455,7 @@ const Summary_report = () => {
                   </tr>
                 ) : paginatedData.length === 0 ? (
                   <tr>
-                    <td colSpan={12} style={{ padding: 16, textAlign: "center" }}>
+                    <td colSpan={12} style={{ padding: 16, textAlign: "left", fontSize: "0.9rem", }}>
                       No Data Found
                     </td>
                   </tr>

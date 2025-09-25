@@ -722,8 +722,6 @@ const BrokerListing = ({
               {[
                 "Name",
                 "Login id",
-                //   "Parent",
-                //   "Percentage",
                 "Master",
                 "T User",
                 "Outstanding",
@@ -765,9 +763,10 @@ const BrokerListing = ({
             ) : (
               filteredData.map((row, index) => (
                 <tr key={row.user_id || index}>
-                  <td>{row.user_full_name || "-"}</td>
-                  <td>{row.loginid || "-"}</td>
-                  <td>{row.master_full_name || "-"}</td>
+                  <td><strong>{row.user_full_name || "-"}</strong></td>
+                  <td><strong>{row.user_name || "-"}</strong></td>
+                  <td><strong>{row.master_full_name || "-"}</strong></td>
+
                   {/* <td
                   style={{
                     cursor: row.out_standing ? "pointer" : "default",

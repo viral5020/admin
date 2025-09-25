@@ -761,10 +761,11 @@ const Userlisting = ({
                     transition: "background-color 0.3s",
                   }}
                 >
-                  <td dangerouslySetInnerHTML={{ __html: row.user_name || "-" }} />
-                  <td dangerouslySetInnerHTML={{ __html: row.user_code || "-" }} />
-                  <td dangerouslySetInnerHTML={{ __html: row.broker || "-" }} />
-                  <td dangerouslySetInnerHTML={{ __html: row.master || "-" }} />
+                  <td dangerouslySetInnerHTML={{ __html: `<strong>${row.user_name || "-"}</strong>` }} />
+                  <td dangerouslySetInnerHTML={{ __html: `<strong>${row.user_code || "-"}</strong>` }} />
+                  <td dangerouslySetInnerHTML={{ __html: `<strong>${row.broker || "-"}</strong>` }} />
+                  <td dangerouslySetInnerHTML={{ __html: `<strong>${row.master || "-"}</strong>` }} />
+
 
                   {/* Status with color */}
                   <td
