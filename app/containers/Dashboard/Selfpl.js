@@ -288,7 +288,7 @@ const Selfpl = () => {
                                 }}
                             >
                                 <tr>
-                                    {["Serial No", "Name", "bill_amount", "user_type"].map((header) => (
+                                    {["Serial No", "Name", "Code", "Bill Amount", "User Type"].map((header) => (
                                         <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
                                             {header}
                                         </th>
@@ -323,7 +323,8 @@ const Selfpl = () => {
                                             }}>
                                             {/* <td>{idx + 1 + currentPage * rowsPerPage}</td> */}
                                             <td>{row.sr_no}</td>
-                                            <td>{row.user_name}</td>
+                                            <td>{row.user_full_name_dis}</td>
+                                            <td>{row.user_name_dis}</td>
                                             <td>{row.bill_amount}</td>
                                             <td>{row.user_type}</td>
                                         </tr>

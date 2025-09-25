@@ -170,10 +170,10 @@ const Summary_report = () => {
     }
   };
 
-  useEffect(() => {
-    fetchforexSummaryReportData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   fetchforexSummaryReportData();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // Search filter
   useEffect(() => {
@@ -467,7 +467,13 @@ const Summary_report = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {!valanId ? (
+                  <tr>
+                    <td colSpan={12} style={{ textAlign: "left", padding: 40, fontSize: "0.9rem", }}>
+                      Please select Valan ID
+                    </td>
+                  </tr>
+                ) : loading ? (
                   <tr>
                     <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
                       <CircularProgress size={30} />
@@ -475,7 +481,7 @@ const Summary_report = () => {
                   </tr>
                 ) : paginatedData.length === 0 ? (
                   <tr>
-                    <td colSpan={12} style={{ padding: 16, textAlign: "center" }}>
+                    <td colSpan={12} style={{ padding: 16, textAlign: "left", fontSize: "0.9rem", }}>
                       No Data Found
                     </td>
                   </tr>

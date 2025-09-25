@@ -734,9 +734,9 @@ const Masterlisting = ({
             ) : (
               filteredData.map((row, index) => (
                 <tr key={row.user_id || index}>
-                  <td>{row.user_full_name || "-"}</td>
-                  <td>{row.user_name || "-"}</td>
-                  <td>{row.master || "-"}</td>
+                  <td><strong>{row.user_full_name || "-"}</strong></td>
+                  <td><strong>{row.user_name || "-"}</strong></td>
+                  <td>{row.parent_user_id || "-"}</td>
                   <td>{row.percentage || "-"}</td>
                   <td
                     style={{
