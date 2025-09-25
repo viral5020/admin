@@ -332,7 +332,7 @@ const Nseoptmanagement = () => {
                     <Box
                         sx={{
                             display: 'flex',
-                            gap: 2,
+                            gap: 0.7,
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             mb: 1.5,

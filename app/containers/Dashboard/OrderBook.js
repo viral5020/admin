@@ -217,13 +217,17 @@ const OrderBook = ({
   }, [fetchOrders])
 
   // Fetch on mount
-  useEffect(() => { fetchOrders(0); }, []);
+  useEffect(() => {
+    fetchOrders(0);
+  }, [user_id]);
 
   // Update total pages when total records or pageSize changes
   useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
 
   // Fetch when filter, search, page, or pageSize changes
-  useEffect(() => { fetchOrders(currentPage, pageSize, filterType, debouncedSearchText); }, [currentPage, pageSize, filterType, debouncedSearchText]);
+  useEffect(() => {
+    fetchOrders(currentPage, pageSize, filterType, debouncedSearchText);
+  }, [currentPage, pageSize, filterType, debouncedSearchText]);
 
 
   // // # Pagination useEffects

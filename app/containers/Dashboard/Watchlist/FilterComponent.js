@@ -408,7 +408,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
 
     return (
         <Box sx={{ p: 1.5, py: !isMobile ? 2 : null, pb: isMobile ? 2 : null }}>
-            {!isMobile && renderFilterFields()}
+            {!isMobile &&
+                <Grid container spacing={2}>
+                    {renderFilterFields()}
+                </Grid>
+            }
             {/* {!isMobile && MyForm()} */}
 
             <Grid container alignItems="center" sx={{ mt: isMobile ? 0 : 1.4, flexWrap: 'wrap', gap: { xs: 2, sm: 0 } }}>
@@ -533,7 +537,9 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                 />
 
                 <DialogContent dividers>
-                    {renderFilterFields()}
+                    <Grid container spacing={2}>
+                        {renderFilterFields()}
+                    </Grid>
                     {/* {MyForm()} */}
                 </DialogContent>
 

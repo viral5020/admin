@@ -3,7 +3,7 @@ import { Autocomplete, TextField, Grid } from '@mui/material';
 
 const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
     return (
-        <Grid container spacing={2}>
+        <>
             {configs.map(({ label, value, onChange, options, getOptionLabel, hidden, isOptionEqualToValue, disabled, errorMsg }) => {
                 const [inputValue, setInputValue] = useState(getOptionLabel(value));
 
@@ -92,7 +92,7 @@ const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
                     </Grid>
                 );
             })}
-        </Grid>
+        </>
     );
 };
 

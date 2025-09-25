@@ -215,39 +215,37 @@ const NseoptManageFilter = ({
     );
 
     return (
-        <Box sx={{ p: 2 }}>
-            {!isMobile && renderFilterFields()}
+        <Box sx={{ pb: 2 }}>
+            <Grid
+                container
+                spacing={2}
+                alignItems="center"        // vertical centering
+                justifyContent="center"    // horizontal centering
+            >
+                {renderFilterFields()}
 
-            <Grid container spacing={1} alignItems="center">
-                {!isMobile && (
-                    <>
-                        <Grid item>
-                            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={handleBlock}
-                                    disabled={isBlockLoading}
-                                    sx={{ borderRadius: 1 }}
-                                >
-                                    {isBlockLoading ? <CircularProgress size={18} /> : 'ADD'}
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={handleRemove}
-                                    disabled={isAddMarketLoading}
-                                    sx={{ borderRadius: 1 }}
-                                >
-                                    {isAddMarketLoading ? <CircularProgress size={18} /> : 'REMOVE'}
-                                </Button>
-                            </Box>
-                        </Grid>
-
-
-                    </>
-                )}
-
+                <Grid item xs={12} sm={6} md={2.4} key={'action'}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={handleBlock}
+                            disabled={isBlockLoading}
+                            sx={{ borderRadius: 1 }}
+                        >
+                            {isBlockLoading ? <CircularProgress size={18} /> : 'ADD'}
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={handleRemove}
+                            disabled={isAddMarketLoading}
+                            sx={{ borderRadius: 1 }}
+                        >
+                            {isAddMarketLoading ? <CircularProgress size={18} /> : 'REMOVE'}
+                        </Button>
+                    </Box>
+                </Grid>
             </Grid>
         </Box>
     );

@@ -303,9 +303,8 @@ const OrderPage1 = ({
 
 
     useEffect(() => {
-
         fetchPositions();
-    }, []);
+    }, [user_id]);
 
 
     const items = [
