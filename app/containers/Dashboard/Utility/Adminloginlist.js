@@ -277,9 +277,22 @@ const Adminloginlist = () => {
                                     </TableHead>
                                     <TableBody>
                                         {logs.map((log, i) => (
-                                            <TableRow key={i}>
+                                            <TableRow key={i}
+                                                style={{
+                                                    backgroundColor:
+                                                        i % 2 === 0
+                                                            ? theme.palette.mode === "dark"
+                                                                ? "#333" // dark mode stripe (even rows)
+                                                                : "#fff" // light mode stripe (even rows)
+                                                            : theme.palette.mode === "dark"
+                                                                ? "#222" // darker alt for dark mode (odd rows)
+                                                                : "#e0e0e0", // darker grey for light mode (odd rows)
+                                                }}>
                                                 <TableCell>{log.sr_no ?? "-"}</TableCell>
-                                                <TableCell>{log.type ?? "-"}</TableCell>
+                                                <TableCell
+                                                    dangerouslySetInnerHTML={{ __html: log.type }}
+                                                />
+
                                                 <TableCell>{log.model ?? "-"}</TableCell>
                                                 <TableCell>{log.extra_details ?? "-"}</TableCell>
                                                 <TableCell>{log.first_seen ?? "-"}</TableCell>
@@ -420,9 +433,17 @@ const Adminloginlist = () => {
                                     <CardContent sx={{ p: 1 }}>
                                         {/* Top Row: Sr no, type, model, extra details */}
                                         <Box sx={{ mb: 1 }}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 600, wordBreak: "break-word" }}>
-                                                {log.sr_no} &nbsp;|&nbsp; {log.type} &nbsp;|&nbsp; {log.model} &nbsp;|&nbsp; {log.extra_details}
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{ fontWeight: 600, wordBreak: "break-word" }}
+                                            >
+                                                {log.sr_no} &nbsp;|&nbsp;{" "}
+                                                <span
+                                                    dangerouslySetInnerHTML={{ __html: log.type }}
+                                                />{" "}
+                                                &nbsp;|&nbsp; {log.model} &nbsp;|&nbsp; {log.extra_details}
                                             </Typography>
+
                                         </Box>
 
                                         {/* Middle Row: First Seen & Last Seen */}
