@@ -1452,18 +1452,32 @@ const OrderPage1 = ({
                                                     </Typography>
                                                 </Box>
                                                 <Box sx={{ flex: 0.6, minWidth: "120px" }}>
+
                                                     <Typography
                                                         variant="subtitle2"
                                                         sx={{
                                                             fontWeight: 700,
-
+                                                            textAlign: "left",  // change as needed
+                                                            display: "block",
+                                                            width: "100%",
+                                                            lineHeight: 0.5,      // removes extra spacing between lines
+                                                            margin: 0,          // remove Typography margin
+                                                            padding: 0,         // remove Typography padding
                                                         }}
                                                     >
                                                         <span
-                                                            style={{ fontWeight: "bold" }}
+                                                            style={{
+                                                                fontWeight: "bold",
+                                                                display: "block",
+                                                                width: "100%",
+                                                                lineHeight: 1,    // removes spacing inside span too
+                                                                margin: 0,
+                                                                padding: 0,
+                                                            }}
                                                             dangerouslySetInnerHTML={{ __html: row.mym_html }}
                                                         />
                                                     </Typography>
+
                                                     <Typography variant="caption" sx={{ opacity: 0.7 }}>
                                                         MTM
                                                     </Typography>

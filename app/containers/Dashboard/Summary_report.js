@@ -280,18 +280,24 @@ const Summary_report = () => {
         {isMobile ? (
           // -------- Mobile Card View (loader inside this area) --------
           <Grid container spacing={0.75}>
-            {loading ? (
-              <Grid item xs={12}>
-                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            {!valanId ? (
+              <tr>
+                <td colSpan={12} style={{ textAlign: "center", padding: 40, fontSize: "0.9rem", }}>
+                  Please select Valan ID
+                </td>
+              </tr>
+            ) : loading ? (
+              <tr>
+                <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
                   <CircularProgress size={30} />
-                </Box>
-              </Grid>
+                </td>
+              </tr>
             ) : paginatedData.length === 0 ? (
-              <Grid item xs={12}>
-                <Typography align="center" sx={{ py: 2 }}>
+              <tr>
+                <td colSpan={12} style={{ padding: 16, textAlign: "center", fontSize: "0.9rem", }}>
                   No Data Found
-                </Typography>
-              </Grid>
+                </td>
+              </tr>
             ) : (
               paginatedData.map((row) => {
                 const m2mColor = Number(row.self_m2m ?? 0) >= 0 ? "#1976d2" : "#d32f2f";

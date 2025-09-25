@@ -1220,62 +1220,143 @@ const OrderPage = () => {
                                         </Box>
 
                                         {/* Bottom row */}
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                py: 0.3,
-                                                px: 0.5,
-                                                borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                                                textAlign: "center",
-                                                width: "100%",
-                                            }}
-                                        >
-                                            <Box sx={{ flex: 0.5, pr: 2 }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                                    {currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Current Value
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ flex: 1 }}>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        color: todaysPL > 0 ? "success.main" : "error.main",
-                                                    }}
-                                                >
-                                                    {todaysPL.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Today&apos;s P&amp;L
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ flex: 0.5, minWidth: "125px" }}>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        color: unrealizedPL > 0 ? "success.main" : "error.main",
-                                                    }}
-                                                >
-                                                    {unrealizedPL >= 1000
-                                                        ? `${(unrealizedPL / 1000).toLocaleString("en-IN", {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2,
-                                                        })}K`
-                                                        : unrealizedPL.toLocaleString("en-IN", {
+                                        {row.net_qty != 0 && (
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    py: 0.4,
+                                                    px: 0.8,
+                                                    borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                                                    textAlign: "center",
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                <Box sx={{ flex: 0.5, pr: 2 }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                        {currentValue.toLocaleString("en-IN", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2,
                                                         })}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                    Unrealized P&amp;L
-                                                </Typography>
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Current Value
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 1 }}>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            color: todaysPL > 0 ? "success.main" : "error.main",
+                                                        }}
+                                                    >
+                                                        {todaysPL.toLocaleString("en-IN", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Today&apos;s P&amp;L
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 0.6, minWidth: "120px" }}>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            color: unrealizedPL > 0 ? "success.main" : "error.main",
+                                                        }}
+                                                    >
+                                                        {unrealizedPL >= 1000
+                                                            ? `${(unrealizedPL / 1000).toLocaleString("en-IN", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })}K`
+                                                            : unrealizedPL.toLocaleString("en-IN", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Unrealized P&amp;L
+                                                    </Typography>
+                                                </Box>
                                             </Box>
-                                        </Box>
+                                        )}
+                                        {row.net_qty == 0 && (
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    py: 0.4,
+                                                    px: 0.8,
+                                                    borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                                                    textAlign: "center",
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                <Box sx={{ flex: 0.5, pr: 2 }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                        {row.buy_avg_rate.toLocaleString("en-IN", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Buy Average
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 1 }}>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 700,
+
+                                                        }}
+                                                    >
+                                                        {row.sell_avg_rate.toLocaleString("en-IN", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        Sell Average
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ flex: 0.6, minWidth: "120px" }}>
+
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            textAlign: "left",  // change as needed
+                                                            display: "block",
+                                                            width: "100%",
+                                                            lineHeight: 0.5,      // removes extra spacing between lines
+                                                            margin: 0,          // remove Typography margin
+                                                            padding: 0,         // remove Typography padding
+                                                        }}
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                fontWeight: "bold",
+                                                                display: "block",
+                                                                width: "100%",
+                                                                lineHeight: 1,    // removes spacing inside span too
+                                                                margin: 0,
+                                                                padding: 0,
+                                                            }}
+                                                            dangerouslySetInnerHTML={{ __html: row.mym_html }}
+                                                        />
+                                                    </Typography>
+
+                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                                        MTM
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        )}
                                     </Box>
                                 );
                             })}

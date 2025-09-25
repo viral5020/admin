@@ -16,7 +16,12 @@ import {
     DialogContentText,
     DialogActions,
 } from '@mui/material';
-import { addClientBlockScriptAPI, deleteClientBlockScriptAPI, fetchBlockedAllowedAPI, removeSelectedClientBlockScriptAPI } from './API/API';
+import {
+    addClientBlockScriptAPI,
+    deleteClientBlockScriptAPI,
+    fetchBlockedAllowedAPI,
+    removeSelectedClientBlockScriptAPI
+} from './API/API';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import Pagination from './filters/Pagination';
 import Blockedallowedscriptfilter from './Utility/Blockedallowedscriptfilter';
@@ -27,15 +32,14 @@ const colArr = [
     "Market Type",
     "Script",
     "Datetime",
-]
+];
 
 const keyArr = [
     "user_full_name",
     "market_type_name",
     "script_name",
     "time",
-]
-
+];
 
 const Blockedallowedscript = () => {
     const theme = useTheme();
@@ -157,7 +161,6 @@ const Blockedallowedscript = () => {
         }
     };
 
-
     // ------------------- Fetch Logs -------------------
     const fetchPageData = async () => {
         setLoading(true);
@@ -181,12 +184,12 @@ const Blockedallowedscript = () => {
             );
         }
 
-        isMobile
-            ? isFilterChange || currentPage === 0
-                ? setLogs(safeData)
-                : setLogs(prev => [...prev, ...safeData])
-            : setLogs(safeData);
+        // ----------------- Pagination -----------------
+        const startIndex = currentPage * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedData = safeData.slice(startIndex, endIndex);
 
+        setLogs(paginatedData);
         setTotalRecords(safeData.length);
         setTotalPages(Math.ceil(safeData.length / pageSize));
         setLoading(false);
@@ -277,35 +280,47 @@ const Blockedallowedscript = () => {
                             <Card
                                 key={index}
                                 sx={{
-                                    mb: 1,
+                                    mb: 0.5, // remove bottom margin
                                     mx: 1,
-                                    borderRadius: 2,
+                                    borderRadius: 1.5,
                                     border: '1px solid',
                                     borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
                                     backgroundColor: theme.palette.background.paper,
                                 }}
                             >
-                                <CardContent sx={{ p: 1 }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 } }}> {/* remove extra bottom padding */}
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '13px' }}>
                                             {log.user_full_name}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontSize: '12px' }}>
                                             {log.market_type_name}
                                         </Typography>
-                                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontSize: '12px' }}>
                                             {log.script_name}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                        <Typography variant="caption" sx={{ fontStyle: 'italic', color: theme.palette.text.secondary }}>
+
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0 }}>
+                                        <Typography variant="caption" sx={{ fontStyle: 'italic', color: theme.palette.text.secondary, fontSize: '11px' }}>
                                             {log.time}
                                         </Typography>
+                                        <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="error"
+                                            sx={{ borderRadius: 1, minWidth: 'auto', padding: '2px 5px', fontSize: '10px', mb: 0.5 }}
+                                            onClick={() => handleOpenConfirm(log)}
+                                        >
+                                            Delete
+                                        </Button>
                                     </Box>
                                 </CardContent>
                             </Card>
+
                         ))
                     ) : (
                         <Box sx={{ overflowX: 'auto', maxHeight: '400px', border: '1px solid #ddd', mx: 1 }}>
@@ -324,11 +339,11 @@ const Blockedallowedscript = () => {
                                                 backgroundColor:
                                                     index % 2 === 0
                                                         ? theme.palette.mode === "dark"
-                                                            ? "#333" // dark mode stripe (even rows)
-                                                            : "#fff" // light mode stripe (even rows)
+                                                            ? "#333"
+                                                            : "#fff"
                                                         : theme.palette.mode === "dark"
-                                                            ? "#222" // darker alt for dark mode (odd rows)
-                                                            : "#e0e0e0", // darker grey for light mode (odd rows)
+                                                            ? "#222"
+                                                            : "#e0e0e0",
                                             }}>
                                             <td>{log.user_full_name}</td>
                                             <td>{log.market_type_name}</td>
@@ -403,7 +418,6 @@ const Blockedallowedscript = () => {
                     <Button onClick={handleConfirmRemoveSelected} variant="contained" color="error">Remove</Button>
                 </DialogActions>
             </Dialog>
-
 
             {/* Pagination */}
             <Pagination
