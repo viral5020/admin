@@ -252,7 +252,7 @@ const OrderPage1 = ({
                 script_id: formatScriptIds(script),
                 broker_id: broker?.id,
                 master_user_id: master?.id,
-                user_id: client?.id,
+                user_id: user_id || client?.id,
             });
 
             const aaData = result?.aaData || [];

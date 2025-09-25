@@ -190,10 +190,10 @@ const OrderBook = ({
         scriptIds: formatScriptIds(script),
         brokerId: broker?.id || null,
         masterUserId: master?.id || null,
-        clientId: client?.id || null,
+        clientId: user_id || client?.id || null,
         status,
         orderType,
-        user_id: user_id
+        // user_id: user_id
       });
 
       setOrders(result.aaData || []);

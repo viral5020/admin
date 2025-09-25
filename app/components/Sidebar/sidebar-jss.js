@@ -4,7 +4,7 @@ import {
   lightGreen, red, amber, grey
 } from '@mui/material/colors';
 
-const drawerWidth = 240;
+const drawerWidth = 255;
 const useStyles = makeStyles()((theme, _params, classes) => ({
   user: {
     justifyContent: 'center'

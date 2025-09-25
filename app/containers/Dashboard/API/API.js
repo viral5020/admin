@@ -154,7 +154,7 @@ export const fetchOrdersAPI = async ({
     is_pending: status === "is_pending" ? "is_pending" : "",
     is_executed: status === "is_executed" ? "is_executed" : "",
     trade_type: orderType || "",
-    ...(user_id ? { user_id } : {}),
+    // ...(user_id ? { user_id } : {}),
   };
 
   try {

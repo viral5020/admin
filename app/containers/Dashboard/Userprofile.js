@@ -20,6 +20,7 @@ import axios from "axios";
 import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI, fetchOrdersByUserAPI, fetchPositionsByUserAPI } from "./API/API";
 import OrderBook from "./OrderBook";
 import OrderPage1 from "./Positions";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const UserTablePage = () => {
     const theme = useTheme();
@@ -56,6 +57,13 @@ const UserTablePage = () => {
     const userData = JSON.parse(sessionStorage.getItem("data") || "{}");
 
     const userType = userData?.user_type; // example user type
+
+    const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 800);
+
+    useEffect(() => {
+        fetchUsers(searchText);
+    }, [debouncedSearchText]);
 
     const glassStyles = {
         p: 2,
@@ -178,7 +186,7 @@ const UserTablePage = () => {
                     getOptionLabel={(option) => option?.text || option || ""}
                     value={selectedUser}
                     onChange={(e, val) => setSelectedUser(val)}
-                    onInputChange={(e, val, reason) => reason === "input" && fetchUsers(val)}
+                    onInputChange={(e, val, reason) => reason === "input" && setSearchText(val)}
                     renderInput={(params) => <TextField {...params} label="Select User" size="small" />}
                     sx={{ flex: 1 }}
                 />
