@@ -1,21 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Grid, TextField } from "@mui/material";
 import { useTheme } from "@emotion/react"; // ✅ added
 import { fetchOptionsAPI } from "../API/API";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const AutoSuggestFilter = ({
     isMultiSelect,
-    options,
     label,
     field,
     setField,
     fieldName,
-    market, // ✅ required if fieldName === "script"
-    isForex = false, // ✅ added default
+    options,
     setOptions, // ✅ parent will pass correct setter
+    market, // ✅ required if fieldName === "script"
+    setScript,// ✅ required if fieldName === "market"
+    isScriptMultiSelect,
+    setScriptOptions,
+    isForex = false, // ✅ added default
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === "dark";
+
+    const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 800);
+
+    useEffect(() => {
+        handleFetch(searchText, fieldName);
+    }, [debouncedSearchText])
+
+    const isMarketField = fieldName === 'market';
 
     const inputBoxStyle = {
         backgroundColor: isDarkMode ? "#263238" : "#fff",
@@ -35,46 +48,31 @@ const AutoSuggestFilter = ({
     };
 
     async function fetchOptions(url, params, setter) {
-        const data = await fetchOptionsAPI(url, params);
+        const data = await fetchOptionsAPI(url, params, setter);
         setter(Array.isArray(data) ? data : []);
     }
 
-    function handleFetch(term, val) {
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        let params = {
-            is_app: 1,
-            login_user_id: dataStored?.user_id,
-            auth_key: dataStored?.auth_key,
-        };
+    function handleFetch(term, field, val) {
 
-        const url = "http://128.199.126.171/~goldorg/ajaxfiles";
-
-        switch (fieldName) {
+        switch (field ?? fieldName) {
             case "market":
                 !isForex &&
-                    fetchOptions(`${url}/get_market_name_search`, { ...params, term }, setOptions);
+                    fetchOptions(`/ajaxfiles/get_market_name_search`, { term }, setOptions);
                 break;
             case "script":
                 isForex && !market && !val
                     ? setOptions([])
-                    : fetchOptions(
-                        `${url}/get_script_name_search`,
-                        { ...params, term, market: val?.id || market?.id },
-                        setOptions
-                    );
+                    : fetchOptions(`/ajaxfiles/get_script_name_search`, { term, market: val?.id || market?.id }, setScriptOptions || setOptions);
                 break;
+
             case "client":
-                fetchOptions(`${url}/get_client_name_search`, { ...params, term }, setOptions);
+                fetchOptions(`/ajaxfiles/get_client_name_search`, { term }, setOptions);
                 break;
             case "master":
-                fetchOptions(`${url}/get_master_name_search`, { ...params, term }, setOptions);
+                fetchOptions(`/ajaxfiles/get_master_name_search`, { term }, setOptions);
                 break;
             case "broker":
-                fetchOptions(
-                    `${url}/get_broker_name_search`,
-                    { ...params, term, term2: 2 },
-                    setOptions
-                );
+                fetchOptions(`/ajaxfiles/get_broker_name_search`, { term, term2: 2 }, setOptions);
                 break;
             default:
                 break;
@@ -83,45 +81,75 @@ const AutoSuggestFilter = ({
 
     return (
         <Grid item xs={12} sm={6} md={3} lg={2.4} position="relative">
+            {/* {console.log('fieldName field', fieldName, field)} */}
             <Autocomplete
+                // disabled={isDisable}
+                // filterSelectedOptions
+
                 multiple={isMultiSelect}
                 disableCloseOnSelect={isMultiSelect}
                 options={options}
                 getOptionLabel={(option) =>
                     typeof option === "string" ? option : option?.text || ""
                 }
-                value={Array.isArray(field) ? field : field || null}
-                onInputChange={(e, val, reason) => reason === "input" && handleFetch(val)}
-                onChange={(e, val) => setField(val)}
 
-                renderOption={(props, option) => {
-                    const optionText = typeof option === "string" ? option : option.text;
-                    const isSelected = Array.isArray(field)
-                        ? field.some(
-                            (item) =>
-                                (typeof item === "string" ? item : item.text) === optionText
-                        )
-                        : (typeof field === "string" ? field : field?.text) === optionText;
 
-                    return (
-                        <li
-                            {...props}
-                            style={{
-                                backgroundColor: isSelected
-                                    ? isDarkMode
-                                        ? "#333"
-                                        : "#e0f7fa"
-                                    : "inherit",
-                                color: isSelected ? "#999" : "inherit",
-                                pointerEvents: isSelected ? "none" : "auto",
-                                opacity: isSelected ? 0.6 : 1,
-                            }}
-                            aria-disabled={isSelected}
-                        >
-                            {optionText}
-                        </li>
-                    );
+                // remain this `value` prop as it is,
+                // bcs if no option selected then mui autocomplte 1.in multiselect want [] 2.in singleselec want null,
+                // in this project's code, 
+                // in some place default value of field prop remain '' or null or [] in both multi and single select
+                // which can cause run time error
+                value={
+                    isMultiSelect
+                        ? Array.isArray(field) ? field : field ? [field] : []
+                        : !Array.isArray(field) ? (field || null) : (field.length > 0 ? field[0] : null)
+                }
+
+                onInputChange={(e, val, reason) => {
+                    if (reason === "input") {
+                        setSearchText(val);
+                    }
+                    isMarketField && setScript?.(isScriptMultiSelect ? [] : ''); // clear script when market changes
                 }}
+                onChange={(e, val) => {
+                    setField(val);
+                    isMarketField && handleFetch('', 'script', val);  // param `val` used, bcs market state take time to update
+                }}
+
+                renderOption={
+                    isMultiSelect
+                        ? (props, option) => {
+                            const optionText = typeof option === "string" ? option : option.text;
+                            const isSelected = Array.isArray(field)
+                                ? field.some(
+                                    (item) =>
+                                        (typeof item === "string" ? item : item.text) === optionText
+                                )
+                                : (typeof field === "string" ? field : field?.text) === optionText;
+
+                            return (
+                                <li
+                                    {...props}
+                                    style={{
+                                        backgroundColor: isSelected
+                                            ? isDarkMode
+                                                ? "#333"
+                                                : "#e0f7fa"
+                                            : "inherit",
+                                        color: isSelected ? "#999" : "inherit",
+                                        pointerEvents: isSelected ? "none" : "auto",
+                                        opacity: isSelected ? 0.6 : 1,
+                                    }}
+                                    aria-disabled={isSelected}
+                                >
+                                    {optionText}
+                                </li>
+                            );
+                        }
+                        : undefined
+                }
+
+
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -139,6 +167,24 @@ const AutoSuggestFilter = ({
                         width: "auto !important",
                     },
                 }}
+
+            // isOptionEqualToValue={(option, value) => {
+            //   if (!value || Object.keys(value).length === 0) return false; // empty object case
+            //   return option?.text === value?.text;
+            // }}
+
+
+            // onBlur={() => {
+            //     // Filter only those scripts which exist in scriptOptions
+            //     const validScripts = script.filter((selectedItem) =>
+            //         scriptOptions.some((opt) =>
+            //             (typeof opt === 'string' ? opt : opt?.text) === selectedItem?.text
+            //         )
+            //     );
+            //     console.log('validScripts', validScripts);
+            //     setScript(validScripts);
+            // }}
+
             />
         </Grid>
     );

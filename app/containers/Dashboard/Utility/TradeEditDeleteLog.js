@@ -81,7 +81,7 @@ const TradeEditDeleteLog = () => {
     const [filterDrawer, setFilterDrawer] = useState(false);
 
     const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
+    const [script, setScript] = useState('');
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
 

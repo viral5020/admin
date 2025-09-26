@@ -108,7 +108,7 @@ const ForexpositionFilter = ({
     setExparyDate(null);
     setClient_wise_value('');
     setAll_outstanding('');
-    setMarket([]);
+    setMarket('');
     setScript([]);
     setClient('');
     setMaster('');
@@ -137,7 +137,7 @@ const ForexpositionFilter = ({
           onChange={setExparyDate}
         />
         <MarketScriptNameFilter
-          market={market || []}
+          market={market || ''}
           script={script || []}
           setScript={setScript}
           setMarket={setMarket}

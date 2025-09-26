@@ -1471,8 +1471,7 @@ const OrderPage = () => {
                                                     </td>
 
                                                     <td style={{ padding: "6px 10px" }}>
-
-                                                        {userType !== 1 && <td>{row.client_name_dis}</td>}
+                                                        {userType !== 1 && row.client_name_dis}
                                                     </td>
 
                                                     <td style={{ padding: "6px 10px" }}>

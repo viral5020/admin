@@ -100,6 +100,7 @@ const OrderPage1 = ({
     const [client, setClient] = useState('');
     const [master, setMaster] = useState('');
     const [broker, setBroker] = useState('');
+
     const [totals, setTotals] = useState({
         upline_grand: "0",
         downline_grand: "0",
@@ -402,7 +403,7 @@ const OrderPage1 = ({
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
-                            console.log('liveRates', liveRates);
+                            // console.log('liveRates', liveRates);
 
                             startTransition(() => {
                                 setliveRates(liveRates);
@@ -1596,8 +1597,7 @@ const OrderPage1 = ({
                                                     </td>
 
                                                     <td style={{ padding: "6px 10px" }}>
-
-                                                        {userType !== 1 && <td>{row.client_name_dis}</td>}
+                                                        {userType !== 1 && row.client_name_dis}
                                                     </td>
 
                                                     <td style={{ padding: "6px 10px" }}>

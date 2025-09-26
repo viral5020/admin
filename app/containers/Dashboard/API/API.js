@@ -2018,7 +2018,7 @@ console.log("API.js runn.......");
 
 const apiCache = new Map();
 
-export const fetchOptionsAPI = async (url, params) => {
+export const fetchOptionsAPI = async (url, params, setter) => {
   const key = `${url}:${JSON.stringify(params)}`;
 
   // If we already have cached response, return it

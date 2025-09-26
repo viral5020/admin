@@ -108,7 +108,7 @@ const ForexpositionFilter = ({
     setExparyDate(null);
     setClient_wise_value('');
     setAll_outstanding('');
-    setMarket([]);
+    setMarket('');
     setScript([]);
     setClient('');
     setMaster('');

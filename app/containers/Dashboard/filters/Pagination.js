@@ -16,11 +16,11 @@ const Pagination = ({
     totalPages,
     setCurrentPage,
     setPageSize,
-    pageSize,
+    pageSize = '',
     disablePagination = false, // new prop
 }) => {
     const isMobile = useMediaQuery("(max-width:600px)");
-    const [pageNo, setPageNo] = useState()
+    const [pageNo, setPageNo] = useState('')
     const debouncedPageNo = useDebounce(pageNo, 2000);
     const gotoPageRef = useRef();
 

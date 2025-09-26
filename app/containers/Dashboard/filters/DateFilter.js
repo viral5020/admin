@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 const DateFilter = ({
     label,
-    value,
+    value = '',
     onChange,
     isMaxDateToday = true,
     gridProps = {},

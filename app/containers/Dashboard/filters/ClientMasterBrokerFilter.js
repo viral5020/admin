@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Grid, Autocomplete, TextField, Tooltip,
-} from '@mui/material';
-import { getInputBoxStyle } from './inputBoxStyle';
-import AutocompleteFilter from './AutocompleteFilter';
-import { useTheme } from '@emotion/react';
-import { clone } from 'lodash';
-import axiosInstance from '../API/axiosconfig';
-import { fetchOptionsAPI, getDefaultParams } from '../API/API';
-import { useDebounce } from '@uidotdev/usehooks';
+import AutoSuggestFilter from './AutoSuggestFilter';
 
 const ClientMasterBrokerFilter = ({
     client,
@@ -19,212 +10,58 @@ const ClientMasterBrokerFilter = ({
     setBroker,
     isMultipleBroker = false,
 }) => {
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === 'dark';
-
-    const [clientText, setClientText] = useState('')
-    const [masterText, setMasterText] = useState('')
-    const [brokerText, setBrokerText] = useState('')
-
-    const debouncedClientText = useDebounce(clientText, 800);
-    const debouncedMasterText = useDebounce(masterText, 800);
-    const debouncedBrokerText = useDebounce(brokerText, 800);
-
-    useEffect(() => {
-        handleFetch(clientText, 'client');
-    }, [debouncedClientText])
-
-    useEffect(() => {
-        handleFetch(masterText, 'master');
-    }, [debouncedMasterText])
-
-    useEffect(() => {
-        handleFetch(brokerText, 'broker');
-    }, [debouncedBrokerText])
-
+    // useEffect(() => { console.log('client', client); }, [client]);
+    // useEffect(() => { console.log('master', master); }, [master]);
+    // useEffect(() => { console.log('broker', broker); }, [broker]);
 
     const [clientOptions, setClientOptions] = useState([]);
     const [masterOptions, setMasterOptions] = useState([]);
     const [brokerOptions, setBrokerOptions] = useState([]);
 
-    const [inputBoxStyle, setInputBoxStyle] = useState({});
     const [userType, setUserType] = useState(0)
 
-    // Utility fetcher
-    async function fetchOptions(url, params, setter) {
-        // try {
-        //     const { data } = await axiosInstance.post(url, params);
-        //     const results = data.results;
-        //     // console.log('TTT results', results);
-        //     setter(Array.isArray(results) ? results : []);
-        // } catch (err) {
-        //     console.error(`Error fetching from ${url}`, err);
-        //     setter([]);
-        // }
-        const data = await fetchOptionsAPI(url, params);
-        setter(Array.isArray(data) ? data : []);
-    };
-
     useEffect(() => {
-        handleFetch('', 'client');
-        handleFetch('', 'master');
-        handleFetch('', 'broker');
         const dataStored = JSON.parse(sessionStorage.getItem("data"));
         setUserType(dataStored.user_type)
-        setInputBoxStyle(getInputBoxStyle(isDarkMode));
     }, []);
-
-    // Autocomplete handlers
-    async function handleFetch(term, type) {
-        // if (!term) return;.
-
-        switch (type) {
-            case 'client':
-                // console.log('TTT term', term);
-                fetchOptions(`/ajaxfiles/get_client_name_search`, { term }, setClientOptions);
-                break;
-            case 'master':
-                fetchOptions(`/ajaxfiles/get_master_name_search`, { term }, setMasterOptions);
-                break;
-            case 'broker':
-                fetchOptions(`/ajaxfiles/get_broker_name_search`, { term, term2: 2 }, setBrokerOptions);
-                break;
-            default:
-                break;
-        }
-    };
 
     return (
         <>
             {/* WHEN API WORKS, THEN MAKE IT FUNCTIONAL LIKE SCRIPT NAME'S AUTO COMPLETE */}
 
             {/* (7) Client Name */}
-            {userType != 1 && setClient && <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                <Autocomplete
+            {userType != 1 && setClient &&
+                <AutoSuggestFilter
+                    label='Client'
+                    field={client}
+                    setField={setClient}
+                    fieldName='client'
                     options={clientOptions}
-                    getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                    value={client || null}
-                    // isOptionEqualToValue={(option, value) => {
-                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
-                    //     return option?.text === value?.text;
-                    // }}
-                    inputValue={client?.text || ''}
-                    onInputChange={(e, val, reason) => {
-                        if (reason === 'input') {
-                            setClient({ text: val });
-                            setClientText(val);
-                        }
-                    }}
-                    onChange={(e, val) => setClient(val)}
-                    onBlur={() => {
-                        const matched = clientOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === client?.text);
-                        (!matched) && setClient(null);
-                    }}
-                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Client" size="small" sx={inputBoxStyle} />}
-                    noOptionsText="No Client found"
-                    fullWidth
-                    sx={inputBoxStyle}
-                />
-            </Grid>}
+                    setOptions={setClientOptions}
+                />}
 
             {/* (8) Master Name */}
-            {userType != 1 && setMaster && <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                <Autocomplete
+            {userType != 1 && setMaster &&
+                <AutoSuggestFilter
+                    label='Master'
+                    field={master}
+                    setField={setMaster}
+                    fieldName='master'
                     options={masterOptions}
-                    getOptionLabel={(option) => typeof option === 'string' ? option : option?.text || ''}
-                    value={master || null}
-                    // isOptionEqualToValue={(option, value) => {
-                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
-                    //     return option?.text === value?.text;
-                    // }}
-                    inputValue={master?.text || ''}
-                    onInputChange={(e, val, reason) => {
-                        if (reason === 'input') {
-                            setMaster({ text: val });
-                            setMasterText(val);
-                        }
-                    }}
-                    onChange={(e, val) => setMaster(val)}
-                    onBlur={() => {
-                        const matched = masterOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === master?.text);
-                        (!matched) && setMaster(null);
-                    }}
-                    renderInput={(params) => <TextField {...params} placeholder="Start typing to search..." label="Master" size="small" sx={inputBoxStyle} />}
-                    noOptionsText="No Master found"
-                    fullWidth
-                    sx={inputBoxStyle}
-                />
-            </Grid>}
+                    setOptions={setMasterOptions}
+                />}
 
             {/* (9) Broker Name */}
-            {setBroker && <Grid item xs={12} sm={6} md={3} lg={2.4}>
-                <Autocomplete
-                    multiple={isMultipleBroker}
-                    disableCloseOnSelect={isMultipleBroker}
+            {setBroker &&
+                <AutoSuggestFilter
+                    isMultiSelect={isMultipleBroker}
+                    label="Broker"
+                    fieldName="broker"
                     options={brokerOptions}
-                    getOptionLabel={(option) =>
-                        typeof option === 'string' ? option : option?.text || ''
-                    }
-                    // value={broker || null}
-                    value={Array.isArray(broker) ? broker : (broker || null)}
-                    // isOptionEqualToValue={(option, value) => {
-                    //     if (!value || Object.keys(value).length === 0) return false; // empty object case
-                    //     return option?.text === value?.text;
-                    // }}
-                    filterSelectedOptions={isMultipleBroker}
-                    // inputValue={broker?.text || ''}
-                    onInputChange={(e, val, reason) => {
-                        if (reason === 'input') {
-                            // setBroker({ text: val });
-                            setBrokerText(val);
-                        }
-                    }}
-                    onChange={(e, val) => setBroker(val)}
-                    // onBlur={() => {
-                    //     const matched = brokerOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === broker?.text);
-                    //     (!matched) && setBroker(null);
-                    // }}
-                    renderOption={(props, option) => {
-                        const optionText = typeof option === 'string' ? option : option.text;
-                        const isSelected = Array.isArray(broker)
-                            ? broker.some(
-                                (item) =>
-                                    (typeof item === 'string' ? item : item.text) === optionText
-                            )
-                            : (typeof broker === 'string' ? broker : broker?.text) === optionText;
-
-                        return (
-                            <li
-                                {...props}
-                                style={{
-                                    backgroundColor: isSelected
-                                        ? isDarkMode
-                                            ? '#333'
-                                            : '#e0f7fa'
-                                        : 'inherit',
-                                    color: isSelected ? '#999' : 'inherit',
-                                    pointerEvents: isSelected ? 'none' : 'auto',
-                                    opacity: isSelected ? 0.6 : 1,
-                                }}
-                                aria-disabled={isSelected}
-                            >
-                                {optionText}
-                            </li>
-                        );
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            placeholder="Start typing to search..."
-                            label="Broker"
-                            size="small"
-                            sx={inputBoxStyle} />
-                    )}
-                    noOptionsText="No Broker found"
-                    fullWidth
-                    sx={inputBoxStyle}
-                />
-            </Grid>}
+                    field={broker}
+                    setField={setBroker}
+                    setOptions={setBrokerOptions}
+                />}
         </>
     )
 }

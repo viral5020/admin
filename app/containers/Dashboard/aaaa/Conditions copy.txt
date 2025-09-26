@@ -1,32 +1,29 @@
+const [market, setMarket] = useState('');
+const [script, setScript] = useState([]);
+const [client, setClient] = useState('');
+const [master, setMaster] = useState('');
+const [broker, setBroker] = useState('');
+    
+
+setMarket('');
+setScript('' || []);
+setClient('');
+setMaster('');
+setBroker('' || []);
+
+
+
+
+
+----------------
+
  <Autocomplete      
-                    value={master || null}
-                   
-                    inputValue={master?.text || ''}
-                    onInputChange={(e, val, reason) => {
-                        if (reason === 'input') {
-                            setMaster({ text: val });
-                            setMasterText(val);
-                        }
-                    }}
-                    onBlur={() => {
-                        const matched = masterOptions.find((opt) => (typeof opt === 'string' ? opt : opt?.text) === master?.text);
-                        (!matched) && setMaster(null);
-                    }}
-                   
                 />
 
 
    <Autocomplete
           multiple={isScriptMultiSelect}
           disableCloseOnSelect={isScriptMultiSelect}
-          
-          value={Array.isArray(script) ? script : (script || null)}
-          
-          onInputChange={(e, val, reason) => {
-            if (reason === 'input') {
-              setScriptText(val);
-            }
-          }}
 
           renderOption={(props, option) => {
             const optionText = typeof option === 'string' ? option : option.text;
@@ -59,3 +56,5 @@
        
 
         />
+
+
