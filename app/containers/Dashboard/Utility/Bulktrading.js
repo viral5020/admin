@@ -255,7 +255,7 @@ const Bulktrading = ({
                         </Box>
 
                         <TradeEditDeleteLogFilter
-                            after_date_date={after_date}
+                            after_date={after_date}
                             before_date={before_date}
                             setbefore_date={setbefore_date}
                             setafter_date={setafter_date}
@@ -275,7 +275,7 @@ const Bulktrading = ({
                 : <Box>
                     {filterShow && (
                         <TradeEditDeleteLogFilter
-                            after_date_date={after_date}
+                            after_date={after_date}
                             before_date={before_date}
                             setbefore_date={setbefore_date}
                             setafter_date={setafter_date}
