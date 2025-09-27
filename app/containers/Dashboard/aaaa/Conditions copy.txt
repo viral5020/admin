@@ -1,3 +1,76 @@
+// OLD
+{
+    "sEcho": 1,
+    "iDisplayStart": 0,
+    "iDisplayLength": 10,
+    "is_app": "1",
+    "login_user_id": "1",
+    "auth_key": "efzi2xn0ZT",
+    "ip_address": "116.74.71.51",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    "start_end": "",
+    "end_date": "2025-09-20 03:04:00",
+    "script_full_name": "DOW JONES 30 19SEP2025",
+    "tradeType": "Sell"
+}
+
+
+// NEW
+{
+    "is_app": "1",
+    "login_user_id": "1",
+    "auth_key": "efzi2xn0ZT",
+    "ip_address": "116.74.71.51",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    "sEcho": 1,
+    "iDisplayStart": 0,
+    "iDisplayLength": 10,
+    "sSearch": "",
+    "isTodayTrade": "today",
+    
+    "script_full_name": "GOLD 03OCT2025",
+  
+    "end_date": "2025-09-27 01:08:00",
+    "start_end": "2025-09-27 01:06:00",
+  
+    "trade_type": "",
+    "tradeType": "Buy"
+}
+
+
+
+
+
+
+
+
+
+---------------------------
+
+
+
+
+{
+    "script_name": "DOW JONES 30 19SEP2025",
+    "trade_type": "Sell",
+    "start_datetime": "2025-09-20 03:04:00",
+    "end_datetime": "2025-09-20 03:06:00",
+    "trade_ids": [
+        "31533350",
+        "31533352"
+    ],
+    "no_of_trade": 2
+}
+
+
+
+
+
+
+
+---------------
+
+
 const [market, setMarket] = useState('');
 const [script, setScript] = useState([]);
 const [client, setClient] = useState('');

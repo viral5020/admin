@@ -37,7 +37,8 @@ import Pagination from './filters/Pagination';
 const OrderBook = ({
   filterShow = true,
   setFilterShow = () => { },
-  user_id
+  user_id,
+  propData,
 }) => {
   console.log("filterShow=", filterShow);
 
@@ -121,7 +122,7 @@ const OrderBook = ({
       if (response.success) {
         showToast.success('Trade cancelled successfully', 'success');
         // Refresh orders after cancel
-        await fetchLogs(filterType, debouncedSearchText);
+        await fetchLogs();
       } else {
         showToast(response.message || 'Failed to cancel trade', 'error');
       }
@@ -186,15 +187,23 @@ const OrderBook = ({
         searchValue: debouncedSearchText,
         currentPage,
         pageSize,
-        end_date,
-        start_end,
         marketId: market?.id || null,
         scriptIds: formatScriptIds(script),
         brokerId: broker?.id || null,
         masterUserId: master?.id || null,
         clientId: user_id || client?.id || null,
         status,
+
         orderType,
+
+        // end_date: propData?.end_datetime ?? end_date,
+        end_date: end_date,
+        // start_end: propData?.start_datetime ?? start_end,
+        start_end: start_end,
+
+        ...(!!propData ? { script_full_name: propData?.script_name } : {}),
+        ...(!!propData ? { tradeType: propData?.trade_type } : {}),
+
       });
 
       const data = result.aaData || [];
@@ -224,18 +233,14 @@ const OrderBook = ({
 
   function onFilterApply() {
     setCurrentPage(0); // Reset pagination to first page
-    fetchLogs(0, pageSize, filterType, debouncedSearchText); // Call API with filters
+    fetchLogs(); // Call API with filters
     toggleDrawer(false)(); // Close drawer if mobile
   }
 
-  useEffect(() => {
-    console.log('orders.length', logs.length);
-  }, [fetchLogs])
-
   // # Pagination useEffects
   useEffect(() => {
-    fetchLogs(0);
-  }, [user_id]); // run on first render
+    fetchLogs();
+  }, [user_id, propData]); // run on first render
 
   useEffect(() => {
     setTotalPages(Math.ceil(totalRecords / pageSize));
@@ -303,7 +308,7 @@ const OrderBook = ({
       if (response?.success) {
         showToast('Trade updated successfully.');
         handleClose();
-        await fetchLogs(filterType, debouncedSearchText);
+        await fetchLogs();
       } else {
         showToast(response?.message || 'Failed to update trade.');
       }
@@ -481,7 +486,7 @@ const OrderBook = ({
         alignItems: "center",
         mb: 2,
         px: 1,
-        backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#f5f5f5",
+        backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
         borderRadius: 1,
         gap: 1,
       }}>

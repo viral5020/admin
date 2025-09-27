@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import axios from "axios";
-import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI, fetchOrdersByUserAPI, fetchPositionsByUserAPI } from "./API/API";
+import { cashEntryAPI, fetchOptionsAPI, fetchProfileAPI, fetchSummaryAPI, fetchPositionsByUserAPI } from "./API/API";
 import OrderBook from "./OrderBook";
 import OrderPage1 from "./Positions";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -390,6 +390,7 @@ const UserTablePage = () => {
                     {/* Orders Table */}
                     <Paper sx={{ ...glassStyles, mb: 3, p: 1, overflowX: "auto" }}>
                         <Typography variant="h6" sx={{ mb: 1 }}>Orders</Typography>
+                        {console.log('selectedUser', selectedUser)}
                         <OrderBook
                             filterShow={false}
                             user_id={selectedUser?.id || ""}   // ✅ correct

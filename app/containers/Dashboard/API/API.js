@@ -123,7 +123,7 @@ export const fetchOrdersAPI = async ({
   filterType = "today",
   searchValue = "",
   currentPage = 0,
-  pageSize = 50,
+  pageSize = 10,
   end_date = "",
   start_end = "",
   marketId = "",
@@ -133,7 +133,8 @@ export const fetchOrdersAPI = async ({
   clientId = "",
   status = "",
   orderType = "",
-  user_id,
+  script_full_name,
+  tradeType,
 }) => {
   const defaultParams = await getDefaultParams();
 
@@ -154,7 +155,9 @@ export const fetchOrdersAPI = async ({
     is_pending: status === "is_pending" ? "is_pending" : "",
     is_executed: status === "is_executed" ? "is_executed" : "",
     trade_type: orderType || "",
-    // ...(user_id ? { user_id } : {}),
+
+    ...(script_full_name ? { script_full_name } : {}),
+    ...(tradeType ? { tradeType } : {}),
   };
 
   try {
@@ -166,27 +169,6 @@ export const fetchOrdersAPI = async ({
   } catch (error) {
     console.error("Error fetching spot orders:", error);
     return { aaData: [], iTotalRecords: 0 };
-  }
-};
-
-
-
-// Fetch orders for a specific user (centralized wrapper for user profile screen)
-export const fetchOrdersByUserAPI = async ({ target_user_id, pageSize = 50, start = 0 }) => {
-  const defaultParams = await getDefaultParams();
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_new", {
-      ...defaultParams,
-      sEcho: 1,
-      iDisplayStart: start,
-      iDisplayLength: pageSize,
-      user_id: target_user_id || "",
-      sSearch: "",
-    });
-    return data?.aaData || [];
-  } catch (err) {
-    console.error("fetchOrdersByUserAPI error:", err);
-    return [];
   }
 };
 
@@ -219,34 +201,6 @@ export const fetcholdforexOrdersAPI = async (userId, authKey, searchValue = "") 
   };
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex_old", formData);
-    return data.aaData || [];
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    return [];
-  }
-};
-
-export const fetchOrders1API = async ({
-  userId,
-  authKey,
-  start_end = "",
-  end_date = "",
-  script_full_name = "",
-  tradeType = ""
-}) => {
-  const defaultParams = await getDefaultParams();
-  const formData = {
-    sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10,
-    ...defaultParams,
-    start_end,
-    end_date,
-    script_full_name,
-    tradeType
-  };
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
     return data.aaData || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -296,29 +250,6 @@ export const fetchforexOrdersAPI = async ({
     return data;
   } catch (error) {
     console.error("Error fetching forex orders:", error);
-    return [];
-  }
-};
-
-
-export const fetchPendingOrdersAPI = async (userId, authKey) => {
-  const defaultParams = await getDefaultParams();
-  try {// &&&&
-    const response = await axiosInstance.post("/datatables/order_book_new", {
-      is_pending: "true",
-      ...defaultParams,
-      sEcho: 1,
-      iDisplayStart: 0,
-      iDisplayLength: 10,
-      sSearch: "",
-    });
-    if (response.data && response.data.aaData) {
-      return response.data.aaData;
-    } else {
-      return [];
-    }
-  } catch (error) {
-    console.error("Error fetching pending orders:", error);
     return [];
   }
 };
@@ -434,28 +365,6 @@ export const fetchBlockedAllowedAPI = async (
   }
 };
 
-export const fetchTradesDataAPI = async (userId, authKey, scriptId) => {
-  if (!scriptId) return [];
-  const defaultParams = await getDefaultParams();
-  const formData = {
-    isTodayTrade: "today",
-    ...defaultParams,
-    sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10,
-    script_id: scriptId,
-    user_id: selectedUserId,
-    sSearch,
-  };
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
-    return data?.aaData || [];
-  } catch (error) {
-    console.error("Failed to fetch trades:", error);
-    return [];
-  }
-};
-
 export const fetchTrendStocksAPI = async (userId, authKey) => {
   const defaultParams = await getDefaultParams();
   const formData = {
@@ -475,27 +384,6 @@ export const fetchTrendStocksAPI = async (userId, authKey) => {
     return [];
   } catch (error) {
     console.error("Failed to fetch Scripts in Trends:", error);
-    return [];
-  }
-};
-
-export const fetchTradesAPI = async (userId, authKey, scriptId) => {
-  const defaultParams = await getDefaultParams();
-  if (!scriptId) return [];
-  const formData = {
-    isTodayTrade: "today",
-    ...defaultParams,
-    sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10,
-    script_id: scriptId,
-    sSearch: "",
-  };
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
-    return data?.aaData || [];
-  } catch (error) {
-    console.error("Failed to fetch trades:", error);
     return [];
   }
 };
@@ -2943,7 +2831,7 @@ export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) =
 };
 
 // 🔹 Save/update bulk trading settings
-export const saveBulkTradingSettingsAPI = async ({ user_id, auth_key, noOfTrades }) => {
+export const saveBulkTradingSettingsAPI = async ({ noOfTrades }) => {
   const defaultParams = await getDefaultParams();
   try {
     const payload = {

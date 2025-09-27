@@ -51,7 +51,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { data } from 'dan-vendor/autoprefixer/lib/autoprefixer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { left } from 'dan-vendor/@popperjs/core';
-import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchPendingOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTopGainersLosersAPI, fetchTradesAPI, fetchTradesDataAPI, fetchTrendStocksAPI } from './API/API';
+import { apifetchPositions, fetchDashboardDataAPI, fetchLoginDataAPI, fetchOrdersAPI, fetchRejectionLogsAPI, fetchStockPositionsAPI, fetchTopGainersLosersAPI, fetchTrendStocksAPI } from './API/API';
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -540,7 +540,7 @@ function PersonalDashboard() {
   const fetchPendingOrders = async () => {
     setLoading(true);
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
-    const result = await fetchPendingOrdersAPI(dataStored.user_id, dataStored.auth_key);
+    const result = await fetchOrdersAPI(dataStored.user_id, dataStored.auth_key);
     setPendingOrders(result);
     setLoading(false);
   };
@@ -557,7 +557,7 @@ function PersonalDashboard() {
     const dataStored = JSON.parse(sessionStorage.getItem("data"));
     if (!selectedRow) return;
     setLoadingTrades(true);
-    const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
+    const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id });
     setTradesData(result);
     setLoadingTrades(false);
   };
@@ -649,7 +649,7 @@ function PersonalDashboard() {
         setTradesError(null);
 
         try {
-          const result = await fetchTradesAPI(dataStored.user_id, dataStored.auth_key, selectedStock.script_id);
+          const result = await fetchOrdersAPI({ scriptIds: selectedStock.script_id });
           setTradesData(result);
         } catch (error) {
           setTradesError("Failed to load trades data");

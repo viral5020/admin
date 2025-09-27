@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Grid, TextField } from "@mui/material";
+import { Autocomplete, CircularProgress, Grid, TextField } from "@mui/material";
 import { useTheme } from "@emotion/react"; // ✅ added
 import { fetchOptionsAPI } from "../API/API";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -23,6 +23,8 @@ const AutoSuggestFilter = ({
 
     const [searchText, setSearchText] = useState('');
     const debouncedSearchText = useDebounce(searchText, 800);
+
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         handleFetch(searchText, fieldName);
@@ -48,8 +50,10 @@ const AutoSuggestFilter = ({
     };
 
     async function fetchOptions(url, params, setter) {
+        setLoading(true);
         const data = await fetchOptionsAPI(url, params, setter);
         setter(Array.isArray(data) ? data : []);
+        setLoading(false);
     }
 
     function handleFetch(term, field, val) {
@@ -85,10 +89,12 @@ const AutoSuggestFilter = ({
             <Autocomplete
                 // disabled={isDisable}
                 // filterSelectedOptions
+                loading={loading}
+                loadingText="Loading..."
 
                 multiple={isMultiSelect}
                 disableCloseOnSelect={isMultiSelect}
-                options={options}
+                options={Array.isArray(options) ? options : []}
                 getOptionLabel={(option) =>
                     typeof option === "string" ? option : option?.text || ""
                 }
@@ -157,8 +163,20 @@ const AutoSuggestFilter = ({
                         label={label}
                         size="small"
                         sx={inputBoxStyle}
+                        InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                                <>
+                                    {loading ? (
+                                        <CircularProgress color="inherit" size={20} />
+                                    ) : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            ),
+                        }}
                     />
                 )}
+
                 noOptionsText={`No ${label} found`}
                 fullWidth
                 sx={{

@@ -44,7 +44,7 @@ import PositionFilter from "./PositionFilter";
 import FilterBtn from "./filters/FilterBtn";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { apifetchPositions, fetchTradesDataAPI, placeTrade } from "./API/API";
+import { apifetchPositions, fetchOrdersAPI, placeTrade } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import { formatScriptIds } from "./helpers/utilFunc";
 import { toast, ToastContainer } from "react-toastify";
@@ -218,7 +218,7 @@ const OrderPage1 = ({
     const fetchTradesData = async () => {
         if (!selectedRow) return;
         setLoadingTrades(true);
-        const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id, searchText);
+        const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id, searchValue: searchText });
         setTradesData(result);
         setLoadingTrades(false);
     };
@@ -418,7 +418,7 @@ const OrderPage1 = ({
                             liveRates[args.data.InstrumentIdentifier].Open = args.data.Open;
                             liveRates[args.data.InstrumentIdentifier].Close = args.data.Close;
                             liveRates[args.data.InstrumentIdentifier].LastTradePrice = args.data.LastTradePrice;
-                            console.log('liveRates', liveRates);
+                            // console.log('liveRates', liveRates);
                             startTransition(() => {
                                 setliveRates(liveRates);
                             });

@@ -29,10 +29,11 @@ import Pagination from '../filters/Pagination';
 import BackToTop from '../helpers/BackToTop';
 import { formatScriptIds } from '../helpers/utilFunc';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
-import { bulktradingAPI, fetchBulkTradeListAPI, fetchOrders1API } from '../API/API';
+import { bulktradingAPI, fetchBulkTradeListAPI, saveBulkTradingSettingsAPI } from '../API/API';
 import axios from 'axios';
 import FilterBtn from '../filters/FilterBtn';
 import SearchPdfCsv from "../filters/SearchPdfCsv";
+import OrderBook from '../OrderBook';
 
 const colArr = [
     "No of Trades",
@@ -101,29 +102,6 @@ const Bulktrading = ({
     }, [orders])
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
-
-
-    // --- Fetch trades for dialog ---
-    const fetchTradeDetails = async (log) => {
-        try {
-            setTradeLoading(true);
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-            const result = await fetchOrders1API({
-                userId: dataStored.user_id,
-                authKey: dataStored.auth_key,
-                start_date: log.end_datetime,
-                end_date: log.start_datetime,
-                script_full_name: log.script_name,
-                tradeType: log.trade_type
-            });
-            setOrders(result || []);
-            setTradeDialogOpen(true);
-        } catch (error) {
-            console.error("Error fetching trades:", error);
-        } finally {
-            setTradeLoading(false);
-        }
-    };
 
     // --- Fetch main logs ---
     const fetchLogs = async () => {
@@ -202,11 +180,7 @@ const Bulktrading = ({
             try {
                 const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
-                await saveBulkTradingSettingsAPI({
-                    user_id: dataStored.user_id,
-                    auth_key: dataStored.auth_key,
-                    noOfTrades,
-                });
+                await saveBulkTradingSettingsAPI({ noOfTrades });
 
                 // Fetch bulk trade list after saving settings
                 fetchBulkTradeList();
@@ -360,8 +334,14 @@ const Bulktrading = ({
                                             <TableCell sx={{ color: 'black', textTransform: 'uppercase' }}>{log.start_datetime ?? '-'}</TableCell>
                                             <TableCell sx={{ color: 'black' }}>{log.end_datetime ?? '-'}</TableCell>
                                             {/* <TableCell sx={{ color: 'black' }}>{log.trade_ids?.join(', ') ?? '-'}</TableCell> */}
-                                            <TableCell sx={{ color: 'black', fontWeight: 'bold', cursor: 'pointer' }}
-                                                onClick={() => fetchTradeDetails(log)}>
+                                            <TableCell
+                                                sx={{
+                                                    color: 'black',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    color: "blue",
+                                                }}
+                                                onClick={() => setTradeDialogOpen(log)}>
                                                 {log.no_of_trade ?? '-'}
                                             </TableCell>
                                             {/* <TableCell sx={{ color: 'black' }}>{minimum}</TableCell> */}
@@ -373,44 +353,13 @@ const Bulktrading = ({
                         </TableContainer>
 
                         {/* Trade dialog */}
-                        <Dialog open={tradeDialogOpen} onClose={() => setTradeDialogOpen(false)} maxWidth="md" fullWidth>
+                        <Dialog open={!!tradeDialogOpen} onClose={() => setTradeDialogOpen(false)} maxWidth="md" fullWidth>
                             <DialogTitle>Trades Details</DialogTitle>
                             <DialogContent>
-                                {tradeLoading ? (
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                        <CircularProgress />
-                                    </Box>
-                                ) : Array.isArray(orders) && orders.length > 0 ? (
-                                    <table style={{ minWidth: "1850px", fontSize: "12px", margin: 0 }}>
-                                        <thead>
-                                            <tr>
-                                                {["Device", "Time", ...(userType !== 1 ? ["Client"] : []), "Script", "B/S", "Order Type", "Qty (Lot)", "Order Price", "Status", "O. Time", "Comm Amt"].map((header) => (
-                                                    <th key={header}>{header}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {orders.map((log, i) => (
-                                                <tr key={log.trd_id || i}>
-                                                    <td dangerouslySetInnerHTML={{ __html: log.device_type_html }} />
-                                                    <td>{log.trd_matchedtime}</td>
-                                                    {userType !== 1 && <td>{log.client_full_name}</td>}
-                                                    <td>{log.scrp_name}</td>
-                                                    <td>{log.trd_type}</td>
-                                                    <td>{log.trd_type2}</td>
-                                                    {/* <td>{log.trd_qty} ({item.trd_lot})</td> */}
-                                                    <td>{log.trd_qty}</td>
-                                                    <td>{log.trd_rate}</td>
-                                                    <td>{log.trd_status}</td>
-                                                    <td>{log.trd_time}</td>
-                                                    <td>{log.trd_comm_amnt}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                ) : (
-                                    <Typography>No trades found.</Typography>
-                                )}
+                                <OrderBook
+                                    filterShow={false}
+                                    propData={tradeDialogOpen}
+                                />
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={() => setTradeDialogOpen(false)}>Close</Button>

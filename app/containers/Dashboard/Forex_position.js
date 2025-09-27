@@ -45,7 +45,7 @@ import PositionFilter from "./PositionFilter";
 import FilterBtn from "./filters/FilterBtn";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { fetchPositionsAPI, fetchTradesDataAPI } from "./API/API";
+import { fetchOrdersAPI, fetchPositionsAPI } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import ForexpositionFilter from "./Forexpositionfilter";
 
@@ -171,7 +171,7 @@ const OrderPage = () => {
     const fetchTradesData = async () => {
         if (!selectedRow) return;
         setLoadingTrades(true);
-        const result = await fetchTradesDataAPI(dataStored.user_id, dataStored.auth_key, selectedRow.script_id);
+        const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id });
         setTradesData(result);
         setLoadingTrades(false);
     };

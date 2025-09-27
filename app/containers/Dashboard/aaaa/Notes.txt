@@ -1,3 +1,12 @@
+ASHISH SIR : 
+>> /datatables/order_book_new aa api ma
+/ajaxfiles/bulk_trading_report aa api in start end date pass kare 6 to result nathi avta
+
+page:bulk trading
+
+
+
+
 bill filter >> search not working
 
 pdf > html content
