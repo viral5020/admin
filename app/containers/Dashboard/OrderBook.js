@@ -230,6 +230,9 @@ const OrderBook = ({
     }
   };
 
+  useEffect(() => {
+    console.log('logs.length', logs.length);
+  }, [logs]);
 
   function onFilterApply() {
     setCurrentPage(0); // Reset pagination to first page
@@ -517,7 +520,7 @@ const OrderBook = ({
       </Box>
 
       {/* Orders List */}
-      {loading ? (
+      {loading && currentPage == 0 ? (
         <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
           <CircularProgress size={28} />
         </Box>
