@@ -86,6 +86,9 @@ const AutoSuggestFilter = ({
             case "broker":
                 fetchOptions(`/ajaxfiles/get_broker_name_search`, { term, term2: 2 }, setOptions);
                 break;
+            case "valan":
+                fetchOptions(`/ajaxfiles/get_valan_name_search`, { term }, setOptions);
+                break;
             default:
                 break;
         }

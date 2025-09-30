@@ -24,6 +24,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import Forexsummaryfilter from "./Forexsummaryfilter";
 import { formatScriptIds } from "./helpers/utilFunc";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import Pagination from "./filters/Pagination";
 
 const colArr = [
   "Sr No",
@@ -64,8 +65,10 @@ const Summary_report = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingLedger, setLoadingLedger] = useState(false);
+
+  // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const rowsPerPage = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const [start_end, setStart_end] = useState(null);
   const [end_date, setEnd_date] = useState(null);
@@ -75,6 +78,8 @@ const Summary_report = () => {
   const [master, setMaster] = useState(null);
   const [broker, setBroker] = useState(null);
   const [valanId, setValanId] = useState(null);
+  const [appliedValanId, setAppliedValanId] = useState(null);
+
 
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -140,7 +145,9 @@ const Summary_report = () => {
 
   // ---------- Report ----------
   const fetchforexSummaryReportData = async () => {
+    setAppliedValanId(valanId);
     setLoading(true);
+
     try {
       const result = await fetchforexSummaryReportAPI(
         client?.id,
@@ -187,10 +194,10 @@ const Summary_report = () => {
     setCurrentPage(0);
   }, [searchQuery, reportData]);
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+  const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
   const paginatedData = filteredData.slice(
-    currentPage * rowsPerPage,
-    (currentPage + 1) * rowsPerPage
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
   );
 
   // ---------- Layout ----------
@@ -302,11 +309,11 @@ const Summary_report = () => {
       </Box>
 
       {/* Scrollable Content Area (vertical) */}
-      <Box sx={{ flex: 1, overflowY: "auto", p: 1 }}>
+      <Box sx={{ overflowY: "auto", p: 1 }}>
         {isMobile ? (
           // -------- Mobile Card View (loader inside this area) --------
           <Grid container spacing={0.75}>
-            {!valanId ? (
+            {!appliedValanId ? (
               <Grid item xs={12}>
                 <Box textAlign="center" py={5} fontSize="0.9rem">
                   Please select Valan ID
@@ -473,7 +480,7 @@ const Summary_report = () => {
                 </tr>
               </thead>
               <tbody>
-                {!valanId ? (
+                {!appliedValanId ? (
                   <tr>
                     <td colSpan={12} style={{ textAlign: "left", padding: 40, fontSize: "0.9rem", }}>
                       Please select Valan ID
@@ -550,76 +557,13 @@ const Summary_report = () => {
         )}
       </Box>
 
-      {/* Pagination (shared) */}
-      <Box
-        sx={{
-          borderTop: `1px solid ${theme.palette.mode === "dark" ? "#333" : "#e5e5e5"}`,
-          p: 1,
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 1,
-          bgcolor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
-        }}
-      >
-        <Button
-          size="small"
-          disabled={currentPage === 0}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
-          color="secondary"
-        >
-          Prev
-        </Button>
-
-        {[...Array(totalPages)].map((_, i) => {
-          if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            return (
-              <Button
-                key={i}
-                size="small"
-                variant={i === currentPage ? "contained" : "outlined"}
-                color="secondary"
-                onClick={() => setCurrentPage(i)}
-              >
-                {i + 1}
-              </Button>
-            );
-          }
-          if ((i === 1 && currentPage > 2) || (i === totalPages - 2 && currentPage < totalPages - 3)) {
-            return (
-              <Typography key={i} sx={{ mx: 0.5 }}>
-                ...
-              </Typography>
-            );
-          }
-          return null;
-        })}
-
-        <Button
-          size="small"
-          disabled={currentPage + 1 >= totalPages}
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          color="secondary"
-        >
-          Next
-        </Button>
-
-        <TextField
-          label="Go to page"
-          type="number"
-          size="small"
-          InputProps={{ inputProps: { min: 1, max: totalPages } }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const page = parseInt(e.target.value, 10) - 1;
-              if (!isNaN(page) && page >= 0 && page < totalPages) {
-                setCurrentPage(page);
-              }
-            }
-          }}
-          sx={{ width: 120, ml: 1 }}
-        />
-      </Box>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setPageSize}
+        pageSize={pageSize}
+      />
 
       {/* Ledger Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">

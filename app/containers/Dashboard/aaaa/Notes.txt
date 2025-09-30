@@ -19,6 +19,8 @@ Forex position has LTP
 
 >> Margin management : no pagination from backend - stock/forex both
 
+
+
 ----- WHAT I HAVE DONE ---------
 
 - /datatables/order_book_new, same api has 6 functions in api.js and used it across multiple files
@@ -38,7 +40,11 @@ Forex position has LTP
 - Brokrage refresh : adjust valan_id filter
 
 
+
+
+
 ---------
+
 
 - summary report(stock/forex) : pdf icon in table gives error
 
@@ -54,7 +60,6 @@ Forex position has LTP
     - in filter : lot, quantity, price accept alphabetic value also, clear btn not clear lot and quantity
 
 
-
 - Banned Blocked Scripts : searchText, selectedMarket, selectedScripts is these require in this page ? 
                             fetchPositionData api calls 2 time when page load
 
@@ -62,24 +67,12 @@ Forex position has LTP
 
 - after click on apply ,filter's value then only should pass with api
 
-- loader in orderbook table
-
-- orderbook search-pdf-csv remain to include,
-- padding top of search bar
-
 - in mobile, Margin Management have no filter
-- table horizontal scroll
-- rows per page not working
-- stock/forex both
+    - table horizontal scroll
+    - rows per page not working
+    - stock/forex both
 
-- manual trade
- - in mobile, filter have no title
-
-- summary report : 
- - valan id filter may be out of filter component
- - in mobile, loading is not centered
- 
- - after selecting valan id loading icon shows, or suddenly table data shows, that shouldnt happen
+- summary report : after selecting valan id loading icon shows, or suddenly table data shows, that shouldnt happen
 
 - Self P&L
  - table row colors are matching for header row and 1st row

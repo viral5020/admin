@@ -1075,18 +1075,6 @@ export async function favouriteActionAPI(market_watch_id, action_type) {
   }
 }
 
-export const fetchValanNamesApi = async (term) => {
-  try {
-    const defaultParams = await getDefaultParams();
-    const response = await axios.post("http://128.199.126.171/~goldorg/ajaxfiles/get_valan_name_search", { ...defaultParams, term },
-    );
-    return response.data.results
-  } catch (err) {
-    console.error("Error fetching Valan IDs:", err);
-    return [];
-  }
-};
-
 export const fetchUserlistingAPI = async (currentPage, rowsPerPage, tradeAfter, tradeBefore, loginBefore, loginAfter, broker, master, user, status, searchText) => {
   const defaultParams = await getDefaultParams();
   const formData = {
