@@ -55,9 +55,7 @@ const Forexsummaryfilter = ({
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
         {/* ✅ Use the new ValanFilter component */}
-        <Grid item xs="auto">
-          <ValanFilter valanId={valanId} setValanId={setValanId} isDarkMode={isDarkMode} />
-        </Grid>
+        <ValanFilter valanId={valanId} setValanId={setValanId} isDarkMode={isDarkMode} />
 
         {/* Market & Script Filter */}
         <MarketScriptNameFilter
@@ -88,7 +86,7 @@ const Forexsummaryfilter = ({
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
+              // padding: '6px 12px',
               borderRadius: '4px',
               textTransform: 'none',
               '&:hover': {
@@ -100,12 +98,13 @@ const Forexsummaryfilter = ({
             Apply
           </Button>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3} lg={2.4}>
           <Button
             variant="contained"
             color="error"
             onClick={handleClear}
-            sx={{ borderRadius: 1, ml: 1 }}
+            sx={{ borderRadius: '4px' }}
             fullWidth
           >
             Clear

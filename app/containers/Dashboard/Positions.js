@@ -165,6 +165,7 @@ const OrderPage1 = ({
 
     const colArr = [
         ...(userType !== 1 ? ["Client"] : []),
+        ...(userType !== 1 ? ["Code"] : []),
         "Script",
         "Market",
         "Total Buy",
@@ -179,7 +180,8 @@ const OrderPage1 = ({
     ]
 
     const keyArr = [
-        ...(userType !== 1 ? ["client_full_name"] : []),   // shown only if userType !== 1
+        ...(userType !== 1 ? ["client_full_name_dis"] : []),   // shown only if userType !== 1
+        ...(userType !== 1 ? ["client_name_dis"] : []),   // shown only if userType !== 1
         "script_name",
         "market_type_name",
         "total_buy_qty",
@@ -219,7 +221,7 @@ const OrderPage1 = ({
         if (!selectedRow) return;
         setLoadingTrades(true);
         const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id, searchValue: searchText });
-        setTradesData(result);
+        setTradesData(result?.aaData);
         setLoadingTrades(false);
     };
 
@@ -247,8 +249,7 @@ const OrderPage1 = ({
             const dataStored = JSON.parse(sessionStorage.getItem("data") || "{}");
 
             const result = await apifetchPositions({
-                login_user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
+                searchText,
                 all_outstanding,
                 expiry_date: exparyDate,
                 group_by: client_wise_value,
@@ -339,7 +340,7 @@ const OrderPage1 = ({
     }, [totals]);
 
     useEffect(() => {
-        !isFirstRender && fetchPositions(null, searchText.trim());
+        !isFirstRender && fetchPositions();
     }, [debouncedSearchText]);
 
     useEffect(() => {
@@ -1060,58 +1061,15 @@ const OrderPage1 = ({
                 )}
             </>
 
-
-            {/* 🔍 Search Bar */}
-            {/* <Box sx={{
-                px: 2, py: 1, display: "flex",
-                alignItems: "center", gap: 2
-            }}>
-                {isMobile && filterShow && <FilterBtn setFilterOpen={setFilterDrawer} />}
-
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Search positions..."
-                    size="small"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start" sx={{ mr: 0.5 }}>
-                                <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{
-                        // width:'100%'
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            height: 36,
-                            fontSize: 13,
-                            '& fieldset': {
-                                borderColor: '#ccc',
-                            },
-                            '&:hover fieldset': {
-                                borderColor: '#666',
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: '#000',
-                            },
-                        },
-                        '& input': {
-                            py: 0.5,
-                        },
-                    }}
+            <Box sx={{ my: 1 }}>
+                <SearchPdfCsv
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={positionData}
+                    colArr={colArr}
+                    keyArr={keyArr}
                 />
-            </Box> */}
-            <SearchPdfCsv
-                searchText={searchText}
-                setSearchText={setSearchText}
-                logs={positionData}
-                colArr={colArr}
-                keyArr={keyArr}
-            />
-
+            </Box>
 
             {/* Body */}
             {loading ? (

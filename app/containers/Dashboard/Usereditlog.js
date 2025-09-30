@@ -239,7 +239,7 @@ const Usereditlog = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

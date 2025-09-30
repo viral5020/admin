@@ -65,7 +65,7 @@ const Summary_report = () => {
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingLedger, setLoadingLedger] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
@@ -281,23 +281,23 @@ const Summary_report = () => {
           // -------- Mobile Card View (loader inside this area) --------
           <Grid container spacing={0.75}>
             {!valanId ? (
-              <tr>
-                <td colSpan={12} style={{ textAlign: "center", padding: 40, fontSize: "0.9rem", }}>
+              <Grid item xs={12}>
+                <Box textAlign="center" py={5} fontSize="0.9rem">
                   Please select Valan ID
-                </td>
-              </tr>
+                </Box>
+              </Grid>
             ) : loading ? (
-              <tr>
-                <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
+              <Grid item xs={12}>
+                <Box textAlign="center" py={3}>
                   <CircularProgress size={30} />
-                </td>
-              </tr>
+                </Box>
+              </Grid>
             ) : paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan={12} style={{ padding: 16, textAlign: "center", fontSize: "0.9rem", }}>
+              <Grid item xs={12}>
+                <Box textAlign="center" py={2} fontSize="0.9rem">
                   No Data Found
-                </td>
-              </tr>
+                </Box>
+              </Grid>
             ) : (
               paginatedData.map((row) => {
                 const m2mColor = Number(row.self_m2m ?? 0) >= 0 ? "#1976d2" : "#d32f2f";
@@ -455,7 +455,7 @@ const Summary_report = () => {
                   </tr>
                 ) : loading ? (
                   <tr>
-                    <td colSpan={12} style={{ textAlign: "center", padding: 40 }}>
+                    <td colSpan={12} style={{ padding: 20, position: 'relative', left: '45vw' }}>
                       <CircularProgress size={30} />
                     </td>
                   </tr>

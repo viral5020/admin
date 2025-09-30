@@ -105,9 +105,9 @@ const Brokrageref = ({ filterShow = true }) => {
                     }}
                 >
                     {/* Valan Filter */}
-                    <Box sx={{ width: isMobile ? '100%' : 'auto', flex: isMobile ? 'unset' : 1 }}>
+                    {/* <Box sx={{ width: isMobile ? '100%' : 'auto', flex: isMobile ? 'unset' : 1 }}>
                         <ValanFilter valanId={valanId} setValanId={setValanId} />
-                    </Box>
+                    </Box> */}
 
                     {/* Trade Edit/Delete Log Filter */}
                     <Box sx={{ width: isMobile ? '100%' : 'auto', flex: isMobile ? 'unset' : 3.2, mt: isMobile ? 2 : 0 }}>
@@ -119,6 +119,8 @@ const Brokrageref = ({ filterShow = true }) => {
                             master={master}
                             broker={broker}
                             userType={userType}
+                            valanId={valanId}
+                            setValanId={setValanId}
                             onApply={onFilterApply}
                         />
                     </Box>

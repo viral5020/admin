@@ -56,9 +56,7 @@ const Summaryreportfilter = ({
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
         {/* ✅ Use the new ValanFilter component */}
-        <Grid item xs="auto">
-          <ValanFilter valanId={valanId} setValanId={setValanId} isDarkMode={isDarkMode} />
-        </Grid>
+        <ValanFilter valanId={valanId} setValanId={setValanId} isDarkMode={isDarkMode} />
 
         {/* Market & Script Filter */}
         <MarketScriptNameFilter
@@ -88,7 +86,7 @@ const Summaryreportfilter = ({
             sx={{
               backgroundColor: theme.palette.secondary.main,
               color: theme.palette.secondary.contrastText,
-              padding: '6px 12px',
+              // padding: '6px 12px',
               borderRadius: '4px',
               textTransform: 'none',
               '&:hover': { backgroundColor: theme.palette.secondary.dark },
@@ -103,12 +101,13 @@ const Summaryreportfilter = ({
             variant="contained"
             color="error"
             onClick={handleClear}
-            sx={{ borderRadius: 1, ml: 1 }}
+            sx={{ borderRadius: 1 }}
             fullWidth
           >
             Clear
           </Button>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3} lg={2.4}>
           <Button
             onClick={() => {
@@ -131,10 +130,10 @@ const Summaryreportfilter = ({
             sx={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
-              padding: '6px 12px',
+              // padding: '6px 12px',
               borderRadius: '4px',
               textTransform: 'none',
-              ml: 0.50,
+              // ml: 0.50,
               flex: 1,
               '&:hover': { backgroundColor: theme.palette.primary.dark },
             }}
@@ -143,6 +142,7 @@ const Summaryreportfilter = ({
             Script Wise Summary
           </Button>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3} lg={2.4}>
           <Button
             onClick={() => {
@@ -165,7 +165,7 @@ const Summaryreportfilter = ({
             sx={{
               backgroundColor: theme.palette.success.main,
               color: theme.palette.success.contrastText,
-              padding: '6px 12px',
+              // padding: '6px 12px',
               borderRadius: '4px',
               textTransform: 'none',
 

@@ -13,6 +13,8 @@ import {
     useTheme,
 } from '@mui/material';
 import Splitscriptmarketfilter from '../filters/Splitscriptmarketfilter';
+import RadioFilter from '../filters/RadioFilterField';
+import { Stack } from '@mui/material';
 
 const Splitscriptfilter = ({
     setEnd1_date,
@@ -98,6 +100,11 @@ const Splitscriptfilter = ({
         setNewTrade('0');
     };
 
+    const trade_options = [
+        { label: 'Yes', value: '1' },
+        { label: 'No', value: '0' }
+    ]
+
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }} alignItems="center" justifyContent="flex-start">
@@ -112,7 +119,7 @@ const Splitscriptfilter = ({
                 />
 
                 {/* Split Date Input */}
-                <Grid item xs={12} sm={6} md={3} lg={2}>
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <TextField
                         label="Split Date"
                         type="date"
@@ -125,7 +132,7 @@ const Splitscriptfilter = ({
                 </Grid>
 
                 {/* Split Number Input */}
-                <Grid item xs={12} sm={6} md={3} lg={2}>
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                     <TextField
                         label="Split Number"
                         type="number"
@@ -137,56 +144,51 @@ const Splitscriptfilter = ({
                 </Grid>
 
                 {/* New Trade Radio */}
-                <Grid item xs={12} sm={6} md={3} lg={2}>
-                    <FormLabel component="legend">New Trade</FormLabel>
-                    <RadioGroup
-                        row
-                        value={newTrade}
-                        onChange={(e) => setNewTrade(e.target.value)}
-                    >
-                        <FormControlLabel value="1" control={<Radio />} label="Yes" />
-                        <FormControlLabel value="0" control={<Radio />} label="No" />
-                    </RadioGroup>
-                </Grid>
+                <RadioFilter
+                    label="Value"
+                    options={trade_options}
+                    value={newTrade}
+                    onChange={setNewTrade}
+                    isLong={true}
+                />
 
                 {/* Add Button */}
-                <Grid item xs={6} sm={3} md={2} lg={2}>
-                    <Button
-                        fullWidth
-                        onClick={handleAdd}
-                        sx={{
-                            backgroundColor: theme.palette.secondary.main,
-                            color: '#fff',
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
-                        }}
-                    >
-                        Add
-                    </Button>
-                </Grid>
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        <Button
+                            fullWidth
+                            onClick={handleAdd}
+                            sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                color: '#fff',
+                                padding: '8px 12px',
+                                borderRadius: '4px',
+                                textTransform: 'none',
+                                '&:hover': {
+                                    backgroundColor: theme.palette.secondary.dark,
+                                },
+                            }}
+                        >
+                            Add
+                        </Button>
 
-                {/* Clear Button */}
-                <Grid item xs={6} sm={3} md={2} lg={2}>
-                    <Button
-                        fullWidth
-                        onClick={handleClear}
-                        sx={{
-                            backgroundColor: theme.palette.error.main,
-                            color: '#fff',
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.error.dark,
-                            },
-                        }}
-                    >
-                        Clear
-                    </Button>
+                        <Button
+                            fullWidth
+                            onClick={handleClear}
+                            sx={{
+                                backgroundColor: theme.palette.error.main,
+                                color: '#fff',
+                                padding: '8px 12px',
+                                borderRadius: '4px',
+                                textTransform: 'none',
+                                '&:hover': {
+                                    backgroundColor: theme.palette.error.dark,
+                                },
+                            }}
+                        >
+                            Clear
+                        </Button>
+                    </Stack>
                 </Grid>
             </Grid>
 

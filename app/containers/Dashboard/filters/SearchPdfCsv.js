@@ -16,7 +16,15 @@ import autoTable from "jspdf-autotable";
 import { formatToTwoDecimals, getLastPath, humanize } from "../helpers/utilFunc";
 import { useLocation } from "react-router-dom";
 
-const SearchPdfCsv = ({ setSearchText, searchText, logs, keyArr, colArr }) => {
+const SearchPdfCsv = ({
+    placeholder,
+    setSearchText,
+    searchText,
+    logs,
+    keyArr,
+    colArr,
+    isLoading
+}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const location = useLocation();
@@ -82,6 +90,7 @@ const SearchPdfCsv = ({ setSearchText, searchText, logs, keyArr, colArr }) => {
     return (
         <Box
             sx={{
+                my: 1,
                 display: "flex",
                 // flexDirection: isMobile ? "column" : "row",
                 flexDirection: "row",
@@ -94,17 +103,26 @@ const SearchPdfCsv = ({ setSearchText, searchText, logs, keyArr, colArr }) => {
         >
             <TextField
                 variant="outlined"
-                placeholder="Search logs..."
+                placeholder={placeholder || "Search logs..."}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 size="small"
                 sx={{ flex: 1, minWidth: 200, maxWidth: '360px' }}
                 InputProps={{
+                    // ...params.InputProps,
                     startAdornment: (
                         <InputAdornment position="start" sx={{ position: 'relative', bottom: '5px' }}>
                             <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                         </InputAdornment>
                     ),
+                    // endAdornment: (
+                    //     <>
+                    //         {isLoading ? (
+                    //             <CircularProgress color="inherit" size={20} />
+                    //         ) : null}
+                    //         {params.InputProps.endAdornment}
+                    //     </>
+                    // ),
                 }}
             />
 

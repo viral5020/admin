@@ -205,7 +205,7 @@ const Valan = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 
@@ -328,7 +328,7 @@ const Valan = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

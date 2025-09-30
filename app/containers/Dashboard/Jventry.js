@@ -416,7 +416,7 @@ const Jventry = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 
@@ -701,7 +701,7 @@ const Jventry = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 

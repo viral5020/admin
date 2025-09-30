@@ -153,10 +153,9 @@ const Forexvaln = ({
 
     const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-    const fetchOrders = async (type = "today", searchValue = "") => {
+    const fetchOrders = async () => {
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        const result = await fetcholdforexOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
+        const result = await fetcholdforexOrdersAPI(searchText);
         setOrders(result);
         setLoading(false);
     };
@@ -403,7 +402,7 @@ const Forexvaln = ({
                     logs={orders}
                     colArr={colArr}
                     keyArr={keyArr}
-                    isLoading={loading}
+
                 />
             </Box>
 
@@ -654,7 +653,7 @@ const Forexvaln = ({
 
                                     return (
                                         <tr key={item.trd_id || index} >
-                                            <td dangerouslySetInnerHTML={{ d_type_html: item.device_type_html }} />
+                                            <td dangerouslySetInnerHTML={{ __html: item?.d_type_html }} />
                                             <td>{item.trd_matchedtime}</td>
                                             {userType !== 1 && <td>{item.client_full_name}</td>}
                                             <td>

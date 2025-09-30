@@ -12,6 +12,7 @@ const MarketScriptNameFilter = ({
 }) => {
   const [marketOptions, setMarketOptions] = useState(isForex ? forex_comex_market : []);
   const [scriptOptions, setScriptOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // useEffect(() => { console.log('market', market); }, [market]);
   // useEffect(() => { console.log('script', script); }, [script]);
@@ -30,6 +31,7 @@ const MarketScriptNameFilter = ({
         setScriptOptions={setScriptOptions}
         isScriptMultiSelect={isScriptMultiSelect}
         isForex={isForex}
+        setIsLoading={setIsLoading}
       />
 
       <AutoSuggestFilter
@@ -42,6 +44,7 @@ const MarketScriptNameFilter = ({
         setOptions={setScriptOptions}
         isForex={isForex}
         market={market}
+        isLoading={isLoading}
       />
     </>
   )

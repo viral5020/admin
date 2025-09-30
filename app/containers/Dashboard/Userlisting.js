@@ -469,10 +469,10 @@ const Userlisting = ({
       </Button>,
       <Button
         onClick={() => {
-
           setactionItem(row);
           handleOpen1();
         }}
+        key="rrr"
         variant="contained"
         color="warning"
         size="small"
@@ -494,6 +494,7 @@ const Userlisting = ({
         onClick={() => handleOpenDialogcl(row.user_id)}
         variant="contained"
         size="small"
+        key="cl"
         sx={{
           minWidth: 30,
           p: "4px",
@@ -507,7 +508,7 @@ const Userlisting = ({
         CL
       </Button>,
       <Button
-        key="status"
+        key="status1"
         variant="contained"
         size="small"
         sx={{
@@ -684,7 +685,7 @@ const Userlisting = ({
           logs={filteredData}
           colArr={colArr}
           keyArr={keyArr}
-          isLoading={loading}
+
         />
       </div>
 

@@ -164,6 +164,7 @@ function Watchlist() {
   const [marketNames, setMarketNames] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [btnLoading, setBtnLoading] = useState(false);
 
   useEffect(() => {
     // console.log('!!! dummyData', dummyData);
@@ -414,62 +415,60 @@ function Watchlist() {
 
 
   function showToast(msg, onUndo, actionIcon) {
-    let didUndo = false;
-    const toast_id = Date.now();
+    let toastId;
 
-    const toastId = toast(
-      <Box
-      // sx={{
-      //   ...toastBoxCss,
-      //   background: isDarkMode ? "#333" : "#fff",
-      //   color: isDarkMode ? "#fff" : "#000",
-      // }}
-      >
-        {actionIcon === "removed" ? (
-          <StarBorder sx={{ color: "gray", mr: 0.8 }} />
-        ) : actionIcon === "added" ? (
-          <Star sx={{ color: "gold", mr: 0.8 }} />
-        ) : actionIcon === "delete" ? (
-          <RemoveCircleSharpIcon sx={{ color: "error.main", mr: 0.8 }} />
-        ) : actionIcon === "error" ? (
-          <ReportIcon sx={{ color: "error.main", mr: 0.8 }} />
-        ) : (
-          ""
-        )}
+    const ToastContent = () => {
+      const [didUndo, setDidUndo] = useState(false);
 
-        <Typography sx={{ fontSize: "0.9rem", display: 'inline' }}>{msg}</Typography>
+      return (
+        <Box>
+          {actionIcon === "removed" ? (
+            <StarBorder sx={{ color: "gray", mr: 0.8 }} />
+          ) : actionIcon === "added" ? (
+            <Star sx={{ color: "gold", mr: 0.8 }} />
+          ) : actionIcon === "delete" ? (
+            <RemoveCircleSharpIcon sx={{ color: "error.main", mr: 0.8 }} />
+          ) : actionIcon === "error" ? (
+            <ReportIcon sx={{ color: "error.main", mr: 0.8 }} />
+          ) : null}
 
-        {onUndo && (
-          <Button
-            size="small"
-            sx={{
-              color: isDarkMode ? "#90caf9" : "#2196f3",
-              ml: 2,
-              textTransform: "none",
-              p: 0,
-              backgroundColor: "#90caf933",
-            }}
-            onClick={() => {
-              didUndo = true;
-              onUndo();
-              // toast.dismiss(toastId); // dismiss using react-toastify API
-            }}
-          >
-            {didUndo ? 'Undone' : 'Undo'}
-          </Button>
-        )}
-      </Box>,
-      {
-        // toastId, // ✅ use toastId here instead of `id`
-        autoClose: toastTime, // ✅ react-toastify uses autoClose instead of duration
-        position: "top-right",
-        ...toastObj,
-      }
-    );
+          <Typography sx={{ fontSize: "0.9rem", display: "inline" }}>{msg}</Typography>
+
+          {onUndo && (
+            <Button
+              size="small"
+              sx={{
+                color: isDarkMode ? "#90caf9" : "#2196f3",
+                ml: 2,
+                textTransform: "none",
+                p: 0,
+                backgroundColor: "#90caf933",
+              }}
+              onClick={() => {
+                setDidUndo(true);
+                onUndo();
+                toast.dismiss(toastId); // ✅ closes this toast
+              }}
+            >
+              {didUndo ? "Undone" : "Undo"}
+            </Button>
+          )}
+        </Box>
+      );
+    };
+
+    toastId = toast(<ToastContent />, {
+      autoClose: toastTime,
+      position: "top-right",
+      ...toastObj,
+    });
+
+    return toastId; // in case you want to programmatically dismiss later
   }
 
 
   async function handleStar(stockData, e) {
+    setRemoveFavorite(false);
     let starBtn;
     if (!!e) {
       starBtn = e?.currentTarget;
@@ -478,7 +477,9 @@ function Watchlist() {
       //   starBtn.disabled = false; // re-enable after 2 seconds
       // }, 1500);
     }
+
     let isError = false;
+
     if (stockData.isFavorite) {
       const response = await favouriteActionAPI(stockData.market_watch_id, 'remove')
       if (response.message === 'remove Successfully') {
@@ -499,6 +500,7 @@ function Watchlist() {
         showToast(`${response.message}.`, false, 'error');
       }
     }
+
     !!e ? starBtn.disabled = false : '';
     console.log('isError', isError);
     if (!isError) {
@@ -516,7 +518,6 @@ function Watchlist() {
         ));
       }
     }
-    setRemoveFavorite(false);
   }
 
   // useEffect(() => {
@@ -525,11 +526,14 @@ function Watchlist() {
 
 
   function handleRemove(stock, idx) {
+    setBtnLoading(true);
     let marketIndex;
     console.log('stock', stock);
     setRemoveMarket(false);
+
     if (stock.quantity > 0) {
       showToast(`Cannot remove ${stock.scriptName} as it has quantity.`, false);
+
     } else {
       let isNotLastScript = false; //it is not last script in its market in watchlist
       let isUndo = false;
@@ -540,10 +544,12 @@ function Watchlist() {
         !isNotLastScript && setMarketNames(prev => prev.toSpliced(marketIndex, 0, stock.market_type_name));
       }
 
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log('setTimeout isUndo', isUndo);
         if (!isUndo) {
-          removeMarketWatchAPI(stock.market_watch_id);
+          const response = await removeMarketWatchAPI(stock.market_watch_id);
+
+          response.status !== 'ok' ? onUndo() : '';
         }
       }, [toastTime + 500])
 
@@ -554,7 +560,7 @@ function Watchlist() {
         }
       })
       console.log('isNotLastScript', isNotLastScript);
-      if (!isNotLastScript) {
+      if (!isNotLastScript) {  // IF LAST SCRIPT OF THAT MARKET, THEN ALSO REMOVE THAT MARKET
         const market_names = marketNames.filter((val, index) => {
           if (val === stock.market_type_name) {
             marketIndex = index;
@@ -858,7 +864,7 @@ function Watchlist() {
           <Button onClick={() => setRemoveFavorite(false)} variant="outlined">
             Cancel
           </Button>
-          <Button onClick={() => handleStar(removeFavorite)} variant="contained" color="error" autoFocus>
+          <Button onClick={(e) => handleStar(removeFavorite, e)} variant="contained" color="error" autoFocus>
             Unfavorite
           </Button>
         </DialogActions>

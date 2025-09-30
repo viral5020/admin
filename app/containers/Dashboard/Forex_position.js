@@ -48,6 +48,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import { fetchOrdersAPI, fetchPositionsAPI } from "./API/API";
 import SocketContext from "./Socket/SocketContext";
 import ForexpositionFilter from "./Forexpositionfilter";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
 
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -147,6 +148,40 @@ const OrderPage = () => {
         return fixedNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
+
+    const colArr = [
+        ...(userType !== 1 ? ["Client"] : []),
+        ...(userType !== 1 ? ["Client Code"] : []),
+        "Script",
+        "Market",
+        "Total Buy",
+        "Buy Avg Rate",
+        "Total Sell",
+        "Sell Avg Rate",
+        "Net Qty",
+        // "Last Trade Price",
+        "MTM",
+        "Auto Closed Date",
+        // "Close Btn",
+    ]
+
+    const keyArr = [
+        ...(userType !== 1 ? ["client_full_name_dis"] : []),   // shown only if userType !== 1
+        ...(userType !== 1 ? ["client_name_dis"] : []),
+        "script_name",
+        "market_type_name",
+        "total_buy_qty",
+        "buy_avg_rate",
+        "total_sell_qty",
+        "sell_avg_rate",
+        "net_qty",
+        // "check_script_name",  // used for liveRates lookup
+        // "mtm",                // numeric value for color logic
+        "mym_html",           // rendered with dangerouslySetInnerHTML
+        "trade_auto_closed_date",
+    ]
+
+
     const handleCardClick = (row) => {
         setSelectedRow(row);
         setDrawerOpen(true);
@@ -172,7 +207,7 @@ const OrderPage = () => {
         if (!selectedRow) return;
         setLoadingTrades(true);
         const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id });
-        setTradesData(result);
+        setTradesData(result?.aaData);
         setLoadingTrades(false);
     };
 
@@ -187,6 +222,7 @@ const OrderPage = () => {
                 login_user_id: dataStored.user_id,
                 auth_key: dataStored.auth_key,
                 all_outstanding,
+                searchText,
                 expiry_date: exparyDate,
                 group_by: client_wise_value,
                 market_type_id: market?.id,
@@ -289,7 +325,7 @@ const OrderPage = () => {
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
-            fetchPositions(searchText.trim());
+            fetchPositions();
         }, 500); // 500ms debounce
 
         return () => clearTimeout(delayDebounce);
@@ -316,7 +352,7 @@ const OrderPage = () => {
         socket.on('reconnecting', function () { })
         socket.on('reconnect', function () { })
         socket.on('marketWatch', function (args) {
-            console.log("args=", args);
+            // console.log("args=", args);
             if (args && args.data) {
 
                 if (args.data.InstrumentIdentifier == "SGXNIFTY-I" || args.data.InstrumentIdentifier == "NIFTY 50-I") {
@@ -550,7 +586,7 @@ const OrderPage = () => {
                         net = Number(net).toFixed(5);
                         net = formatNumberWithCommas(net, 5);
 
-                        console.log("total old=", totals.totalMTM);
+                        // console.log("total old=", totals.totalMTM);
 
                         setTotals(prv => ({
                             ...prv,
@@ -561,7 +597,7 @@ const OrderPage = () => {
                             net: net,
 
                         }));
-                        console.log("total new=", totals.totalMTM);
+                        // console.log("total new=", totals.totalMTM);
 
                     }
                 }
@@ -569,7 +605,7 @@ const OrderPage = () => {
         });
     }
     useEffect(() => {
-        console.log("totals updated:", totals.totalMTM);
+        // console.log("totals updated:", totals.totalMTM);
     }, [totals]);
     const handleViewTradesClick = () => {
         if (!expanded) fetchTradesData();
@@ -639,7 +675,7 @@ const OrderPage = () => {
         }
     }
     const setTradeType = (element) => {
-        console.log(element);
+        // console.log(element);
         startTransition(() => {
             setOrderType(element);
             selectTradeTypeSet.current = element;
@@ -979,51 +1015,13 @@ const OrderPage = () => {
 
             </>
 
-            {/* 🔍 Search Bar */}
-            <Box sx={{
-                px: 2, py: 1, display: "flex",
-                alignItems: "center", gap: 2
-            }}>
-                {isMobile && <FilterBtn setFilterOpen={setFilterDrawer} />}
-
-                {/* 🔍 Search Input */}
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Search positions..."
-                    size="small"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start" sx={{ mr: 0.5 }}>
-                                <SearchIcon sx={{ fontSize: 18, color: 'text.secondary', verticalAlign: 'middle' }} />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{
-                        // width:'100%'
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            height: 36,
-                            fontSize: 13,
-                            '& fieldset': {
-                                borderColor: '#ccc',
-                            },
-                            '&:hover fieldset': {
-                                borderColor: '#666',
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: '#000',
-                            },
-                        },
-                        '& input': {
-                            py: 0.5,
-                        },
-                    }}
-                />
-            </Box>
-
+            <SearchPdfCsv
+                searchText={searchText}
+                setSearchText={setSearchText}
+                logs={positionData}
+                colArr={colArr}
+                keyArr={keyArr}
+            />
 
             {/* Body */}
             {loading ? (

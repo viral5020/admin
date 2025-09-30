@@ -1,505 +1,72 @@
+ const colArr = [
+    "Device",
+    "Status",
+    ...(userType !== 1 ? ["Client Name"] : []),
+    ...(userType !== 1 ? ["Client Code"] : []),
+    "Script",
+    "Market",
 
-   make 1st component's pagination-logic like 2nd component
+    "B/S",
+    "Order Type",
 
-    pagination-logic means track below states , where and how it used
+    "Qty",
+    "Lot",
+    "Order Price",
+    "Time",
+    "O. Time",
+    "Comm Amt",
+    ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
+    ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
+    ...(userType !== 2 ? ["Modify"] : [])
+    ...(userType !== 2 ? ["Cancel"] : [])
+  ]
+
+  const keyArr = [
+    'device_type_html',
+    'trd_status',
+    ...(userType !== 1 ? ["client_full_name_dis"] : []),
+    ...(userType !== 1 ? ["client_name_dis"] : []),
     
-  const [logs, setLogs] = useState([]);
-
-  const [filterType, setFilterType] = useState("today");
-  const [searchText, setSearchText] = useState("");
-  const debouncedSearchText = useDebounce(searchText, 800);
-  const [isFilterChange, setIsFilterChange] = useState(false);
-
-  // # Pagination states
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-
-pagination in mobile is with `load more btn`, accordingly set logic
-
-  >> 1st component
-
-const OrderBook = ({
-  filterShow = true,
-  setFilterShow = () => { },
-  user_id
-}) => {
-  console.log("filterShow=", filterShow);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isDarkMode = theme.palette.mode === 'dark';
-  const isFirstRender = useIsFirstRender();
-
-  const [status, setStatus] = useState();  // []
-  const [end_date, setEnd_date] = useState('');
-  const [start_end, setStart_end] = useState('');
-  const [orderType, setOrderType] = useState('');  // trade_type
-
-  const [loading, setLoading] = useState(false);
-
-  const [logs, setLogs] = useState([]);
-
-  const [filterType, setFilterType] = useState("today");  // it is a filter
-  const [searchText, setSearchText] = useState("");  // it is a filter
-  const debouncedSearchText = useDebounce(searchText, 800);
-  const [isFilterChange, setIsFilterChange] = useState(false);
-
-  // # Pagination states
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [cancelItem, setCancelItem] = useState(null);
-  const [password, setPassword] = useState('');
-  const [selectedMarket, setSelectedMarket] = useState(null);
-  const [selectedScripts, setSelectedScripts] = useState([]);
-
-
-  const showToast = (message, type = 'info') => {
-    switch (type) {
-      case 'success':
-        toast.success(message);
-        break;
-      case 'error':
-        toast.error(message);
-        break;
-      case 'warning':
-        toast.warn(message);
-        break;
-      default:
-        toast.info(message);
-    }
-  };
-
-
-
-  const handleCancel = async (itemToCancel, enteredPassword = '') => {
-    try {
-      // Get stored user data
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      if (!dataStored) {
-        showToast('User data not found in session.', 'error');
-        return;
-      }
-
-      // Construct payload
-      const payload = {
-        trade_id: itemToCancel.trd_id,
-        password: enteredPassword,
-        device_type: 0,
-        is_app: "1",
-        login_user_id: dataStored.user_id,
-        auth_key: dataStored.auth_key,
-      };
-
-      console.log('Sending cancel payload:', payload);
-
-      // Call deleteTrade API
-      const response = await deleteTrade(payload);
-
-      if (response.success) {
-        showToast.success('Trade cancelled successfully', 'success');
-        // Refresh orders after cancel
-        await fetchLogs(filterType, debouncedSearchText);
-      } else {
-        showToast(response.message || 'Failed to cancel trade', 'error');
-      }
-    } catch (error) {
-      console.error('Cancel trade error:', error);
-      showToast('An error occurred while cancelling the trade.', 'error');
-    }
-  };
-
-
-
-  const [market, setMarket] = useState({});
-  const [script, setScript] = useState([]);
-  const [client, setClient] = useState({});
-  const [master, setMaster] = useState({});
-  const [broker, setBroker] = useState({});
-
-  // 1. Retrieve the raw data from sessionStorage
-  const rawData = sessionStorage.getItem("data");
-
-  // 2. Initialize parsedData safely
-  let parsedData = null;
-  if (rawData) {
-    try {
-      parsedData = JSON.parse(rawData);
-    } catch (error) {
-      console.error("Failed to parse session data:", error);
-    }
-  }
-
-  // 3. Extract user_type and deletePopup safely
-  let userType = null;
-  let deletePopup = 0; // default to 0 if not set
-
-  if (parsedData) {
-    // Convert user_type to integer if available
-    if (parsedData.user_type !== undefined) {
-      userType = parseInt(parsedData.user_type, 10);
-      if (isNaN(userType)) {
-        console.warn("user_type is not a valid number");
-        userType = null;
-      }
-    }
-
-    // Convert deletePopup to integer if available
-    if (parsedData.deletePopup !== undefined) {
-      deletePopup = parseInt(parsedData.deletePopup, 10);
-      if (isNaN(deletePopup)) {
-        console.warn("deletePopup is not a valid number");
-        deletePopup = 0;
-      }
-    }
-  }
-
-  const toggleDrawer = (open) => () => setDrawerOpen(open);
-
-  const fetchLogs = async () => {
-    setLoading(true);
-    try {
-      const result = await fetchOrdersAPI({
-        filterType: filterType,
-        searchValue: debouncedSearchText,
-        currentPage: currentPage,
-        pageSize: pageSize,
-        end_date,
-        start_end,
-        marketId: market?.id || null,
-        scriptIds: formatScriptIds(script),
-        brokerId: broker?.id || null,
-        masterUserId: master?.id || null,
-        clientId: user_id || client?.id || null,
-        status,
-        orderType,
-        // user_id: user_id
-      });
-
-      setLogs(result.aaData || []);
-      setTotalRecords(result.iTotalRecords || 0);
-      setIsFilterChange(false);
-    } catch (err) {
-      console.error(err);
-      showToast('Failed to fetch orders.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  function onFilterApply() {
-    setCurrentPage(0); // Reset pagination to first page
-    fetchLogs(0, pageSize, filterType, debouncedSearchText); // Call API with filters
-    toggleDrawer(false)(); // Close drawer if mobile
-  }
-
-  useEffect(() => {
-    console.log('orders.length', logs.length);
-  }, [fetchLogs])
-
-  // Fetch on mount
-  useEffect(() => {
-    fetchLogs(0);
-  }, [user_id]);
-
-  // Update total pages when total records or pageSize changes
-  useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
-
-  // Fetch when filter, search, page, or pageSize changes
-  // useEffect(() => {
-  //   fetchOrders(currentPage, pageSize, filterType, debouncedSearchText);
-  // }, [currentPage, pageSize, filterType, debouncedSearchText]);
-
-
-  // # Pagination useEffects
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  useEffect(() => {
-    setTotalPages(Math.ceil(totalRecords / pageSize));
-  }, [pageSize, totalRecords])
-
-  useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
-  }, [filterType, debouncedSearchText]);
-
-  useEffect(() => {
-    !isFirstRender && fetchLogs();
-  }, [currentPage, pageSize]);
-
-  useEffect(() => {
-    isFilterChange && !isFirstRender && fetchLogs();
-  }, [isFilterChange])
-
-  // useEffect(() => {
-  //   fetchOrders(filterType, debouncedSearchText);
-  // }, [filterType, debouncedSearchText]);
-
-
-  const [open, setOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [lot, setLot] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [price, setPrice] = useState('');
-
-  const handleModify = (item) => {
-    setSelectedItem(item);
-    setLot(item.trd_lot);
-    setQuantity(item.trd_qty);
-    setPrice(item.trd_rate);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-
-  const handleSave = async () => {
-    if (!selectedItem?.trd_id) {
-      showToast('Trade ID is missing.', 'error');
-      return;
-    }
-
-    if (!lot || !quantity || !price) {
-      showToast('Lot, Quantity, and Price are required.');
-      return;
-    }
-
-    try {
-      const payload = {
-        trade_id: selectedItem.trd_id,  // ✅ use trd_id from your data
-        trade_rate: price,
-        trade_lot: lot,
-        trade_qty: quantity,
-        device_type: 0,
-      };
-
-      console.log('Sending payload to update trade:', payload);
-
-      setLoading(true);
-      const response = await updateTrade(payload);
-      setLoading(false);
-
-      if (response?.success) {
-        showToast('Trade updated successfully.');
-        handleClose();
-        await fetchLogs(filterType, debouncedSearchText);
-      } else {
-        showToast(response?.message || 'Failed to update trade.');
-      }
-    } catch (error) {
-      console.error('Error updating trade:', error);
-      setLoading(false);
-      showToast('Something went wrong while updating the trade.');
-    }
-  };
-
-
-  const needsPassword = userType === 4 && deletePopup === 1;
-
-  const renderActions = (item, idx, isQty) => ({
-    // leading: (
-    //     <LeadingActions>
-    //         <SwipeAction
-    //             // destructive={true}
-    //             onClick={() => handleStar(item, isFavorite)}
-    //         >
-    //             <ThemeProvider theme={theme}>
-    //                 <Button
-    //                     variant="contained"
-    //                     color="star"
-    //                     sx={{
-    //                         backgroundColor: isDarkMode ? '#eca52e' : '#ffb63c',
-    //                         height: '100%',
-    //                         borderRadius: 0,
-    //                         minWidth: '80px',
-    //                         fontSize: '0.85rem',
-    //                         color: '#fff',
-    //                     }}
-    //                 >
-    //                     {/* Star */}
-    //                     {isFavorite ? <RemoveCircleIcon sx={{ fontSize: '1.8rem' }} /> : <StarSharpIcon sx={{ fontSize: '2rem' }} />}
-    //                 </Button>
-    //             </ThemeProvider>
-    //         </SwipeAction >
-    //     </LeadingActions >
-    // ),
-    trailing: (
-      <TrailingActions>
-        {item.modify === true && (
-          <SwipeAction
-            destructive={false}
-            onClick={() => handleModify(item)}
-          >
-            <button
-              style={{
-                marginRight: '4px',
-                padding: '4px 8px',
-                backgroundColor: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              <ModeIcon />
-            </button>
-          </SwipeAction>
-        )}
-
-        {item.cancel === true && (
-          <SwipeAction
-            onClick={() => {
-              setCancelItem(item);
-              setCancelDialogOpen(true);
-            }}
-          >
-            <button
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#d32f2f',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              <CancelIcon />
-            </button>
-          </SwipeAction>
-        )}
-
-        {item.modify !== true && item.cancel !== true && (
-          <SwipeAction>
-            <div
-              style={{
-                padding: '4px 8px',
-                color: '#888',
-                fontStyle: 'italic',
-              }}
-            >
-
-            </div>
-          </SwipeAction>
-        )}
-      </TrailingActions>
-
-    )
-  });
-
-  return (
-
-
->> 2nd component
-
-
-const TradeEditDeleteLog = () => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const [logs, setLogs] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const [searchText, setSearchText] = useState('');  // it is a filter
-    const debouncedSearchText = useDebounce(searchText, 800);
-    const [isFilterChange, setIsFilterChange] = useState(false);
-    const isFirstRender = useIsFirstRender();
-
-    // # Pagination states
-    const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-
-    const [filterDrawer, setFilterDrawer] = useState(false);
-
-    const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-
-    const [end_date, setEnd_date] = useState('');
-    const [start_date, setStart_date] = useState('');
-
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
-
-
-    const fetchLogs = async () => {
-        setLoading(true);
-        const scriptIds = formatScriptIds(script);
-        const result = await editDeleteLogLogsAPI(
-            currentPage,
-            pageSize,
-            searchText,
-            market,
-            scriptIds,
-            master,
-            client,
-            end_date,
-            start_date,
-            is_deleted,
-            is_updated,
-            isAdminOnly,
-        );
-
-        const data = result.aaData || [];
-
-        isMobile
-            ? isFilterChange || currentPage === 0
-                ? setLogs(data || [])
-                : setLogs(prev => [...prev, ...data])
-            : setLogs(data || []);
-
-        setTotalRecords(result.iTotalRecords || 0);
-        setIsFilterChange(false);
-
-        setLoading(false);
-    };
-
-    const toggleDrawer = (open) => () => setFilterDrawer(open);
-
-    function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
-        toggleDrawer(false)();
-    }
-
-    useEffect(() => {
-        console.log('logs.length', logs.length);
-    }, [logs])
-
-    // # pagination useEffects
-    useEffect(() => {
-        fetchLogs();
-    }, []);
-
-    useEffect(() => {
-        setTotalPages(Math.ceil(totalRecords / pageSize));
-    }, [pageSize, totalRecords])
-
-    useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
-    }, [debouncedSearchText]);
-
-    useEffect(() => {
-        !isFirstRender && fetchLogs();
-    }, [currentPage, pageSize]);
-
-    useEffect(() => {
-        isFilterChange && !isFirstRender && fetchLogs();
-    }, [isFilterChange])
-
+    'scrp_name',
+    'mrkt_name',
+
+    'trd_type',
+    'trd_type2',
+    'trd_qty',
+    'trd_lot',
+    'net_rate',
+    'trd_matchedtime',
+    'trd_time',
+    'trd_comm_amnt',
+    'trade_ip_address',
+    'trd_id',
+    'modify',
+    'cancel',
+  ]
+
+------------
+
+
+  const keyArr = [
+    'd_type_html',
+    'status',
+    ...(userType !== 1 ? ["client_full_name_dis"] : []),
+    ...(userType !== 1 ? ["client_name_dis"] : []),
+
+    'scrp_name',
+    'mrkt_t_name',
+
+    'trd_type',
+    'trd_type2',
+    'trd_qty',
+    'trd_lot',
+    'trd_rate',
+    'trd_matchedtime',
+    'trd_time',
+    'trd_commision_amount',
+
+    // ...([3, 4, 5].includes(userType) ? ["trd_ip_address"] : []),
+    ...(userType === 4 || userType === 5 ? ["trd_id"] : []),
+    ...(userType !== 2 ? ["modify"] : []),
+    ...(userType !== 2 ? ["cancel"] : []),
+  ]

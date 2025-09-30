@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { Grid, Button, TextField, useTheme } from '@mui/material'
+import { Grid, Button, TextField, useTheme, Stack } from '@mui/material'
 import Expirymarketscriptfilter from '../filters/Expirymarketscriptfilter'
 
 const Expiryvalidationfilter = ({
@@ -105,44 +105,42 @@ const Expiryvalidationfilter = ({
                 </Grid>
 
                 {/* Add Button */}
-                <Grid item xs={6} sm={3} md={2} lg={2.4}>
-                    <Button
-                        fullWidth
-                        onClick={handleAdd}
-                        sx={{
-                            backgroundColor: theme.palette.secondary.main,
-                            color: '#fff',
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.secondary.dark,
-                            },
-                        }}
-                    >
-                        Add
-                    </Button>
+                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        <Button
+                            fullWidth
+                            onClick={handleAdd}
+                            sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                color: "#fff",
+                                borderRadius: "4px",
+                                textTransform: "none",
+                                "&:hover": {
+                                    backgroundColor: theme.palette.secondary.dark,
+                                },
+                            }}
+                        >
+                            Add
+                        </Button>
+
+                        <Button
+                            fullWidth
+                            onClick={handleClear}
+                            sx={{
+                                backgroundColor: theme.palette.error.main,
+                                color: "#fff",
+                                borderRadius: "4px",
+                                textTransform: "none",
+                                "&:hover": {
+                                    backgroundColor: theme.palette.error.dark,
+                                },
+                            }}
+                        >
+                            Clear
+                        </Button>
+                    </Stack>
                 </Grid>
 
-                {/* Clear Button */}
-                <Grid item xs={6} sm={3} md={2} lg={2.4}>
-                    <Button
-                        fullWidth
-                        onClick={handleClear}
-                        sx={{
-                            backgroundColor: theme.palette.error.main,
-                            color: '#fff',
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            textTransform: 'none',
-                            '&:hover': {
-                                backgroundColor: theme.palette.error.dark,
-                            },
-                        }}
-                    >
-                        Clear
-                    </Button>
-                </Grid>
             </Grid>
 
             <ToastContainer />

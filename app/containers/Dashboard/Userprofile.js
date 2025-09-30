@@ -28,6 +28,7 @@ const UserTablePage = () => {
     // Dropdown state
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [selectedUserId, setselectedUserId] = useState(null);
 
     // Orders & Positions
@@ -79,6 +80,7 @@ const UserTablePage = () => {
 
     // Fetch users for dropdown
     const fetchUsers = async (term = "") => {
+        setLoadingUsers(true);
         try {
             const params = {
                 is_app: 1,
@@ -93,12 +95,10 @@ const UserTablePage = () => {
             setUsers(Array.isArray(data) ? data : data?.results || []);
         } catch (err) {
             console.error("Error fetching users:", err);
+        } finally {
+            setLoadingUsers(false);
         }
     };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
     // Fetch Logs
     const fetchLogs = async () => {
@@ -182,12 +182,33 @@ const UserTablePage = () => {
             {/* User Dropdown */}
             <Box sx={{ display: "flex", gap: 1, maxWidth: 400, mb: 3 }}>
                 <Autocomplete
+                    loading={loadingUsers}
+                    loadingText="Loading..."
+
                     options={users}
                     getOptionLabel={(option) => option?.text || option || ""}
                     value={selectedUser}
                     onChange={(e, val) => setSelectedUser(val)}
                     onInputChange={(e, val, reason) => reason === "input" && setSearchText(val)}
-                    renderInput={(params) => <TextField {...params} label="Select User" size="small" />}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            placeholder="Start typing to search..."
+                            label="Select User"
+                            size="small"
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                    <>
+                                        {loadingUsers ? (
+                                            <CircularProgress color="inherit" size={20} />
+                                        ) : null}
+                                        {params.InputProps.endAdornment}
+                                    </>
+                                ),
+                            }}
+                        />
+                    )}
                     sx={{ flex: 1 }}
                 />
                 <Button

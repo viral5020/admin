@@ -472,7 +472,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
     }
   },
   header_Title: {
-    fontSize: theme.spacing(3),
+    fontSize: theme.spacing(2.5),
     fontWeight: 700,
     color: theme.palette.common.white,
     textTransform: 'capitalize',

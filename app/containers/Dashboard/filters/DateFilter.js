@@ -34,7 +34,7 @@ const DateFilter = ({
                 //     const formatted = `${dd}-${mm}-${yyyy}`;
                 //     onChange(formatted);
                 // }}
-                value={value}
+                value={value ?? ''}
                 onChange={(e) => onChange(e.target.value)}
                 InputProps={{ inputProps: isMaxDateToday && { max: today } }}
                 InputLabelProps={{ shrink: true }}

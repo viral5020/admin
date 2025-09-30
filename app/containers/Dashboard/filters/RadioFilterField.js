@@ -27,11 +27,14 @@ const RadioFilter = ({
                     borderRadius: 1,
                     backgroundColor: "transparent", // No background
                     boxShadow: "none",              // No shadow
+                    position: 'relative',
+                    left: '10px',
+                    bottom: '4px',
                 }}
             >
                 <Typography
                     sx={{
-                        fontSize: "0.85rem",
+                        fontSize: "0.80rem",
                         fontWeight: 500,
                         mb: 0,
                         color: isDarkMode ? "#ccc" : "#333",
@@ -45,7 +48,7 @@ const RadioFilter = ({
                     value={value || ''}
                     onChange={(e) => onChange(e.target.value)}
                     sx={{
-                        gap: 2,
+                        gap: 1,
                         flexWrap: "wrap",
                         '& .MuiFormControlLabel-root': {
                             m: 0,

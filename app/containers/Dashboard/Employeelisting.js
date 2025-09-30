@@ -659,7 +659,7 @@ const Employeelisting = ({
                     logs={filteredData}
                     colArr={colArr}
                     keyArr={keyArr}
-                    isLoading={loading}
+
                 />
             </div>
 

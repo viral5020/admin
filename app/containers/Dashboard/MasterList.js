@@ -28,6 +28,7 @@ import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import Loader from "./Components/Loader";
 
 const colArr = [
   "Name",
@@ -77,6 +78,7 @@ const Masterlisting = ({
   const [isFilterChange, setIsFilterChange] = useState(false);
 
   const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
 
   // # Pagination states
   const [currentPage, setCurrentPage] = useState(0);
@@ -90,6 +92,7 @@ const Masterlisting = ({
   // Filters
   const [databroker, setDatabroker] = useState("");
   const [master, setMaster] = useState("");
+  const [isMasterUnderMaster, setIsMasterUnderMaster] = useState(false);
   const [user, setUser] = useState("");
   const [status, setStatus] = useState();
   const [segment, setSegment] = useState("");
@@ -333,7 +336,8 @@ const Masterlisting = ({
 
   const fetchUserListOfMaster = async (masterId) => {
     console.log('@@@ userId', masterId);
-    setLoading(true);
+    setIsDialogOpen(true);
+    setLoadingData(true);
     try {
       const result = await fetchUserlistingAPI(0, 100000, null, null, null, null, null, masterId);
       setDialogData(result.aaData || []); // Store in dialogData
@@ -341,12 +345,13 @@ const Masterlisting = ({
       console.error("Error fetching user listing:", error);
       setDialogData([]);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
   const fetchBrokerListOfMaster = async (masterId) => {
-    setLoading(true);
+    setIsDialogOpen(true);
+    setLoadingData(true);
     try {
       const result = await fetchBrokerlistingAPI(0, 100000, null, null, null, null, null, masterId,);
       setDialogData(result.aaData || []);
@@ -354,7 +359,7 @@ const Masterlisting = ({
       console.error("Error fetching master listing:", error);
       setDialogData([]);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
@@ -441,8 +446,8 @@ const Masterlisting = ({
         L
       </Button>,
       <Button
+        key="rrr"
         onClick={() => {
-
           setactionItem(row);
           handleOpen1();
         }}
@@ -464,6 +469,7 @@ const Masterlisting = ({
         A
       </Button>,
       <Button
+        key="cl"
         onClick={() => handleOpenDialogcl(row.user_id)}
         variant="contained"
         size="small"
@@ -480,7 +486,7 @@ const Masterlisting = ({
         CL
       </Button>,
       <Button
-        key="status"
+        key="status1"
         variant="contained"
         size="small"
         sx={{
@@ -650,15 +656,17 @@ const Masterlisting = ({
           logs={filteredData}
           colArr={colArr}
           keyArr={keyArr}
-          isLoading={loading}
+
         />
       </div>
 
       <Button
-        color="secondary"
+        color={isMasterUnderMaster ? "secondary" : "inherit"} // valid values only
+        sx={{ ...(isMasterUnderMaster ? {} : { color: "grey" }), cursor: !isMasterUnderMaster ? 'not-allowed' : 'pointer' }}
         onClick={() => {
           setMaster({ id: "" });
           fetchMasterListingData(true);
+          setIsMasterUnderMaster(false);
         }}
       >
         Go Back
@@ -745,12 +753,13 @@ const Masterlisting = ({
                     }}
                     onClick={() => {
                       if (!row.masters_under) return;
+                      setIsMasterUnderMaster(true);
                       setMaster({ id: row.user_id });
                       currentPage === 0
                         ? fetchMasterListingData(null, row.user_id)
                         : setCurrentPage(0);
-                      setSelectedUserId(row.user_id);
-                      setOpenDialog(true);
+                      // setSelectedUserId(row.user_id);
+                      // setOpenDialog(true);
                     }}
                   >
                     {row.masters_under || "-"}
@@ -975,9 +984,9 @@ const Masterlisting = ({
 
       <Dialog open={!!isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>User Details</DialogTitle>
-        <DialogContent dividers>
-          {loading ? (
-            <DialogContentText>Loading user data...</DialogContentText>
+        <DialogContent sx={{ position: 'relative', minHeight: '60px' }}>
+          {loadingData ? (
+            <CircularProgress sx={{ position: 'absolute', left: '50%' }} />
           ) : dialogData.length === 0 ? (
             <DialogContentText>No data found for this user.</DialogContentText>
           ) : isDialogOpen === 'user' ? (
@@ -1158,7 +1167,7 @@ const Masterlisting = ({
       </Dialog>
 
       <ToastContainer position="top-right" autoClose={3000} />
-    </div>
+    </div >
   );
 };
 

@@ -199,7 +199,7 @@ const Casheditdeletelog = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 
@@ -373,7 +373,7 @@ const Casheditdeletelog = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

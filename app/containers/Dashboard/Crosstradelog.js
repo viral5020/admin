@@ -274,7 +274,7 @@ const Crosstradelog = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

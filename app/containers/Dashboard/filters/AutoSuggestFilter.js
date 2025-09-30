@@ -3,6 +3,7 @@ import { Autocomplete, CircularProgress, Grid, TextField } from "@mui/material";
 import { useTheme } from "@emotion/react"; // ✅ added
 import { fetchOptionsAPI } from "../API/API";
 import { useDebounce } from "@uidotdev/usehooks";
+import { getInputBoxStyle } from "./inputBoxStyle";
 
 const AutoSuggestFilter = ({
     isMultiSelect,
@@ -17,6 +18,8 @@ const AutoSuggestFilter = ({
     isScriptMultiSelect,
     setScriptOptions,
     isForex = false, // ✅ added default
+    isLoading,
+    setIsLoading
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === "dark";
@@ -31,6 +34,7 @@ const AutoSuggestFilter = ({
     }, [debouncedSearchText])
 
     const isMarketField = fieldName === 'market';
+    const isScriptField = fieldName === 'script';
 
     const inputBoxStyle = {
         backgroundColor: isDarkMode ? "#263238" : "#fff",
@@ -51,9 +55,13 @@ const AutoSuggestFilter = ({
 
     async function fetchOptions(url, params, setter) {
         setLoading(true);
+        isMarketField && setIsLoading(true);
+
         const data = await fetchOptionsAPI(url, params, setter);
         setter(Array.isArray(data) ? data : []);
+
         setLoading(false);
+        isMarketField && setIsLoading(false);
     }
 
     function handleFetch(term, field, val) {
@@ -91,6 +99,7 @@ const AutoSuggestFilter = ({
                 // filterSelectedOptions
                 loading={loading}
                 loadingText="Loading..."
+                disabled={isScriptField && isLoading}
 
                 multiple={isMultiSelect}
                 disableCloseOnSelect={isMultiSelect}
@@ -107,8 +116,12 @@ const AutoSuggestFilter = ({
                 // which can cause run time error
                 value={
                     isMultiSelect
-                        ? Array.isArray(field) ? field : field ? [field] : []
-                        : !Array.isArray(field) ? (field || null) : (field.length > 0 ? field[0] : null)
+                        ? Array.isArray(field)
+                            ? (field && Object.keys(field).length > 0 ? field : [])
+                            : field ? [field] : []
+                        : !Array.isArray(field)
+                            ? (field && Object.keys(field).length > 0 ? field : null)
+                            : (field.length > 0 ? field[0] : null)
                 }
 
                 onInputChange={(e, val, reason) => {
@@ -180,7 +193,7 @@ const AutoSuggestFilter = ({
                 noOptionsText={`No ${label} found`}
                 fullWidth
                 sx={{
-                    ...inputBoxStyle,
+                    ...getInputBoxStyle(isDarkMode),
                     "& .MuiAutocomplete-input": {
                         width: "auto !important",
                     },

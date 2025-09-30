@@ -200,7 +200,7 @@ const Autosquareuplog = ({
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 
@@ -289,7 +289,7 @@ const Autosquareuplog = ({
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

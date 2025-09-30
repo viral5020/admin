@@ -102,6 +102,8 @@ const BrokerListing = ({
   const [open, setOpen] = useState(false);
   const [openR, setOpenR] = useState(false);
 
+  const [loadingData, setLoadingData] = useState(true);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
@@ -336,7 +338,8 @@ const BrokerListing = ({
 
   const fetchUserData = async (brokerId) => {
     console.log('@@@ userId', brokerId);
-    setLoading(true);
+    setIsDialogOpen(true);
+    setLoadingData(true);
     try {
       console.log("Fetching data for user:", brokerId);
 
@@ -347,7 +350,7 @@ const BrokerListing = ({
       console.error("Error fetching user listing:", error);
       setDialogData([]);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
@@ -472,8 +475,8 @@ const BrokerListing = ({
         L
       </Button>,
       <Button
+        key="rrr"
         onClick={() => {
-
           setactionItem(row);
           handleOpen1();
         }}
@@ -511,7 +514,7 @@ const BrokerListing = ({
       //     CL
       //   </Button>,
       <Button
-        key="status"
+        key="status1"
         variant="contained"
         size="small"
         sx={{
@@ -682,7 +685,7 @@ const BrokerListing = ({
           logs={filteredData}
           colArr={colArr}
           keyArr={keyArr}
-          isLoading={loading}
+
         />
       </div>
       {/* 
@@ -997,9 +1000,9 @@ const BrokerListing = ({
 
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>User Details</DialogTitle>
-        <DialogContent dividers>
-          {loading ? (
-            <DialogContentText>Loading user data...</DialogContentText>
+        <DialogContent sx={{ position: 'relative', minHeight: '60px' }}>
+          {loadingData ? (
+            <CircularProgress sx={{ position: 'absolute', left: '50%' }} />
           ) : dialogData.length === 0 ? (
             <DialogContentText>No data found for this user.</DialogContentText>
           ) : (

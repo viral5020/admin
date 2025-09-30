@@ -222,7 +222,7 @@ const Bulktrading = ({
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </>
                 }
@@ -300,7 +300,7 @@ const Bulktrading = ({
                     logs={logs}
                     colArr={colArr}
                     keyArr={keyArr}
-                    isLoading={loading}
+
                 />
             }
 

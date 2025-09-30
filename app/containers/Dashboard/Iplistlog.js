@@ -195,7 +195,7 @@ const Iplistlog = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 

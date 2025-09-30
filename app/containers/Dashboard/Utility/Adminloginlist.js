@@ -211,7 +211,7 @@ const Adminloginlist = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                         <Button
                             variant="contained"
@@ -398,7 +398,7 @@ const Adminloginlist = () => {
                             logs={logs}
                             colArr={colArr}
                             keyArr={keyArr}
-                            isLoading={loading}
+
                         />
                     </Box>
 

@@ -244,7 +244,7 @@ const RejectionLogs = ({
             logs={logs}
             colArr={colArr}
             keyArr={keyArr}
-            isLoading={loading}
+
           />
         </Box>
       </Box>

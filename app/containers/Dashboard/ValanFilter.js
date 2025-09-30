@@ -40,7 +40,7 @@ const ValanFilter = ({ valanId, setValanId, isDarkMode }) => {
   const selectedOption = valanOptions.find(opt => opt.value === valanId) || null;
 
   return (
-    <Grid item xs={12} sm={6} md={4} lg={3.6}>
+    <Grid item xs={12} sm={6} md={4} lg={2.4}>
       <Autocomplete
         placeholder='asdasdsd'
         size="small"
@@ -73,7 +73,12 @@ const ValanFilter = ({ valanId, setValanId, isDarkMode }) => {
             {...params}
             placeholder="Start typing to search..."
             label="Valan ID"
-            sx={{ ...getInputBoxStyle(isDarkMode), width: 250 }}
+            sx={{
+              ...getInputBoxStyle(isDarkMode),
+              "& .MuiAutocomplete-input": {
+                width: "auto !important",
+              },
+            }}
 
             InputProps={{
               ...params.InputProps,

@@ -4,6 +4,7 @@ import MarketScriptNameFilter from '../filters/MarketScriptNameFilter';
 import ClientMasterBrokerFilter from '../filters/ClientMasterBrokerFilter';
 import { Checkbox, FormControlLabel, FormGroup, Grid, Button, useTheme } from '@mui/material';
 import ClientMasterBrokerFilter2 from '../filters/Clientmasterbrokerfilter2';
+import ValanFilter from '../ValanFilter';
 
 const TradeEditDeleteLogFilter = ({
     setEnd_date,
@@ -44,6 +45,8 @@ const TradeEditDeleteLogFilter = ({
     setUserType,
     selectedUser,
     setSelectedUser,
+    valanId,
+    setValanId,
     onApply,
 }) => {
     const theme = useTheme();
@@ -72,6 +75,8 @@ const TradeEditDeleteLogFilter = ({
     return (
         <>
             <Grid container spacing={1} sx={{ mb: 1.5 }}>
+
+                {setValanId && <ValanFilter valanId={valanId} setValanId={setValanId} />}
 
                 {setIs_deleted && setIs_updated &&
                     <Grid item xs={12} sm={6} md={3} lg={2.4}>
@@ -156,7 +161,7 @@ const TradeEditDeleteLogFilter = ({
 
                 {/* Apply Button */}
                 {onApply &&
-                    <Grid item xs="auto">
+                    <Grid item xs={12} sm={6} md={4} lg={2.4}>
                         <Button
                             onClick={onApply}
                             sx={{
@@ -167,6 +172,7 @@ const TradeEditDeleteLogFilter = ({
                                 textTransform: 'none',
                                 '&:hover': { backgroundColor: theme.palette.secondary.dark },
                             }}
+                            fullWidth
                         >
                             Apply
                         </Button>
@@ -174,7 +180,7 @@ const TradeEditDeleteLogFilter = ({
                 }
 
                 {/* Clear Button */}
-                <Grid item xs="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2.4}>
                     <Button
                         onClick={handleClear}
                         variant="contained"
@@ -184,6 +190,7 @@ const TradeEditDeleteLogFilter = ({
                             borderRadius: '4px',
                             textTransform: 'none',
                         }}
+                        fullWidth
                     >
                         Clear
                     </Button>

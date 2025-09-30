@@ -613,17 +613,15 @@ function Masterdashboard() {
 
     const fetchOrders = async (type = "today", searchValue = "") => {
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
-        const result = await fetchOrdersAPI(dataStored.user_id, dataStored.auth_key, type, searchValue);
-        setOrders(result);
+        const result = await fetchOrdersAPI({ filterType: type, searchValue });
+        setOrders(result?.aaData);
         setLoading(false);
     };
 
     const fetchPendingOrders = async () => {
         setLoading(true);
-        const dataStored = JSON.parse(sessionStorage.getItem("data"));
         const result = await fetchOrdersAPI();
-        setPendingOrders(result);
+        setPendingOrders(result?.aaData);
         setLoading(false);
     };
 
@@ -640,7 +638,7 @@ function Masterdashboard() {
         if (!selectedRow) return;
         setLoadingTrades(true);
         const result = await fetchOrdersAPI({ scriptIds: selectedRow.script_id });
-        setTradesData(result);
+        setTradesData(result?.aaData);
         setLoadingTrades(false);
     };
 
@@ -745,7 +743,7 @@ function Masterdashboard() {
 
                 try {
                     const result = await fetchOrdersAPI({ scriptIds: selectedStock.script_id });
-                    setTradesData(result);
+                    setTradesData(result?.aaData);
                 } catch (error) {
                     setTradesError("Failed to load trades data");
                     setTradesData([]);

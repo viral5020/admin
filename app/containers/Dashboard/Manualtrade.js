@@ -11,6 +11,7 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import { useDispatch } from 'react-redux';
 import axios from 'dan-vendor/axios';
 
+import CloseIcon from '@mui/icons-material/Close';
 import BackToTop from './helpers/BackToTop';
 import Manualtradesfilter from './Utility/Manualtradesfilter';
 import Pagination from './filters/Pagination';
@@ -226,8 +227,29 @@ const Manualtrade = () => {
 
 
                 {/* Desktop Filter */}
-                {!isMobile && (
-                    <Box sx={boxStyles}>
+                {isMobile
+
+                    ? <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
+                        <Box sx={{ width: 280, p: 2 }} role="presentation">
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6">Filters</Typography>
+                                <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
+                            </Box>
+                            <Manualtradesfilter
+                                trade_date={trade_date} settrade_date={setTrade_date}
+                                market={addMarket} script={addScript} setScript={setAddScript} setMarket={setAddMarket}
+                                client={addClient} setClient={setAddClient}
+                                lot={lot} setLot={setLot}
+                                quantity={quantity} setQuantity={setQuantity}
+                                price={price} setPrice={setPrice}
+                                pair={pair} setPair={setPair}
+                                brokerage={brokerage} setBrokerage={setBrokerage}
+                                onSubmit={() => { handleSubmit(); setFilterDrawer(false); }}
+                            />
+                        </Box>
+                    </Drawer>
+
+                    : <Box sx={boxStyles}>
                         <Manualtradesfilter
                             trade_date={trade_date} settrade_date={setTrade_date}
                             market={addMarket} script={addScript} setScript={setAddScript} setMarket={setAddMarket}
@@ -240,25 +262,7 @@ const Manualtrade = () => {
                             onSubmit={handleSubmit}
                         />
                     </Box>
-
-                )}
-
-                {/* Filter Drawer for Mobile */}
-                <Drawer anchor="left" open={filterDrawer} onClose={() => setFilterDrawer(false)}>
-                    <Box sx={{ width: 300, p: 2 }}>
-                        <Manualtradesfilter
-                            trade_date={trade_date} settrade_date={setTrade_date}
-                            market={addMarket} script={addScript} setScript={setAddScript} setMarket={setAddMarket}
-                            client={addClient} setClient={setAddClient}
-                            lot={lot} setLot={setLot}
-                            quantity={quantity} setQuantity={setQuantity}
-                            price={price} setPrice={setPrice}
-                            pair={pair} setPair={setPair}
-                            brokerage={brokerage} setBrokerage={setBrokerage}
-                            onSubmit={() => { handleSubmit(); setFilterDrawer(false); }}
-                        />
-                    </Box>
-                </Drawer>
+                }
 
                 {/* High/Low/LTP Cards */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
@@ -286,7 +290,7 @@ const Manualtrade = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
 

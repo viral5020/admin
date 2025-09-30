@@ -208,7 +208,7 @@ const Selfpl = () => {
                         logs={paginatedData}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
             </Box>

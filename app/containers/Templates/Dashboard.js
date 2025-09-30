@@ -54,7 +54,7 @@ function Dashboard(props) {
   // const titleException = ['/app','/app/dashboard/watchlist'];
   const titleException = ['/app'];
   const parts = location.pathname.split('/');
-  const place = parts[parts.length - 1].replace('-', ' ');
+  const place = parts[parts.length - 1].replaceAll('-', ' ');
   return (
     <div
       style={{ minHeight: appHeight }}
@@ -84,7 +84,7 @@ function Dashboard(props) {
             titleException={titleException}
             handleOpenGuide={handleOpenGuide}
           >
-            { children }
+            {children}
           </LeftSidebarLayout>
         )
       }
@@ -105,7 +105,7 @@ function Dashboard(props) {
             titleException={titleException}
             handleOpenGuide={handleOpenGuide}
           >
-            { children }
+            {children}
           </LeftSidebarBigLayout>
         )
       }
@@ -126,7 +126,7 @@ function Dashboard(props) {
             titleException={titleException}
             handleOpenGuide={handleOpenGuide}
           >
-            { children }
+            {children}
           </DropMenuLayout>
         )
       }
@@ -147,7 +147,7 @@ function Dashboard(props) {
             titleException={titleException}
             handleOpenGuide={handleOpenGuide}
           >
-            { children }
+            {children}
           </MegaMenuLayout>
         )
       }

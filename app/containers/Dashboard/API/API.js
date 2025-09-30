@@ -56,11 +56,10 @@ export async function getIP() {
 };
 
 export const apifetchPositions = async ({
-  login_user_id,
-  auth_key,
   all_outstanding,
   expiry_date,
   group_by,
+  searchText,
   market_type_id,
   script_id,
   broker_id,
@@ -74,7 +73,7 @@ export const apifetchPositions = async ({
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: -1,
-    sSearch: "",
+    sSearch: searchText.trim(),
     all_outstanding,
     expiry_date,
     group_by,
@@ -135,7 +134,7 @@ export const fetchOrdersAPI = async ({
   orderType = "",
   script_full_name,
   tradeType,
-}) => {
+} = {}) => {
   const defaultParams = await getDefaultParams();
 
   const formData = {
@@ -172,7 +171,7 @@ export const fetchOrdersAPI = async ({
   }
 };
 
-export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
+export const fetcholdOrdersAPI = async (searchValue = "") => {
   const defaultParams = await getDefaultParams();
   const formData = {
     sEcho: 1,
@@ -190,7 +189,7 @@ export const fetcholdOrdersAPI = async (userId, authKey, searchValue = "") => {
   }
 };
 
-export const fetcholdforexOrdersAPI = async (userId, authKey, searchValue = "") => {
+export const fetcholdforexOrdersAPI = async (searchValue = "") => {
   const defaultParams = await getDefaultParams();
   const formData = {
     sEcho: 1,
@@ -812,9 +811,8 @@ export const deleteTrade = async ({ trade_id, password = '', device_type = 0 }) 
 };
 
 export const fetchPositionsAPI = async ({
-  login_user_id,
-  auth_key,
   all_outstanding,
+  searchText = '',
   expiry_date,
   group_by,
   market_type_id,
@@ -829,7 +827,7 @@ export const fetchPositionsAPI = async ({
     sEcho: 1,
     iDisplayStart: 0,
     iDisplayLength: -1,
-    sSearch: "",
+    sSearch: searchText.trim(),
     all_outstanding,
     expiry_date,
     group_by,
@@ -1058,8 +1056,11 @@ export async function removeMarketWatchAPI(market_watch_id) {
   try {
     const response = await axiosInstance.post('ajaxfiles/remove_market_watch', { ...defaultParams, market_watch_id })
     console.log('response.data', response.data);
+    return response.data;
   } catch (err) {
+    toast.error(err?.response?.data?.message || "Something went wrong");
     console.log('err', err);
+    return err?.response?.data;
   }
 }
 

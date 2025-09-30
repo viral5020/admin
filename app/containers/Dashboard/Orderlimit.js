@@ -355,7 +355,7 @@ const Orderlimit = () => {
                         logs={logs}
                         colArr={colArr}
                         keyArr={keyArr}
-                        isLoading={loading}
+
                     />
                 </Box>
             </Box>
