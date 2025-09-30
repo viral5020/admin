@@ -359,16 +359,15 @@ const Marginmanagement = () => {
             )}
           </tbody>
         </table>
-
-        {/* Pagination */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
-          pageSize={pageSize}
-        />
       </Box>
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setPageSize}
+        pageSize={pageSize}
+      />
     </Box>
   );
 };

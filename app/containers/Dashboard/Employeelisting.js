@@ -719,16 +719,59 @@ const Employeelisting = ({
                         ) : (
                             filteredData.map((row, index) => (
                                 <tr key={row.user_name || index}>
-                                    <td dangerouslySetInnerHTML={{ __html: row.user_full_name || "" }} />
-                                    <td>{row.user_name || "-"}</td>
-                                    <td>{row.emp_permission || "-"}</td>
+                                    <td><strong>{row.user_full_name || "-"}</strong></td>
+                                    <td><strong>{row.user_name || "-"}</strong></td>
+                                    <td style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                                        {(row.emp_permission || "-").split(",").map((perm) => {
+                                            if (perm === "-") return <span key="none">-</span>;
+                                            let bgColor;
+                                            switch (perm) {
+                                                case "ACCOUNT":
+                                                    bgColor = "#f87171"; // red
+                                                    break;
+                                                case "USERS":
+                                                    bgColor = "#60a5fa"; // blue
+                                                    break;
+                                                case "UTILITY":
+                                                    bgColor = "#fbbf24"; // yellow
+                                                    break;
+                                                case "TRADE":
+                                                    bgColor = "#34d399"; // green
+                                                    break;
+                                                case "SETTINGS":
+                                                    bgColor = "#a78bfa"; // purple
+                                                    break;
+                                                default:
+                                                    bgColor = "#e5e7eb"; // gray
+                                            }
+                                            return (
+                                                <span
+                                                    key={perm}
+                                                    style={{
+                                                        backgroundColor: bgColor,
+                                                        color: "#fff",
+                                                        padding: "4px 12px",
+                                                        borderRadius: "9999px",
+                                                        fontWeight: "bold",
+                                                        textAlign: "center",
+                                                        display: "inline-block",
+                                                        minWidth: "60px",
+                                                        transition: "all 0.3s",
+                                                    }}
+                                                >
+                                                    {perm}
+                                                </span>
+                                            );
+                                        })}
+                                    </td>
+
                                     <td
                                         style={{
-                                            color: row.user_status === 1 ? "#28a745" : "#ec081fff",
+                                            color: row.user_status == 1 ? "#28a745" : "#ec081fff",
                                             fontWeight: 900,
                                         }}
                                     >
-                                        {row.user_status === 1 ? "Active" : "Inactive"}
+                                        {row.user_status == 1 ? "Active" : "Inactive"}
                                     </td>
                                     <td>{renderActions(row)}</td>
                                     <td>{row.last_login_ip || "-"}</td>
