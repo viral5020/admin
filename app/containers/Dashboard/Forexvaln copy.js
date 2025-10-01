@@ -56,9 +56,11 @@ const Forexvaln = ({
     const [selectedMarket, setSelectedMarket] = useState(null);
     const [selectedScripts, setSelectedScripts] = useState([]);
 
+    const [filterType, setFilterType] = useState("today");
     const [searchText, setSearchText] = useState("");
     const debouncedSearchText = useDebounce(searchText, 800);
     const [isFilterChange, setIsFilterChange] = useState(false);
+    const [isApplyClicked, setIsApplyClicked] = useState(0);
 
     // # Pagination states
     const [currentPage, setCurrentPage] = useState(0);
@@ -159,8 +161,11 @@ const Forexvaln = ({
             currentPage,
             pageSize,
 
-            end_date: end_date,
-            start_end: start_end,
+
+            // end_date: end_date,
+            // start_end: start_end,
+            end_date: propData?.end_datetime ?? end_date,
+            start_end: propData?.start_datetime ?? start_end,
             status,
             orderType,
 
@@ -170,22 +175,7 @@ const Forexvaln = ({
             masterUserId: master?.id || null,
             clientId: user_id || client?.id || null,
         });
-
-        const data = result.aaData || [];
-
-        if (isMobile) {
-            if (currentPage === 0) {
-                setOrders(data);
-            } else {
-                setOrders(prev => [...prev, ...data]);
-            }
-        } else {
-            setOrders(data);
-        }
-
-        setTotalRecords(result.iTotalRecords || 0);
-        setIsFilterChange(false);
-
+        setOrders(result);
         setLoading(false);
     };
 
@@ -198,9 +188,6 @@ const Forexvaln = ({
     useEffect(() => {
         console.log('orders.length', orders.length);
     }, [orders])
-
-
-
     // # Pagination useEffects
     useEffect(() => {
         fetchOrders();
@@ -213,7 +200,7 @@ const Forexvaln = ({
     useEffect(() => {
         !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
         setCurrentPage(0);
-    }, [debouncedSearchText]);
+    }, [filterType, debouncedSearchText]);
 
     useEffect(() => {
         !isFirstRender && fetchOrders();

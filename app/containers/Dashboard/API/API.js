@@ -176,7 +176,7 @@ export const fetcholdOrdersAPI = async (searchValue = "") => {
   const formData = {
     sEcho: 1,
     iDisplayStart: 0,
-    iDisplayLength: 10000,
+    iDisplayLength: 10,
     sSearch: searchValue,
     ...defaultParams,
   };
@@ -189,23 +189,56 @@ export const fetcholdOrdersAPI = async (searchValue = "") => {
   }
 };
 
-export const fetcholdforexOrdersAPI = async (searchValue = "") => {
+
+export const fetcholdforexOrdersAPI = async ({
+  // filterType = "today",
+  searchText = "",
+  currentPage = 0,
+  pageSize = 10,
+
+  end_date = "",
+  start_end = "",
+  status = "",
+  orderType = "",
+
+  marketId = "",
+  scriptIds = "",
+  brokerId = "",
+  masterUserId = "",
+  clientId = "",
+} = {}) => {
   const defaultParams = await getDefaultParams();
+
   const formData = {
-    sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10000,
-    sSearch: searchValue,
     ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+
+    sSearch: searchText,
+    // isTodayTrade: filterType,
+    end_date,
+    start_end,
+    is_pending: status === "is_pending" ? "is_pending" : "",
+    is_executed: status === "is_executed" ? "is_executed" : "",
+    trade_type: orderType || "",
+
+    market_type_id: marketId || "",
+    script_id: scriptIds,
+    broker_id: brokerId || "",
+    master_user_id: masterUserId || "",
+    user_id: clientId || "",
   };
+
   try {
     const { data } = await axiosInstance.post("/datatables/order_book_forex_old", formData);
-    return data.aaData || [];
+    return data;
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    return [];
+    console.error("Error fetching spot orders:", error);
+    return { aaData: [], iTotalRecords: 0 };
   }
 };
+
 
 export const fetchforexOrdersAPI = async ({
   userId,

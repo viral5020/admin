@@ -118,7 +118,7 @@ const Billfilter = () => {
             console.log("Logs array:", logsArray);
 
             if (isMobile) {
-                if (isFilterChange || currentPage === 0) {
+                if (currentPage === 0) {
                     setLogs(logsArray);
                 } else {
                     setLogs(prev => [...prev, ...logsArray]);
@@ -153,7 +153,8 @@ const Billfilter = () => {
         console.log('logs.length', logs.length, logs);
     }, [logs]);
 
-    // Initial fetch
+
+    // # pagination useEffects
     useEffect(() => {
         fetchLogs();
     }, []);

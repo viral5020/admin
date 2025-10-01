@@ -110,7 +110,7 @@ const Iplistlog = () => {
             const data = Array.isArray(result?.aaData) ? result.aaData : [];
 
             if (isMobile) {
-                if (isFilterChange || currentPage === 0) {
+                if (currentPage === 0) {
                     setLogs(data);
                 } else {
                     setLogs(prev => [...prev, ...data]);

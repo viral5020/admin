@@ -315,7 +315,7 @@ const Summary_report = () => {
           <Grid container spacing={0.75}>
             {!appliedValanId ? (
               <Grid item xs={12}>
-                <Box textAlign="center" py={5} fontSize="0.9rem">
+                <Box textAlign="center" py={5} fontSize="0.9rem" color="#dd1b1b">
                   Please select Valan ID
                 </Box>
               </Grid>
@@ -482,7 +482,7 @@ const Summary_report = () => {
               <tbody>
                 {!appliedValanId ? (
                   <tr>
-                    <td colSpan={12} style={{ textAlign: "left", padding: 40, fontSize: "0.9rem", }}>
+                    <td colSpan={12} style={{ textAlign: "left", padding: 40, fontSize: "0.9rem", color: "#dd1b1b" }}>
                       Please select Valan ID
                     </td>
                   </tr>
