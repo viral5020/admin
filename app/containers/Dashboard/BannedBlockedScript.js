@@ -7,6 +7,19 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { fetchPositionDataAPI } from "./API/API";
+import SearchPdfCsv from "./filters/SearchPdfCsv";
+
+const colArr = [
+  "Script Name",
+  "Banned",
+  "Blocked",
+]
+
+const keyArr = [
+  "script_name",
+  "banned",
+  "blocked"
+];
 
 const BannedBlockedScript = () => {
   const theme = useTheme();
@@ -65,6 +78,13 @@ const BannedBlockedScript = () => {
 
   return (
     <Box sx={{ p: 2 }}>
+      <SearchPdfCsv
+        searchText={searchText}
+        setSearchText={setSearchText}
+        logs={filteredData}
+        colArr={colArr}
+        keyArr={keyArr}
+      />
       {loading ? (
         <Box
           sx={{
@@ -89,6 +109,7 @@ const BannedBlockedScript = () => {
             gap: 1.5,
           }}
         >
+
           {filteredData.map((row, index) => (
             <Box
               key={index}

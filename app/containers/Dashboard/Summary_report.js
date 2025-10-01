@@ -69,6 +69,24 @@ const Summary_report = () => {
   const [loading, setLoading] = useState(false);
   const [loadingLedger, setLoadingLedger] = useState(false);
 
+  // ---------- Helpers ----------
+  const openSecuredPdf = (filePath) => {
+    const dataStored = JSON.parse(sessionStorage.getItem("data"));
+    if (!dataStored) {
+      alert("Session expired. Please log in again.");
+      return;
+    }
+    const BASE_URL = "http://128.199.126.171/~goldorg/";
+    const authKey = dataStored.auth_key;
+    const loginUserId = dataStored.user_id;
+    const fullUrl = filePath.startsWith("http") ? filePath : `${BASE_URL}${filePath}`;
+    const url = new URL(fullUrl);
+    url.searchParams.set("is", "1");
+    url.searchParams.set("k", authKey);
+    url.searchParams.set("lui", loginUserId);
+    window.open(url.toString(), "_blank");
+  };
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
