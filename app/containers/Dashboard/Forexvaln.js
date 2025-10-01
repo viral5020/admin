@@ -53,9 +53,6 @@ const Forexvaln = ({
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [selectedMarket, setSelectedMarket] = useState(null);
-    const [selectedScripts, setSelectedScripts] = useState([]);
-
     const [searchText, setSearchText] = useState("");
     const debouncedSearchText = useDebounce(searchText, 800);
     const [isFilterChange, setIsFilterChange] = useState(false);
@@ -107,8 +104,6 @@ const Forexvaln = ({
     const rawData = sessionStorage.getItem("data");
     const parsedData = JSON.parse(rawData);
     const userType = parseInt(parsedData.user_type, 10);
-
-
 
 
     const colArr = [
@@ -168,7 +163,7 @@ const Forexvaln = ({
             scriptIds: formatScriptIds(script),
             brokerId: broker?.id || null,
             masterUserId: master?.id || null,
-            clientId: user_id || client?.id || null,
+            clientId: client?.id || null,
         });
 
         const data = result.aaData || [];
@@ -190,8 +185,7 @@ const Forexvaln = ({
     };
 
     function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -211,8 +205,7 @@ const Forexvaln = ({
     }, [pageSize, totalRecords])
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
     useEffect(() => {
@@ -368,13 +361,13 @@ const Forexvaln = ({
                             end_date={end_date}
                             start_end={start_end}
                             orderType={orderType}
-                            setMarket={setSelectedMarket}
-                            setScript={setSelectedScripts}
+                            setMarket={setMarket}
+                            setScript={setScript}
                             setClient={setClient}
                             setMaster={setMaster}
                             setBroker={setBroker}
-                            market={selectedMarket}
-                            script={selectedScripts}
+                            market={market}
+                            script={script}
                             client={client}
                             master={master}
                             broker={broker}
@@ -397,13 +390,13 @@ const Forexvaln = ({
                         end_date={end_date}
                         start_end={start_end}
                         orderType={orderType}
-                        setMarket={setSelectedMarket}
-                        setScript={setSelectedScripts}
+                        setMarket={setMarket}
+                        setScript={setScript}
                         setClient={setClient}
                         setMaster={setMaster}
                         setBroker={setBroker}
-                        market={selectedMarket}
-                        script={selectedScripts}
+                        market={market}
+                        script={script}
                         client={client}
                         master={master}
                         broker={broker}

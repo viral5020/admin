@@ -71,12 +71,9 @@ const OrderBook = ({
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelItem, setCancelItem] = useState(null);
   const [password, setPassword] = useState('');
-  const [selectedMarket, setSelectedMarket] = useState(null);
-  const [selectedScripts, setSelectedScripts] = useState([]);
 
   const showToast = (message, type = 'info') => {
     switch (type) {
@@ -233,7 +230,7 @@ const OrderBook = ({
     try {
       const result = await fetchOrdersAPI({
         filterType,
-        searchValue: debouncedSearchText,
+        searchValue: searchText,
         currentPage,
         pageSize,
         marketId: market?.id || null,
@@ -245,10 +242,10 @@ const OrderBook = ({
 
         orderType,
 
-        // end_date: propData?.end_datetime ?? end_date,
-        end_date: end_date,
-        // start_end: propData?.start_datetime ?? start_end,
-        start_end: start_end,
+        // end_date: end_date,
+        // start_end: start_end,
+        end_date: propData?.end_datetime ?? end_date,
+        start_end: propData?.start_datetime ?? start_end,
 
         ...(!!propData ? { script_full_name: propData?.script_name } : {}),
         ...(!!propData ? { tradeType: propData?.trade_type } : {}),
@@ -259,7 +256,7 @@ const OrderBook = ({
 
       if (isMobile) {
         // Mobile: append data on "load more"
-        if (isFilterChange || currentPage === 0) {
+        if (currentPage === 0) {
           setLogs(data); // replace when filter/search applied or first page
         } else {
           setLogs(prev => [...prev, ...data]); // append on load more
@@ -284,8 +281,7 @@ const OrderBook = ({
   }, [logs]);
 
   function onFilterApply() {
-    setCurrentPage(0); // Reset pagination to first page
-    fetchLogs(); // Call API with filters
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     toggleDrawer(false)(); // Close drawer if mobile
   }
 
@@ -299,8 +295,7 @@ const OrderBook = ({
   }, [pageSize, totalRecords])
 
   useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
   }, [filterType, debouncedSearchText]);
 
   useEffect(() => {

@@ -188,6 +188,10 @@ const Employeelisting = ({
         }
     };
 
+    function onFilterApply() {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
+        toggleDrawer(false)();
+    }
 
     // # Pagination useEffects
     useEffect(() => {
@@ -199,8 +203,7 @@ const Employeelisting = ({
     }, [pageSize, totalRecords])
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
     useEffect(() => {
@@ -614,16 +617,12 @@ const Employeelisting = ({
                                 setTradeBefore={setTradeBefore}
                                 tradeAfter={tradeAfter}
                                 setTradeAfter={setTradeAfter}
-                                onApply={() => {
-                                    currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
-                                }}
+                                onApply={onFilterApply}
                             />
                         </Box>
                     </Drawer>
                 ) : (
                     filterShow && (
-
-
                         <UserListFilter
                             isDarkMode={theme.palette.mode === "dark"}
                             status={status}
@@ -632,10 +631,7 @@ const Employeelisting = ({
                             setTradeBefore={setTradeBefore}
                             tradeAfter={tradeAfter}
                             setTradeAfter={setTradeAfter}
-
-                            onApply={() => {
-                                currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
-                            }}
+                            onApply={onFilterApply}
                         />
                     )
                 )}

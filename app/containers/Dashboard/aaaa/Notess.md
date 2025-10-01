@@ -22,9 +22,19 @@
 
 ## BAKI
 
-- summary report : pdf icon in table gives error vv
+- adjust loader and pagination, for mobile and desktop
 
-- Manual Trade : vv
+  - tradeeditdeletelog
+  - tradeeditdeletelogold
+  - cash edit delete log
+  - auto square up log
+  - Valan
+
+- cash entry loader for mobile
+
+- previous valan trade : have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ? kk
+
+- Manual Trade : kk
 
   - get_master_name_search
   - get_broker_name_search
@@ -32,16 +42,24 @@
 
   - in filter : lot, quantity, price accept alphabetic value also, clear btn not clear lot and quantity
 
-- Banned Blocked Scripts : searchText, selectedMarket, selectedScripts is these require in this page ? vv
-  fetchPositionData api calls 2 time when page load
-
-- previous valan trade : have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ? vv
-
-- in mobile, Margin Management have no filter vv
+- in mobile, Margin Management have no filter kk
 
   - table horizontal scroll
   - rows per page not working
   - stock/forex both
+
+- Cash Entry : adjust plus(+) btn
+
+- Scriptwiselot && Timesetting && Expiryvalidation : check pagination
+
+- Nseoptmanagement && Orderlimit : onFilterApply() not used, onFilterApply : used for apply filter of page
+
+- bulk terading filter have apply or submit (ashish sir)
+
+- summary report : pdf icon in table gives error vv
+
+- Banned Blocked Scripts : searchText, selectedMarket, selectedScripts is these require in this page ? vv
+  fetchPositionData api calls 2 time when page load
 
 - Self P&L vv
 - table row colors are matching for header row and 1st row

@@ -201,8 +201,7 @@ const Bulktrading = ({
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
     useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);

@@ -120,8 +120,7 @@ const RejectionLogs = ({
   };
 
   function onFilterApply() {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     setDrawerOpen(false); // <-- close drawer after applying filter
   }
 
@@ -134,8 +133,7 @@ const RejectionLogs = ({
   }, [pageSize, totalRecords])
 
   useEffect(() => {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-    setCurrentPage(0);
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
   }, [filterType, debouncedSearchText]);
 
   useEffect(() => {

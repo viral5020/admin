@@ -291,8 +291,7 @@ const Cashentry = ({
     const toggleDrawer = (open) => () => setFilterDrawer(open);
 
     function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -306,10 +305,7 @@ const Cashentry = ({
     }, [pageSize, totalRecords]);
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0
-            ? setIsFilterChange(true)
-            : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
     useEffect(() => {
@@ -614,6 +610,10 @@ const Cashentry = ({
                                     setentry_date={setEntryAfter_date}
                                     entrybefore_date={entryBefore_date}
                                     setentrybefore_date={setEntryBefore_date}
+                                    userType={userType}
+                                    setUserType={setUserType}
+                                    selectedUser={selectedUser}
+                                    setSelectedUser={setSelectedUser}
                                     onApply={onFilterApply}
                                 />
 

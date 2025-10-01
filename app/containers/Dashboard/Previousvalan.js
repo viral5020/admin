@@ -54,7 +54,6 @@ const Previousvalan = ({
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [filterType, setFilterType] = useState("today");
     const [searchText, setSearchText] = useState("");
     const debouncedSearchText = useDebounce(searchText, 800);
     const [isFilterChange, setIsFilterChange] = useState(false);
@@ -155,8 +154,7 @@ const Previousvalan = ({
     };
 
     function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -174,9 +172,8 @@ const Previousvalan = ({
 
     useEffect(() => {
         console.log("debouncedSearchText........")
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
-    }, [filterType, debouncedSearchText]);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
+    }, [debouncedSearchText]);
 
     useEffect(() => {
         !isFirstRender && fetchOrders();

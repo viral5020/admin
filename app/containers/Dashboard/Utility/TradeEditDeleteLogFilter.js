@@ -137,9 +137,9 @@ const TradeEditDeleteLogFilter = ({
                     setClient={setClient}
                     setMaster={setMaster}
                     setBroker={setBroker}
-                    showClient={Boolean(setClient)}
-                    showBroker={Boolean(setBroker)}
-                    showMaster={Boolean(setMaster)}
+                // showClient={Boolean(setClient)}
+                // showBroker={Boolean(setBroker)}
+                // showMaster={Boolean(setMaster)}
                 />
 
 

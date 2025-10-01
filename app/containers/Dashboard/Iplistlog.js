@@ -134,8 +134,7 @@ const Iplistlog = () => {
     const toggleDrawer = (open) => () => setFilterDrawer(open);
 
     function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -153,8 +152,7 @@ const Iplistlog = () => {
     }, [pageSize, totalRecords])
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
     useEffect(() => {

@@ -60,7 +60,6 @@ const Forexvaln = ({
     const [searchText, setSearchText] = useState("");
     const debouncedSearchText = useDebounce(searchText, 800);
     const [isFilterChange, setIsFilterChange] = useState(false);
-    const [isApplyClicked, setIsApplyClicked] = useState(0);
 
     // # Pagination states
     const [currentPage, setCurrentPage] = useState(0);
@@ -180,8 +179,7 @@ const Forexvaln = ({
     };
 
     function onFilterApply() {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -198,8 +196,7 @@ const Forexvaln = ({
     }, [pageSize, totalRecords])
 
     useEffect(() => {
-        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setIsFilterChange(false);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [filterType, debouncedSearchText]);
 
     useEffect(() => {
