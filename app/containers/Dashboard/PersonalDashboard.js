@@ -2110,6 +2110,18 @@ function PersonalDashboard() {
                       >
                         <CircularProgress size={28} />
                       </Box>
+                    ) : stocks.length === 0 ? (
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        height="100%"
+                        p={2}
+                      >
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                          No data available
+                        </Typography>
+                      </Box>
                     ) : (
                       stocks.map((stock, idx) => {
                         const stockName =

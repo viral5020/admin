@@ -417,7 +417,7 @@ const Adminloginlist = () => {
                                 <Card
                                     key={index}
                                     sx={{
-                                        mb: 1.2,
+                                        mb: 0.5,
                                         mx: 1,
                                         borderRadius: 2,
                                         p: 1.2,
@@ -454,7 +454,7 @@ const Adminloginlist = () => {
                                         </Box>
 
                                         {/* Bottom Row: Action Buttons */}
-                                        <Box sx={{ display: "flex", gap: 1 }}>
+                                        <Box sx={{ display: "flex", gap: 1, mb: -3, mt: -0.5 }}>
                                             <Button
                                                 variant="contained"
                                                 color="error"

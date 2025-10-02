@@ -984,7 +984,6 @@ const OrderBook = ({
                         );
                       })}
                     </tbody>
-
                   </table>
                 </Box>
 

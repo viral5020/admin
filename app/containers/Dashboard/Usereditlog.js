@@ -243,13 +243,11 @@ const Usereditlog = () => {
                     />
                 </Box>
 
-
-                {logs.length === 0 && !loading && <Typography textAlign='center'>No Logs Found</Typography>}
-
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                         <CircularProgress />
                     </Box>
+
                 ) : (
                     <Box sx={{ width: '100%', overflowX: 'auto' }}>
                         <TableContainer sx={{ minWidth: '1100px' }}>
@@ -264,6 +262,7 @@ const Usereditlog = () => {
                                         <TableCell>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
+
                                 <TableBody>
                                     {logs.map((log, i) => (
                                         <TableRow key={i}>
@@ -281,6 +280,24 @@ const Usereditlog = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            {logs.length === 0 && !loading && (
+                                <Typography
+                                    sx={{
+                                        textAlign: {
+                                            xs: "left",   // 📱 Mobile
+                                            sm: "center", // 💻 Tablet and up
+                                        },
+                                        ml: {
+                                            xs: 20,        // add margin-left on mobile
+                                            sm: 0,        // reset on larger screens
+                                        },
+                                    }}
+                                >
+                                    No Logs Found
+                                </Typography>
+                            )}
+
+
                         </TableContainer>
 
                         <Pagination
