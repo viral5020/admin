@@ -617,6 +617,7 @@ const Employeelisting = ({
                                 setTradeBefore={setTradeBefore}
                                 tradeAfter={tradeAfter}
                                 setTradeAfter={setTradeAfter}
+                                isMobile={isMobile}
                                 onApply={onFilterApply}
                             />
                         </Box>
@@ -631,6 +632,7 @@ const Employeelisting = ({
                             setTradeBefore={setTradeBefore}
                             tradeAfter={tradeAfter}
                             setTradeAfter={setTradeAfter}
+                            isMobile={isMobile}
                             onApply={onFilterApply}
                         />
                     )

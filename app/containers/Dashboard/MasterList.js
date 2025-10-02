@@ -598,6 +598,7 @@ const Masterlisting = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchMasterListingData(null, null, 0) : setCurrentPage(0);
               }}
@@ -630,6 +631,7 @@ const Masterlisting = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchMasterListingData(null, null, 0) : setCurrentPage(0);
               }}

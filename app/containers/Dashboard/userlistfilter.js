@@ -28,6 +28,7 @@ const UserListFilter = ({
   setLoginAfter,
   setTradeBefore,
   setTradeAfter,
+  isMobile,
   onApply,
   forBroker = false,
   forMaster = false,
@@ -55,7 +56,7 @@ const UserListFilter = ({
   };
 
   return (
-    <Box sx={{ pt: 1, mb: 1, overflowX: 'auto' }}>
+    <Box sx={{ pt: 1, mb: 1, overflowX: !isMobile && 'auto' }}>
       <Grid container spacing={1}>
         {/* Status */}
         <Grid item xs={12} sm={6} md={4} lg={3} sx={{ pr: 0 }}>

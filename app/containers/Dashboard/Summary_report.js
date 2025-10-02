@@ -255,6 +255,7 @@ const Summary_report = () => {
                   setBroker={setBroker}
                   valanId={valanId}
                   setValanId={setValanId}
+                  isMobile={isMobile}
                   onApply={() => {
                     fetchSummaryReportData();
                     setDrawerOpen(false);
@@ -283,6 +284,7 @@ const Summary_report = () => {
               setBroker={setBroker}
               valanId={valanId}
               setValanId={setValanId}
+              isMobile={isMobile}
               onApply={fetchSummaryReportData}
             />
 

@@ -619,6 +619,7 @@ const Userlisting = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
               }}
@@ -659,6 +660,7 @@ const Userlisting = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchPageData(0) : setCurrentPage(0);
               }}

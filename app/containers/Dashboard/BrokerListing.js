@@ -627,6 +627,7 @@ const BrokerListing = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
               }}
@@ -659,6 +660,7 @@ const BrokerListing = ({
               setTradeAfter={setTradeAfter}
               type={type}
               setType={setType}
+              isMobile={isMobile}
               onApply={() => {
                 currentPage === 0 ? fetchBrokerListingData(0) : setCurrentPage(0);
               }}

@@ -26,6 +26,7 @@ const Forexsummaryfilter = ({
   broker,
   valanId,
   setValanId,
+  isMobile,
   onApply,
 }) => {
   const theme = useTheme();
@@ -49,7 +50,7 @@ const Forexsummaryfilter = ({
   };
 
   return (
-    <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
+    <Box sx={{ pt: 1, mb: 2, overflowX: !isMobile && 'auto' }}>
       <Grid container spacing={1}>
         <DateFilter label="Trade After" value={start_end} onChange={setStart_end} />
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />

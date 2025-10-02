@@ -28,26 +28,15 @@
 
 ## BAKI
 
-- page's parent tag
+- Id LHS of SearchPdfCsv component have filter(today/this week), then take SearchPdfCsv to 2nd line and in 1st line filterbtn and filter(today/this week)
 
-  1. `<Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>`
-     To
-     `<Box sx={{ pt: 1, mb: 2, overflowX: !isMObile && 'auto' }}>`
+- page's parent tag vv
+  `<div style={{ padding: 16 }}>`
+  To
+  `<div style={{ padding: !isMobile ? 16 : 0 }}>`
 
-  2. `<div style={{ padding: 16 }}>`
-     To
-     `<div style={{ padding: !isMobile ? 16 : 0 }}>`
-
-- Remove All Table's top bottom margin
+- Remove All Table's top bottom margin vv
   `<table style={{ margin: 0}}>`
-
-- adjust loader and pagination, for mobile and desktop
-
-  - tradeeditdeletelog
-  - tradeeditdeletelogold
-  - cash edit delete log
-  - auto square up log
-  - Valan
 
 - previous valan trade : have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ? kk
 
