@@ -28,7 +28,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ForexComexScriptFilter from './forexorderfilter';
-import OrderFilter from './OrderFilter';
 import ForexFilter from './forexfilter';
 import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
@@ -411,6 +410,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
+            isMobile={isMobile}
             onApply={onFilterApply}
           />
         </Box>
@@ -441,6 +441,7 @@ const Forex_order = () => {
             client={client}
             master={master}
             broker={broker}
+            isMobile={isMobile}
             onApply={onFilterApply}
           />
 

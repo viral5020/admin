@@ -371,45 +371,43 @@ const Cashentry = ({
                         </Box>
                     )} */}
                     {filterShow && (
-                        <Box sx={{ mb: 3 }}>
-                            {/* Filter + Add Cash Entry icon button together */}
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <TradeEditDeleteLogFilter
-                                    entry_date={entryAfter_date}
-                                    setentry_date={setEntryAfter_date}
-                                    entrybefore_date={entryBefore_date}
-                                    setentrybefore_date={setEntryBefore_date}
-                                    userType={userType}
-                                    setUserType={setUserType}
-                                    selectedUser={selectedUser}
-                                    setSelectedUser={setSelectedUser}
-                                    onApply={onFilterApply}
-                                />
-                            </Box>
-                        </Box>
+                        <TradeEditDeleteLogFilter
+                            entry_date={entryAfter_date}
+                            setentry_date={setEntryAfter_date}
+                            entrybefore_date={entryBefore_date}
+                            setentrybefore_date={setEntryBefore_date}
+                            userType={userType}
+                            setUserType={setUserType}
+                            selectedUser={selectedUser}
+                            setSelectedUser={setSelectedUser}
+                            onApply={onFilterApply}
+                        />
                     )}
 
 
                     {/* Add Cash Entry Button directly after Apply */}
-                    <Tooltip title={formOpen ? "Close Form" : "Add Cash Entry"}>
-                        <IconButton
-                            onClick={() => setFormOpen((prev) => !prev)}
-                            sx={{
-                                mb: 7,
-                                bgcolor: "secondary.main",
-                                color: "white",
-                                "&:hover": { bgcolor: "secondary.dark" },
-                                borderRadius: 1.5,
-                            }}
-                        >
-                            <AddIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Tooltip title={formOpen ? "Close Form" : "Add Cash Entry"}>
+                            <IconButton
+                                onClick={() => setFormOpen((prev) => !prev)}
+                                sx={{
+                                    // mb: 7,
+                                    bgcolor: "secondary.main",
+                                    color: "white",
+                                    "&:hover": { bgcolor: "secondary.dark" },
+                                    borderRadius: 1.5,
+                                }}
+                            >
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
 
                     <Collapse in={formOpen}>
-                        <Box sx={{ mt: 1, display: "grid", gap: 0.5 }}>
+                        <Box sx={{ mb: 3, display: "grid", gap: 0.5 }}>
                             {/* Filter and Current Balance side by side */}
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}> */}
+                            <Grid container spacing={1} sx={{ mt: 0.5 }}>
                                 <ClientMasterBrokerFilter2
                                     sx={{ width: "100%" }}
                                     userType={entryUserType}
@@ -417,31 +415,12 @@ const Cashentry = ({
                                     selectedUser={entryUser}
                                     setSelectedUser={setEntryUser}
                                 />
-                                <Box
-                                    sx={{
-                                        px: 3,
-                                        py: 1,
-                                        borderRadius: 1,
-                                        fontWeight: 600,
-                                        bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
-                                        color: "common.white",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
-                                        width: "fit-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
-                                        Balance:
-                                    </Typography>
-                                    <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
-                                </Box>
-                            </Box>
 
-                            {/* Form fields */}
-                            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                                <Grid item xs={12} sm={3}>
+                                {/* </Box> */}
+
+                                {/* Form fields */}
+                                {/* <Grid container spacing={2} sx={{ mt: 0.5 }}> */}
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                                     <TextField
                                         type="date"
                                         label="Date"
@@ -451,7 +430,8 @@ const Cashentry = ({
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={3}>
+
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                                     <TextField
                                         select
                                         label="Type"
@@ -463,7 +443,37 @@ const Cashentry = ({
                                         <MenuItem value={0}>Payment</MenuItem>
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} sm={3}>
+
+
+
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                                    <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 0.5 }}>
+                                        <Box
+                                            sx={{
+                                                px: 3,
+                                                py: 1,
+                                                borderRadius: 1,
+                                                fontWeight: 600,
+                                                bgcolor: entryUserBalance >= 0 ? "success.main" : "error.main",
+                                                color: "common.white",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 0.5,
+                                                width: "fit-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            <Typography variant="body2" sx={{ fontWeight: 400, opacity: 0.8 }}>
+                                                Balance:
+                                            </Typography>
+                                            <Typography variant="body2">{entryUserBalance ?? 0}</Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+
+
+
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                                     <TextField
                                         type="number"
                                         label="Amount"
@@ -472,7 +482,7 @@ const Cashentry = ({
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={3}>
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
                                     <TextField
                                         label="Remark"
                                         value={entryRemark}
@@ -480,19 +490,20 @@ const Cashentry = ({
                                         fullWidth
                                     />
                                 </Grid>
+                                <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                                    <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 0.5 }}>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            size="small"
+                                            sx={{ borderRadius: 1 }}
+                                            onClick={handleEntrySubmit}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </Box>
+                                </Grid>
                             </Grid>
-
-                            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    size="small"
-                                    sx={{ borderRadius: 1 }}
-                                    onClick={handleEntrySubmit}
-                                >
-                                    Submit
-                                </Button>
-                            </Box>
                         </Box>
                     </Collapse>
 

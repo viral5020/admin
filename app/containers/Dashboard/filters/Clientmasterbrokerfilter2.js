@@ -66,7 +66,7 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
         // <Grid container spacing={2}>
         <>
             {/* User Type Dropdown */}
-            {setUserType && <Grid item xs={12} sm={6} md={3}>
+            {setUserType && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={userTypeOptions}
                     getOptionLabel={(option) => option.label}
@@ -80,7 +80,7 @@ const ClientMasterBrokerFilter2 = ({ setUserType, userType, selectedUser, setSel
             </Grid>}
 
             {/* Dependent Dropdown */}
-            {setSelectedUser && <Grid item xs={12} sm={6} md={3}>
+            {setSelectedUser && <Grid item xs={12} sm={6} md={3} lg={2.4}>
                 <Autocomplete
                     options={options}
                     getOptionLabel={(option) => typeof option === "string" ? option : option?.text || ""}

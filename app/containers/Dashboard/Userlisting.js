@@ -585,7 +585,7 @@ const Userlisting = ({
   };
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: !isMobile ? 16 : 0 }}>
       {/* Filters - Fixed on top */}
       {isMobile && filterShow ? (
         <Drawer
@@ -694,6 +694,7 @@ const Userlisting = ({
         <table
           className="table table-striped table-bordered"
           style={{
+            margin: 0,
             minWidth: "1200px",
             fontSize: "12px",
             backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",

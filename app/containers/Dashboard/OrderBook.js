@@ -491,6 +491,7 @@ const OrderBook = ({
               master={master}
               broker={broker}
               userType={userType}
+              isMobile={isMobile}
               onApply={onFilterApply}
             />
           </Box>
@@ -520,6 +521,7 @@ const OrderBook = ({
             client={client}
             master={master}
             broker={broker}
+            isMobile={isMobile}
             onApply={onFilterApply}
           />
         </Box>

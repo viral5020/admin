@@ -28,6 +28,19 @@
 
 ## BAKI
 
+- page's parent tag
+
+  1. `<Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>`
+     To
+     `<Box sx={{ pt: 1, mb: 2, overflowX: !isMObile && 'auto' }}>`
+
+  2. `<div style={{ padding: 16 }}>`
+     To
+     `<div style={{ padding: !isMobile ? 16 : 0 }}>`
+
+- Remove All Table's top bottom margin
+  `<table style={{ margin: 0}}>`
+
 - adjust loader and pagination, for mobile and desktop
 
   - tradeeditdeletelog
