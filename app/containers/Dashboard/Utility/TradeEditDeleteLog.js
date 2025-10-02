@@ -300,7 +300,15 @@ const TradeEditDeleteLog = () => {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <strong>{log.trade_rate ?? '-'}</strong>
+                                                    <strong>
+                                                        {log.trade_rate != null
+                                                            ? Number(log.trade_rate).toLocaleString(undefined, {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })
+                                                            : '-'}
+                                                    </strong>
+
                                                 </TableCell>
 
                                                 <TableCell>{log.added_by ?? '-'}</TableCell>
@@ -435,9 +443,16 @@ const TradeEditDeleteLog = () => {
                                     <CardContent sx={{ p: 0.5, "&:last-child": { pb: 0.5 } }}>
                                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                                {log.trade_rate} &nbsp;
-                                                {log.trade_qty} Qty&nbsp;
-                                                <span style={{ fontWeight: 400 }}>{log.trade_lot} Lot</span>
+
+                                                {log.trade_rate != null
+                                                    ? Number(log.trade_rate).toLocaleString(undefined, {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    })
+                                                    : '-'}
+                                                &nbsp;
+                                                ({log.trade_qty}) Qty&nbsp;
+                                                <span style={{ fontWeight: 400 }}>{Number(log.trade_lot).toFixed(2)} Lot</span>
                                             </Typography>
                                             <Typography variant="caption" sx={{ fontStyle: "italic" }}>
                                                 {log.added_datetime}

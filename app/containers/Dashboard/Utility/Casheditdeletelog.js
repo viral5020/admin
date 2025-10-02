@@ -444,12 +444,30 @@ const Casheditdeletelog = () => {
 
                                             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
                                                 {log.debit && log.debit !== "-" && (
-                                                    <Typography variant="body2" sx={{ fontWeight: 700, color: "red" }}>
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            color: "white",
+                                                            backgroundColor: "red",
+                                                            padding: "4px 8px",
+                                                            borderRadius: "4px",
+                                                            display: "inline-block"
+                                                        }}
+                                                    >
                                                         Debit: {log.debit}
                                                     </Typography>
+
                                                 )}
                                                 {log.credit && log.credit !== "-" && (
-                                                    <Typography variant="body2" sx={{ fontWeight: 700, color: "green" }}>
+                                                    <Typography variant="body2" sx={{
+                                                        fontWeight: 700,
+                                                        color: "white",
+                                                        backgroundColor: "green",
+                                                        padding: "4px 8px",
+                                                        borderRadius: "4px",
+                                                        display: "inline-block"
+                                                    }}>
                                                         Credit: {log.credit}
                                                     </Typography>
                                                 )}
@@ -459,7 +477,7 @@ const Casheditdeletelog = () => {
                                         {/* Changed By */}
                                         <Box sx={{ mt: 0.5 }}>
                                             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                                Changed By: {log.changed_by_details1 ?? "-"}
+                                                Changed By: <strong>{log.changed_by_details1 ?? "-"}</strong>
                                             </Typography>
                                         </Box>
 
@@ -468,7 +486,7 @@ const Casheditdeletelog = () => {
                                             variant="body2"
                                             sx={{ fontWeight: 600, mt: 0.5, color: "text.secondary" }}
                                         >
-                                            Remark: {log.remark ?? "-"}
+                                            Remark: <strong>{log.remark ?? "-"}</strong>
                                         </Typography>
 
                                         {/* IP Address + log_datetime */}
