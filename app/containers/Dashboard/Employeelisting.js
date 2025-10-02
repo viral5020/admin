@@ -639,7 +639,7 @@ const Employeelisting = ({
 
 
             {/* Search */}
-            <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 0 }}>
                 {isMobile && (
                     <IconButton
                         onClick={() => setDrawerOpen(true)}

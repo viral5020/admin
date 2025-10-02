@@ -428,9 +428,10 @@ const Nseoptmanagement = () => {
 
                                                 {/* Remove Button */}
                                                 <Button
-                                                    variant="outlined"
+                                                    variant="contained"
                                                     color="error"
                                                     size="small"
+                                                    style={{ borderRadius: 4 }}
                                                     onClick={() => handleRemove(log.script_expiry_option_id)}
                                                 >
                                                     Remove

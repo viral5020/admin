@@ -429,8 +429,9 @@ const Timesetting = () => {
 
                                                 <Typography variant="body2">{<Button
                                                     size="small"
-                                                    variant="outlined"
+                                                    variant="contained"
                                                     color="error"
+                                                    style={{ borderRadius: 5 }}
                                                     onClick={() => handleRemove(row)}
                                                 >
                                                     Remove

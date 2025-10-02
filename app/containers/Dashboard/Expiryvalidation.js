@@ -433,8 +433,9 @@ const Expiryvalidation = () => {
                                                 <Typography variant="body2">{log.expiry_validation_id ?? '-'}</Typography>
                                                 <Typography variant="body2">{<Button
                                                     size="small"
-                                                    variant="outlined"
+                                                    variant="contained"
                                                     color="error"
+                                                    style={{ borderRadius: 5 }}
                                                     onClick={() => handleRemove(row)}
                                                 >
                                                     Remove

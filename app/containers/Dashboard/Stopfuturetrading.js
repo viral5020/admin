@@ -352,7 +352,7 @@ const Stopfuturetrading = () => {
                         <>
                             {logs.map((log, index) => (
                                 <Card key={index} sx={{ mb: 1, mx: 1, borderRadius: 2 }}>
-                                    <CardContent sx={{ p: 1 }}>
+                                    <CardContent sx={{ p: 1, mb: -1.8 }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                                                 {log.full_name ?? '-'}
@@ -365,7 +365,7 @@ const Stopfuturetrading = () => {
                                             <Box sx={{ display: 'flex', gap: 2 }}>
                                                 <Typography variant="body2">{log.added_datetime ?? '-'}</Typography>
                                                 <Typography
-                                                    variant="body2"
+                                                    variant="contained"
                                                     sx={{
                                                         color: 'error.main',
                                                         fontWeight: 600,

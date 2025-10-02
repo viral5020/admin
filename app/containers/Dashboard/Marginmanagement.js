@@ -43,7 +43,6 @@ const keyArr = [
   "total",
 ]
 
-
 const Marginmanagement = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -53,14 +52,11 @@ const Marginmanagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-
   const rowsPerPage = 10;
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  // const [totalPages, setTotalPages] = useState(0);
 
   // Filter states
   const [client, setClient] = useState(null);
@@ -135,12 +131,6 @@ const Marginmanagement = () => {
     setCurrentPage(0);
   };
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * rowsPerPage,
-    (currentPage + 1) * rowsPerPage
-  );
-
   const handleClearFilters = () => {
     setClient(null);
     setMaster(null);
@@ -150,10 +140,84 @@ const Marginmanagement = () => {
     setCurrentPage(0);
   };
 
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const paginatedData = filteredData.slice(
+    currentPage * rowsPerPage,
+    (currentPage + 1) * rowsPerPage
+  );
+
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Filters (fixed top) */}
-      {isMobile ? (
+    <Box sx={{ height: "70h", display: "flex", flexDirection: "column" }}>
+      {/* Filters & Search */}
+      <Box sx={{ p: 2, borderBottom: "1px solid #ddd" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          {isMobile && (
+            <IconButton
+              onClick={() => setDrawerOpen(true)}
+              color="primary"
+              sx={{
+                mr: 1,
+                bgcolor: "background.paper",
+                borderRadius: 1,
+                p: 1,
+              }}
+            >
+              <FilterListIcon />
+            </IconButton>
+          )}
+          <SearchPdfCsv
+            searchText={searchQuery}
+            setSearchText={setSearchQuery}
+            logs={paginatedData}
+            colArr={[]}
+            keyArr={[]}
+          />
+        </Box>
+
+        {/* Desktop filters */}
+        {!isMobile && (
+          <Box component="form" onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }}>
+            <Grid container spacing={2} alignItems="center">
+              <ClientMasterBrokerFilter
+                client={client}
+                master={master}
+                broker={broker}
+                setClient={setClient}
+                setMaster={setMaster}
+                setBroker={setBroker}
+                showClient
+                showMaster
+                showBroker
+              />
+              <Grid item>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  sx={{ minWidth: 100, borderRadius: 2, height: 38 }}
+                  onClick={fetchMarginManagementListData}
+                >
+                  Apply
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="error"
+                  sx={{ minWidth: 100, borderRadius: 2, height: 38 }}
+                  onClick={handleClearFilters}
+                >
+                  Clear
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
+      </Box>
+
+      {/* Mobile Drawer */}
+      {isMobile && (
         <Drawer
           anchor="left"
           open={drawerOpen}
@@ -178,15 +242,15 @@ const Marginmanagement = () => {
               setClient={setClient}
               setMaster={setMaster}
               setBroker={setBroker}
-              showClient={true}
-              showMaster={true}
-              showBroker={true}
+              showClient
+              showMaster
+              showBroker
             />
             <Button
               type="submit"
               variant="contained"
               color="primary"
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, mr: 1, borderRadius: 2 }}
               onClick={fetchMarginManagementListData}
             >
               Apply
@@ -194,8 +258,8 @@ const Marginmanagement = () => {
             <Button
               type="button"
               variant="contained"
-              color="erroe"
-              sx={{ mt: 2 }}
+              color="error"
+              sx={{ mt: 2, borderRadius: 2 }}
               onClick={() => {
                 handleClearFilters();
                 setDrawerOpen(false);
@@ -205,75 +269,9 @@ const Marginmanagement = () => {
             </Button>
           </Box>
         </Drawer>
-      ) : (
-        <Box sx={{ p: 2, borderBottom: "1px solid #ddd" }}>
-          <Box
-            component="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleApplyFilters();
-            }}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <ClientMasterBrokerFilter
-                client={client}
-                master={master}
-                broker={broker}
-                setClient={setClient}
-                setMaster={setMaster}
-                setBroker={setBroker}
-                showClient={true}
-                showMaster={true}
-                showBroker={true}
-              />
-              <Grid item>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="secondary"
-                  sx={{ minWidth: 100, borderRadius: 1, height: 38, mt: -0.5 }}
-                  onClick={fetchMarginManagementListData}
-                >
-                  Apply
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  type="button"
-                  variant="contained"
-                  color="error"
-                  sx={{ minWidth: 100, borderRadius: 1, height: 38, mt: -0.5 }}
-                  onClick={handleClearFilters}
-                >
-                  Clear
-                </Button>
-              </Grid>
-            </Grid>
-          </Box>
-
-          {/* Search */}
-          <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-            {isMobile && (
-              <IconButton
-                onClick={() => setDrawerOpen(true)}
-                color="primary"
-                sx={{ mr: 1 }}
-              >
-                <FilterListIcon />
-              </IconButton>
-            )}
-            <SearchPdfCsv
-              searchText={searchQuery}
-              setSearchText={setSearchQuery}
-              logs={paginatedData}
-              colArr={colArr}
-              keyArr={keyArr}
-            />
-          </Box>
-        </Box>
       )}
 
-      {/* Table wrapper with scroll */}
+      {/* Table */}
       <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
         <table
           className="table table-striped table-bordered"
@@ -286,29 +284,10 @@ const Marginmanagement = () => {
             whiteSpace: "nowrap",
           }}
         >
-          <thead
-            style={{
-              backgroundColor:
-                theme.palette.mode === "dark" ? "#444" : "#e0e0e0",
-            }}
-          >
+          <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
             <tr>
-              {[
-                "Name",
-                "Code",
-                "NSEFUT",
-                "MCXFUT",
-                "NSE OPT",
-                "Global",
-                "NSEeqt",
-                "Forex",
-                "Comex",
-                "Total",
-              ].map((header) => (
-                <th
-                  key={header}
-                  style={{ padding: "8px 12px", fontWeight: 600 }}
-                >
+              {["Name", "Code", "NSEFUT", "MCXFUT", "NSE OPT", "Global", "NSEeqt", "Forex", "Comex", "Total"].map((header) => (
+                <th key={header} style={{ padding: "8px 12px", fontWeight: 600 }}>
                   {header}
                 </th>
               ))}
@@ -337,11 +316,11 @@ const Marginmanagement = () => {
                     backgroundColor:
                       index % 2 === 0
                         ? theme.palette.mode === "dark"
-                          ? "#333" // dark mode stripe (even rows)
-                          : "#fff" // light mode stripe (even rows)
+                          ? "#333"
+                          : "#fff"
                         : theme.palette.mode === "dark"
-                          ? "#222" // darker alt for dark mode (odd rows)
-                          : "#e0e0e0", // darker grey for light mode (odd rows)
+                          ? "#222"
+                          : "#e0e0e0",
                   }}
                 >
                   <td>{row.user_details}</td>
@@ -360,6 +339,7 @@ const Marginmanagement = () => {
           </tbody>
         </table>
       </Box>
+
       {/* Pagination */}
       <Pagination
         currentPage={currentPage}
