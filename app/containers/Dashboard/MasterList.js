@@ -564,7 +564,7 @@ const Masterlisting = ({
   };
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: !isMobile ? 16 : 0 }}>
       {/* Filters */}
       {isMobile && filterShow ? (
         <Drawer
@@ -681,6 +681,7 @@ const Masterlisting = ({
         <table
           className="table table-striped table-bordered"
           style={{
+            margin: 0,
             minWidth: "1200px",
             fontSize: "12px",
             backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",

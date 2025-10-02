@@ -256,7 +256,7 @@ const Cashledger = ({
         <>
             {/* Desktop */}
             {!isMobile ? (
-                <Paper sx={{ p: 2, borderRadius: 2 }}>
+                <Paper sx={{ p: filterShow && 2, borderRadius: 2, boxShadow: !filterShow && "none" }}>
                     {filterShow && (
                         <TradeEditDeleteLogFilter
                             userType={userType}

@@ -28,6 +28,18 @@
 
 ## BAKI
 
+- Remove All Page's padding
+
+```js
+return <div padding="some px"></div>;
+```
+
+TO
+
+```js
+<div></div>
+```
+
 - adjust loader and pagination, for mobile and desktop
 
   - tradeeditdeletelog

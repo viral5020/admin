@@ -339,6 +339,7 @@ const Previousvalan = ({
                             master={master}
                             broker={broker}
                             userType={userType}
+                            isMobile={isMobile}
                             onApply={onFilterApply}
                         />
                     </Box>
@@ -368,6 +369,7 @@ const Previousvalan = ({
                         client={client}
                         master={master}
                         broker={broker}
+                        isMobile={isMobile}
                         onApply={onFilterApply}
                     />
                 </Box>

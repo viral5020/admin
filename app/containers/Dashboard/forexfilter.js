@@ -38,6 +38,7 @@ const ForexFilter = ({
   client,
   master,
   broker,
+  isMobile,
   onApply,
 }) => {
   const theme = useTheme();
@@ -64,7 +65,7 @@ const ForexFilter = ({
 
 
   return (
-    <Box sx={{ pt: 1, mb: 2 }}>
+    <Box sx={{ pt: 1, mb: 2, overflowX: !isMobile && 'auto' }}>
       <Grid container spacing={1}>
         <Grid item xs={12} sm={6} md={4} lg={3.6}>
           <RadioFilter
