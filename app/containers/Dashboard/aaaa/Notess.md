@@ -28,17 +28,18 @@
 
 ## BAKI
 
-- Remove All Page's padding
+- page's parent tag
 
-```js
-return <div padding="some px"></div>;
-```
+  1. `<Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>`
+     To
+     `<Box sx={{ pt: 1, mb: 2, overflowX: !isMObile && 'auto' }}>`
 
-TO
+  2. `<div style={{ padding: 16 }}>`
+     To
+     `<div style={{ padding: !isMobile ? 16 : 0 }}>`
 
-```js
-<div></div>
-```
+- Remove All Table's top bottom margin
+  `<table style={{ margin: 0}}>`
 
 - adjust loader and pagination, for mobile and desktop
 

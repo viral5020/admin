@@ -40,6 +40,7 @@ const OrderFilter = ({
   client,
   master,
   broker,
+  isMObile,
   onApply,
 }) => {
   const theme = useTheme();
