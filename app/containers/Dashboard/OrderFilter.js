@@ -65,22 +65,22 @@ const OrderFilter = ({
   };
 
   return (
-    <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
+    <Box sx={{ pt: 1, mb: 2 }}>
       <Grid container spacing={1}>
-        <Grid item xs={12} sm={6} md={4} lg={3.6}>
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
           <RadioFilter
             label="Status"
             options={statusOptions}
             value={status}
             onChange={setStatus}
-            flag={false}
+          // flag={false}
           />
         </Grid>
 
         <DateFilter label="Trade After" value={start_end} onChange={setStart_end} />
         <DateFilter label="Trade Before" value={end_date} onChange={setEnd_date} />
 
-        <Grid item xs={12} sm={6} md={4} lg={3.6}>
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
           <FormControl fullWidth size="small" sx={getInputBoxStyle(isDarkMode)}>
             <InputLabel>Select Order Type</InputLabel>
             <Select

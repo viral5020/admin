@@ -1,5 +1,14 @@
 ### ASHISH SIR
 
+- forex previous valan trade :
+  /datatables/order_book_forex_old in filter
+
+  - is_pending
+  - is_execute
+  - Trade after
+  - Trade before
+    Is this filter working from backend ?
+
 - page:bulk trading
 
   - /datatables/order_book_new aa api ma
@@ -13,10 +22,7 @@
   - Forex position has LTP
 
 - previous-valan-trade, require pagination
-
   - 13095 records comes in single api call, page turns into unresponsive
-
-- Margin management : no pagination from backend - stock/forex both
 
 ---
 
@@ -29,8 +35,6 @@
   - cash edit delete log
   - auto square up log
   - Valan
-
-- cash entry loader for mobile
 
 - previous valan trade : have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ? kk
 
@@ -46,27 +50,14 @@
 
   - table horizontal scroll
   - rows per page not working
+  - no pagination from backend - stock/forex both
   - stock/forex both
-
-- Cash Entry : adjust plus(+) btn
 
 - Scriptwiselot && Timesetting && Expiryvalidation : check pagination
 
 - Nseoptmanagement && Orderlimit : onFilterApply() not used, onFilterApply : used for apply filter of page
 
 - bulk terading filter have apply or submit (ashish sir)
-
-- summary report : pdf icon in table gives error vv
-
-- Banned Blocked Scripts : searchText, selectedMarket, selectedScripts is these require in this page ? vv
-  fetchPositionData api calls 2 time when page load
-
-- Self P&L vv
-- table row colors are matching for header row and 1st row
-- in mobile, adjust card data's alignmnet
-
-- Brokrage refresh vv
-- in mobile, filter isnt inside drawer or popup
 
 ---
 

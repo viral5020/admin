@@ -1,3 +1,41 @@
+{ loading && !isMobile && <Loader /> }
+
+{
+    isMobile && loading && currentPage == 0
+        ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
+                <CircularProgress size={28} />
+            </Box>
+        )
+        : logs.length === 0
+            ? (
+                <Typography sx={{ px: 1, mt: 2 }}>No orders found </Typography>
+            )
+            : isMobile
+                ? (
+                    <Box>
+                        Some content
+                    </Box>
+                )
+                : (
+                    <Box>
+                        Some Content
+                    </Box>
+                )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 const userPayload = {
     "is_app": "1",
     "login_user_id": "37946",

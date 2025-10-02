@@ -184,13 +184,6 @@ const Crosstradelog = () => {
                         </IconButton>
                     </Box>
 
-                    {/* Filters (same as desktop) */}
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
-                            <ValanFilter valanId={valanId} setValanId={setValanId} />
-                        </div>
-                    </div>
-
                     <TradeEditDeleteLogFilter
                         End1_date={end_date}
                         Start1_date={start_date}
@@ -206,6 +199,8 @@ const Crosstradelog = () => {
                         setClient={setClient}
                         setMaster={setMaster}
                         setBroker={setBroker}
+                        valanId={valanId}
+                        setValanId={setValanId}
                         onApply={onFilterApply}
                     />
                 </Box>
@@ -215,19 +210,6 @@ const Crosstradelog = () => {
                 {/* Desktop filters (always visible) */}
                 {!isMobile && (
                     <>
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                marginBottom: '16px',
-                                gap: '16px',
-                            }}
-                        >
-                            <div style={{ flex: 1, minWidth: '200px' }}>
-                                <ValanFilter valanId={valanId} setValanId={setValanId} />
-                            </div>
-                        </div>
-
                         <TradeEditDeleteLogFilter
                             End1_date={end_date}
                             Start1_date={start_date}
@@ -243,6 +225,8 @@ const Crosstradelog = () => {
                             setClient={setClient}
                             setMaster={setMaster}
                             setBroker={setBroker}
+                            valanId={valanId}
+                            setValanId={setValanId}
                             onApply={onFilterApply}
                         />
                     </>

@@ -64,7 +64,7 @@ const ForexFilter = ({
 
 
   return (
-    <Box sx={{ pt: 1, mb: 2, overflowX: 'auto' }}>
+    <Box sx={{ pt: 1, mb: 2 }}>
       <Grid container spacing={1}>
         <Grid item xs={12} sm={6} md={4} lg={3.6}>
           <RadioFilter
