@@ -19,6 +19,7 @@ import { manualtradesAPI } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import SocketContext from './Socket/SocketContext';
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import FilterBtn from './filters/FilterBtn';
 
 const colArr = [
     "Action",
@@ -279,7 +280,7 @@ const Manualtrade = () => {
                     {/* Filter icon on the left */}
                     {isMobile && (
                         <IconButton onClick={() => setFilterDrawer(true)}>
-                            <FilterListIcon />
+                            <FilterBtn />
                         </IconButton>
                     )}
 

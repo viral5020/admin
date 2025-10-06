@@ -69,7 +69,13 @@ import SearchPdfCsv from "./filters/SearchPdfCsv";
 const rawData = JSON.parse(sessionStorage.getItem("data"));
 const userType = parseInt(rawData?.user_type, 10);
 
-const OrderPage = () => {
+const OrderPage = ({
+    filterShow = true,
+    setFilterShow = () => { },
+    filterShow1 = true,
+    setFilterShow1 = () => { },
+    user_id
+}) => {
     const theme = useTheme();
     // const isDarkMode = theme.palette.mode === 'dark';
     const isMobile = useMUIQuery(theme.breakpoints.down('sm', 'md'));
@@ -1014,14 +1020,20 @@ const OrderPage = () => {
                 )}
 
             </>
+            <Box sx={{
+                px: 2, py: 1, display: "flex",
+                alignItems: "center", gap: 2
+            }}>
+                {isMobile && filterShow && <FilterBtn setFilterOpen={setFilterDrawer} />}
 
-            <SearchPdfCsv
-                searchText={searchText}
-                setSearchText={setSearchText}
-                logs={positionData}
-                colArr={colArr}
-                keyArr={keyArr}
-            />
+                <SearchPdfCsv
+                    searchText={searchText}
+                    setSearchText={setSearchText}
+                    logs={positionData}
+                    colArr={colArr}
+                    keyArr={keyArr}
+                />
+            </Box>
 
             {/* Body */}
             {loading ? (
@@ -2484,20 +2496,44 @@ const OrderPage = () => {
                                         <Typography variant="caption">LTP</Typography>
                                         <Typography variant="body2" fontWeight={600}>{selectedRow?.net_qty > 0 ? liveRates[selectedRow?.check_script_name]?.BuyPrice : liveRates[selectedRow?.check_script_name]?.SellPrice}</Typography>
                                     </Box>
-                                    <Box sx={{ flex: "1 1 22%" }}>
+                                    {/* <Box sx={{ flex: "1 1 22%" }}>
                                         <Typography variant="caption">MTM</Typography>
                                         <Typography
                                             variant="body2"
                                             fontWeight={600}
                                             dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
                                         />
+                                    </Box> */}
+                                    <Box sx={{ flex: "1 1 22%" }}>
+                                        <Typography variant="caption">Auto Closed</Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ fontWeight: 700, color: "error.main" }}
+                                        >
+                                            {selectedRow?.trade_auto_closed_date}
+                                        </Typography>
+
                                     </Box>
                                 </Box>
 
-                                <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-                                    <Typography variant="caption">Auto Closed Date</Typography>
-                                    <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
+                                <Box sx={{ flex: "1 1 22%" }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                        MTM:
+                                    </Typography>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            gap: 2.5,
+                                            flexWrap: "wrap",
+                                            mt: 0.5,
+                                            fontWeight: 600,
+                                            fontSize: "0.95rem",
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
+                                    />
                                 </Box>
+
 
                                 {/* Action Buttons */}
                                 <Box sx={{ display: "flex", gap: 1 }}>
@@ -2951,8 +2987,9 @@ const OrderPage = () => {
                         }}
                     />
                 </>
-            )}
-        </Box>
+            )
+            }
+        </Box >
 
     );
 };

@@ -150,7 +150,6 @@ const Timesetting = () => {
     const handleRemove = async (row) => {
         if (!row.expiry_validation_id) return;
 
-
         try {
             const response = await axios.post(
                 'ajaxfiles/setting/remove_expiry_validation',
@@ -432,7 +431,7 @@ const Timesetting = () => {
                                                     variant="contained"
                                                     color="error"
                                                     style={{ borderRadius: 5 }}
-                                                    onClick={() => handleRemove(row)}
+                                                    onClick={() => handleRemove(log)}
                                                 >
                                                     Remove
                                                 </Button>}</Typography>

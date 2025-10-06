@@ -29,6 +29,7 @@ import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
 import Loader from "./Components/Loader";
+import FilterBtn from "./filters/FilterBtn";
 
 const colArr = [
   "Name",
@@ -649,7 +650,7 @@ const Masterlisting = ({
             color="primary"
             sx={{ mr: 1 }}
           >
-            <FilterListIcon />
+            <FilterBtn />
           </IconButton>
         )}
         <SearchPdfCsv

@@ -36,6 +36,7 @@ import { FormControlLabel } from "@mui/material";
 import { Radio } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import FilterBtn from "./filters/FilterBtn";
 
 const colArr = [
   "User Code",
@@ -678,7 +679,7 @@ const Userlisting = ({
             color="primary"
             sx={{ mr: 1 }}
           >
-            <FilterListIcon />
+            <FilterBtn />
           </IconButton>
         )}
         <SearchPdfCsv

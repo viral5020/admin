@@ -1062,7 +1062,12 @@ const OrderPage1 = ({
                 )}
             </>
 
-            <Box sx={{ my: 1 }}>
+            <Box sx={{
+                px: 2, py: 1, display: "flex",
+                alignItems: "center", gap: 2
+            }}>
+                {isMobile && filterShow && <FilterBtn setFilterOpen={setFilterDrawer} />}
+
                 <SearchPdfCsv
                     searchText={searchText}
                     setSearchText={setSearchText}

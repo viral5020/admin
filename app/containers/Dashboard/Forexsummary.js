@@ -25,6 +25,7 @@ import Forexsummaryfilter from "./Forexsummaryfilter";
 import { formatScriptIds } from "./helpers/utilFunc";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
 import Pagination from "./filters/Pagination";
+import FilterBtn from "./filters/FilterBtn";
 
 const colArr = [
   "Sr No",
@@ -226,7 +227,7 @@ const Summary_report = () => {
           <>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton onClick={() => setDrawerOpen(true)} color="primary">
-                <FilterListIcon />
+                <FilterBtn />
               </IconButton>
               {/* <Typography variant="subtitle1" sx={{ flex: 0, mr: 1 }}>
                 Filters

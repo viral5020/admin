@@ -436,7 +436,7 @@ const Expiryvalidation = () => {
                                                     variant="contained"
                                                     color="error"
                                                     style={{ borderRadius: 5 }}
-                                                    onClick={() => handleRemove(row)}
+                                                    onClick={() => handleRemove(log)}
                                                 >
                                                     Remove
                                                 </Button>}</Typography>

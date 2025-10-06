@@ -23,6 +23,7 @@ import Pagination from './filters/Pagination';
 import TradeEditDeleteLogFilter from './Utility/TradeEditDeleteLogFilter';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import FilterBtn from './filters/FilterBtn';
 
 
 const RejectionLogs = ({
@@ -209,43 +210,38 @@ const RejectionLogs = ({
       {/* Filter + Search Bar */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
+          my: 2,
           px: 1,
-          py: 1,
-          backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f5f5f5',
+          backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
           borderRadius: 1,
+          gap: 1,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
-          {isMobile && filterShow && (
-            <IconButton
-              color="primary"
-              onClick={() => setDrawerOpen(true)}
-              sx={{ mr: 1 }}
-            >
-              <FilterListIcon />
-            </IconButton>
-          )}
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Filter</InputLabel>
-            <Select value={filterType} label="Filter" onChange={(e) => setFilterType(e.target.value)}>
-              <MenuItem value="today">Today</MenuItem>
-              <MenuItem value="all">This Week</MenuItem>
-            </Select>
-          </FormControl>
+        {isMobile && filterShow && <FilterBtn setFilterOpen={setDrawerOpen} />}
 
-          <SearchPdfCsv
-            searchText={searchText}
-            setSearchText={setSearchText}
-            logs={logs}
-            colArr={colArr}
-            keyArr={keyArr}
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>Filter</InputLabel>
+          <Select
+            value={filterType}
+            label="Filter"
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <MenuItem value="today">Today</MenuItem>
+            <MenuItem value="all">This Week</MenuItem>
+          </Select>
+        </FormControl>
 
-          />
-        </Box>
+        <SearchPdfCsv
+          searchText={searchText}
+          setSearchText={setSearchText}
+          logs={logs}
+          colArr={colArr}
+          keyArr={keyArr}
+        />
       </Box>
+
 
       {isMobile
         ? loading && (isFilterChange || currentPage === 0)

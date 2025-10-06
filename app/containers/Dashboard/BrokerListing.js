@@ -28,6 +28,7 @@ import { useDebounce, useIsFirstRender } from "@uidotdev/usehooks";
 import Pagination from "./filters/Pagination";
 import { useNavigate } from "react-router-dom";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
+import FilterBtn from "./filters/FilterBtn";
 
 const colArr = [
   "Name",
@@ -678,7 +679,7 @@ const BrokerListing = ({
             color="primary"
             sx={{ mr: 1 }}
           >
-            <FilterListIcon />
+            <FilterBtn />
           </IconButton>
         )}
         <SearchPdfCsv

@@ -15,6 +15,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import ClientMasterBrokerFilter from "./filters/ClientMasterBrokerFilter";
 import SearchPdfCsv from "./filters/SearchPdfCsv";
 import Pagination from './filters/Pagination';
+import FilterBtn from "./filters/FilterBtn";
 
 
 const colArr = [
@@ -263,7 +264,7 @@ const Forexmarginmanagement = () => {
             color="primary"
             sx={{ mr: 1 }}
           >
-            <FilterListIcon />
+            <FilterBtn />
           </IconButton>
         )}
         <SearchPdfCsv
