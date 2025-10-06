@@ -454,8 +454,8 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                                 sx={{ borderRadius: 1 }}
                                 onClick={() => {
                                     isForex
-                                        ? navigate('/app/dashboard/favorite-list')
-                                        : navigate('/app/dashboard/forex-favorite-list')
+                                        ? navigate('/app/dashboard/forex-favorite-list')
+                                        : navigate('/app/dashboard/favorite-list')
                                 }}
                             >
                                 Favorite List

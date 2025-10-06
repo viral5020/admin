@@ -11,12 +11,23 @@ import {
     FormGroup,
     useTheme,
     Paper,
+    Box,
 } from '@mui/material';
 import DateFilter from '../filters/DateFilter';
 import Manualscriptfilter from '../filters/Manualscriptfilter';
 import Clientmanualfilter from '../filters/Clientmanualfilter';
+import RadioFilter from '../filters/RadioFilterField';
 
 
+const pairOptions = [
+    { label: 'Buy', value: '0' },
+    { label: 'Sell', value: '1' },
+];
+
+const brokerageOptions = [
+    { label: 'With Brokerage', value: '0' },
+    { label: 'Without Brokerage', value: '1' },
+];
 
 
 const Manualtradesfilter = ({
@@ -29,8 +40,6 @@ const Manualtradesfilter = ({
     market, setMarket,
     script, setScript,
     client, setClient,
-    master, setMaster,
-    broker, setBroker,
 
     // Trade params
     lot, setLot,
@@ -44,19 +53,11 @@ const Manualtradesfilter = ({
     is_updated, setIs_updated,
     isAdminOnly, setIsAdminOnly,
 
+    filterBoxColor,
     // Handlers
     onApply,
     onSubmit
 }) => {
-    const theme = useTheme();
-
-    // Whole box color based on Buy/Sell
-    const filterBoxColor =
-        pair === '0' // Buy
-            ? theme.palette.info.light // blue
-            : pair === '1' // Sell
-                ? theme.palette.error.light // red
-                : theme.palette.grey[100]; // default
 
     const handleClear = () => {
         if (setStart_date) setStart_date("");
@@ -65,8 +66,6 @@ const Manualtradesfilter = ({
         if (setMarket) setMarket("");
         if (setScript) setScript("");
         if (setClient) setClient(null);
-        if (setMaster) setMaster(null);
-        if (setBroker) setBroker(null);
         if (setLot) setLot("");
         if (setQuantity) setQuantity("");
         if (setPrice) setPrice("");
@@ -79,7 +78,7 @@ const Manualtradesfilter = ({
 
     return (
         <Paper
-            // elevation={3}
+            elevation={0}
             sx={{
                 // p: 2,
                 // mb: 2,
@@ -132,13 +131,39 @@ const Manualtradesfilter = ({
                     setMarket={setMarket}
                     script={script}
                     setScript={setScript}
-                    onLotQtyChange={(lotQty) => {
-                        setLot(1);
-                        setQuantity(lotQty);
-                    }}
+                    lot={lot}
+                    setLot={setLot}
+                    quantity={quantity}
+                    setQuantity={setQuantity}
                 />
 
                 {/* Trade Inputs */}
+
+                {/* Client/Master/Broker Filter */}
+                <Clientmanualfilter
+                    client={client}
+                    setClient={setClient}
+                />
+
+                {/* <Grid item>
+                    <FormControl>
+                        <RadioGroup row value={pair} onChange={(e) => setPair(e.target.value)}>
+                            <FormControlLabel value="0" control={<Radio size="small" />} label="Buy" />
+                            <FormControlLabel value="1" control={<Radio size="small" />} label="Sell" />
+                        </RadioGroup>
+                    </FormControl>
+                </Grid>
+
+
+                <Grid item>
+                    <FormControl>
+                        <RadioGroup row value={brokerage} onChange={(e) => setBrokerage(e.target.value)}>
+                            <FormControlLabel value="0" control={<Radio size="small" />} label="With Brokerage" />
+                            <FormControlLabel value="1" control={<Radio size="small" />} label="Without Brokerage" />
+                        </RadioGroup>
+                    </FormControl>
+                </Grid> */}
+
 
                 <Grid item>
                     <TextField
@@ -148,40 +173,28 @@ const Manualtradesfilter = ({
                         onChange={(e) => setPrice(e.target.value)}
                         sx={{ width: 100 }}
                     />
-
-
-
                 </Grid>
 
-                {/* Client/Master/Broker Filter */}
-                <Clientmanualfilter
-                    client={client}
-                    setClient={setClient}
-                    master={master}
-                    setMaster={setMaster}
-                    broker={broker}
-                    setBroker={setBroker}
-                />
-
-                {/* Trade type (Buy/Sell) */}
                 <Grid item>
-                    <FormControl>
-                        <RadioGroup row value={pair} onChange={(e) => setPair(e.target.value)}>
-                            <FormControlLabel value="0" control={<Radio size="small" />} label="Buy" />
-                            <FormControlLabel value="1" control={<Radio size="small" />} label="Sell" />
-                        </RadioGroup>
-                    </FormControl>
+                    <RadioFilter
+                        label="Pair"
+                        options={pairOptions}
+                        value={pair}
+                        onChange={setPair}
+                        flag={false}
+                    />
                 </Grid>
 
-                {/* Brokerage toggle */}
-                <Grid item>
-                    <FormControl>
-                        <RadioGroup row value={brokerage} onChange={(e) => setBrokerage(e.target.value)}>
-                            <FormControlLabel value="0" control={<Radio size="small" />} label="With Brokerage" />
-                            <FormControlLabel value="1" control={<Radio size="small" />} label="Without Brokerage" />
-                        </RadioGroup>
-                    </FormControl>
+                <Grid item sx={{ mr: 2 }}>
+                    <RadioFilter
+                        label="Brokerage"
+                        options={brokerageOptions}
+                        value={brokerage}
+                        onChange={setBrokerage}
+                        flag={false}
+                    />
                 </Grid>
+
 
                 {/* Buttons */}
                 {onApply && (

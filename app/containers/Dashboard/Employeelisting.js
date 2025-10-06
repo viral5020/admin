@@ -587,7 +587,7 @@ const Employeelisting = ({
     };
 
     return (
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: !isMobile ? 16 : 0 }}>
             {/* Filters - Fixed on top */}
             <Box
                 sx={{

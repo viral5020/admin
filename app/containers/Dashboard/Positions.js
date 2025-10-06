@@ -1473,7 +1473,6 @@ const OrderPage1 = ({
                                         borderCollapse: "collapse",
                                         width: "100%",
                                         border: "1px solid #ddd",
-                                        margin: '0px',
                                     }}
                                 >
                                     <thead>

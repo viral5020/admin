@@ -65,28 +65,17 @@ const Manualtrade = () => {
 
     const [filterDrawer, setFilterDrawer] = useState(false);
 
-    // Trade filters
-    const [market, setMarket] = useState('');
-    const [script, setScript] = useState([]);
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-
     // Add trade states
     const [addMarket, setAddMarket] = useState('');
     const [addScript, setAddScript] = useState([]);
     const [addClient, setAddClient] = useState('');
 
-    const [end_date, setEnd_date] = useState('');
-    const [start_date, setStart_date] = useState('');
     const [trade_date, setTrade_date] = useState('');
-
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
 
     const [lot, setLot] = useState('');
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState('');
+
     const [brokerage, setBrokerage] = useState('0');
     const [pair, setPair] = useState('');
 
@@ -138,7 +127,11 @@ const Manualtrade = () => {
 
     // Socket subscription for selected script
     useEffect(() => {
-        if (!socket || !addScript || addScript.length === 0) return;
+        if (!socket) return;
+        if (!addScript) {
+            setTotals({ high: '-', low: '-', ltp: '-', });
+            return;
+        }
         const selectedScript = Array.isArray(addScript) ? addScript[0]?.script_name : addScript?.script_name;
         if (!selectedScript) return;
 
@@ -160,10 +153,8 @@ const Manualtrade = () => {
 
     const fetchLogs = async () => {
         setLoading(true);
-        const scriptIds = formatScriptIds(script);
         const result = await manualtradesAPI(
-            currentPage, pageSize, searchText, market, scriptIds, master, client,
-            end_date, start_date, is_deleted, is_updated, isAdminOnly
+            currentPage, pageSize, searchText,
         );
         const data = result.aaData || [];
         setLogs(isMobile && !isFilterChange && currentPage > 0 ? prev => [...prev, ...data] : data);
@@ -208,12 +199,20 @@ const Manualtrade = () => {
             alert("Failed to submit trade.");
         }
     };
+    // Whole box color based on Buy/Sell
+    const filterBoxColor =
+        pair === '0' // Buy
+            ? theme.palette.info.light // blue
+            : pair === '1' // Sell
+                ? theme.palette.error.light // red
+                : ''; // default
 
     const boxStyles = {
         borderRadius: 2,
         border: '2px solid',
         borderColor: pair === 'buy' ? '#2196f3' : pair === 'sell' ? '#f44336' : '#ccc',
-        backgroundColor: pair === 'buy' ? '#e3f2fd' : pair === 'sell' ? '#ffebee' : '#f5f5f5',
+        // backgroundColor: pair === 'buy' ? '#e3f2fd' : pair === 'sell' ? '#ffebee' : '#f5f5f5',
+        backgroundColor: filterBoxColor,
         padding: 2,
         mb: 2,
     };
@@ -236,29 +235,54 @@ const Manualtrade = () => {
                                 <IconButton onClick={() => setFilterDrawer(false)}><CloseIcon /></IconButton>
                             </Box>
                             <Manualtradesfilter
-                                trade_date={trade_date} settrade_date={setTrade_date}
-                                market={addMarket} script={addScript} setScript={setAddScript} setMarket={setAddMarket}
-                                client={addClient} setClient={setAddClient}
-                                lot={lot} setLot={setLot}
-                                quantity={quantity} setQuantity={setQuantity}
-                                price={price} setPrice={setPrice}
-                                pair={pair} setPair={setPair}
-                                brokerage={brokerage} setBrokerage={setBrokerage}
-                                onSubmit={() => { handleSubmit(); setFilterDrawer(false); }}
+                                trade_date={trade_date}
+                                settrade_date={setTrade_date}
+                                market={addMarket}
+                                script={addScript}
+                                setScript={setAddScript}
+                                setMarket={setAddMarket}
+                                client={addClient}
+                                setClient={setAddClient}
+                                lot={lot}
+                                setLot={setLot}
+                                quantity={quantity}
+                                setQuantity={setQuantity}
+                                price={price}
+                                setPrice={setPrice}
+                                pair={pair}
+                                setPair={setPair}
+                                brokerage={brokerage}
+                                setBrokerage={setBrokerage}
+                                filterBoxColor={filterBoxColor}
+                                onSubmit={() => {
+                                    handleSubmit();
+                                    setFilterDrawer(false);
+                                }}
                             />
                         </Box>
                     </Drawer>
 
                     : <Box sx={boxStyles}>
                         <Manualtradesfilter
-                            trade_date={trade_date} settrade_date={setTrade_date}
-                            market={addMarket} script={addScript} setScript={setAddScript} setMarket={setAddMarket}
-                            client={addClient} setClient={setAddClient}
-                            lot={lot} setLot={setLot}
-                            quantity={quantity} setQuantity={setQuantity}
-                            price={price} setPrice={setPrice}
-                            pair={pair} setPair={setPair}
-                            brokerage={brokerage} setBrokerage={setBrokerage}
+                            trade_date={trade_date}
+                            settrade_date={setTrade_date}
+                            market={addMarket}
+                            script={addScript}
+                            setScript={setAddScript}
+                            setMarket={setAddMarket}
+                            client={addClient}
+                            setClient={setAddClient}
+                            lot={lot}
+                            setLot={setLot}
+                            quantity={quantity}
+                            setQuantity={setQuantity}
+                            price={price}
+                            setPrice={setPrice}
+                            pair={pair}
+                            setPair={setPair}
+                            brokerage={brokerage}
+                            setBrokerage={setBrokerage}
+                            filterBoxColor={filterBoxColor}
                             onSubmit={handleSubmit}
                         />
                     </Box>
