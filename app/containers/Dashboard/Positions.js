@@ -267,10 +267,11 @@ const OrderPage1 = ({
 
             // Extract flat script list
             const flat1 = aaData
-                .filter(e => parseInt(e.net_qty) !== 0)
+                // .filter(e => parseInt(e.net_qty) !== 0)
                 .map(e => e.check_script_name)
                 .filter((v, i, a) => a.indexOf(v) === i);
             setfFlat(flat1);
+            console.log('flat1', flat1);
 
             // Emit to socket
             socket.emit("positionReport", {
@@ -378,7 +379,7 @@ const OrderPage1 = ({
                 var newArray = data.reduce(function (a, e, i) {
 
 
-                    if (e[0] === args.data.InstrumentIdentifier && parseInt(e[8]) != 0)
+                    if (e[0] === args.data.InstrumentIdentifier)
                         a.push(i);
                     return a;
                 }, []);
@@ -1472,6 +1473,7 @@ const OrderPage1 = ({
                                         borderCollapse: "collapse",
                                         width: "100%",
                                         border: "1px solid #ddd",
+                                        margin: '0px',
                                     }}
                                 >
                                     <thead>

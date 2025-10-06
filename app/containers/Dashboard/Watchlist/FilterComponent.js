@@ -452,7 +452,11 @@ const FilterComponent = ({ searchText, setSearchText, isMobile, isDarkMode, isFo
                                 color="secondary"
                                 size="small"
                                 sx={{ borderRadius: 1 }}
-                                onClick={() => navigate('/app/dashboard/favorite-list')}
+                                onClick={() => {
+                                    isForex
+                                        ? navigate('/app/dashboard/favorite-list')
+                                        : navigate('/app/dashboard/forex-favorite-list')
+                                }}
                             >
                                 Favorite List
                             </Button>

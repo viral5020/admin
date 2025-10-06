@@ -391,19 +391,10 @@ function Watchlist() {
     const lastPart = path.split("/").pop();
     console.log('lastPart', lastPart);
 
-    if (lastPart === 'forex-watchlist') {
-      setIsForex(true);
-      setisFavoritePage(false);
-    } else if (lastPart === 'favorite-list') {
-      setIsForex(false);
-      setisFavoritePage(true);
-    } else if (lastPart === 'forex-favorite-list') {
-      setIsForex(true);
-      setisFavoritePage(true);
-    } else {
-      setIsForex(false);
-      setisFavoritePage(false);
-    }
+    const forex = lastPart.toLowerCase().includes('forex');
+    const favoritePage = lastPart.toLowerCase().includes('favorite');
+    setIsForex(forex);
+    setisFavoritePage(favoritePage);
 
     // setTimeout(() => { getWatchListData(), [2000] })
   }, [location.pathname])
