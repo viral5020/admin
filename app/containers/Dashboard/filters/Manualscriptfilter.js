@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Autocomplete, TextField } from '@mui/material';
+import { Grid, Autocomplete, TextField, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { forex_comex_market } from '../helpers/utilFunc';
 import { fetchOptionsAPI, fetchOptionsAPIManualScript, fetchOptionsPriceOptionAPI } from '../API/API';
@@ -14,6 +14,10 @@ const Manualscriptfilter = ({
     showMarket = true,
     showScript = true,
     onLotQtyChange,
+    lot,
+    setLot,
+    quantity,
+    setQuantity,
 }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
@@ -23,9 +27,6 @@ const Manualscriptfilter = ({
     const [optionScripts, setOptionScripts] = useState([]);
     const [isScriptNameDisable, setIsScriptNameDisable] = useState(true);
 
-    // 🔹 Lot & Qty fields
-    const [prefilledLot, setPrefilledLot] = useState('');
-    const [prefilledQty, setPrefilledQty] = useState('');
     const [baseLotQty, setBaseLotQty] = useState(0);
 
     const [showOptionType, setShowOptionType] = useState(false);
@@ -205,12 +206,9 @@ const Manualscriptfilter = ({
                         onChange={(e, val) => {
                             setScript(val);
                             if (!isScriptMultiSelect && val?.lot_qty != null) {
-                                setPrefilledLot(1);
-                                setPrefilledQty(val.lot_qty);
+                                setLot(1);
+                                setQuantity(val.lot_qty);
                                 setBaseLotQty(val.lot_qty); // <-- set base for multiply
-                                if (onLotQtyChange) {
-                                    onLotQtyChange(val.lot_qty);
-                                }
                             }
                         }}
                         renderInput={(params) => (
@@ -222,40 +220,43 @@ const Manualscriptfilter = ({
                 </Grid>
             )}
 
-            {/* Lot & Quantity Inputs */}
-            {market?.text?.toUpperCase() !== 'NSEEQT' && (
-                <Grid item>
+            <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                {/* Lot & Quantity Inputs */}
+                <Box sx={{ display: 'flex', gap: 1, position: 'relative', bottom: '3px' }}>
+                    {market?.text?.toUpperCase() !== 'NSEEQT' && (
+                        <TextField
+                            fullWidth
+                            type='number'
+                            label="Lot"
+                            size="small"
+                            value={lot}
+                            onChange={(e) => {
+                                const rawVal = e.target.value;
+                                const newLot = parseInt(rawVal, 10);
+                                setLot(newLot);
+                                if (!isNaN(newLot) && baseLotQty > 0) {
+                                    setQuantity(newLot * baseLotQty);
+                                }
+                            }}
+                        // sx={{ width: 100 }}
+                        />
+                    )}
+
                     <TextField
-                        label="Lot"
+                        fullWidth
+                        type='number'
+                        label="Quantity"
                         size="small"
-                        value={prefilledLot}
-                        onChange={(e) => {
-                            const rawVal = e.target.value;
-                            setPrefilledLot(rawVal);
-                            const newLot = parseInt(rawVal, 10);
-                            if (!isNaN(newLot) && baseLotQty > 0) {
-                                setPrefilledQty(newLot * baseLotQty);
-                            }
-                        }}
-                        sx={{ width: 100 }}
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        // sx={{ width: 120 }}
+                        disabled={
+                            market?.id === 1 ||
+                            ['MCXFUT', 'NSEOPT', 'NSECDS'].includes(market?.text?.toUpperCase())
+                        }
                     />
-                </Grid>
-            )}
-
-            <Grid item>
-                <TextField
-                    label="Quantity"
-                    size="small"
-                    value={prefilledQty}
-                    onChange={(e) => setPrefilledQty(e.target.value)}
-                    sx={{ width: 120 }}
-                    disabled={
-                        market?.id === 1 ||
-                        ['MCXFUT', 'NSEOPT', 'NSECDS'].includes(market?.text?.toUpperCase())
-                    }
-                />
+                </Box>
             </Grid>
-
             {/* Option Type Dropdown */}
             {showOptionType && (
                 <Grid item xs={12} sm={6} md={3} lg={2.4}>
