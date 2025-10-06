@@ -229,7 +229,6 @@ const Casheditdeletelog = () => {
                                 },
                             }}
                         >
-
                             <Table stickyHeader size="small" sx={{ minWidth: 1600 }}>
                                 <TableHead>
                                     <TableRow>
