@@ -1,0 +1,122 @@
+
+
+
+
+
+- <button id="del31533200" ng-disabled="disabledActions" ng-click="deleteTrade(31533200)" _ngcontent-gwo-c168="" style="padding: .375rem .75rem;" type="button" class="btn btn-danger"><i _ngcontent-gwo-c168="" class="fa fa fa-trash-o"></i></button>
+
+
+
+- valan's api
+- remain modify btn in valan
+- net price in valan
+- Trade Export Btn not in valan
+- Today/This-Week filter not in valan
+
+
+
+
+>> START ON MONDAY
+- Merge previous valan (stock/forex both) in orderBook.js
+- Observe previousValan.js's  git difference and accordingly modify OrderBook.js
+- same do for forexValn.js
+
+- Merger all forex components to its stock component
+
+- Position netQty = 0 ? then LTP should shown or not
+    - initially in this project not shown || But ma'am ask where is ltp, so correct it from ashish sir
+
+
+
+
+## FOREX ORDER
+- orderfilter vs forexfilter 
+- modify btn already there in forex
+- Set PDF keyArr
+- ip address not shown in forex_order
+- in forex_order `item.trd_rate` but in order_book `item.net_rate`
+
+
+## PREVIOUS VALAN
+- remove filterType (today / this week)
+
+
+{
+    "device_type_html": "<span id=\"31533169\"  title=\"\">A</span>",
+    "trd_matchedtime": "05:41:38",
+    "mrkt_name": "MCXFUT",
+    "scrp_name": "GOLD 03OCT2025",
+    "trd_type": "Sell",
+    "trd_type2": "BF",
+    "trd_lot": "10.00",
+    "edit_trd_lot": 10,
+    "trd_qty": 1000,
+    "trd_rate": "109,370.00 (109,370.00)",
+    "net_rate": "109,370.00",
+    "edit_trd_rate": 109370,
+    "trd_status": "Executed",
+    "trd_time": "13-09-2025 05:41:38",
+    "trd_id": "31533169",
+    "trd_time_time": "05:41:38",
+    "trd_comm_amnt": 0,
+    "device_type": 3,
+    "tradeed_user_type": "4",
+    "modify": "NA",
+    "cancel": true,
+    "trade_ip_address": "172.71.124.5",
+    "client_full_name": "MONTU RAJA(745780)  </br> / (Demo master nnn)",
+    "client_full_name_dis": "MONTU RAJA",
+    "client_name_dis": "745780",
+    "parent_full_name": " </br> / (Demo master nnn)",
+    "execute": "#31533169"
+}
+
+
+
+{
+    "d_type_html": "",
+    "trd_matchdtime": "03:05:01",
+    "client_full_name": "VD 😎(444444)   </br> / (Demo master nnn)",
+    "client_full_name_dis": "VD 😎",
+    "client_name_dis": "444444",
+    "parent_full_name": " </br> / (Demo master nnn)",
+    "mrkt_t_name": "COMEX",
+    "scrp_name": "CRUDEOIL-USD 22SEP2025",
+    "trd_type": "Sell",
+    "trd_type2": "Exit auto",
+    "trd_lot": "1.00",
+    "trd_qty": 1000,
+    "trd_rate": "62.11000",
+    "net_rate": "62.10000",
+    "status": "Executed",
+    "trd_ip_address": "GoldMineExch",
+    "trd_time": "20-09-2025 03:05:01",
+    "cancel": true,
+    "trd_id": "31533353",
+    "trd_time_time": "03:05:01",
+    "trd_commision_amount": "10.00",
+    "d_type": 0
+}
+
+map all keys of above two JSON object like this
+| 1st | 2nd |
+| device_type_html | d_type_html |
+| mrkt_name | mrkt_t_name |
+
+
+
+
+
+
+
+
+  const keys = {
+    deviceType_Html: !isForex ? "device_type_html" : "d_type_html",
+    market_Name: !isForex ? "mrkt_name" : "mrkt_t_name",
+    trade_Status: !isForex ? "trd_status" : "status",
+    matched_Time: !isForex ? "trd_matchedtime" : "trd_matchdtime",
+    commission_Amount: !isForex ? "trd_comm_amnt" : "trd_commision_amount",
+    trade_Ip: !isForex ? "trade_ip_address" : "trd_ip_address"
+    
+    deviceType: !isForex ? "device_type" : "d_type",
+  };

@@ -10,7 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
-
+//
 import {
   SwipeableList,
   SwipeableListItem,
@@ -30,11 +30,40 @@ import OrderFilter from './OrderFilter';
 import FilterBtn from './filters/FilterBtn';
 import { DialogContent } from '@mui/material';
 import { DialogActions } from '@mui/material';
-import { deleteTrade, fetchOrdersAPI, updateTrade } from './API/API';
+import { deleteTrade, fetchforexOrdersAPI, fetcholdforexOrdersAPI, fetcholdOrdersAPI, fetchOrdersAPI, updateTrade } from './API/API';
 import { formatScriptIds } from './helpers/utilFunc';
 import Pagination from './filters/Pagination';
 import SearchPdfCsv from './filters/SearchPdfCsv';
 import Loader from './Components/Loader';
+import { useLocation } from 'react-router-dom';
+
+function extractNameAndId(str) {
+  // Match: everything before (digits) and capture both
+  const match = str.match(/^(.+?)\((\d+)\)/);
+  if (!match) return null;
+
+  return {
+    full_name: match[1].trim(), // first group = name
+    name: match[2].trim()    // second group = digits
+  };
+}
+
+function getData_With_ClientName(data) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return []
+  } else {
+    if (data.hasOwnProperty('client_name_dis') && data.hasOwnProperty('client_full_name_dis')) {
+      return data;
+    } else {
+      return data.map(val => {
+        const { full_name, name } = extractNameAndId(val.client_full_name)
+        val.client_full_name_dis = full_name;
+        val.client_name_dis = name;
+        return val;
+      })
+    }
+  }
+}
 
 const OrderBook = ({
   filterShow = true,
@@ -75,108 +104,46 @@ const OrderBook = ({
   const [cancelItem, setCancelItem] = useState(null);
   const [password, setPassword] = useState('');
 
-  const showToast = (message, type = 'info') => {
-    switch (type) {
-      case 'success':
-        toast.success(message);
-        break;
-      case 'error':
-        toast.error(message);
-        break;
-      case 'warning':
-        toast.warn(message);
-        break;
-      default:
-        toast.info(message);
-    }
-  };
-
-
-
-  const handleCancel = async (itemToCancel, enteredPassword = '') => {
-    try {
-      // Get stored user data
-      const dataStored = JSON.parse(sessionStorage.getItem("data"));
-      if (!dataStored) {
-        showToast('User data not found in session.', 'error');
-        return;
-      }
-
-      // Construct payload
-      const payload = {
-        trade_id: itemToCancel.trd_id,
-        password: enteredPassword,
-        device_type: 0,
-        is_app: "1",
-        login_user_id: dataStored.user_id,
-        auth_key: dataStored.auth_key,
-      };
-
-      console.log('Sending cancel payload:', payload);
-
-      // Call deleteTrade API
-      const response = await deleteTrade(payload);
-
-      if (response.success) {
-        showToast.success('Trade cancelled successfully', 'success');
-        // Refresh orders after cancel
-        await fetchLogs();
-      } else {
-        showToast(response.message || 'Failed to cancel trade', 'error');
-      }
-    } catch (error) {
-      console.error('Cancel trade error:', error);
-      showToast('An error occurred while cancelling the trade.', 'error');
-    }
-  };
-
-
-
   const [market, setMarket] = useState({});
   const [script, setScript] = useState([]);
   const [client, setClient] = useState({});
   const [master, setMaster] = useState({});
   const [broker, setBroker] = useState({});
 
-  // 1. Retrieve the raw data from sessionStorage
-  const rawData = sessionStorage.getItem("data");
+  const rawData = JSON.parse(sessionStorage.getItem("data"));
+  const userType = parseInt(rawData?.user_type, 10);
+  const deletePopup = parseInt(rawData?.deletePopup, 10);
+  const needsPassword = userType === 4 && deletePopup === 1;
 
-  // 2. Initialize parsedData safely
-  let parsedData = null;
-  if (rawData) {
-    try {
-      parsedData = JSON.parse(rawData);
-    } catch (error) {
-      console.error("Failed to parse session data:", error);
-    }
-  }
+  const location = useLocation();
+  const [isForex, setIsForex] = useState();
+  const [isValanPage, setIsValanPage] = useState(false);
 
-  // 3. Extract user_type and deletePopup safely
-  let userType = null;
-  let deletePopup = 0; // default to 0 if not set
+  useEffect(() => {
+    // window.location.reload();
+    const path = location.pathname;
+    const lastPart = path.split("/").pop();
+    console.log('lastPart', lastPart);
 
-  if (parsedData) {
-    // Convert user_type to integer if available
-    if (parsedData.user_type !== undefined) {
-      userType = parseInt(parsedData.user_type, 10);
-      if (isNaN(userType)) {
-        console.warn("user_type is not a valid number");
-        userType = null;
-      }
-    }
+    const forex = lastPart.toLowerCase().includes('forex');
+    const valanPage = lastPart.toLowerCase().includes('valan');
+    setIsForex(forex);
+    setIsValanPage(valanPage);
+  }, [location.pathname])
 
-    // Convert deletePopup to integer if available
-    if (parsedData.deletePopup !== undefined) {
-      deletePopup = parseInt(parsedData.deletePopup, 10);
-      if (isNaN(deletePopup)) {
-        console.warn("deletePopup is not a valid number");
-        deletePopup = 0;
-      }
-    }
-  }
+  const keys = {
+    deviceType_Html: !isForex ? "device_type_html" : "d_type_html",
+    matched_Time: !isForex ? "trd_matchedtime" : "trd_matchdtime",
+    market_Name: !isForex ? "mrkt_name" : "mrkt_t_name",
+    trade_Status: !isForex ? "trd_status" : "status",
+    commission_Amount: !isForex ? "trd_comm_amnt" : "trd_commision_amount",
+    trade_Ip: !isForex ? "trade_ip_address" : "trd_ip_address",
+    deviceType: !isForex ? "device_type" : "d_type",
+  };
+
 
   const colArr = [
-    "Device",
+    // "Device",
     "Status",
     ...(userType !== 1 ? ["Client Name"] : []),
     ...(userType !== 1 ? ["Client Code"] : []),
@@ -199,60 +166,111 @@ const OrderBook = ({
   ]
 
   const keyArr = [
-    'device_type_html',
-    'trd_status',
+    // keys.deviceType_Html,
+    keys.trade_Status,
     ...(userType !== 1 ? ["client_full_name_dis"] : []),
     ...(userType !== 1 ? ["client_name_dis"] : []),
 
     'scrp_name',
-    'mrkt_name',
+    keys.market_Name,
 
     'trd_type',
     'trd_type2',
     'trd_qty',
     'trd_lot',
     'net_rate',
-    'trd_matchedtime',
+    keys.matched_Time,
     'trd_time',
-    'trd_comm_amnt',
+    keys.commission_Amount,
 
-    ...([3, 4, 5].includes(userType) ? ["trade_ip_address"] : []),
+    ...([3, 4, 5].includes(userType) ? [`${keys.trade_Ip}`] : []),
     ...(userType === 4 || userType === 5 ? ["trd_id"] : []),
     ...(userType !== 2 ? ["modify"] : []),
     ...(userType !== 2 ? ["cancel"] : []),
   ]
+
+  const showToast = (message, type = 'info') => {
+    switch (type) {
+      case 'success':
+        toast.success(message);
+        break;
+      case 'error':
+        toast.error(message);
+        break;
+      case 'warning':
+        toast.warn(message);
+        break;
+      default:
+        toast.info(message);
+    }
+  };
+
+  const handleCancel = async (itemToCancel, enteredPassword = '') => {
+    try {
+      // Construct payload
+      const payload = {
+        trade_id: itemToCancel.trd_id,
+        password: enteredPassword,
+        device_type: 0,
+      };
+
+      console.log('Sending cancel payload:', payload);
+
+      // Call deleteTrade API
+      const response = await deleteTrade(payload);
+
+      if (response.success) {
+        showToast.success('Trade cancelled successfully', 'success');
+        // Refresh orders after cancel
+        await fetchLogs();
+      } else {
+        showToast(response.message || 'Failed to cancel trade', 'error');
+      }
+    } catch (error) {
+      console.error('Cancel trade error:', error);
+      showToast('An error occurred while cancelling the trade.', 'error');
+    }
+  };
 
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   const fetchLogs = async () => {
     setLoading(true);
+    const payload = {
+      ...(isValanPage ? {} : { filterType }),
+      searchValue: searchText,
+      currentPage,
+      pageSize,
+      marketId: market?.id || null,
+      scriptIds: formatScriptIds(script),
+      brokerId: broker?.id || null,
+      masterUserId: master?.id || null,
+      clientId: user_id || client?.id || null,
+      status,
+
+      orderType,
+
+      // end_date: end_date,
+      // start_end: start_end,
+      end_date: propData?.end_datetime ?? end_date,
+      start_end: propData?.start_datetime ?? start_end,
+
+      ...(!!propData ? { script_full_name: propData?.script_name } : {}),
+      ...(!!propData ? { tradeType: propData?.trade_type } : {}),
+
+    }
     try {
-      const result = await fetchOrdersAPI({
-        filterType,
-        searchValue: searchText,
-        currentPage,
-        pageSize,
-        marketId: market?.id || null,
-        scriptIds: formatScriptIds(script),
-        brokerId: broker?.id || null,
-        masterUserId: master?.id || null,
-        clientId: user_id || client?.id || null,
-        status,
+      let result;
 
-        orderType,
+      if (!isForex) {
+        result = !isValanPage ? await fetchOrdersAPI(payload) : await fetcholdOrdersAPI(payload);
+      } else {
+        result = !isValanPage ? await fetchforexOrdersAPI(payload) : await fetcholdforexOrdersAPI(payload);
+      }
 
-        // end_date: end_date,
-        // start_end: start_end,
-        end_date: propData?.end_datetime ?? end_date,
-        start_end: propData?.start_datetime ?? start_end,
-
-        ...(!!propData ? { script_full_name: propData?.script_name } : {}),
-        ...(!!propData ? { tradeType: propData?.trade_type } : {}),
-
-      });
-
-      const data = result.aaData || [];
+      const data2 = result.aaData || [];
+      const data = getData_With_ClientName(data2);
 
       if (isMobile) {
         // Mobile: append data on "load more"
@@ -287,8 +305,8 @@ const OrderBook = ({
 
   // # Pagination useEffects
   useEffect(() => {
-    fetchLogs();
-  }, [user_id, propData]); // run on first render
+    !isFirstRender && fetchLogs();
+  }, [user_id, propData, isForex, isValanPage]); // run on first render
 
   useEffect(() => {
     setTotalPages(Math.ceil(totalRecords / pageSize));
@@ -366,8 +384,6 @@ const OrderBook = ({
     }
   };
 
-
-  const needsPassword = userType === 4 && deletePopup === 1;
 
   const renderActions = (item, idx, isQty) => ({
     // leading: (
@@ -492,6 +508,8 @@ const OrderBook = ({
               broker={broker}
               userType={userType}
               isMobile={isMobile}
+              isForex={isForex}
+              isValanPage={isValanPage}
               onApply={onFilterApply}
             />
           </Box>
@@ -522,6 +540,8 @@ const OrderBook = ({
             master={master}
             broker={broker}
             isMobile={isMobile}
+            isForex={isForex}
+            isValanPage={isValanPage}
             onApply={onFilterApply}
           />
         </Box>
@@ -543,17 +563,19 @@ const OrderBook = ({
         {isMobile && filterShow && <FilterBtn setFilterOpen={setDrawerOpen} />}
 
 
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Filter</InputLabel>
-          <Select
-            value={filterType}
-            label="Filter"
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <MenuItem value="today">Today</MenuItem>
-            <MenuItem value="all">This Week</MenuItem>
-          </Select>
-        </FormControl>
+        {!isValanPage &&
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Filter</InputLabel>
+            <Select
+              value={filterType}
+              label="Filter"
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="today">Today</MenuItem>
+              <MenuItem value="all">This Week</MenuItem>
+            </Select>
+          </FormControl>
+        }
 
         <SearchPdfCsv
           searchText={searchText}
@@ -685,7 +707,7 @@ const OrderBook = ({
                             {/* Row 2 */}
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <span dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                                <span dangerouslySetInnerHTML={{ __html: item[keys.deviceType_Html] }} />
 
                                 <Typography component="span" variant="body2" sx={{ ml: 0.5, fontSize: "1rem" }}>
                                   {isBuy ? "📈" : isSell ? "📉" : ""}
@@ -717,7 +739,7 @@ const OrderBook = ({
                                 {item.trd_time}
                               </Typography>
                               <Typography variant="caption" sx={{ m: 0, lineHeight: 1 }}>
-                                Comm: <strong style={{ color: "#2e7d32" }}>{item.trd_comm_amnt}</strong>
+                                Comm: <strong style={{ color: "#2e7d32" }}>{item[keys.commission_Amount]}</strong>
                               </Typography>
                             </Box>
                           </CardContent>
@@ -762,7 +784,7 @@ const OrderBook = ({
                   <table
                     className="table table-striped table-bordered"
                     style={{
-                      minWidth: "1990px",
+                      minWidth: "1650px",
                       fontSize: "12px",
                       margin: 0,
                       backgroundColor: theme.palette.mode === "dark" ? "#2a2a2a" : "#fff",
@@ -770,6 +792,7 @@ const OrderBook = ({
                     }}
                   >
                     <thead style={{ backgroundColor: theme.palette.mode === "dark" ? "#444" : "#e0e0e0" }}>
+                      {console.log('userType', userType)}
                       <tr>
                         {[
                           "Device",
@@ -782,11 +805,13 @@ const OrderBook = ({
                           "Order Type",
                           "Qty (Lot)",
                           "Order Price",
+                          // ...(isValanPage ? ["Net Price"] : []),
+
                           "Time",
                           "O. Time",
                           "Comm Amt",
-                          ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
                           ...(userType === 4 || userType === 5 ? ["Trade ID"] : []),
+                          ...([3, 4, 5].includes(userType) ? ["IP Address"] : []),
                           ...(userType !== 2 ? ["Action"] : [])
                         ].map((header) => (
                           <th
@@ -809,7 +834,7 @@ const OrderBook = ({
                     </thead>
                     <tbody>
                       {logs.map((item, index) => {
-                        const market = item.mrkt_name?.toUpperCase?.() || "DEFAULT";
+                        const market = item[keys.market_Name]?.toUpperCase?.() || "DEFAULT";
                         let backgroundColor = "#9e9e9e";
                         if (market === "NSEFUT") backgroundColor = "#5a88adff";
                         else if (market === "GLOBAL FUTURES") backgroundColor = "#519253ff";
@@ -838,19 +863,19 @@ const OrderBook = ({
                               background: rowGradient,
                             }}
                           >
-                            <td dangerouslySetInnerHTML={{ __html: item.device_type_html }} />
+                            <td dangerouslySetInnerHTML={{ __html: item[keys.deviceType_Html] }} />
                             <td
                               style={{
                                 color:
-                                  item.trd_status === "Executed" ? "#2e7d32" : // green for executed
-                                    item.trd_status === "Pending Order" ? "#fbc02d" : // yellow for pending
+                                  item[keys.trade_Status] === "Executed" ? "#2e7d32" : // green for executed
+                                    item[keys.trade_Status] === "Pending Order" ? "#fbc02d" : // yellow for pending
                                       "#000", // default color
                                 fontSize: 13.5,
                                 fontWeight: "bold",
                                 textTransform: "capitalize",
                               }}
                             >
-                              {item.trd_status}
+                              {item[keys.trade_Status]}
                             </td>
 
                             {userType !== 1 && <td>{item.client_full_name_dis}</td>}
@@ -876,7 +901,7 @@ const OrderBook = ({
                                     display: "inline-block",
                                   }}
                                 >
-                                  {item.mrkt_name}
+                                  {item[keys.market_Name]}
                                 </Box>
                               </Box>
                             </td>
@@ -932,16 +957,16 @@ const OrderBook = ({
                             <td style={{ fontWeight: 700, color: theme.palette.text.primary }}>
                               {item.net_rate}
                             </td>
-                            <td>{item.trd_matchedtime}</td>
+                            <td>{item[keys.matched_Time]}</td>
                             <td>{item.trd_time}</td>
-                            <td>{item.trd_comm_amnt}</td>
+                            <td>{item[keys.commission_Amount]}</td>
                             {(userType === 4 || userType === 5) && <td>#{item.trd_id}</td>}
-                            {[3, 4, 5].includes(userType) && <td>{item.trade_ip_address}</td>}
+                            {[3, 4, 5].includes(userType) && <td>{item[keys.trade_Ip]}</td>}
                             {userType !== 2 && (
                               <td>
-                                {item.modify === true || item.cancel === true ? (
+                                {item.modify === true || item.cancel === true || isValanPage ? (
                                   <>
-                                    {item.modify === true && (
+                                    {(item.modify === true || isValanPage) && (
                                       <button
                                         style={{
                                           marginRight: '8px',
@@ -958,7 +983,7 @@ const OrderBook = ({
                                       </button>
                                     )}
 
-                                    {item.cancel === true && (
+                                    {(item.cancel === true || isValanPage) && (
                                       <button
                                         style={{
                                           padding: '4px 8px',

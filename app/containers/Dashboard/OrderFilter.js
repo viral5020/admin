@@ -41,6 +41,8 @@ const OrderFilter = ({
   master,
   broker,
   isMobile,
+  isForex,
+  isValanPage,
   onApply,
 }) => {
   const theme = useTheme();
@@ -103,6 +105,7 @@ const OrderFilter = ({
           script={script}
           setScript={setScript}
           setMarket={setMarket}
+          isForex={isForex}
         />
 
         <ClientMasterBrokerFilter
@@ -156,38 +159,39 @@ const OrderFilter = ({
 
 
           {/* Trade Export Button */}
-          <Button
-            onClick={async () => {
-              try {
-                const response = await exportTradeApi({ status, start_end, end_date, orderType, market, script, client, master, broker });
+          {!isValanPage &&
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await exportTradeApi({ status, start_end, end_date, orderType, market, script, client, master, broker });
 
-                if (!response.ok) throw new Error("Export failed");
+                  if (!response.ok) throw new Error("Export failed");
 
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "trade_book.csv";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-              } catch (error) {
-                console.error("❌ Trade export failed:", error);
-              }
-            }}
-            sx={{
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
-              padding: '6px 50px', // wider
-              borderRadius: '4px',
-              textTransform: 'none',
-              flex: 1,
-              '&:hover': { backgroundColor: theme.palette.primary.dark },
-            }}
-          >
-            Trade Export
-          </Button>
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "trade_book.csv";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error("❌ Trade export failed:", error);
+                }
+              }}
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                padding: '6px 50px', // wider
+                borderRadius: '4px',
+                textTransform: 'none',
+                flex: 1,
+                '&:hover': { backgroundColor: theme.palette.primary.dark },
+              }}
+            >
+              Trade Export
+            </Button>}
         </Grid>
 
 

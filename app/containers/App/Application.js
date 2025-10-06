@@ -231,7 +231,7 @@ function Application(props) {
               path="dashboard/previous-valan-trade"
               element={
                 userType === 4 || userType === 5 ? (
-                  <Previousvalan />
+                  <OrderBook />
                 ) : (
                   <Navigate to="/app" />
                 )
@@ -299,7 +299,7 @@ function Application(props) {
             />
             <Route
               path="dashboard/forex-order"
-              element={isForex ? <Forex_order /> : <Navigate to="/app" />}
+              element={isForex ? <OrderBook /> : <Navigate to="/app" />}
             />
             <Route
               path="dashboard/forex-position"
@@ -309,7 +309,7 @@ function Application(props) {
               path="dashboard/forex-previous-valan-trade"
               element={
                 userType === 4 || userType === 5 ? (
-                  <Forexvaln />
+                  <OrderBook />
                 ) : (
                   <Navigate to="/app" />
                 )

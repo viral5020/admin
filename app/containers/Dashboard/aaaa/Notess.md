@@ -1,5 +1,29 @@
 ### ASHISH SIR
 
+- OrderBook vs Previous valan :
+
+  - Today/This-Week filter not in valan
+  - remain modify btn in valan, modify btn in orderbook depends on response's `modify` key
+  - Trade Export Btn not in valan
+
+  - Forex order : Order Price -> net_rate
+  - Forex order :
+    - Order Price -> trd_rate
+    - Net Price -> net_rate
+  - net_rate vs trd_rate in orderbook and valan
+  - net price in valan, not in orderbook
+
+---
+
+- Manual Trade :
+
+  - Can user enter desimal point value in Lot ?
+  - flow : user 1st select market > then select script > then lot > then qty , so accordingly disable fields
+
+- orderbook(stock/forex) :
+
+  - modify key gets in stock orderbokmapi but not in forex orderbook api,<br>should modify btn need to use in forex order book ?
+
 - forex previous valan trade :
   /datatables/order_book_forex_old in filter
 
@@ -28,19 +52,21 @@
 
 ## BAKI
 
-- Id LHS of SearchPdfCsv component have filter(today/this week), then take SearchPdfCsv to 2nd line and in 1st line filterbtn and filter(today/this week)
+- (vv) Id LHS of SearchPdfCsv component have filter(today/this week), then take SearchPdfCsv to 2nd line and in 1st line filterbtn and filter(today/this week)
 
-- page's parent tag vv
+- (vv) page's parent tag
   `<div style={{ padding: 16 }}>`
   To
   `<div style={{ padding: !isMobile ? 16 : 0 }}>`
 
-- Remove All Table's top bottom margin vv
+- (vv) Remove All Table's top bottom margin
   `<table style={{ margin: 0}}>`
 
-- previous valan trade : have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ? kk
+- (kk) previous valan trade :
 
-- Manual Trade : kk
+  - have multiple filters on screen but in api few is passing, is that all filter need to be pass in api ?
+
+- (kk) Manual Trade :
 
   - get_master_name_search
   - get_broker_name_search
@@ -48,7 +74,7 @@
 
   - in filter : lot, quantity, price accept alphabetic value also, clear btn not clear lot and quantity
 
-- in mobile, Margin Management have no filter kk
+- (kk) in mobile, Margin Management have no filter
 
   - table horizontal scroll
   - rows per page not working
