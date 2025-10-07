@@ -19,6 +19,10 @@ import {
     IconButton,
     Drawer,
     Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Dialog,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -81,16 +85,12 @@ const Stopfuturetrading = () => {
 
     const [isFilterChange, setIsFilterChange] = useState(false);
 
-    // ✅ Delete handler (common for desktop + mobile)
-    const handleDelete = async (future_id) => {
-        try {
-            const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
+    const [removeTrade, setRemoveTrade] = useState(false);
 
-            const result = await deleteFutureTradingBlockAPI({
-                future_id,
-                user_id: dataStored.user_id ?? "",
-                auth_key: dataStored.auth_key ?? "",
-            });
+    // ✅ Delete handler (common for desktop + mobile)
+    const handleDelete = async (future_block_id) => {
+        try {
+            const result = await deleteFutureTradingBlockAPI({ future_block_id });
 
             if (result?.status === "ok") {
                 toast.success("Future block deleted!", { position: "top-right", autoClose: 3000 });
@@ -161,35 +161,33 @@ const Stopfuturetrading = () => {
         }
     };
 
+    // # pagination useEffects
     useEffect(() => {
         fetchLogs();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-        if (!isFirstRender) {
-            setCurrentPage(0);
-            setIsFilterChange(true);
-        }
-    }, [debouncedSearchText, isFirstRender]);
-
-    useEffect(() => {
-        if (!isFirstRender) {
-            fetchLogs();
-        }
-    }, [currentPage, pageSize, isFilterChange, isFirstRender]);
-
-    useEffect(() => {
         setTotalPages(Math.ceil(totalRecords / pageSize));
-    }, [pageSize, totalRecords]);
+    }, [pageSize, totalRecords])
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
+    }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && fetchLogs();
+    }, [currentPage, pageSize]);
+
+    useEffect(() => {
+        isFilterChange && !isFirstRender && fetchLogs();
+    }, [isFilterChange])
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
 
-    const onFilterApply = () => {
-        setIsFilterChange(true);
-        setCurrentPage(0);
+    function onFilterApply() {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
-    };
+    }
 
     return (
         <>
@@ -270,7 +268,13 @@ const Stopfuturetrading = () => {
                                                 <TableCell>{row.added_datetime ?? '-'}</TableCell>
                                                 <TableCell align="center">
                                                     <Typography style={{ textAlign: 'center' }}>
-                                                        <Button size="small" variant="contained" color="error" sx={{ borderRadius: 1 }} onClick={() => handleDelete(row.future_id)}>
+                                                        <Button
+                                                            size="small"
+                                                            variant="contained"
+                                                            color="error"
+                                                            sx={{ borderRadius: 1 }}
+                                                            onClick={() => setRemoveTrade(row)}
+                                                        >
                                                             Delete
                                                         </Button>
                                                     </Typography>
@@ -401,6 +405,30 @@ const Stopfuturetrading = () => {
                     )}
                 </>
             )}
+
+            <Dialog
+                open={!!removeTrade}
+                onClose={() => setRemoveTrade(false)}
+                aria-labelledby="confirm-dialog-title"
+                aria-describedby="confirm-dialog-description"
+            >
+                <DialogTitle id="confirm-dialog-title" sx={{ mb: 2 }}>
+                    Confirm Delete
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="confirm-dialog-description">
+                        Are you sure, you want to delete ?
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, pt: 0 }}>
+                    <Button onClick={() => setRemoveTrade(false)} variant="outlined">
+                        Cancel
+                    </Button>
+                    <Button onClick={() => handleDelete(removeTrade.future_id)} variant="contained" color="error" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

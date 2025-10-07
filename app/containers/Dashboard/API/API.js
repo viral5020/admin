@@ -180,6 +180,10 @@ export const fetchOrdersAPI = async ({
   }
 };
 
+export const fetcholdOrdersAPI = async (params = {}) => fetchOrdersAPI({ ...params, isForex: false, isValanPage: true });
+export const fetchforexOrdersAPI = async (params = {}) => fetchOrdersAPI({ ...params, isForex: true, isValanPage: false });
+export const fetcholdforexOrdersAPI = async (params = {}) => fetchOrdersAPI({ ...params, isForex: true, isValanPage: true });
+
 export const fetchRejectionLogsAPI = async (
   userId,
   authKey,
@@ -2708,16 +2712,16 @@ export const deleteClientOrderLimitAPI = async ({ user_id, auth_key, client_orde
   }
 };
 
-export const deleteFutureTradingBlockAPI = async ({ future_id, user_id, auth_key }) => {
+export const deleteFutureTradingBlockAPI = async ({ future_block_id }) => {
   const defaultParams = await getDefaultParams();
   try {
     const payload = {
-      future_id,
+      future_block_id,
       ...defaultParams,
     };
     console.log("🔍 Deleting future trading block with payload:", payload);
     const response = await axiosInstance.post(
-      "setting/remove_future_trading_block",
+      "ajaxfiles/setting/remove_future_trading_block",
       payload
     );
     return response.data;

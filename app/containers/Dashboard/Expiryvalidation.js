@@ -19,7 +19,10 @@ import {
     useTheme,
     IconButton,
     Drawer,
-
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -88,6 +91,8 @@ const Expiryvalidation = () => {
 
     // marker to indicate filter/search was changed and we should refresh
     const [isFilterChange, setIsFilterChange] = useState(false);
+
+    const [removeTrade, setRemoveTrade] = useState(false);
 
     const fetchLogs = async () => {
         setLoading(true);
@@ -174,39 +179,32 @@ const Expiryvalidation = () => {
         }
     };
 
-    // Initial load
+
+    // # pagination useEffects
     useEffect(() => {
         fetchLogs();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    // When debounced search term changes -> reset to page 0 and mark filter change
-    useEffect(() => {
-        if (!isFirstRender) {
-            setCurrentPage(0);
-            setIsFilterChange(true);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedSearchText]);
-
-    // When page / pageSize / filter-change toggles -> fetch
-    useEffect(() => {
-        if (!isFirstRender) {
-            fetchLogs();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, pageSize, isFilterChange]);
 
     useEffect(() => {
         setTotalPages(Math.ceil(totalRecords / pageSize));
-    }, [pageSize, totalRecords]);
+    }, [pageSize, totalRecords])
+
+    useEffect(() => {
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
+    }, [debouncedSearchText]);
+
+    useEffect(() => {
+        !isFirstRender && fetchLogs();
+    }, [currentPage, pageSize]);
+
+    useEffect(() => {
+        isFilterChange && !isFirstRender && fetchLogs();
+    }, [isFilterChange])
 
     const toggleDrawer = (open) => () => setFilterDrawer(open);
 
     function onFilterApply() {
-        // user applied filters from drawer -> reset page and fetch
-        setIsFilterChange(true);
-        setCurrentPage(0);
+        !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
         toggleDrawer(false)();
     }
 
@@ -298,7 +296,7 @@ const Expiryvalidation = () => {
                                                         size="small"
                                                         variant="contained"
                                                         color="error"
-                                                        onClick={() => handleRemove(row)}
+                                                        onClick={() => setRemoveTrade(row)}
                                                         sx={{ borderRadius: 1 }}
                                                     >
                                                         Remove
@@ -436,7 +434,7 @@ const Expiryvalidation = () => {
                                                     variant="contained"
                                                     color="error"
                                                     style={{ borderRadius: 5 }}
-                                                    onClick={() => handleRemove(log)}
+                                                    onClick={() => setRemoveTrade(log)}
                                                 >
                                                     Remove
                                                 </Button>}</Typography>
@@ -467,6 +465,30 @@ const Expiryvalidation = () => {
                     )}
                 </>
             )}
+
+            <Dialog
+                open={!!removeTrade}
+                onClose={() => setRemoveTrade(false)}
+                aria-labelledby="confirm-dialog-title"
+                aria-describedby="confirm-dialog-description"
+            >
+                <DialogTitle id="confirm-dialog-title" sx={{ mb: 2 }}>
+                    Confirm Removal
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="confirm-dialog-description">
+                        Are you sure, you want to Remove ?
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, pt: 0 }}>
+                    <Button onClick={() => setRemoveTrade(false)} variant="outlined">
+                        Cancel
+                    </Button>
+                    <Button onClick={() => handleRemove(removeTrade)} variant="contained" color="error" autoFocus>
+                        Remove
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };
