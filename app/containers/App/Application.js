@@ -221,7 +221,7 @@ function Application(props) {
             />
             <Route
               path="dashboard/order-Book"
-              element={isStock ? <OrderBook /> : <Navigate to="/app" />}
+              element={isStock ? <OrderBook key={'order-Book'} /> : <Navigate to="/app" />}
             />
             <Route
               path="dashboard/positions"
@@ -231,7 +231,7 @@ function Application(props) {
               path="dashboard/previous-valan-trade"
               element={
                 userType === 4 || userType === 5 ? (
-                  <OrderBook />
+                  <OrderBook key={'previous-valan'} />
                 ) : (
                   <Navigate to="/app" />
                 )
@@ -299,7 +299,7 @@ function Application(props) {
             />
             <Route
               path="dashboard/forex-order"
-              element={isForex ? <OrderBook /> : <Navigate to="/app" />}
+              element={isForex ? <OrderBook key={'forex-order'} /> : <Navigate to="/app" />}
             />
             <Route
               path="dashboard/forex-position"
@@ -309,7 +309,7 @@ function Application(props) {
               path="dashboard/forex-previous-valan-trade"
               element={
                 userType === 4 || userType === 5 ? (
-                  <OrderBook />
+                  <OrderBook key={'forex-valan'} />
                 ) : (
                   <Navigate to="/app" />
                 )

@@ -1,44 +1,6 @@
 
-
-
-
-
-- <button id="del31533200" ng-disabled="disabledActions" ng-click="deleteTrade(31533200)" _ngcontent-gwo-c168="" style="padding: .375rem .75rem;" type="button" class="btn btn-danger"><i _ngcontent-gwo-c168="" class="fa fa fa-trash-o"></i></button>
-
-
-
-- valan's api
-- remain modify btn in valan
-- net price in valan
-- Trade Export Btn not in valan
-- Today/This-Week filter not in valan
-
-
-
-
 >> START ON MONDAY
-- Merge previous valan (stock/forex both) in orderBook.js
-- Observe previousValan.js's  git difference and accordingly modify OrderBook.js
-- same do for forexValn.js
-
-- Merger all forex components to its stock component
-
-- Position netQty = 0 ? then LTP should shown or not
-    - initially in this project not shown || But ma'am ask where is ltp, so correct it from ashish sir
-
-
-
-
-## FOREX ORDER
-- orderfilter vs forexfilter 
-- modify btn already there in forex
-- Set PDF keyArr
-- ip address not shown in forex_order
-- in forex_order `item.trd_rate` but in order_book `item.net_rate`
-
-
-## PREVIOUS VALAN
-- remove filterType (today / this week)
+  - Merger all forex components to its stock component
 
 
 {
