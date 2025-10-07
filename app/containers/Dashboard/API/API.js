@@ -3377,3 +3377,40 @@ export async function exportTradeApi(payload) {
     throw error;
   }
 }
+
+
+export const BrokregereportAPI = async (
+  currentPage,
+  pageSize,
+  searchText,
+  market,
+  scriptIds,
+  master,
+  client,
+  before_date,
+  after_date,
+) => {
+  const defaultParams = await getDefaultParams();
+  const formData = {
+    ...defaultParams,
+    sEcho: 1,
+    iDisplayStart: currentPage * pageSize,
+    iDisplayLength: pageSize,
+    sSearch: searchText,
+    device_type: "1",
+    type: "1",
+    market_type_id: market?.id,
+    script_id: scriptIds,
+    master_user_id: master?.id,
+    user_id: client?.id,
+    end_date: before_date,
+    start_date: after_date,
+  }
+  try {
+    const response = await axiosInstance.post("datatables/broker_commision_list.php", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};

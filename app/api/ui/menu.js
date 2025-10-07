@@ -635,9 +635,33 @@ export function getSibarContent(authData) {
     });
   }
 
-  // console.log('menu', menu);
+
+
+  if (userType === 2) {
+    menu.push({
+      key: 'Reports',
+      name: 'Reports',
+      // icon: 'ion-ios-swap-outline',
+      child: [
+        ...(userType === 2
+          ? [{
+            key: 'Reports',
+            name: 'Brokerage Report',
+            link: '/app/dashboard/Brokrage-Reports',
+            icon: 'wallet-outline'
+          }]
+          : []),
+      ]
+    });
+  }
   return menu;
 }
+
+
+
+
+
+
 
 const menu = [{
   key: 'editDeleteLogs',

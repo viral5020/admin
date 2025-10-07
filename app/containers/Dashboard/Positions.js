@@ -2012,19 +2012,44 @@ const OrderPage1 = ({
                                                         </Box>
 
                                                         <Box sx={{ flex: "1 1 22%" }}>
+                                                            <Typography variant="caption">Auto Closed</Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{ fontWeight: 700, color: "error.main" }}
+                                                            >
+                                                                {selectedRow?.trade_auto_closed_date}
+                                                            </Typography>
+
+                                                        </Box>
+
+                                                        {/* <Box sx={{ flex: "1 1 22%" }}>
                                                             <Typography variant="caption">MTM</Typography>
                                                             <Typography
                                                                 variant="body2"
                                                                 fontWeight={600}
                                                                 dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
                                                             />
-                                                        </Box>
+                                                        </Box> */}
                                                     </Box>
 
-                                                    <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-                                                        <Typography variant="caption">Auto Closed Date</Typography>
-                                                        <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
+                                                    <Box sx={{ flex: "1 1 22%" }}>
+                                                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                                            MTM:
+                                                        </Typography>
+
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                gap: 2.5,
+                                                                flexWrap: "wrap",
+                                                                mt: 0.5,
+                                                                fontWeight: 600,
+                                                                fontSize: "0.95rem",
+                                                            }}
+                                                            dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
+                                                        />
                                                     </Box>
+
 
                                                     {/* Action Buttons */}
                                                     <Box sx={{ display: "flex", gap: 1 }}>
@@ -2591,20 +2616,33 @@ const OrderPage1 = ({
                                             )?.toLocaleString()}
                                         </Typography>
                                     </Box>
-
                                     <Box sx={{ flex: "1 1 22%" }}>
-                                        <Typography variant="caption">MTM</Typography>
+                                        <Typography variant="caption">Auto Closed</Typography>
                                         <Typography
                                             variant="body2"
-                                            fontWeight={600}
-                                            dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
-                                        />
+                                            sx={{ fontWeight: 700, color: "error.main" }}
+                                        >
+                                            {selectedRow?.trade_auto_closed_date}
+                                        </Typography>
+
                                     </Box>
                                 </Box>
+                                <Box sx={{ flex: "1 1 22%" }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                        MTM:
+                                    </Typography>
 
-                                <Box sx={{ flex: "1 1 100%", mb: 2 }}>
-                                    <Typography variant="caption">Auto Closed Date</Typography>
-                                    <Typography variant="body2" fontWeight={600}>{selectedRow?.trade_auto_closed_date}</Typography>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            gap: 2.5,
+                                            flexWrap: "wrap",
+                                            mt: 0.5,
+                                            fontWeight: 600,
+                                            fontSize: "0.95rem",
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: selectedRow?.mym_html }}
+                                    />
                                 </Box>
 
                                 {/* Action Buttons */}

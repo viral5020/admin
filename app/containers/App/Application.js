@@ -157,6 +157,7 @@ import Timesetting from "../Dashboard/Timesetting";
 import Levelimport from "../Dashboard/Levelimport";
 import { useSelector } from "react-redux";
 import Adminloginlist from "../Dashboard/Utility/Adminloginlist";
+import Brokragereports from "../Dashboard/Brokragereports";
 
 // Patch sessionStorage.getItem to never return "undefined" or "null" as strings
 (function () {
@@ -621,7 +622,15 @@ function Application(props) {
               }
             />
           </Route>
+          <Route path="dashboard/Brokrage-Reports" element={
+            userType === 2 ? (
+              <Brokragereports />
+            ) : (
+              <Navigate to="/app/dashboard/Master-Dashboard" />
+            )
+          } />
         </Route>
+
 
         <Route path="dashboard/cryptocurrency" element={<CryptoDashboard />} />
         <Route path="dashboard/sales-marketing" element={<CrmDashboard />} />
