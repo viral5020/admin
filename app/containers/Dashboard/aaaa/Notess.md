@@ -1,5 +1,9 @@
 ### ASHISH SIR
 
+- In application.js : `dashboard/Trial-balance` this defines 2 times with 2 different conditions, out of 2 which condition shlould remain
+
+- In position, Before LTP shows only for qty > 0, ma'am
+
 - OrderBook vs Previous valan :
 
   - Today/This-Week filter not in valan
@@ -44,9 +48,6 @@
 - position page's data's LTP value is not coming in api
 
   - Forex position has LTP
-
-- previous-valan-trade, require pagination
-  - 13095 records comes in single api call, page turns into unresponsive
 
 ---
 

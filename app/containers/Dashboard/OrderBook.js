@@ -66,6 +66,11 @@ function getData_With_ClientName(data) {
 }
 
 const OrderBook = ({
+  key,
+  // In application.js we pass key prop, key prop used to re-render the whole component again
+  // Bcs this component used on 4 url path in application.js, if we change key porop then below heppens
+  //  - all state values set to their initial value
+  //  - useEffect(() => { ... } , []) this runs again
   filterShow = true,
   setFilterShow = () => { },
   user_id,
@@ -261,13 +266,7 @@ const OrderBook = ({
 
     }
     try {
-      let result;
-
-      if (!isForex) {
-        result = !isValanPage ? await fetchOrdersAPI(payload) : await fetcholdOrdersAPI(payload);
-      } else {
-        result = !isValanPage ? await fetchforexOrdersAPI(payload) : await fetcholdforexOrdersAPI(payload);
-      }
+      const result = await fetchOrdersAPI({ isForex, isValanPage, ...payload });
 
       const data2 = result.aaData || [];
       const data = getData_With_ClientName(data2);

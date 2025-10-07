@@ -119,6 +119,8 @@ export const fetchLoginDataAPI = async (userId, authKey) => {
 };
 
 export const fetchOrdersAPI = async ({
+  isForex,
+  isValanPage,
   filterType = "today",
   searchValue = "",
   currentPage = 0,
@@ -160,7 +162,14 @@ export const fetchOrdersAPI = async ({
   };
 
   try {
-    const { data } = await axiosInstance.post("/datatables/order_book_new", formData);
+    let api_url;
+    if (!isForex) {
+      api_url = !isValanPage ? "order_book_new" : "order_book_old";
+    } else {
+      api_url = !isValanPage ? "order_book_forex" : "order_book_forex_old";
+    }
+
+    const { data } = await axiosInstance.post(`/datatables/${api_url}`, formData);
     return {
       aaData: data?.aaData || [],
       iTotalRecords: data?.iTotalRecords || 0,
@@ -168,121 +177,6 @@ export const fetchOrdersAPI = async ({
   } catch (error) {
     console.error("Error fetching spot orders:", error);
     return { aaData: [], iTotalRecords: 0 };
-  }
-};
-
-export const fetcholdOrdersAPI = async (searchValue = "") => {
-  const defaultParams = await getDefaultParams();
-  const formData = {
-    sEcho: 1,
-    iDisplayStart: 0,
-    iDisplayLength: 10,
-    sSearch: searchValue,
-    ...defaultParams,
-  };
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_old", formData);
-    return data.aaData || [];
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    return [];
-  }
-};
-
-
-export const fetcholdforexOrdersAPI = async ({
-  // filterType = "today",
-  searchText = "",
-  currentPage = 0,
-  pageSize = 10,
-
-  end_date = "",
-  start_end = "",
-  status = "",
-  orderType = "",
-
-  marketId = "",
-  scriptIds = "",
-  brokerId = "",
-  masterUserId = "",
-  clientId = "",
-} = {}) => {
-  const defaultParams = await getDefaultParams();
-
-  const formData = {
-    ...defaultParams,
-    sEcho: 1,
-    iDisplayStart: currentPage * pageSize,
-    iDisplayLength: pageSize,
-
-    sSearch: searchText,
-    // isTodayTrade: filterType,
-    end_date,
-    start_end,
-    is_pending: status === "is_pending" ? "is_pending" : "",
-    is_executed: status === "is_executed" ? "is_executed" : "",
-    trade_type: orderType || "",
-
-    market_type_id: marketId || "",
-    script_id: scriptIds,
-    broker_id: brokerId || "",
-    master_user_id: masterUserId || "",
-    user_id: clientId || "",
-  };
-
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_forex_old", formData);
-    return data;
-  } catch (error) {
-    console.error("Error fetching spot orders:", error);
-    return { aaData: [], iTotalRecords: 0 };
-  }
-};
-
-
-export const fetchforexOrdersAPI = async ({
-  userId,
-  authKey,
-  filterType = "today",
-  searchValue = "",
-  currentPage = 0,
-  pageSize = 10000,
-  end_date = "",
-  start_end = "",
-  marketId = "",
-  scriptIds = "",
-  brokerId = "",
-  masterUserId = "",
-  clientId = "",
-  status = "",
-  orderType = ""
-}) => {
-  const defaultParams = await getDefaultParams();
-  const formData = {
-    sEcho: 1,
-    iDisplayStart: currentPage * pageSize,
-    iDisplayLength: pageSize,
-    sSearch: searchValue,
-    ...defaultParams,
-    isTodayTrade: filterType,
-    end_date,
-    start_end,
-    market_type_id: marketId || "",
-    script_id: scriptIds,
-    broker_id: brokerId || "",
-    master_user_id: masterUserId || "",
-    user_id: clientId || "",
-    is_pending: status === "is_pending" ? "is_pending" : "",
-    is_executed: status === "is_executed" ? "is_executed" : "",
-    trade_type: orderType || "",
-  };
-  console.log("Forex API formData:", formData); // debug
-  try {
-    const { data } = await axiosInstance.post("/datatables/order_book_forex", formData);
-    return data;
-  } catch (error) {
-    console.error("Error fetching forex orders:", error);
-    return [];
   }
 };
 
