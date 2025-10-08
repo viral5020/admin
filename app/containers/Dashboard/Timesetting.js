@@ -32,7 +32,7 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import FilterBtn from './filters/FilterBtn';
 import BackToTop from './helpers/BackToTop';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
-import { ExpiryvalidationAPI, ScriptwiselotAPI, TimesettingAPI } from './API/API';
+import { ExpiryvalidationAPI, ScriptwiselotAPI, TimesettingAPI, TimeSettingRemoveAPI } from './API/API';
 import Expiryvalidationfilter from './Utility/Expiryvalidationfilter';
 import Pagination from './filters/Pagination';
 import axios from 'dan-vendor/axios';
@@ -76,18 +76,6 @@ const Timesetting = () => {
 
     const [filterDrawer, setFilterDrawer] = useState(false);
 
-    // Filters
-    const [market, setMarket] = useState('');
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-    const [script, setScript] = useState('');
-    const [end1_date, setEnd1_date] = useState('');
-    const [start1_date, setStart1_date] = useState('');
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
-    const [valanId, setValanId] = useState(null);
-
     // marker to indicate filter/search was changed and we should refresh
     const [isFilterChange, setIsFilterChange] = useState(false);
 
@@ -101,14 +89,6 @@ const Timesetting = () => {
                 currentPage,
                 pageSize,
                 debouncedSearchText,
-                market,
-                master,
-                client,
-                end1_date,
-                start1_date,
-                is_deleted,
-                is_updated,
-                isAdminOnly,
             );
 
             let data = result?.data || [];
@@ -154,23 +134,18 @@ const Timesetting = () => {
     };
 
 
-    const handleRemove = async (row) => {
-        if (!row.expiry_validation_id) return;
-
+    const handleRemove = async (id) => {
         try {
-            const response = await axios.post(
-                'ajaxfiles/setting/remove_expiry_validation',
-                { expiry_validation_id: row.expiry_validation_id }
-            );
-
-            if (response.data.success) {
-                // Remove from state to update UI
+            const response = await TimeSettingRemoveAPI(id);
+            if (response.status === 'ok') {
                 setLogs((prev) =>
-                    prev.filter((r) => r.expiry_validation_id !== row.expiry_validation_id)
+                    prev.filter((r) => r.market_start_end_id !== id)
                 );
                 toast.success("Entry removed successfully!");
+                setRemoveTrade(false);
+                // handleClear();
             } else {
-                toast.error(response.data.message || "Failed to remove entry.");
+                toast.error(response.message || "Failed to remove entry.");
             }
         } catch (error) {
             console.error("Remove error:", error);
@@ -210,15 +185,7 @@ const Timesetting = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Timesettingfilter
-                        market={market}
-                        script={script}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        valanId={valanId}
-                        setValanId={setValanId}
-                        onApply={onFilterApply}
-                    />
+                    <Timesettingfilter />
 
                     <Box
                         sx={{
@@ -292,7 +259,8 @@ const Timesetting = () => {
                                                         size="small"
                                                         variant="contained"
                                                         color="error"
-                                                        onClick={() => setRemoveTrade(row)}
+                                                        // onClick={() => setRemoveTrade(row)}
+                                                        onClick={() => handleRemove(row?.market_start_end_id)}
                                                         sx={{ borderRadius: 1 }}
                                                     >
                                                         Remove
@@ -338,21 +306,7 @@ const Timesetting = () => {
                                         <CloseIcon />
                                     </IconButton>
                                 </Box>
-                                <Timesettingfilter
-                                    end1_date={end1_date}
-                                    start1_date={start1_date}
-                                    setEnd1_date={setEnd1_date}
-                                    setStart1_date={setStart1_date}
-                                    is_deleted={is_deleted}
-                                    is_updated={is_updated}
-                                    setIs_deleted={setIs_deleted}
-                                    setIs_updated={setIs_updated}
-                                    market={market}
-                                    setMarket={setMarket}
-                                    valanId={valanId}
-                                    setValanId={setValanId}
-                                    onApply={onFilterApply}
-                                />
+                                <Timesettingfilter />
                             </Box>
                         </Drawer>
 
@@ -430,7 +384,8 @@ const Timesetting = () => {
                                                     variant="contained"
                                                     color="error"
                                                     style={{ borderRadius: 5 }}
-                                                    onClick={() => setRemoveTrade(row)}
+                                                    // onClick={() => setRemoveTrade(log)}
+                                                    onClick={() => handleRemove(row?.market_start_end_id)}
                                                 >
                                                     Remove
                                                 </Button>}</Typography>
@@ -480,7 +435,7 @@ const Timesetting = () => {
                     <Button onClick={() => setRemoveTrade(false)} variant="outlined">
                         Cancel
                     </Button>
-                    <Button onClick={() => handleRemove(removeTrade)} variant="contained" color="error" autoFocus>
+                    <Button onClick={() => handleRemove(removeTrade?.market_start_end_id)} variant="contained" color="error" autoFocus>
                         Remove
                     </Button>
                 </DialogActions>

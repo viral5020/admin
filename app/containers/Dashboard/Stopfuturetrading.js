@@ -273,7 +273,8 @@ const Stopfuturetrading = () => {
                                                             variant="contained"
                                                             color="error"
                                                             sx={{ borderRadius: 1 }}
-                                                            onClick={() => setRemoveTrade(row)}
+                                                            // onClick={() => setRemoveTrade(row)}
+                                                            onClick={() => handleDelete(row.future_id)}
                                                         >
                                                             Delete
                                                         </Button>
@@ -376,6 +377,7 @@ const Stopfuturetrading = () => {
                                                         cursor: 'pointer',
                                                         '&:hover': { textDecoration: 'underline' },
                                                     }}
+                                                    // onClick={() => handleDelete(log.future_id)}
                                                     onClick={() => handleDelete(log.future_id)}
                                                 >
                                                     Delete

@@ -1,5 +1,7 @@
 ### ASHISH SIR
 
+- Expiry Validation : Add api gives `Invalid User Type` || api: `ajaxfiles/setting/set_expiry_validation`
+
 - NSEOPT management :
 
   - search not working from api

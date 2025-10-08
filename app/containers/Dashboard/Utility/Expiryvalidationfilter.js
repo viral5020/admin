@@ -4,32 +4,25 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Grid, Button, TextField, useTheme, Stack } from '@mui/material'
 import Expirymarketscriptfilter from '../filters/Expirymarketscriptfilter'
+import { getDefaultParams } from '../API/API'
 
-const Expiryvalidationfilter = ({
-    setEnd1_date,
-    setStart1_date,
-    setIs_deleted,
-    setIs_updated,
-    market,
-    script,
-    setScript,
-    setMarket,
-}) => {
+const Expiryvalidationfilter = ({ }) => {
     const theme = useTheme()
 
-    const [afterDays, setAfterDays] = useState("")
-    const [beforeDays, setBeforeDays] = useState("")
+    const [market, setMarket] = useState('');
+    const [script, setScript] = useState('');
+    const [afterDays, setAfterDays] = useState("");
+    const [beforeDays, setBeforeDays] = useState("");
 
     const handleAdd = async () => {
-        const dataStored = JSON.parse(sessionStorage.getItem("data")) || {}
+        const defaultParams = await getDefaultParams();
 
         const payload = {
+            ...defaultParams,
             market_type_id: market?.id ?? market,
             script_id: market?.name === "NSEFUT" ? "All" : (script?.id ?? script),
             after_days: afterDays,
             before_days: beforeDays,
-            login_user_id: dataStored.user_id ?? "",
-            auth_key: dataStored.auth_key ?? "",
         }
 
         console.log("Add Payload:", payload)
@@ -40,28 +33,18 @@ const Expiryvalidationfilter = ({
                 payload
             )
             console.log("API Response:", response.data)
-
-            toast.success("Expiry validation added successfully!", {
-                position: "top-right",
-                autoClose: 3000,
-            })
-
-            handleClear() // ✅ reset after success
+            response.data.status === 'ok'
+                ? toast.success("Expiry validation added successfully!", { containerId: "1234" })
+                : toast.error(response.data.message || "Some error occured.", { containerId: "1234" })
+            response.data.status === 'ok' && handleClear();
         } catch (error) {
             console.error("Error adding expiry validation:", error)
-            toast.error("Failed to add expiry validation!", {
-                position: "top-right",
-                autoClose: 3000,
-            })
+            toast.error("Failed to add expiry validation!", { containerId: "1234" })
         }
     }
 
     // ✅ Clear function
     const handleClear = () => {
-        setStart1_date("")
-        setEnd1_date("")
-        setIs_updated(0)
-        setIs_deleted(0)
         setMarket(null)
         setScript(null)
         setAfterDays("")
@@ -143,7 +126,7 @@ const Expiryvalidationfilter = ({
 
             </Grid>
 
-            <ToastContainer />
+            <ToastContainer containerId="1234" />
         </>
     )
 }

@@ -396,7 +396,8 @@ const Nseoptmanagement = () => {
                                                 variant="contained"
                                                 color="error"
                                                 size="small"
-                                                onClick={() => setRemoveTrade(row)}
+                                                // onClick={() => setRemoveTrade(row)}
+                                                onClick={() => handleAction(row.script_expiry_option_id)}
                                                 sx={{ borderRadius: 1 }}
                                             >
                                                 Remove
@@ -521,7 +522,8 @@ const Nseoptmanagement = () => {
                                             color="error"
                                             size="small"
                                             style={{ borderRadius: 4 }}
-                                            onClick={() => setRemoveTrade(log)}
+                                            // onClick={() => setRemoveTrade(log)}
+                                            onClick={() => handleAction(log.script_expiry_option_id)}
                                         >
                                             Remove
                                         </Button>

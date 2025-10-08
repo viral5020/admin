@@ -2030,14 +2030,6 @@ export const TimesettingAPI = async (
   currentPage,
   pageSize,
   searchText,
-  market,
-  scriptIds,
-  master,
-  client,
-  end_date,
-  start_date,
-  is_deleted,
-  is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
   const formData = {
@@ -2049,6 +2041,21 @@ export const TimesettingAPI = async (
   }
   try {
     const response = await axiosInstance.post("ajaxfiles/setting/list_start_end_time", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    throw error;
+  }
+};
+
+export const TimeSettingRemoveAPI = async (market_start_end_id) => {
+  const defaultParams = await getDefaultParams();
+
+  try {
+    const response = await axiosInstance.post(
+      "ajaxfiles/setting/remove_start_end_time",
+      { ...defaultParams, market_start_end_id }
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);

@@ -12,15 +12,14 @@ const Timescrptmarketfilter = ({
     isScriptMultiSelect = false,
     isForex,
     showMarket = true,
-    showScript = true,
+    showScript,
+    isGlobalFutMarket,
 }) => {
+    console.log('showScript', showScript);
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
     const [marketOptions, setMarketOptions] = useState([]);
     const [scriptOptions, setScriptOptions] = useState([]);
-
-    // ✅ Only GLOBAL FUTURES needs script selection
-    const isGlobalFutMarket = market?.text?.toUpperCase() === 'GLOBAL FUTURES';
 
     useEffect(() => {
         handleFetch('', 'market');

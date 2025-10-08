@@ -1,31 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Grid, Button, TextField, useTheme } from '@mui/material';
 import Timescrptmarketfilter from '../filters/Timescrptmarketfilter';
+import { getDefaultParams } from '../API/API';
 
-const Timesettingfilter = ({
-    setEnd1_date,
-    setStart1_date,
-    end1_date,
-    start1_date,
-    setIs_deleted,
-    is_deleted,
-    is_updated,
-    setIs_updated,
-    market,
-    script,
-    setScript,
-    setMarket,
-}) => {
+const Timesettingfilter = ({ }) => {
     const theme = useTheme();
+
+    const [market, setMarket] = useState('');
+    const [script, setScript] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
 
-    const isNseMarket =
-        market?.text?.toUpperCase() === 'NSEFUT' ||
-        market?.text?.toUpperCase() === 'NSEOPT';
+    const [isNseMarket, setIsNseMarket] = useState(false);
+    const [isGlobalFutMarket, setisGlobalFutMarket] = useState(false);
+
+    // ✅ Only GLOBAL FUTURES needs script selection
+    useEffect(() => {
+        setIsNseMarket(market?.text?.toUpperCase() === 'NSEFUT' || market?.text?.toUpperCase() === 'NSEOPT');
+        setisGlobalFutMarket(market?.text?.toUpperCase() === 'GLOBAL FUTURES');
+    }, [market]);
+
 
     const handleAdd = async () => {
         if (!market) {
@@ -43,15 +40,14 @@ const Timesettingfilter = ({
             return;
         }
 
-        const dataStored = JSON.parse(sessionStorage.getItem('data')) || {};
+        const defaultParams = await getDefaultParams();
 
         const payload = {
+            ...defaultParams,
             market_type_id: market?.id ?? market,
             script_id: isNseMarket ? 'All' : script?.id ?? script,
             start_time: startTime,
             end_time: endTime,
-            login_user_id: dataStored.user_id ?? '',
-            auth_key: dataStored.auth_key ?? '',
         };
 
         console.log('Add Payload:', payload);
@@ -63,30 +59,20 @@ const Timesettingfilter = ({
             );
             console.log('API Response:', response.data);
 
-            if (response.data.success) {
-                toast.success('Time added successfully!', { position: 'top-right', autoClose: 3000 });
-                handleClear(); // ✅ reset after success
+            if (response.data.status === 'ok') {
+                toast.success('Time added successfully!', { containerId: "1234" });
+                handleClear();
             } else {
-                toast.error(response.data.message || 'Failed to add time. Please try again.', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
+                toast.error(response.data.message || 'Failed to add time. Please try again.', { containerId: "1234" });
             }
         } catch (error) {
             console.error('Error adding Time:', error);
-            toast.error('An error occurred while adding time.', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
+            toast.error('An error occurred while adding time.', { containerId: "1234" });
         }
     };
 
     // ✅ Clear function
     const handleClear = () => {
-        setStart1_date('');
-        setEnd1_date('');
-        setIs_updated(0);
-        setIs_deleted(0);
         setMarket(null);
         setScript(null);
         setStartTime('');
@@ -105,6 +91,7 @@ const Timesettingfilter = ({
                     setMarket={setMarket}
                     showMarket={true}
                     showScript={!isNseMarket}
+                    isGlobalFutMarket={isGlobalFutMarket}
                 />
 
                 {/* Start Time Input */}
@@ -176,7 +163,7 @@ const Timesettingfilter = ({
                 </Grid>
             </Grid>
 
-            <ToastContainer />
+            <ToastContainer containerId="1234" />
         </>
     );
 };

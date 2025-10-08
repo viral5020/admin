@@ -77,18 +77,6 @@ const Expiryvalidation = () => {
 
     const [filterDrawer, setFilterDrawer] = useState(false);
 
-    // Filters
-    const [market, setMarket] = useState('');
-    const [client, setClient] = useState('');
-    const [master, setMaster] = useState('');
-    const [script, setScript] = useState('');
-    const [end1_date, setEnd1_date] = useState('');
-    const [start1_date, setStart1_date] = useState('');
-    const [is_updated, setIs_updated] = useState(false);
-    const [is_deleted, setIs_deleted] = useState(false);
-    const [isAdminOnly, setIsAdminOnly] = useState(false);
-    const [valanId, setValanId] = useState(null);
-
     // marker to indicate filter/search was changed and we should refresh
     const [isFilterChange, setIsFilterChange] = useState(false);
 
@@ -101,14 +89,6 @@ const Expiryvalidation = () => {
                 currentPage,
                 pageSize,
                 debouncedSearchText,
-                market,
-                master,
-                client,
-                end1_date,
-                start1_date,
-                is_deleted,
-                is_updated,
-                isAdminOnly,
             );
 
             let data = result?.data || [];
@@ -164,7 +144,7 @@ const Expiryvalidation = () => {
                 { expiry_validation_id: row.expiry_validation_id }
             );
 
-            if (response.data.success) {
+            if (response.data.status === 'ok') {
                 // Remove from state to update UI
                 setLogs((prev) =>
                     prev.filter((r) => r.expiry_validation_id !== row.expiry_validation_id)
@@ -212,15 +192,7 @@ const Expiryvalidation = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Expiryvalidationfilter
-                        market={market}
-                        script={script}
-                        setScript={setScript}
-                        setMarket={setMarket}
-                        valanId={valanId}
-                        setValanId={setValanId}
-                        onApply={onFilterApply}
-                    />
+                    <Expiryvalidationfilter />
 
                     <Box
                         sx={{
@@ -296,7 +268,8 @@ const Expiryvalidation = () => {
                                                         size="small"
                                                         variant="contained"
                                                         color="error"
-                                                        onClick={() => setRemoveTrade(row)}
+                                                        // onClick={() => setRemoveTrade(row)}
+                                                        onClick={() => handleRemove(row)}
                                                         sx={{ borderRadius: 1 }}
                                                     >
                                                         Remove
@@ -342,21 +315,7 @@ const Expiryvalidation = () => {
                                         <CloseIcon />
                                     </IconButton>
                                 </Box>
-                                <Expiryvalidationfilter
-                                    end1_date={end1_date}
-                                    start1_date={start1_date}
-                                    setEnd1_date={setEnd1_date}
-                                    setStart1_date={setStart1_date}
-                                    is_deleted={is_deleted}
-                                    is_updated={is_updated}
-                                    setIs_deleted={setIs_deleted}
-                                    setIs_updated={setIs_updated}
-                                    market={market}
-                                    setMarket={setMarket}
-                                    valanId={valanId}
-                                    setValanId={setValanId}
-                                    onApply={onFilterApply}
-                                />
+                                <Expiryvalidationfilter />
                             </Box>
                         </Drawer>
 
@@ -434,7 +393,8 @@ const Expiryvalidation = () => {
                                                     variant="contained"
                                                     color="error"
                                                     style={{ borderRadius: 5 }}
-                                                    onClick={() => setRemoveTrade(log)}
+                                                    // onClick={() => setRemoveTrade(log)}
+                                                    onClick={() => handleRemove(log)}
                                                 >
                                                     Remove
                                                 </Button>}</Typography>
