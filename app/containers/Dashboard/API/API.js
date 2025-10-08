@@ -2081,7 +2081,7 @@ export const NSEOPTmanageAPI = async (
     const response = await axiosInstance.post("datatables/option_block_list", formData);
     console.log("API raw response:", response.data); // debug
     // return aaData array inside data
-    return response.data?.aaData || [];
+    return response.data || {};
   } catch (error) {
     console.error("Failed to fetch logs:", error);
     throw error;
@@ -2626,8 +2626,11 @@ export const addNotificationAPI = async ({ user_id, auth_key, user_type, title, 
 };
 
 export const removeBlockOptionExpiryAPI = async ({ script_expiry_option_id }) => {
+  const defaultParams = await getDefaultParams();
+
   try {
     const payload = {
+      ...defaultParams,
       script_expiry_option_id,
       is_block: 0,
     };
@@ -2644,9 +2647,18 @@ export const removeBlockOptionExpiryAPI = async ({ script_expiry_option_id }) =>
 };
 
 // Generic block/unblock option expiry API
-export const setBlockOptionExpiryAPI = async ({ script_expiry_option_id, is_block }) => {
+export const setBlockOptionExpiryAPI = async ({ script_expiry_option_id, action }) => {
+  const defaultParams = await getDefaultParams();
+  const is_block = action === 'block' ? 1 : action === 'remove' ? 0 : -1;
+  if (is_block === -1) return;
+
   try {
-    const payload = { script_expiry_option_id, is_block };
+    const payload = {
+      ...defaultParams,
+      script_expiry_option_id,
+      is_block
+    };
+
     console.log("🔍 Setting block option with payload:", payload);
     const response = await axiosInstance.post(
       "ajaxfiles/setting/add_block_option_expiry",

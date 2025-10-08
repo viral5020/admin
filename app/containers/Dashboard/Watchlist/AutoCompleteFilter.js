@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Autocomplete, TextField, Grid } from '@mui/material';
+import { Autocomplete, TextField, Grid, CircularProgress } from '@mui/material';
 
 const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
     return (
         <>
-            {configs.map(({ label, value, onChange, options, getOptionLabel, hidden, isOptionEqualToValue, disabled, errorMsg }) => {
+            {configs.map(({ label, value, onChange, options, getOptionLabel, hidden, isOptionEqualToValue, disabled, errorMsg, loading }) => {
                 const [inputValue, setInputValue] = useState(getOptionLabel(value));
 
                 useEffect(() => {
@@ -39,7 +39,7 @@ const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
                             getOptionLabel={getOptionLabel}
                             isOptionEqualToValue={isOptionEqualToValue}
                             getOptionDisabled={(option) => getOptionLabel(option) === 'Not Found'}
-                            disabled={disabled}
+                            disabled={disabled || loading}
                             renderOption={(props, option) => {
                                 const optionLabel = getOptionLabel(option);
                                 const isMatch = optionLabel.toLowerCase() === inputValue.toLowerCase();
@@ -66,6 +66,18 @@ const AutoCompleteFilter = ({ configs = [], isDarkMode = false }) => {
                                     size="small"
                                     error={Boolean(errorMsg)}
                                     helperText={errorMsg}
+
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {loading ? (
+                                                    <CircularProgress color="inherit" size={20} />
+                                                ) : null}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
                                 />
                             )}
                             fullWidth
