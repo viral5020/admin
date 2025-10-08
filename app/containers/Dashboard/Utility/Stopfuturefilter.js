@@ -53,9 +53,8 @@ const Stopfuturefilter = ({
 
         const payload = {
             market_type_id: market?.id ?? market,
-            script_id: script?.id ?? script,
+            script_id: selectedFuture,
             master_user_id: master?.id ?? master,
-            future_id: selectedFuture, // ✅ include selected future
             is_app: 1,
             login_user_id: dataStored.user_id ?? "",
             auth_key: dataStored.auth_key ?? "",
