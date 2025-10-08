@@ -38,27 +38,24 @@ import { formatScriptIds } from './helpers/utilFunc';
 import { BrokregereportAPI, editDeleteLogLogsAPI } from './API/API';
 
 const colArr = [
-    "Action",
+    "Trade Time",
     "Client",
     "Script",
-    "Type",
-    "Qty",
-    "lot",
-    "Rate",
-    "Added By",
-    "DateTime"
+    "Trade Type",
+    "Trade Rate",
+    "QTY(lot)",
+    "Brokerage",
 ]
 
 const keyArr = [
-    "log_type",
+    "added_datetime",
     "user_full_name",
     "script_name",
     "trade_type",
-    "trade_qty",
-    { isDesimal: true, name: "trade_lot" },
+    "script_qty",
+    { isDesimal: true, name: "script_lot" },
     { isDesimal: true, name: "trade_rate" },
-    "added_by",
-    "added_datetime",
+    "commissoion_amount",
 ];
 
 const Brokragereports = () => {
@@ -209,14 +206,13 @@ const Brokragereports = () => {
                             <Table stickyHeader size="small" sx={{ minWidth: 1000 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Action</TableCell>
+                                        <TableCell>Trade Time</TableCell>
                                         <TableCell>Client</TableCell>
                                         <TableCell>Script</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        <TableCell>Qty (Lot)</TableCell>
-                                        <TableCell>Rate</TableCell>
-                                        <TableCell>Added By</TableCell>
-                                        <TableCell>DateTime</TableCell>
+                                        <TableCell>Trade Type</TableCell>
+                                        <TableCell>Trade Rate</TableCell>
+                                        <TableCell>QTY(lot)</TableCell>
+                                        <TableCell>Brokerage</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -247,7 +243,8 @@ const Brokragereports = () => {
                                             >
                                                 <TableCell sx={{ color: 'black' }}>
                                                     <span style={{ color: isBuy ? 'green' : isSell ? 'red' : 'black' }}>
-                                                        {log.log_type}
+                                                        {log.added_datetime
+                                                        }
                                                     </span>
                                                 </TableCell>
 
@@ -280,11 +277,6 @@ const Brokragereports = () => {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <strong>{log.trade_qty ?? '-'}</strong>{' '}
-                                                    {log.trade_lot !== undefined && `(${Number(log.trade_lot).toFixed(2)})`}
-                                                </TableCell>
-
-                                                <TableCell>
                                                     <strong>
                                                         {log.trade_rate != null
                                                             ? Number(log.trade_rate).toLocaleString(undefined, {
@@ -296,8 +288,13 @@ const Brokragereports = () => {
 
                                                 </TableCell>
 
-                                                <TableCell>{log.added_by ?? '-'}</TableCell>
-                                                <TableCell>{log.added_datetime ?? '-'}</TableCell>
+                                                <TableCell>
+                                                    <strong>{log.script_qty ?? '-'}</strong>{' '}
+                                                    {log.script_lot !== undefined && `(${Number(log.script_lot).toFixed(2)})`}
+                                                </TableCell>
+
+                                                <TableCell>{log.broker_commission_id ?? '-'}</TableCell>
+
                                             </TableRow>
 
                                         );
@@ -429,8 +426,8 @@ const Brokragereports = () => {
                                                     })
                                                     : '-'}
                                                 &nbsp;
-                                                ({log.trade_qty}) Qty&nbsp;
-                                                <span style={{ fontWeight: 400 }}>{Number(log.trade_lot).toFixed(2)} Lot</span>
+                                                ({log.script_qty}) Qty&nbsp;
+                                                <span style={{ fontWeight: 400 }}>{Number(log.script_lot).toFixed(2)} Lot</span>
                                             </Typography>
                                             <Typography variant="caption" sx={{ fontStyle: "italic" }}>
                                                 {log.added_datetime}
@@ -450,8 +447,13 @@ const Brokragereports = () => {
                                                 }}
                                             >
                                                 {log.trade_type}
-                                                <span style={{ fontWeight: 400, marginLeft: 4 }}>({log.log_type})</span>
+                                                <span style={{ color: "black", fontWeight: 400, marginLeft: 4 }}>
+                                                    Comm Amt: (
+                                                    <span style={{ fontWeight: 700, color: "#4caf50" }}>{log.commissoion_amount}</span>
+                                                    )
+                                                </span>
                                             </Typography>
+
                                             <Typography variant="body2">{log.user_full_name}</Typography>
                                         </Box>
 

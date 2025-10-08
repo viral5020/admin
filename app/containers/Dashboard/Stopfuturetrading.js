@@ -35,7 +35,7 @@ import { deleteFutureTradingBlockAPI, StopfuturelistAPI } from './API/API';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
 import Pagination from './filters/Pagination';
 import Stopfuturefilter from './Utility/Stopfuturefilter';
-import { toast } from 'dan-vendor/react-toastify/dist';
+import { toast, ToastContainer } from 'dan-vendor/react-toastify/dist';
 import SearchPdfCsv from './filters/SearchPdfCsv';
 
 const colArr = [
@@ -93,8 +93,14 @@ const Stopfuturetrading = () => {
             const result = await deleteFutureTradingBlockAPI({ future_block_id });
 
             if (result?.status === "ok") {
+                // Close the dialog first
+                setRemoveTrade(false);
+
+                // Then show toast (can also use setTimeout for tiny delay)
                 toast.success("Future block deleted!", { position: "top-right", autoClose: 3000 });
-                setLogs((prev) => prev.filter((item) => item.future_id !== future_id));
+
+                // Remove the deleted log from state
+                setLogs((prev) => prev.filter((item) => item.future_id !== future_block_id));
             } else {
                 toast.error("Failed to delete!", { position: "top-right", autoClose: 3000 });
             }
@@ -431,6 +437,19 @@ const Stopfuturetrading = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </>
     );
 };
