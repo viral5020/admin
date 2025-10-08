@@ -297,11 +297,6 @@ const OrderBook = ({
     console.log('logs.length', logs.length);
   }, [logs]);
 
-  function onFilterApply() {
-    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
-    toggleDrawer(false)(); // Close drawer if mobile
-  }
-
   // # Pagination useEffects
   useEffect(() => {
     !isFirstRender && fetchLogs();
@@ -323,6 +318,10 @@ const OrderBook = ({
     isFilterChange && !isFirstRender && fetchLogs();
   }, [isFilterChange])
 
+  function onFilterApply() {
+    !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
+    toggleDrawer(false)(); // Close drawer if mobile
+  }
 
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);

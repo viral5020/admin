@@ -17,3 +17,5 @@
 - In mobile, Add `LOAD MORE`
 
 - Add <pagination /> component
+
+- onFilterApply()

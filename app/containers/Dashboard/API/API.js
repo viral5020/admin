@@ -881,8 +881,7 @@ export const fetchMarginManagementListAPI = async (userId, authKey, client, mast
   }
 };
 
-export const fetchforexMarginManagementListAPI = async (userId, authKey, client, master, broker) => {
-  if (!userId || !authKey) return [];
+export const fetchforexMarginManagementListAPI = async (client, master, broker) => {
   const defaultParams = await getDefaultParams();
   const formData = {
     broker_id: broker?.id,
