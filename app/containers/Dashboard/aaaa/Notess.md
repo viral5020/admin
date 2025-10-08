@@ -1,5 +1,11 @@
 ### ASHISH SIR
 
+- NSEOPT management :
+
+  - search not working from api
+  - Also check Add and Remove functionality of api `ajaxfiles/setting/add_block_option_expiry`
+    - Same script added and removed multiple times
+
 - In application.js : `dashboard/Trial-balance` this defines 2 times with 2 different conditions, out of 2 which condition shlould remain
 
 - In position, Before LTP shows only for qty > 0, ma'am
