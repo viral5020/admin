@@ -202,7 +202,7 @@ const Forexmarginmanagement = () => {
             <Button
               type="button"
               variant="contained"
-              color="erroe"
+              color="error"
               sx={{ mt: 2 }}
               onClick={handleClearFilters}
             >
@@ -227,7 +227,6 @@ const Forexmarginmanagement = () => {
                 setClient={setClient}
                 setMaster={setMaster}
                 setBroker={setBroker}
-                horizontal={true}
               />
               <Grid item>
                 <Button

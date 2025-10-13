@@ -13,12 +13,13 @@ import {
 
 import { Tabs, Tab } from '@mui/material';
 import Drawer from '@mui/material/Drawer';
-import { Pie, Doughnut } from 'react-chartjs-2';
+import { Pie, Doughnut, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     ArcElement,
     Tooltip,
     Legend,
+    Cell
 } from 'chart.js';
 
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -68,6 +69,16 @@ import Mtmalerts from './Mtmalerts';
 import Userlisting from './Userlisting';
 import Masterlisting from './MasterList';
 import BrokerListing from './BrokerListing';
+import {
+    BarChart,
+
+    XAxis,
+    YAxis,
+    CartesianGrid,
+
+    ResponsiveContainer,
+
+} from 'recharts'
 
 
 const rawData = sessionStorage.getItem("data");
@@ -160,6 +171,23 @@ const asserts = {
     "ONGC": { price: 300, pl: -600, qty: 40 },
 };
 
+const pnlData = [
+    { instrument: 'NIFTY', pnl: 12000 },
+    { instrument: 'BANKNIFTY', pnl: -5000 },
+    { instrument: 'RELIANCE', pnl: 8000 },
+    { instrument: 'TCS', pnl: 4000 },
+    { instrument: 'INFY', pnl: -2000 },
+    { instrument: 'HDFC', pnl: 6000 },
+    { instrument: 'ICICI', pnl: -3000 },
+    { instrument: 'LT', pnl: 5000 },
+    { instrument: 'SBIN', pnl: -1000 },
+    { instrument: 'MARUTI', pnl: 7000 },
+    { instrument: 'AXISBANK', pnl: -4000 },
+    { instrument: 'WIPRO', pnl: 3000 },
+    { instrument: 'ITC', pnl: 2000 },
+    { instrument: 'HINDUNILVR', pnl: -1500 },
+    { instrument: 'BHARTIARTL', pnl: 2500 },
+]
 
 const assertNames = Object.keys(asserts);
 const smallCapNames = ["Wipro", "ONGC", "Dr. Reddy"];
@@ -206,7 +234,10 @@ const exampleStock = {
 const boxHeight = 280;
 
 function Masterdashboard() {
+    const [isOpen, setIsOpen] = useState(false)
 
+    // Function to color bars based on PnL
+    const getBarColor = (pnl) => (pnl >= 0 ? '#82ca9d' : '#ff4d4f')
     const initialMasterData = [
         {
             name: "Master A",
@@ -252,6 +283,7 @@ function Masterdashboard() {
     const [margindata, setMargindata] = useState()
 
     const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
+    const [chartsDialogOpen, setchartsDialogOpen] = useState(false);
     const [orders, setOrders] = useState([]);
     const [filterType, setFilterType] = useState("today");
     const [PendingFilterType, setPendingFilterType] = useState("today");
@@ -267,6 +299,7 @@ function Masterdashboard() {
     const [positionData, setPositionData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const [viewmore, setviewmore] = useState("");
 
     const [rejectionDialogOpen, setrejectionDialogOpen] = useState(false);
     const [rejectionLogs, setRejectionLogs] = useState([]);
@@ -826,6 +859,7 @@ function Masterdashboard() {
         setCurrentPage(0);
         fetchOrders(newFilter); // pass filter type to fetch updated data
         setOrdersDialogOpen(true)
+        setchartsDialogOpen(true)
     };
 
     const handleSearchChange = (value) => {
@@ -1707,6 +1741,57 @@ function Masterdashboard() {
                                     <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ m: 0 }}>
                                         Stock-Wise Distribution
                                     </Typography>
+                                    <Box sx={{ position: 'absolute', left: 0 }}>
+                                        <button onClick={() => setOpen(true)}>Open Chart Dialog</button>
+                                        <Dialog
+                                            open={open}
+                                            onClose={() => setOpen(false)}
+                                            maxWidth="lg"
+                                            fullWidth
+                                        >
+                                            <DialogTitle>
+                                                PnL Chart
+                                                <IconButton
+                                                    aria-label="close"
+                                                    onClick={() => setOpen(false)}
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        right: 8,
+                                                        top: 8,
+                                                        color: (theme) => theme.palette.grey[500],
+                                                    }}
+                                                >
+                                                    <CloseIcon />
+                                                </IconButton>
+                                            </DialogTitle>
+
+                                            <DialogContent dividers style={{ height: '70vh' }}>
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <BarChart
+                                                        data={pnlData}
+                                                        margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+                                                    >
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis
+                                                            dataKey="instrument"
+                                                            tick={{ fontSize: 12 }}
+                                                            interval={0}
+                                                            angle={-45}
+                                                            textAnchor="end"
+                                                            height={80}
+                                                        />
+                                                        <YAxis />
+                                                        <Tooltip />
+                                                        <Bar dataKey="pnl" isAnimationActive={false}>
+                                                            {pnlData.map((entry, index) => (
+                                                                <Cell key={`cell-${index}`} fill={getBarColor(entry.pnl)} />
+                                                            ))}
+                                                        </Bar>
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </Box>
                                     <Box sx={{ position: 'absolute', right: 0 }}>
                                         <DropdownMenu selected={selected} setSelected={setSelected} />
                                     </Box>
