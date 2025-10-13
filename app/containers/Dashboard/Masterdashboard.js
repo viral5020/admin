@@ -1811,6 +1811,7 @@ function Masterdashboard() {
                                             </IconButton>
                                         </Box>
                                         <DialogContent>
+                                            {/* --- Bar Chart --- */}
                                             <Box sx={{ height: 450, width: '100%' }}>
                                                 <Bar
                                                     data={{
@@ -1821,15 +1822,14 @@ function Masterdashboard() {
                                                                 data: Object.values(dummyInstrumentPnL),
                                                                 backgroundColor: Object.values(dummyInstrumentPnL).map(val =>
                                                                     val >= 0
-                                                                        ? 'linear-gradient(180deg, rgba(75,192,192,0.8), rgba(75,192,192,0.4))'
-                                                                        : 'linear-gradient(180deg, rgba(255,99,132,0.8), rgba(255,99,132,0.4))'
+                                                                        ? 'rgba(75,192,192,0.6)'
+                                                                        : 'rgba(255,99,132,0.6)'
                                                                 ),
                                                                 borderColor: Object.values(dummyInstrumentPnL).map(val =>
                                                                     val >= 0 ? 'rgba(75,192,192,1)' : 'rgba(255,99,132,1)'
                                                                 ),
                                                                 borderWidth: 2,
-                                                                borderRadius: 8, // smooth edges
-                                                                hoverOffset: 5,
+                                                                borderRadius: 8,
                                                             },
                                                         ],
                                                     }}
@@ -1839,33 +1839,158 @@ function Masterdashboard() {
                                                             legend: { display: false },
                                                             tooltip: {
                                                                 callbacks: {
-                                                                    label: function (context) {
-                                                                        const value = context.raw;
-                                                                        return `P/L: ₹${value.toLocaleString("en-IN")}`;
-                                                                    }
-                                                                }
+                                                                    label: (context) =>
+                                                                        `P/L: ₹${context.raw.toLocaleString("en-IN")}`,
+                                                                },
                                                             },
                                                         },
                                                         scales: {
                                                             x: {
-                                                                ticks: { font: { weight: 'bold', size: 13 } },
+                                                                ticks: { font: { weight: "bold", size: 13 } },
                                                                 grid: { display: false },
                                                             },
                                                             y: {
                                                                 beginAtZero: true,
                                                                 ticks: {
-                                                                    callback: value => `₹${value.toLocaleString("en-IN")}`,
-                                                                    font: { weight: 'bold', size: 13 }
+                                                                    callback: (value) => `₹${value.toLocaleString("en-IN")}`,
+                                                                    font: { weight: "bold", size: 13 },
                                                                 },
-                                                                grid: { color: 'rgba(0,0,0,0.1)', borderDash: [5, 5] },
+                                                                grid: { color: "rgba(0,0,0,0.1)", borderDash: [5, 5] },
                                                             },
                                                         },
-                                                        animation: {
-                                                            duration: 1000,
-                                                            easing: 'easeOutQuart'
-                                                        },
+                                                        animation: { duration: 1200, easing: "easeOutQuart" },
                                                     }}
                                                 />
+                                            </Box>
+
+                                            {/* --- Doughnut Chart --- */}
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    mt: 5,
+                                                    width: "100%",
+                                                    flexDirection: { xs: "column", md: "row" },
+                                                }}
+                                            >
+                                                {/* Doughnut Chart */}
+                                                <Box sx={{ height: 400, width: { xs: "100%", md: "70%" }, position: "relative" }}>
+                                                    <Doughnut
+                                                        data={{
+                                                            labels: Object.keys(dummyInstrumentPnL),
+                                                            datasets: [
+                                                                {
+                                                                    data: Object.values(dummyInstrumentPnL).map(v => Math.abs(v)),
+                                                                    backgroundColor: Object.values(dummyInstrumentPnL).map(val =>
+                                                                        val >= 0
+                                                                            ? "rgba(75,192,192,0.7)"
+                                                                            : "rgba(255,99,132,0.7)"
+                                                                    ),
+                                                                    borderColor: "#fff",
+                                                                    borderWidth: 2,
+                                                                    hoverOffset: 10,
+                                                                },
+                                                            ],
+                                                        }}
+                                                        options={{
+                                                            cutout: "65%",
+                                                            responsive: true,
+                                                            plugins: {
+                                                                legend: { display: false },
+                                                                tooltip: {
+                                                                    callbacks: {
+                                                                        label: (context) => {
+                                                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                            const val = context.raw;
+                                                                            const pct = ((val / total) * 100).toFixed(1);
+                                                                            const orig = dummyInstrumentPnL[context.label];
+                                                                            const sign = orig >= 0 ? "+" : "-";
+                                                                            return `${context.label}: ${sign}₹${Math.abs(orig).toLocaleString("en-IN")} (${pct}%)`;
+                                                                        },
+                                                                    },
+                                                                },
+                                                            },
+                                                            animation: { animateScale: true, animateRotate: true, duration: 1300 },
+                                                        }}
+                                                        plugins={[
+                                                            {
+                                                                // Custom plugin for center text
+                                                                id: "centerText",
+                                                                beforeDraw: (chart) => {
+                                                                    const { width } = chart;
+                                                                    const { ctx } = chart;
+                                                                    ctx.save();
+                                                                    const total = Object.values(dummyInstrumentPnL).reduce(
+                                                                        (a, b) => a + b,
+                                                                        0
+                                                                    );
+                                                                    ctx.font = "600 18px Poppins";
+                                                                    ctx.textBaseline = "middle";
+                                                                    ctx.fillStyle = total >= 0 ? "rgba(75,192,192,1)" : "rgba(255,99,132,1)";
+                                                                    const text = `Total P/L: ₹${total.toLocaleString("en-IN")}`;
+                                                                    const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                                                                    const textY = chart.chartArea.top + chart.chartArea.height / 2;
+                                                                    ctx.fillText(text, textX, textY);
+                                                                    ctx.restore();
+                                                                },
+                                                            },
+                                                        ]}
+                                                    />
+                                                </Box>
+
+                                                {/* Scrollable Legend */}
+                                                <Box
+                                                    sx={{
+                                                        width: { xs: "100%", md: "30%" },
+                                                        maxHeight: 400,
+                                                        overflowY: "auto",
+                                                        ml: { md: 3 },
+                                                        mt: { xs: 3, md: 0 },
+                                                        borderLeft: { md: "1px solid rgba(0,0,0,0.1)" },
+                                                        pl: { md: 2 },
+                                                    }}
+                                                >
+                                                    <Typography variant="h6" fontWeight="bold" mb={2}>
+                                                        Instrument Breakdown
+                                                    </Typography>
+                                                    {Object.entries(dummyInstrumentPnL).map(([name, value]) => {
+                                                        const color =
+                                                            value >= 0 ? "rgba(75,192,192,0.8)" : "rgba(255,99,132,0.8)";
+                                                        const total = Object.values(dummyInstrumentPnL).reduce(
+                                                            (a, b) => a + Math.abs(b),
+                                                            0
+                                                        );
+                                                        const pct = ((Math.abs(value) / total) * 100).toFixed(1);
+                                                        return (
+                                                            <Box
+                                                                key={name}
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    mb: 1.5,
+                                                                    gap: 1,
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 14,
+                                                                        height: 14,
+                                                                        borderRadius: "50%",
+                                                                        backgroundColor: color,
+                                                                    }}
+                                                                />
+                                                                <Typography sx={{ flexGrow: 1 }}>{name}</Typography>
+                                                                <Typography fontWeight="bold" color={value >= 0 ? "teal" : "error"}>
+                                                                    {value >= 0 ? "+" : "-"}₹{Math.abs(value).toLocaleString("en-IN")}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                                                    ({pct}%)
+                                                                </Typography>
+                                                            </Box>
+                                                        );
+                                                    })}
+                                                </Box>
                                             </Box>
                                         </DialogContent>
 
