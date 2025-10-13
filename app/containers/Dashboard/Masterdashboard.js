@@ -16,10 +16,13 @@ import Drawer from '@mui/material/Drawer';
 import { Pie, Doughnut, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
-    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
     Tooltip,
     Legend,
-    Cell
+    ArcElement,
 } from 'chart.js';
 
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -69,16 +72,6 @@ import Mtmalerts from './Mtmalerts';
 import Userlisting from './Userlisting';
 import Masterlisting from './MasterList';
 import BrokerListing from './BrokerListing';
-import {
-    BarChart,
-
-    XAxis,
-    YAxis,
-    CartesianGrid,
-
-    ResponsiveContainer,
-
-} from 'recharts'
 
 
 const rawData = sessionStorage.getItem("data");
@@ -91,7 +84,7 @@ const animationVariants = {
     exit: { opacity: 0, scale: 0.95 },
 };
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, CategoryScale, BarElement);
 
 const generateCandleData = (name) => {
     const base = 1000 + Math.random() * 100;
@@ -171,23 +164,6 @@ const asserts = {
     "ONGC": { price: 300, pl: -600, qty: 40 },
 };
 
-const pnlData = [
-    { instrument: 'NIFTY', pnl: 12000 },
-    { instrument: 'BANKNIFTY', pnl: -5000 },
-    { instrument: 'RELIANCE', pnl: 8000 },
-    { instrument: 'TCS', pnl: 4000 },
-    { instrument: 'INFY', pnl: -2000 },
-    { instrument: 'HDFC', pnl: 6000 },
-    { instrument: 'ICICI', pnl: -3000 },
-    { instrument: 'LT', pnl: 5000 },
-    { instrument: 'SBIN', pnl: -1000 },
-    { instrument: 'MARUTI', pnl: 7000 },
-    { instrument: 'AXISBANK', pnl: -4000 },
-    { instrument: 'WIPRO', pnl: 3000 },
-    { instrument: 'ITC', pnl: 2000 },
-    { instrument: 'HINDUNILVR', pnl: -1500 },
-    { instrument: 'BHARTIARTL', pnl: 2500 },
-]
 
 const assertNames = Object.keys(asserts);
 const smallCapNames = ["Wipro", "ONGC", "Dr. Reddy"];
@@ -234,10 +210,34 @@ const exampleStock = {
 const boxHeight = 280;
 
 function Masterdashboard() {
-    const [isOpen, setIsOpen] = useState(false)
 
-    // Function to color bars based on PnL
-    const getBarColor = (pnl) => (pnl >= 0 ? '#82ca9d' : '#ff4d4f')
+    const dummyInstrumentPnL = {
+        NIFTY: 12000,
+        BANKNIFTY: -5000,
+        RELIANCE: 8000,
+        TCS: -3000,
+        INFY: 7000,
+        HDFC: 4000,
+        ICICI: -2500,
+        SBI: 1000,
+        WIPRO: 3500,
+        TECHM: -1500,
+        LT: 5000,
+        KOTAK: -2000,
+        HCLTECH: 6000,
+        MARUTI: 3000,
+        AXISBANK: -1000,
+        BHARTIARTL: 4500,
+        ADANIPORTS: -3500,
+        SUNPHARMA: 2000,
+        ITC: 1500,
+        TATAMOTORS: -4000,
+    };
+
+    const [openPnLDialog, setOpenPnLDialog] = useState(false);
+    const handleOpenDialog = () => setOpenPnLDialog(true);
+    const handleCloseDialog = () => setOpenPnLDialog(false);
+
     const initialMasterData = [
         {
             name: "Master A",
@@ -283,7 +283,6 @@ function Masterdashboard() {
     const [margindata, setMargindata] = useState()
 
     const [ordersDialogOpen, setOrdersDialogOpen] = useState(false);
-    const [chartsDialogOpen, setchartsDialogOpen] = useState(false);
     const [orders, setOrders] = useState([]);
     const [filterType, setFilterType] = useState("today");
     const [PendingFilterType, setPendingFilterType] = useState("today");
@@ -299,7 +298,6 @@ function Masterdashboard() {
     const [positionData, setPositionData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const [viewmore, setviewmore] = useState("");
 
     const [rejectionDialogOpen, setrejectionDialogOpen] = useState(false);
     const [rejectionLogs, setRejectionLogs] = useState([]);
@@ -859,7 +857,6 @@ function Masterdashboard() {
         setCurrentPage(0);
         fetchOrders(newFilter); // pass filter type to fetch updated data
         setOrdersDialogOpen(true)
-        setchartsDialogOpen(true)
     };
 
     const handleSearchChange = (value) => {
@@ -1733,68 +1730,146 @@ function Masterdashboard() {
                                     sx={{
                                         position: 'relative',
                                         display: 'flex',
-                                        justifyContent: 'center',
+                                        justifyContent: 'space-between',
                                         alignItems: 'center',
                                         mb: 0,
                                     }}
                                 >
-                                    <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ m: 0 }}>
+                                    {/* View More Button on the left */}
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => setOpenPnLDialog(true)}
+                                        sx={{
+                                            mr: 2,
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                        }}
+                                    >
+                                        View More
+                                    </Button>
+
+                                    {/* Title */}
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight={700}
+                                        textAlign="center"
+                                        sx={{ flex: 1 }}
+                                    >
                                         Stock-Wise Distribution
                                     </Typography>
-                                    <Box sx={{ position: 'absolute', left: 0 }}>
-                                        <button onClick={() => setOpen(true)}>Open Chart Dialog</button>
-                                        <Dialog
-                                            open={open}
-                                            onClose={() => setOpen(false)}
-                                            maxWidth="lg"
-                                            fullWidth
-                                        >
-                                            <DialogTitle>
-                                                PnL Chart
-                                                <IconButton
-                                                    aria-label="close"
-                                                    onClick={() => setOpen(false)}
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        right: 8,
-                                                        top: 8,
-                                                        color: (theme) => theme.palette.grey[500],
-                                                    }}
-                                                >
-                                                    <CloseIcon />
-                                                </IconButton>
-                                            </DialogTitle>
 
-                                            <DialogContent dividers style={{ height: '70vh' }}>
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart
-                                                        data={pnlData}
-                                                        margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
-                                                    >
-                                                        <CartesianGrid strokeDasharray="3 3" />
-                                                        <XAxis
-                                                            dataKey="instrument"
-                                                            tick={{ fontSize: 12 }}
-                                                            interval={0}
-                                                            angle={-45}
-                                                            textAnchor="end"
-                                                            height={80}
-                                                        />
-                                                        <YAxis />
-                                                        <Tooltip />
-                                                        <Bar dataKey="pnl" isAnimationActive={false}>
-                                                            {pnlData.map((entry, index) => (
-                                                                <Cell key={`cell-${index}`} fill={getBarColor(entry.pnl)} />
-                                                            ))}
-                                                        </Bar>
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </Box>
-                                    <Box sx={{ position: 'absolute', right: 0 }}>
+                                    {/* Dropdown */}
+                                    <Box sx={{ ml: 2 }}>
                                         <DropdownMenu selected={selected} setSelected={setSelected} />
                                     </Box>
+
+                                    {/* PnL Dialog */}
+                                    <Dialog
+                                        open={openPnLDialog}
+                                        onClose={() => setOpenPnLDialog(false)}
+                                        maxWidth="md"
+                                        fullWidth
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                px: 2,
+                                                py: 1.5,
+                                                backdropFilter: "blur(6px)",
+                                                background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #21cbf3 100%)",
+                                                color: "#fff",
+                                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight={800}
+                                                sx={{
+                                                    textTransform: "uppercase",
+                                                    letterSpacing: 1.5,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    textShadow: "0 0 6px rgba(33,203,243,0.9)",
+                                                }}
+                                            >
+                                                <BarChartIcon sx={{ mr: 1, fontSize: "2rem", color: "#fff" }} />
+                                                PnL by Instrument
+                                            </Typography>
+                                            <IconButton
+                                                size="small"
+                                                sx={{
+                                                    color: "#fff",
+                                                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                                    borderRadius: "50%",
+                                                    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+                                                }}
+                                                onClick={() => setOpenPnLDialog(false)}
+                                            >
+                                                <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                        <DialogContent>
+                                            <Box sx={{ height: 450, width: '100%' }}>
+                                                <Bar
+                                                    data={{
+                                                        labels: Object.keys(dummyInstrumentPnL),
+                                                        datasets: [
+                                                            {
+                                                                label: "P/L (₹)",
+                                                                data: Object.values(dummyInstrumentPnL),
+                                                                backgroundColor: Object.values(dummyInstrumentPnL).map(val =>
+                                                                    val >= 0
+                                                                        ? 'linear-gradient(180deg, rgba(75,192,192,0.8), rgba(75,192,192,0.4))'
+                                                                        : 'linear-gradient(180deg, rgba(255,99,132,0.8), rgba(255,99,132,0.4))'
+                                                                ),
+                                                                borderColor: Object.values(dummyInstrumentPnL).map(val =>
+                                                                    val >= 0 ? 'rgba(75,192,192,1)' : 'rgba(255,99,132,1)'
+                                                                ),
+                                                                borderWidth: 2,
+                                                                borderRadius: 8, // smooth edges
+                                                                hoverOffset: 5,
+                                                            },
+                                                        ],
+                                                    }}
+                                                    options={{
+                                                        responsive: true,
+                                                        plugins: {
+                                                            legend: { display: false },
+                                                            tooltip: {
+                                                                callbacks: {
+                                                                    label: function (context) {
+                                                                        const value = context.raw;
+                                                                        return `P/L: ₹${value.toLocaleString("en-IN")}`;
+                                                                    }
+                                                                }
+                                                            },
+                                                        },
+                                                        scales: {
+                                                            x: {
+                                                                ticks: { font: { weight: 'bold', size: 13 } },
+                                                                grid: { display: false },
+                                                            },
+                                                            y: {
+                                                                beginAtZero: true,
+                                                                ticks: {
+                                                                    callback: value => `₹${value.toLocaleString("en-IN")}`,
+                                                                    font: { weight: 'bold', size: 13 }
+                                                                },
+                                                                grid: { color: 'rgba(0,0,0,0.1)', borderDash: [5, 5] },
+                                                            },
+                                                        },
+                                                        animation: {
+                                                            duration: 1000,
+                                                            easing: 'easeOutQuart'
+                                                        },
+                                                    }}
+                                                />
+                                            </Box>
+                                        </DialogContent>
+
+                                    </Dialog>
                                 </Box>
                             ) : (
                                 <Box
@@ -1851,13 +1926,13 @@ function Masterdashboard() {
                                                 onClick={() => showChartTooltip(i)}
                                                 sx={{
                                                     mb: 1.5,
-                                                    p: 1.5,
-                                                    borderRadius: 1,
-                                                    boxShadow: 1,
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    boxShadow: highlightedStock === name ? 6 : 1,
                                                     cursor: 'pointer',
                                                     backgroundColor: highlightedStock === name ? 'primary.light' : 'background.paper',
-                                                    transition: 'background-color 0.4s ease, transform 0.3s ease',
-                                                    transform: highlightedStock === name ? 'scale(1.02)' : 'scale(1)',
+                                                    transition: 'all 0.3s ease',
+                                                    transform: highlightedStock === name ? 'scale(1.03)' : 'scale(1)',
                                                 }}
                                             >
                                                 <Box
@@ -1877,7 +1952,7 @@ function Masterdashboard() {
                                                             m: 0,
                                                         }}
                                                     >
-                                                        P/L: ₹{details.pl}
+                                                        P/L: ₹{details.pl.toLocaleString("en-IN")}
                                                     </Typography>
                                                     <Typography fontWeight={600} variant="subtitle2" sx={{ lineHeight: 1.2, m: 0 }}>
                                                         {name}
@@ -1907,8 +1982,8 @@ function Masterdashboard() {
                                         sx={{
                                             flex: 1,
                                             width: '100%',
-                                            maxWidth: { xs: '100%', md: 400 },
-                                            height: { xs: 250, sm: 300 },
+                                            maxWidth: { xs: '100%', md: 450 },
+                                            height: { xs: 250, sm: 350 },
                                             mx: 'auto',
                                             position: 'relative',
                                         }}
@@ -1921,29 +1996,29 @@ function Masterdashboard() {
                                                         label: "Small Cap",
                                                         data: smallCapData,
                                                         backgroundColor: smallCapColors,
-                                                        borderColor: "#222",
-                                                        borderWidth: 1,
+                                                        borderColor: "#fff",
+                                                        borderWidth: 2,
                                                     },
                                                     {
                                                         label: "Mid Cap",
                                                         data: midCapData,
                                                         backgroundColor: midCapColors,
-                                                        borderColor: "#222",
-                                                        borderWidth: 1,
+                                                        borderColor: "#fff",
+                                                        borderWidth: 2,
                                                     },
                                                     {
                                                         label: "Large Cap",
                                                         data: largeCapData,
                                                         backgroundColor: largeCapColors,
-                                                        borderColor: "#222",
-                                                        borderWidth: 1,
+                                                        borderColor: "#fff",
+                                                        borderWidth: 2,
                                                     },
                                                 ],
                                             }}
                                             options={{
                                                 responsive: true,
-                                                maintainAspectRatio: false, // Keep or try removing to test
-                                                cutout: "50%",
+                                                maintainAspectRatio: false,
+                                                cutout: "55%",
                                                 plugins: {
                                                     legend: {
                                                         position: "bottom",
@@ -1951,17 +2026,16 @@ function Masterdashboard() {
                                                             usePointStyle: true,
                                                             pointStyle: 'circle',
                                                             color: theme.palette.text.primary,
-                                                            padding: 20,
-                                                            generateLabels: (chart) => {
-                                                                return chart.data.datasets.map((dataset, i) => ({
-                                                                    text: dataset.label,
-                                                                    fillStyle: dataset.backgroundColor[0],
-                                                                    strokeStyle: dataset.borderColor,
-                                                                    lineWidth: 1,
-                                                                    hidden: false,
-                                                                    index: i,
-                                                                }));
-                                                            },
+                                                            padding: 16,
+                                                            font: { weight: 'bold' },
+                                                            generateLabels: (chart) => chart.data.datasets.map((dataset, i) => ({
+                                                                text: dataset.label,
+                                                                fillStyle: dataset.backgroundColor[0],
+                                                                strokeStyle: dataset.borderColor,
+                                                                lineWidth: 2,
+                                                                hidden: false,
+                                                                index: i,
+                                                            })),
                                                         },
                                                     },
                                                     tooltip: {
@@ -1970,11 +2044,9 @@ function Masterdashboard() {
                                                                 const datasetLabel = context.dataset.label;
                                                                 const dataIndex = context.dataIndex;
                                                                 let name = "";
-
                                                                 if (datasetLabel === "Small Cap") name = smallCapNames[dataIndex];
                                                                 else if (datasetLabel === "Mid Cap") name = midCapNames[dataIndex];
                                                                 else if (datasetLabel === "Large Cap") name = largeCapNames[dataIndex];
-
                                                                 const asset = asserts[name];
                                                                 return `${name}: Qty ${asset.qty}, P/L ₹${asset.pl.toLocaleString("en-IN")}`;
                                                             },
@@ -1986,17 +2058,15 @@ function Masterdashboard() {
                                                         const datasetIndex = elements[0].datasetIndex;
                                                         const dataIndex = elements[0].index;
                                                         let stockName = "";
-
                                                         if (datasetIndex === 0) stockName = smallCapNames[dataIndex];
                                                         else if (datasetIndex === 1) stockName = midCapNames[dataIndex];
                                                         else if (datasetIndex === 2) stockName = largeCapNames[dataIndex];
-
                                                         scrollToCompany(stockName);
                                                     }
                                                 },
                                             }}
-                                            height={250}  // ⭐ Optional fallback
-                                            width={250}
+                                            height={300}
+                                            width={300}
                                         />
                                     </Box>
                                 </Box>
@@ -2004,6 +2074,7 @@ function Masterdashboard() {
                         </DialogContent>
                     </Paper>
                 </Grid>
+
 
                 {/*--------------------- LAST 3 CARDS ---------------------*/}
                 <Grid item xs={12}>
