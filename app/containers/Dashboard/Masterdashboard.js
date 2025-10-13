@@ -1812,7 +1812,7 @@ function Masterdashboard() {
                                         </Box>
                                         <DialogContent>
                                             {/* --- Bar Chart --- */}
-                                            <Box sx={{ height: 450, width: '100%' }}>
+                                            <Box sx={{ width: '100%' }}>
                                                 <Bar
                                                     data={{
                                                         labels: Object.keys(dummyInstrumentPnL),
@@ -1863,19 +1863,33 @@ function Masterdashboard() {
                                                 />
                                             </Box>
 
+                                            <Divider sx={{ my: 3 }} />
+
                                             {/* --- Doughnut Chart --- */}
                                             <Box
                                                 sx={{
                                                     display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    mt: 5,
+                                                    // alignItems: "center",
+                                                    justifyContent: "space-between",
+                                                    mt: 7,
                                                     width: "100%",
-                                                    flexDirection: { xs: "column", md: "row" },
+                                                    flexDirection: { xs: "column", sm: "row" },
+                                                    // flexDirection: "row",
+                                                    pb: 4,
                                                 }}
                                             >
                                                 {/* Doughnut Chart */}
-                                                <Box sx={{ height: 400, width: { xs: "100%", md: "70%" }, position: "relative" }}>
+                                                <Box
+                                                    sx={{
+                                                        height: '35vw',
+                                                        // width: { xs: "100%", md: "50%" },
+                                                        width: "100%",
+                                                        minWidth: 200,
+                                                        maxWidth: 400,
+                                                        position: "relative",
+                                                        pl: 1,
+                                                    }}
+                                                >
                                                     <Doughnut
                                                         data={{
                                                             labels: Object.keys(dummyInstrumentPnL),
@@ -1915,26 +1929,41 @@ function Masterdashboard() {
                                                         }}
                                                         plugins={[
                                                             {
-                                                                // Custom plugin for center text
                                                                 id: "centerText",
                                                                 beforeDraw: (chart) => {
-                                                                    const { width } = chart;
-                                                                    const { ctx } = chart;
+                                                                    const { width, chartArea, ctx } = chart;
+                                                                    const total = Object.values(dummyInstrumentPnL).reduce((a, b) => a + b, 0);
+                                                                    const color = total >= 0 ? "rgba(75,192,192,1)" : "rgba(255,99,132,1)";
+
+                                                                    const fullText = `Total P/L: ₹${total.toLocaleString("en-IN")}`;
+                                                                    const labelText = "Total P/L:";
+                                                                    const valueText = `₹${total.toLocaleString("en-IN")}`;
+
                                                                     ctx.save();
-                                                                    const total = Object.values(dummyInstrumentPnL).reduce(
-                                                                        (a, b) => a + b,
-                                                                        0
-                                                                    );
+
+                                                                    // const fontSize = Math.min(18, width / 20);
+                                                                    const fontSize = 18;
                                                                     ctx.font = "600 18px Poppins";
+
                                                                     ctx.textBaseline = "middle";
-                                                                    ctx.fillStyle = total >= 0 ? "rgba(75,192,192,1)" : "rgba(255,99,132,1)";
-                                                                    const text = `Total P/L: ₹${total.toLocaleString("en-IN")}`;
-                                                                    const textX = Math.round((width - ctx.measureText(text).width) / 2);
-                                                                    const textY = chart.chartArea.top + chart.chartArea.height / 2;
-                                                                    ctx.fillText(text, textX, textY);
+                                                                    ctx.textAlign = "center";
+                                                                    ctx.fillStyle = color;
+
+                                                                    const textWidth = ctx.measureText(fullText).width;
+                                                                    const centerX = (chartArea.left + chartArea.right) / 2;
+                                                                    const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+                                                                    if (textWidth > width * 0.6) {
+                                                                        ctx.fillText(labelText, centerX, centerY - fontSize / 1.5);
+                                                                        ctx.fillText(valueText, centerX, centerY + fontSize / 1.5);
+                                                                    } else {
+                                                                        ctx.fillText(fullText, centerX, centerY);
+                                                                    }
+
                                                                     ctx.restore();
                                                                 },
-                                                            },
+                                                            }
+
                                                         ]}
                                                     />
                                                 </Box>
@@ -1942,54 +1971,85 @@ function Masterdashboard() {
                                                 {/* Scrollable Legend */}
                                                 <Box
                                                     sx={{
-                                                        width: { xs: "100%", md: "30%" },
-                                                        maxHeight: 400,
-                                                        overflowY: "auto",
+
+                                                        width: "100%",
+                                                        maxWidth: '400px',
+                                                        // width: { xs: "100%", md: "40%" },
                                                         ml: { md: 3 },
-                                                        mt: { xs: 3, md: 0 },
+                                                        // mt: { xs: 3, md: 0 },
                                                         borderLeft: { md: "1px solid rgba(0,0,0,0.1)" },
-                                                        pl: { md: 2 },
+                                                        px: 2,
                                                     }}
                                                 >
                                                     <Typography variant="h6" fontWeight="bold" mb={2}>
                                                         Instrument Breakdown
                                                     </Typography>
-                                                    {Object.entries(dummyInstrumentPnL).map(([name, value]) => {
-                                                        const color =
-                                                            value >= 0 ? "rgba(75,192,192,0.8)" : "rgba(255,99,132,0.8)";
-                                                        const total = Object.values(dummyInstrumentPnL).reduce(
-                                                            (a, b) => a + Math.abs(b),
-                                                            0
-                                                        );
-                                                        const pct = ((Math.abs(value) / total) * 100).toFixed(1);
-                                                        return (
-                                                            <Box
-                                                                key={name}
-                                                                sx={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    mb: 1.5,
-                                                                    gap: 1,
-                                                                }}
-                                                            >
+                                                    <Box
+                                                        sx={{
+                                                            maxHeight: 400,
+                                                            overflowY: "auto",
+                                                            overflowY: 'auto',
+                                                            '&::-webkit-scrollbar': {
+                                                                width: '6px', // thinner scrollbar
+                                                            },
+                                                            '&::-webkit-scrollbar-thumb': {
+                                                                backgroundColor: '#888', // scrollbar color
+                                                                borderRadius: '4px',
+                                                            },
+                                                            '&::-webkit-scrollbar-thumb:hover': {
+                                                                backgroundColor: '#555', // on hover
+                                                            },
+                                                            '&::-webkit-scrollbar-track': {
+                                                                backgroundColor: '#f1f1f1', // scrollbar track
+                                                            },
+                                                        }}
+                                                    >
+                                                        {Object.entries(dummyInstrumentPnL).map(([name, value]) => {
+                                                            const color =
+                                                                value >= 0 ? "rgba(75,192,192,0.8)" : "rgba(255,99,132,0.8)";
+                                                            const total = Object.values(dummyInstrumentPnL).reduce(
+                                                                (a, b) => a + Math.abs(b),
+                                                                0
+                                                            );
+                                                            const pct = ((Math.abs(value) / total) * 100).toFixed(1);
+                                                            return (
                                                                 <Box
+                                                                    key={name}
                                                                     sx={{
-                                                                        width: 14,
-                                                                        height: 14,
-                                                                        borderRadius: "50%",
-                                                                        backgroundColor: color,
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        mb: 1.5,
+                                                                        gap: 1,
+                                                                        mr: 1,
                                                                     }}
-                                                                />
-                                                                <Typography sx={{ flexGrow: 1 }}>{name}</Typography>
-                                                                <Typography fontWeight="bold" color={value >= 0 ? "teal" : "error"}>
-                                                                    {value >= 0 ? "+" : "-"}₹{Math.abs(value).toLocaleString("en-IN")}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                                                    ({pct}%)
-                                                                </Typography>
-                                                            </Box>
-                                                        );
-                                                    })}
+                                                                >
+                                                                    <Box
+                                                                        sx={{
+                                                                            width: 14,
+                                                                            height: 14,
+                                                                            borderRadius: "50%",
+                                                                            backgroundColor: color,
+                                                                        }}
+                                                                    />
+                                                                    <Typography sx={{ flexGrow: 1 }}>{name}</Typography>
+                                                                    <Typography
+                                                                        fontWeight="bold"
+                                                                        color={value >= 0 ? "teal" : "error"}
+                                                                        sx={{ whiteSpace: 'nowrap' }}
+                                                                    >
+                                                                        {value >= 0 ? "+" : "-"}₹{Math.abs(value).toLocaleString("en-IN")}
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color="text.secondary"
+                                                                        sx={{ ml: 1, whiteSpace: 'nowrap' }}
+                                                                    >
+                                                                        ({pct}%)
+                                                                    </Typography>
+                                                                </Box>
+                                                            );
+                                                        })}
+                                                    </Box>
                                                 </Box>
                                             </Box>
                                         </DialogContent>
