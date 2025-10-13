@@ -82,3 +82,5 @@ map all keys of above two JSON object like this
     
     deviceType: !isForex ? "device_type" : "d_type",
   };
+
+

@@ -31,13 +31,14 @@ import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
 import FilterBtn from './filters/FilterBtn';
 import BackToTop from './helpers/BackToTop';
 import Scriptwiselotfilter from './Utility/Scriptwiselotfilter';
-import { ExpiryvalidationAPI, ScriptwiselotAPI } from './API/API';
+import { ExpiryvalidationAPI, getDefaultParams, ScriptwiselotAPI } from './API/API';
 import Expiryvalidationfilter from './Utility/Expiryvalidationfilter';
 import Pagination from './filters/Pagination';
 import axios from 'dan-vendor/axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SearchPdfCsv from './filters/SearchPdfCsv';
+import axiosInstance from './API/axiosconfig';
 
 
 const colArr = [
@@ -81,6 +82,13 @@ const Expiryvalidation = () => {
     const [isFilterChange, setIsFilterChange] = useState(false);
 
     const [removeTrade, setRemoveTrade] = useState(false);
+
+
+    const [isMarketAdded, setIsMarketAdded] = useState(false);
+    useEffect(() => {
+        if (isMarketAdded && currentPage === (totalPages - 1)) fetchLogs();
+        setIsMarketAdded(false);
+    }, [isMarketAdded])
 
     const fetchLogs = async () => {
         setLoading(true);
@@ -136,12 +144,12 @@ const Expiryvalidation = () => {
 
     const handleRemove = async (row) => {
         if (!row.expiry_validation_id) return;
-
+        const defaultParams = await getDefaultParams();
 
         try {
-            const response = await axios.post(
+            const response = await axiosInstance.post(
                 'ajaxfiles/setting/remove_expiry_validation',
-                { expiry_validation_id: row.expiry_validation_id }
+                { expiry_validation_id: row.expiry_validation_id, ...defaultParams }
             );
 
             if (response.data.status === 'ok') {
@@ -192,7 +200,7 @@ const Expiryvalidation = () => {
         <>
             {!isMobile ? (
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
-                    <Expiryvalidationfilter />
+                    <Expiryvalidationfilter setIsMarketAdded={setIsMarketAdded} />
 
                     <Box
                         sx={{
@@ -315,7 +323,7 @@ const Expiryvalidation = () => {
                                         <CloseIcon />
                                     </IconButton>
                                 </Box>
-                                <Expiryvalidationfilter />
+                                <Expiryvalidationfilter setIsMarketAdded={setIsMarketAdded} />
                             </Box>
                         </Drawer>
 

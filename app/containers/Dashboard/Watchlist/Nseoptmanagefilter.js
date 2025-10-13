@@ -115,8 +115,8 @@ const NseoptManageFilter = ({
                                     toast.error('Please select Expiry and Strike to block');
                                     return;
                                 }
-
-                                setRemoveTrade(strike)
+                                // setRemoveTrade(strike)
+                                handleAction(strike.rate_id, 'remove')
                             }}
                             // disabled={isAddMarketLoading}
                             sx={{ borderRadius: 1 }}

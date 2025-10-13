@@ -167,6 +167,7 @@ const Manualtradesfilter = ({
 
                 <Grid item>
                     <TextField
+                        type='number'
                         label="Price"
                         size="small"
                         value={price}

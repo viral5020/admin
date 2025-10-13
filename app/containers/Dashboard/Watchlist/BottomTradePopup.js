@@ -25,19 +25,15 @@ const marketOptions = [
 
 const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, setTabIndex }) => {
     const [tradeType, setTradeType] = useState('BUY');
+
     const [market, setMarket] = useState(marketOptions[0].value);
-    const [lot, setLot] = useState('1');
-    const [qty, setQty] = useState(stockData?.script_lot_qty);
+    const [lot, setLot] = useState(1);
+    const [qty, setQty] = useState(Number(stockData?.script_lot_qty) || 0);
     const [price, setPrice] = useState('');
-    const [isAllRequired, setIsAllRequired] = useState();
-    const [client, setClient] = useState();
+    const [client, setClient] = useState('');
+
+    const [isAllRequired, setIsAllRequired] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    // useEffect(() => {
-
-    // },[lot])
-
-
     const [userType, setUserType] = useState('');
 
     const handleChange = (_, newValue) => {
@@ -46,9 +42,9 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
 
     function resetAllState() {
         setMarket(marketOptions[0].value);
-        setLot('1');
-        setQty(stockData?.script_lot_qty);
-        setPrice('');
+        setLot(1);
+        setQty(Number(stockData?.script_lot_qty));
+        setPrice(null);
         setIsAllRequired();
     }
 
@@ -65,7 +61,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
 
     useEffect(() => {
         // console.log('tabIndex', tabIndex);
-        market == 0 && (tabIndex === 0 ? setPrice(stockData?.bidRate) : setPrice(stockData?.askRate));
+        market == 0 && (tabIndex === 0 ? setPrice(stockData?.bidRate || '') : setPrice(stockData?.askRate || ''));
     }, [tabIndex, stockData])
 
     const isBuy = tabIndex === 0;
@@ -349,6 +345,7 @@ const BottomTradePopup = ({ open, onClose, stockData = {}, isMobile, tabIndex, s
                                         label="Lot"
                                         type="number"
                                         value={Number(lot)}
+                                        inputProps={{ min: 0 }}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setLot(val);

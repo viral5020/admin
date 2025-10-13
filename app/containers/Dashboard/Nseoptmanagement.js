@@ -96,6 +96,12 @@ const Nseoptmanagement = () => {
 
     const [removeTrade, setRemoveTrade] = useState(false);
 
+    const [isMarketAdded, setIsMarketAdded] = useState(false);
+    useEffect(() => {
+        if (isMarketAdded && currentPage === (totalPages - 1)) fetchLogs();
+        setIsMarketAdded(false);
+    }, [isMarketAdded])
+
     const fetchLogs = async () => {
         setLoading(true);
         try {
@@ -146,7 +152,7 @@ const Nseoptmanagement = () => {
 
             if (result?.status === "ok") {
                 toast.success(`Option ${w1} successfully`);
-                fetchLogs(); // refresh table/cards
+                setIsMarketAdded(true);
             } else {
                 toast.error(`Failed to ${action} option`);
             }
@@ -397,7 +403,7 @@ const Nseoptmanagement = () => {
                                                 color="error"
                                                 size="small"
                                                 // onClick={() => setRemoveTrade(row)}
-                                                onClick={() => handleAction(row.script_expiry_option_id)}
+                                                onClick={() => handleAction(row.script_expiry_option_id, 'remove')}
                                                 sx={{ borderRadius: 1 }}
                                             >
                                                 Remove
@@ -523,7 +529,7 @@ const Nseoptmanagement = () => {
                                             size="small"
                                             style={{ borderRadius: 4 }}
                                             // onClick={() => setRemoveTrade(log)}
-                                            onClick={() => handleAction(log.script_expiry_option_id)}
+                                            onClick={() => handleAction(log.script_expiry_option_id, 'remove')}
                                         >
                                             Remove
                                         </Button>
