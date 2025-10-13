@@ -6,7 +6,7 @@ import { Grid, Button, TextField, useTheme, Stack } from '@mui/material'
 import Expirymarketscriptfilter from '../filters/Expirymarketscriptfilter'
 import { getDefaultParams } from '../API/API'
 
-const Expiryvalidationfilter = ({ }) => {
+const Expiryvalidationfilter = ({ setIsMarketAdded }) => {
     const theme = useTheme()
 
     const [market, setMarket] = useState('');
@@ -33,10 +33,13 @@ const Expiryvalidationfilter = ({ }) => {
                 payload
             )
             console.log("API Response:", response.data)
-            response.data.status === 'ok'
-                ? toast.success("Expiry validation added successfully!", { containerId: "1234" })
-                : toast.error(response.data.message || "Some error occured.", { containerId: "1234" })
-            response.data.status === 'ok' && handleClear();
+            if (response.data.status === 'ok') {
+                toast.success("Expiry validation added successfully!", { containerId: "1234" })
+                handleClear();
+                setIsMarketAdded(true);
+            } else {
+                toast.error(response.data.message || "Some error occured.", { containerId: "1234" })
+            }
         } catch (error) {
             console.error("Error adding expiry validation:", error)
             toast.error("Failed to add expiry validation!", { containerId: "1234" })

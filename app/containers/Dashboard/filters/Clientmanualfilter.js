@@ -45,13 +45,13 @@ const Clientmanualfilter = ({
 
         switch (type) {
             case 'client':
-                fetchOptions(`${url}/get_client_name_search`, params, setClientOptions);
+                setClient && fetchOptions(`${url}/get_client_name_search`, params, setClientOptions);
                 break;
             case 'master':
-                fetchOptions(`${url}/get_master_name_search`, params, setMasterOptions);
+                setMaster && fetchOptions(`${url}/get_master_name_search`, params, setMasterOptions);
                 break;
             case 'broker':
-                fetchOptions(`${url}/get_broker_name_search`, { ...params, term2: 2 }, setBrokerOptions);
+                setBroker && fetchOptions(`${url}/get_broker_name_search`, { ...params, term2: 2 }, setBrokerOptions);
                 break;
             default:
                 break;
@@ -59,9 +59,9 @@ const Clientmanualfilter = ({
     }
 
     useEffect(() => {
-        handleFetch('', 'client');
-        handleFetch('', 'master');
-        handleFetch('', 'broker');
+        setClient && handleFetch('', 'client');
+        setMaster && handleFetch('', 'master');
+        setBroker && handleFetch('', 'broker');
         const dataStored = JSON.parse(sessionStorage.getItem("data")) || {};
         setUserType(dataStored.user_type);
         setInputBoxStyle(getInputBoxStyle(isDarkMode));

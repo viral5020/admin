@@ -104,18 +104,15 @@ const Bulktrading = ({
     const toggleDrawer = (open) => () => setFilterDrawer(open);
 
     // --- Fetch main logs ---
-    const fetchLogs = async () => {
+    const bulk_trading_report_API = async () => {
         try {
             setLoading(true);
             const scriptIds = formatScriptIds(script);
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
 
             const payload = {
                 is_app: '1',
                 currentPage,
                 pageSize,
-                login_user_id: dataStored?.user_id,
-                auth_key: dataStored?.auth_key,
                 master_user_id: master?.id || '',
                 broker_user_id: client?.id || '',
                 market_type_id: market?.id || '',
@@ -133,7 +130,6 @@ const Bulktrading = ({
 
             setLogs(data);
             setTotalRecords(data.length);
-            setMinimum(minimumValue);
             setIsFilterChange(false);
         } catch (error) {
             console.error('Error fetching logs:', error);
@@ -143,7 +139,7 @@ const Bulktrading = ({
     };
 
     // --- Fetch bulk trade list ---
-    const fetchBulkTradeList = async () => {
+    const bulk_trade_list_API = async () => {
         if (!noOfTrades || parseInt(noOfTrades, 10) <= 0) {
             alert("Number of orders is required and must be positive");
             return;
@@ -151,15 +147,8 @@ const Bulktrading = ({
 
         try {
             setBulkLoading(true);
-            const dataStored = JSON.parse(sessionStorage.getItem("data"));
-
-            const result = await fetchBulkTradeListAPI({
-                user_id: dataStored.user_id,
-                auth_key: dataStored.auth_key,
-                noOfTrades,
-            });
-
-            setBulkTrades(result.data?.data || []);
+            const result = await fetchBulkTradeListAPI({ noOfTrades });
+            setNoOfTrades(result.data?.minimum ?? noOfTrades);
         } catch (error) {
             console.error("Error fetching bulk trade list:", error);
         } finally {
@@ -183,7 +172,7 @@ const Bulktrading = ({
                 await saveBulkTradingSettingsAPI({ noOfTrades });
 
                 // Fetch bulk trade list after saving settings
-                fetchBulkTradeList();
+                bulk_trade_list_API();
             } catch (err) {
                 console.error("Error saving bulk trading settings:", err);
             }
@@ -194,8 +183,8 @@ const Bulktrading = ({
 
     // --- Effects ---
     useEffect(() => {
-        fetchLogs();          // main logs
-        fetchBulkTradeList(); // bulk trade list with default noOfTrades
+        bulk_trade_list_API(); // bulk trade list with default noOfTrades
+        bulk_trading_report_API();          // main logs
     }, []);
 
     useEffect(() => { setTotalPages(Math.ceil(totalRecords / pageSize)); }, [totalRecords, pageSize]);
@@ -204,8 +193,8 @@ const Bulktrading = ({
         !isFirstRender && currentPage === 0 ? setIsFilterChange(true) : setCurrentPage(0);
     }, [debouncedSearchText]);
 
-    useEffect(() => { !isFirstRender && fetchLogs(); }, [currentPage, pageSize]);
-    useEffect(() => { isFilterChange && !isFirstRender && fetchLogs(); }, [isFilterChange]);
+    useEffect(() => { !isFirstRender && bulk_trading_report_API(); }, [currentPage, pageSize]);
+    useEffect(() => { isFilterChange && !isFirstRender && bulk_trading_report_API(); }, [isFilterChange]);
 
     return (
         <Paper sx={{ p: 1, borderRadius: 2 }}>

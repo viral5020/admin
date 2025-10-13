@@ -1999,14 +1999,6 @@ export const ExpiryvalidationAPI = async (
   currentPage,
   pageSize,
   searchText,
-  market,
-  scriptIds,
-  master,
-  client,
-  end_date,
-  start_date,
-  is_deleted,
-  is_updated,
 ) => {
   const defaultParams = await getDefaultParams();
   const formData = {
@@ -2749,7 +2741,7 @@ export const deleteFutureTradingBlockAPI = async ({ future_block_id }) => {
   }
 };
 
-export const fetchBulkTradeListAPI = async ({ user_id, auth_key, noOfTrades }) => {
+export const fetchBulkTradeListAPI = async ({ noOfTrades }) => {
   const defaultParams = await getDefaultParams();
   try {
     const payload = {

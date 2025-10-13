@@ -542,7 +542,7 @@ function Watchlist() {
 
           response.status !== 'ok' ? onUndo() : '';
         }
-      }, [toastTime + 500])
+      }, [toastTime + 1500])
 
       dummyData.forEach(val => {
         if (val.market_type_name === stock.market_type_name && val.market_watch_id !== stock.market_watch_id) {
@@ -562,7 +562,8 @@ function Watchlist() {
       }
 
       setDummyData(prevData => prevData.filter(data => data.market_watch_id !== stock.market_watch_id));
-      showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
+      const id = showToast(`${stock.scriptName} Removed `, onUndo, 'delete');
+      console.log('id', id);
     }
   }
   // useEffect(() => {
@@ -865,7 +866,7 @@ function Watchlist() {
       <BottomTradePopup
         open={Boolean(buySellPopup)}
         onClose={() => {
-          setTabIndex(null);
+          // setTabIndex(null);
           setBuySellPopup(null);
         }}
         stockData={buySellPopup}

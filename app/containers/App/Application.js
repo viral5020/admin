@@ -301,6 +301,7 @@ function Application(props) {
             <Route
               path="dashboard/forex-order"
               element={isForex ? <OrderBook key={'forex-order'} /> : <Navigate to="/app" />}
+            // element={isForex ? <Forex_order /> : <Navigate to="/app" />}
             />
             <Route
               path="dashboard/forex-position"
@@ -493,14 +494,14 @@ function Application(props) {
           <Route
             path="dashboard/Trial-balance"
             element={
-              userType === 3 || userType === 4 || userType === 5 ? (
+              userType === 3 ? (
                 <Trialbalance />
               ) : (
                 <Navigate to="/app" />
               )
             }
           />
-          <Route
+          {/* <Route
             path="dashboard/Trial-balance"
             element={
               userType === 4 || userType === 5 ? (
@@ -509,7 +510,7 @@ function Application(props) {
                 <Navigate to="/app" />
               )
             }
-          />
+          /> */}
 
           {/* ----------- Settings ----------- */}
           <Route element={isHave('SETTING') ? <Outlet /> : <Navigate to="/app" />}>

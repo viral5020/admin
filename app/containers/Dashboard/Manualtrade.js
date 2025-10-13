@@ -284,7 +284,10 @@ const Manualtrade = () => {
                             brokerage={brokerage}
                             setBrokerage={setBrokerage}
                             filterBoxColor={filterBoxColor}
-                            onSubmit={handleSubmit}
+                            onSubmit={() => {
+                                handleSubmit();
+                                setFilterDrawer(false);
+                            }}
                         />
                     </Box>
                 }
