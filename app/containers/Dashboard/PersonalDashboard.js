@@ -60,6 +60,33 @@ import OrderPage from './BlockedScripts';
 import OrderPage1 from './Positions';
 import { Fullscreen } from 'dan-vendor/@mui/icons-material';
 import RejectionLogs from './RejectionLogs';
+import PnLDialog from './Components/PnLDialog';
+
+
+
+const dummyInstrumentPnL = {
+  NIFTY: 12000,
+  BANKNIFTY: -5000,
+  RELIANCE: 8000,
+  TCS: -3000,
+  INFY: 7000,
+  HDFC: 4000,
+  ICICI: -2500,
+  SBI: 1000,
+  WIPRO: 3500,
+  TECHM: -1500,
+  LT: 5000,
+  KOTAK: -2000,
+  HCLTECH: 6000,
+  MARUTI: 3000,
+  AXISBANK: -1000,
+  BHARTIARTL: 4500,
+  ADANIPORTS: -3500,
+  SUNPHARMA: 2000,
+  ITC: 1500,
+  TATAMOTORS: -4000,
+};
+
 
 const rawData = sessionStorage.getItem("data");
 const parsedData = JSON.parse(rawData);
@@ -279,6 +306,9 @@ function PersonalDashboard() {
 
   const [topGainers, setTopGainers] = useState([]);
   const [topLosers, setTopLosers] = useState([]);
+
+  const [openPnLDialog, setOpenPnLDialog] = useState(false);
+  const isSmallScreen = window.innerWidth <= 500;
 
   // const needsPassword = userType === 4 && deletePopup;
 
@@ -1818,43 +1848,82 @@ function PersonalDashboard() {
           <Paper elevation={0} sx={{ ...glassStyles, p: 2 }}>
             {/*--------- Title --------- */}
             <Box sx={{ mb: 1 }}>
-              {!isMobile ? (
-                <Box
-                  sx={{
-                    position: 'relative',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    mb: 0,
-                  }}
-                >
-                  <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ m: 0 }}>
-                    Stock-Wise Distribution
-                  </Typography>
-                  <Box sx={{ position: 'absolute', right: 0 }}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 0,
+                }}
+              >
+                {!isSmallScreen
+                  ? <>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setOpenPnLDialog(true)}
+                      sx={{
+                        mr: 2,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        p: isMobile ? '3px 8px' : '5px 15px',
+                      }}
+                    >
+                      View More
+                    </Button>
+
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={700}
+                      textAlign="center"
+                      sx={{ flex: 1 }}
+                    >
+                      Stock-Wise Distribution
+                    </Typography>
+
                     <DropdownMenu selected={selected} setSelected={setSelected} />
-                  </Box>
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mb: 0,
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={700}
-                    textAlign="left"
-                    sx={{ m: 0 }}
-                  >
-                    Stock-Wise Distribution
-                  </Typography>
-                  <DropdownMenu selected={selected} setSelected={setSelected} />
-                </Box>
-              )}
+                  </>
+
+                  : <>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={700}
+                      textAlign="left"
+                      sx={{ flex: 1 }}
+                      maxWidth={isSmallScreen && '170px'}
+                    >
+                      Stock-Wise Distribution
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0,
+                      }}
+                    >
+                      <DropdownMenu selected={selected} setSelected={setSelected} />
+
+                      <Button
+                        variant="outlined"
+                        onClick={() => setOpenPnLDialog(true)}
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          p: isMobile ? '3px 8px' : '5px 15px',
+                        }}
+                      >
+                        View More
+                      </Button>
+                    </Box>
+                  </>}
+              </Box>
+
+              <PnLDialog
+                open={openPnLDialog}
+                onClose={() => setOpenPnLDialog(false)}
+                dummyInstrumentPnL={dummyInstrumentPnL}
+              />
             </Box>
 
             <Divider sx={{ mb: 1 }} />
