@@ -1226,8 +1226,6 @@ function Masterdashboard() {
                     </DialogActions>
                 </Dialog>
 
-
-
                 {/*--------------------- MTM ---------------------- */}
                 <Grid item xs={12} md={6}>
                     <Paper
@@ -1353,7 +1351,7 @@ function Masterdashboard() {
                                         data: [400, 300, 200, 100],
                                         backgroundColor: ['#1976d2', '#388e3c', '#7b1fa2', '#d32f2f'],
                                         borderColor: theme.palette.mode === 'dark' ? '#222' : '#fff',
-                                        borderWidth: 2,
+                                        borderWidth: 0,
                                     }],
                                 }}
                                 options={{
@@ -1582,7 +1580,7 @@ function Masterdashboard() {
                                                 ["#1976d2", "#9c27b0", "#4caf50", "#ff9800", "#f44336"][i % 5]
                                             ),
                                             borderColor: theme.palette?.mode === "dark" ? "#222" : "#fff",
-                                            borderWidth: 2,
+                                            borderWidth: 0,
                                         },
                                     ],
                                 }}
@@ -1749,8 +1747,7 @@ function Masterdashboard() {
                                                 p: isMobile ? '3px 8px' : '5px 15px',
                                             }}
                                         >
-                                            View More
-                                        </Button>
+                                            View More                                        </Button>
 
                                         <Typography
                                             variant="subtitle1"
@@ -1911,21 +1908,21 @@ function Masterdashboard() {
                                                         data: smallCapData,
                                                         backgroundColor: smallCapColors,
                                                         borderColor: "#fff",
-                                                        borderWidth: 2,
+                                                        borderWidth: 0,
                                                     },
                                                     {
                                                         label: "Mid Cap",
                                                         data: midCapData,
                                                         backgroundColor: midCapColors,
                                                         borderColor: "#fff",
-                                                        borderWidth: 2,
+                                                        borderWidth: 0,
                                                     },
                                                     {
                                                         label: "Large Cap",
                                                         data: largeCapData,
                                                         backgroundColor: largeCapColors,
                                                         borderColor: "#fff",
-                                                        borderWidth: 2,
+                                                        borderWidth: 0,
                                                     },
                                                 ],
                                             }}

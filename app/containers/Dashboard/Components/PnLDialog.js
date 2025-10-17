@@ -163,7 +163,7 @@ const PnLDialog = ({ open, onClose, dummyInstrumentPnL }) => {
                                                         : "rgba(255,99,132,0.7)"
                                             ),
                                             borderColor: "#fff",
-                                            borderWidth: 2,
+                                            borderWidth: 0,
                                             hoverOffset: 10,
                                         },
                                     ],
